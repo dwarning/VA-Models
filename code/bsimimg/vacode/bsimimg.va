@@ -1,0 +1,66 @@
+// ****************************************************************************
+// *  BSIM-IMG 102.9.4 released by Girish Pahwa on 08/24/2020                 *
+// *  BSIM Independent Multi-Gate Model (Verilog-A)                           *
+// ****************************************************************************
+
+// ****************************************************************************
+// *  Copyright (c) 2020 University of California                             *
+// *                                                                          *
+// *  Project director: Prof. Chenming Hu                                     *
+// *                                                                          *
+// *  Current developers: Girish Pahwa (Postdoc, UC Berkeley)                 *
+// *                      Avirup Dasgupta (Postdoc, UC Berkeley)              *
+// *                      Ming-Yen Kao (Ph.D., UC Berkeley)                   *
+// ****************************************************************************
+
+/*
+Licensed under Educational Community License, Version 2.0 (the "License"); you may
+not use this file except in compliance with the License. You may obtain a copy of the license at
+http://opensource.org/licenses/ECL-2.0
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations
+under the License.
+
+BSIM-IMG model is supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
+standard can be found at: http://www.si2.org/cmc
+*/
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+// ****************************************************************************
+// *  SHMOD is a model parameter                                              *
+// *  - SHMOD = 0: Self-heating turned off                                    *
+// *  - SHMOD = 1: Self-heating turned on                                     *
+// *                                                                          *
+// *  RDSMOD is a model parameter                                             *
+// *  - RDSMOD = 0: Bias-dependent S/D resistances are internal and           *
+// *                bias-independent S/D resistances are external             *
+// *  - RDSMOD = 1: Both bias-dependent and independent of S/D resistances    *
+// *                are external                                              *
+// *  - RDSMOD = 2: Both bias-dependent and independent of S/D resistances    *
+// *                are internal                                              *
+// *                                                                          *
+// *  RGATEMOD is a model parameter                                           *
+// *  - RGATEMOD = 0: Gate resistance / ge node turned off                    *
+// *  - RGATEMOD = 1: Gate resistance / ge node turned on                     *
+// ****************************************************************************
+
+// In Verilog-A the number of internal nodes cannot be controlled by a model
+// parameter. Therefore we use `define statements to control it. Comment the
+// following lines whenever possible for best computational efficiency.
+
+`include "common_defs.include"
+`include "bsimimg_sp.include"
+
+module bsimimg(d, fg, s, bg, t);
+    inout d, fg, s, bg, t;
+    electrical d, fg, s, bg, di, si, gi, ge;
+    thermal t;
+    branch (t) rth_branch;
+    branch (t) ith_branch;
+
+
+`include "bsimimg_body.include"
+
+endmodule

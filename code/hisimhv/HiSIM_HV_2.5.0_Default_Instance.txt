@@ -1,0 +1,108 @@
+*************************************************
+*** HiSIM_HV default instance parameter card ***
+*************************************************
+
+* Version : HiSIM_HV 2.5.0
+* Date    : 2019.04.26
+
+
+
+*** Flags ***
+****(aging model disabled as default)+ CODEG        = 0
+****(aging model disabled as default)+ CODEGES0     = 0
+****(aging model disabled as default)+ CODEGSTEP    = 0
++ CORG         = 0
++ CORBNET      = 0
++ COSELFHEAT   = 0
++ COSUBNODE    = 0
++ COTRENCH     = 0
+
+*** Parameters ***
++ L            = 2e-06
++ W            = 5e-06
++ NRD          = 1
++ NRS          = 1
++ NGCON        = 1
++ XGW          = 0
++ XGL          = 0
++ NF           = 1
++ SA           = 0
++ SB           = 0
++ SD           = 0
++ DTEMP        = 0
+*+ M            = 1
+****(used only if specified)+ NSUBCDFM     = 3e+17
++ AD           = 0
++ AS           = 0
++ PD           = 0
++ PS           = 0
++ LOVERLD      = 1e-06
++ WTRENCH      = 1e-06
+****(depends on other parameters as default)+ LOVERS       = 3e-08
++ LDRIFT1      = 1e-06
++ LDRIFT2      = 1e-06
++ SUBLD1       = 0
++ SUBLD2       = 0
++ NPEXT        = 5e+17
++ VOVER        = 0.3
++ FALPH        = 1
++ CGBO         = 0
++ CVDSOVER     = 0
+
+***** Model and Instance Parameters *****
++ RBPB         = 50
++ RBPD         = 50
++ RBPS         = 50
+****(depends on COSYM as default)+ LDRIFTS      = 1e-06
+
+***** Depends on the Model Flag COSYM *****
+****(depends on COSYM as default)+ LOVER        = 3e-08
+****(depends on COSYM as default)+ LDRIFT1S     = 0
+****(depends on COSYM as default)+ LDRIFT2S     = 1e-06
+****(depends on COSYM as default)+ RS           = 0
+
+***** Drift Resistor Model (Old) *****
++ RDOV13       = 1
++ RDSLP1       = 0
++ RDVG11       = 0
++ RDICT1       = 1
++ RD           = 0
++ RDVD         = 0.07
++ RD23         = 0.005
++ RD24         = 0
++ RDVB         = 0
++ RD22         = 0
+
+***** Self-Heating-Effect Model *****
++ RTH0         = 0.1
++ POWRAT       = 1
+
+***** Aging Model *****
+****(aging model disabled as default)+ CODEG        = 0
+****(aging model disabled as default)+ CODEGSTEP    = 0
+****(aging model disabled as default)+ DEGTIME0     = 0
+****(aging model disabled as default)+ DEGTIME      = 0
+****(aging model disabled as default)+ TRAPN        = 1
+****(aging model disabled as default)+ TRAPP        = 1
+****(aging model disabled as default)+ TRAPGC0      = 1e+30
+****(aging model disabled as default)+ TRAPES0      = 0.01
+****(aging model disabled as default)+ TRAPGC1      = 1e+15
+****(aging model disabled as default)+ TRAPES1      = 0.2
+****(aging model disabled as default)+ TRAPGC2      = 5e+13
+****(aging model disabled as default)+ TRAPES2      = 0.03
+****(aging model disabled as default)+ TRAPLX       = 1
+****(aging model disabled as default)+ TRAPGCLIM    = 1e+30
+****(aging model disabled as default)+ TRAPESLIM    = 5
+****(aging model disabled as default)+ TRAPTAUCAP   = 1e-06
+****(aging model disabled as default)+ TRAPGC1MAX   = 5e+19
+****(aging model disabled as default)+ TRAPES1MAX   = 1
+****(aging model disabled as default)+ TRAPGCTIME1  = 30
+****(aging model disabled as default)+ TRAPGCTIME2  = 1e+08
+****(aging model disabled as default)+ TRAPESTIME1  = 100
+****(aging model disabled as default)+ TRAPESTIME2  = 1e+08
+****(aging model disabled as default)+ TRAPDVDDP    = 0
+****(aging model disabled as default)+ TRAPDLX      = 1
+****(aging model disabled as default)+ TRAPTEMP1    = 0
+****(aging model disabled as default)+ TRAPTEMP2    = 0
+****(aging model disabled as default)+ TRAPDVTH     = 0
+****(aging model disabled as default)+ TRAPBTI      = 1e+07

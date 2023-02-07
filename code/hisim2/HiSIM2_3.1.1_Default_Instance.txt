@@ -1,0 +1,71 @@
+*************************************************
+*** HiSIM2 default instance parameter card ***
+*************************************************
+
+* Version : HiSIM2 3.1.1
+* Date    : 2019.04.04
+
+
+*** Flags ***
++ CORG         = 0
++ CORBNET      = 0
+****(aging model disabled as default)+ CODEG        = 0
+****(aging model disabled as default)+ CODEGSTEP    = 0
+****(aging model disabled as default)+ CODEGES0     = 0
+
+*** Parameters ***
++ L            = 10e-06
++ W            = 1e-06
++ AD           = 0
++ AS           = 0
++ PD           = 0
++ PS           = 0
++ NRD          = 0
++ NRS          = 0
++ NGCON        = 1
++ XGW          = 0
++ XGL          = 0
++ NF           = 1
++ SA           = 0
++ SB           = 0
++ SD           = 0
++ DTEMP        = 0
++ SCA          = 0
++ SCB          = 0
++ SCC          = 0
+****(used only if specified)+ NSUBCDFM     = 5e+17
+
+***** Model and Instance Parameters *****
++ RBPB         = 50
++ RBPD         = 50
++ RBPS         = 50
++ RBDB         = 50
++ RBSB         = 50
++ MPHDFM       = -0.3
+
+***** Aging Model *****
+****(aging model disabled as default)+ CODEG        = 0
+****(aging model disabled as default)+ CODEGSTEP    = 0
+****(aging model disabled as default)+ DEGTIME0     = 0
+****(aging model disabled as default)+ DEGTIME      = 0
+****(aging model disabled as default)+ TRAPN        = 0.4
+****(aging model disabled as default)+ TRAPGC0      = 1e+35
+****(aging model disabled as default)+ TRAPES0      = 0.1
+****(aging model disabled as default)+ TRAPGC1      = 1e+15
+****(aging model disabled as default)+ TRAPES1      = 0.3
+****(aging model disabled as default)+ TRAPGC2      = 500
+****(aging model disabled as default)+ TRAPES2      = 0.001
+****(aging model disabled as default)+ TRAPLX       = 0.5
+****(aging model disabled as default)+ TRAPGCLIM    = 1e+18
+****(aging model disabled as default)+ TRAPESLIM    = 5
+****(aging model disabled as default)+ TRAPTAUCAP   = 1e-06
+****(aging model disabled as default)+ TRAPGC1MAX   = 5e+19
+****(aging model disabled as default)+ TRAPES1MAX   = 0.5
+****(aging model disabled as default)+ TRAPGCTIME1  = 10
+****(aging model disabled as default)+ TRAPGCTIME2  = 1e+06
+****(aging model disabled as default)+ TRAPESTIME1  = 10
+****(aging model disabled as default)+ TRAPESTIME2  = 100
+****(aging model disabled as default)+ TRAPTEMP1    = 0
+****(aging model disabled as default)+ TRAPTEMP2    = 0
+****(aging model disabled as default)+ TRAPDVTH     = 0
+****(aging model disabled as default)+ TRAPBTI      = 1e+07

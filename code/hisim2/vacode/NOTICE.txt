@@ -1,0 +1,7 @@
+The HiSIM2 standard is supported by the members of Silicon Integration Initiative's
+Compact Model Coalition.
+
+CMC Release Date:  April 4, 2019
+Public Release Date:  October 4, 2020
+
+A link to the most recent version of this standard can be found at: http://www.si2.org/cmc

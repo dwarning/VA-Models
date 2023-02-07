@@ -1,0 +1,686 @@
+// ****************************************************************************
+// *  EPFL HEMT MODEL  V3.0.0 released on April  24, 2020                     *
+// *  Verilog-A Model                                                         *
+// ****************************************************************************
+
+// ****************************************************************************
+// *             "Copyright 2020 EPFL, All rights reserved"                   *
+// *                                                                          *
+// *                     Version              Date                            *
+// ****************************************************************************
+// *  Current:             3.0.0        April  24, 2020                       *
+// *  Older:               2.2.0        August 07, 2019                       *
+// ****************************************************************************
+
+// ****************************************************************************
+// *  The EPFL-HEMT model has been developed by ED-LAB, École Polytechnique   *
+// *  Fédérale de Lausanne,(EPFL), Switzerland in cooperation among           *
+// *    1- Amirkabir University of Technology (AUT)                           *
+// *    2- Technical University of Crete(TUC), Chania, Crete, Greece          *
+// *    3- IMEC, Leuven, Belgium                                              *
+// ****************************************************************************
+
+// ****************************************************************************
+// *  Main contributions:                                                     *
+// ****************************************************************************
+// *  -Coordination:                                                          *
+// *    Dr. Farzan Jazaeri (EPFL)                                             *
+// *            Email: Farzan.Jazaeri@epfl.ch                                 *
+// *                                                                          *
+// *  -Contributions to model formulation:                                    *
+// *    Dr. Farzan Jazaeri (EPFL)                                             *
+// *    Dr. Jean-Michel Sallese (EPFL)                                        *
+// *    Dr. Majid Shalchian (AUT)                                             *
+// *                                                                          *
+// *  -Coding, implementation and testing:                                    *
+// *    Dr. Majid Shalchian (AUT)                                             *
+// *    Hedieh Alipour (AUT)                                                  *
+// *    Mojtaba Allaei (AUT)                                                  *
+// *    Dr. Matthias Bucher (TUC)                                             *
+// *    Nikolaos Makris (TUC)                                                 *
+// *                                                                          *
+// *  -Contributions to code standardization:                                 *
+// *    Dr. Bertrand Parvais (IMEC)                                           *
+// ****************************************************************************
+
+// ****************************************************************************
+// *  1. The model and its code are made available 'as is' is, without any    *
+// *     warranty regarding its functionality or fitness of performance.      *
+// *                                                                          *
+// *  2. The model and its code is continuously being tested, corrected and   *
+// *     extended. Updates to the code may be frequent.                       *
+// *                                                                          *
+// *  3. The EPFL owns the copyright and grants users a perpetual,            *
+// *     irrevocable, worldwide, non-exclusive, royalty-free license with     *
+// *     respect to the software.                                             *
+// *                                                                          *
+// *  4. We grant the users the right to modify, copy, and redistribute the   *
+// *     code and documentation, subject to the following restrictions:       *
+// *                                                                          *
+// *        a. The non-commercial users are not entitled to the model usage   *
+// *           charge but might be charged for additions, extensions, or      *
+// *           support. However, commercial use requesters are not entitled   *
+// *           to the free license.                                           *
+// *                                                                          *
+// *        b. In any usage of this code, the users agree to suitably         *
+// *           acknowledge the name of the model (EPFL-HEMT Model). This      *
+// *           acknowledgment shall appear in the product documentation.      *
+// *                                                                          *
+// *        c. All advertising materials mentioning features or use of        *
+// *           this model might cite the model, related papers:               *
+// *                                                                          *
+// *            [1] F. Jazaeri and J. Sallese, "Charge-Based EPFL HEMT        *
+// *                Model," in IEEE Transactions on Electron Devices,         *
+// *                vol. 66, no. 3,pp. 1218-1229, March 2019.                 *
+// *            [2] F. Jazaeri, M. Shalchian, and J. Sallese,                 *
+// *                "Transcapacitances in EPFL-HEMT Model," in IEEE           *
+// *                Transactions on Electron Devices, vol. 66, no. 3,         *
+// *                pp. 1218-1229 2020.                                       *
+// *                                                                          *
+// *        d. Redistributions to others of source code and documentation     *
+// *           might retain the copyright notice, disclaimer, and list        *
+// *           of conditions.                                                 *
+// *                                                                          *
+// *        e. Redistributions to others in binary form must reproduce the    *
+// *           copyright notice, disclaimer, and list of conditions in the    *
+// *           documentation and/or other materials provided with the         *
+// *           distribution.                                                  *
+// ****************************************************************************
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+// Disable strobe for improved performance speed
+`define DISABLE_STROBE
+`ifdef DISABLE_STROBE
+    `define STROBE(X)
+    `define STROBE2(X,Y)
+    `define STROBE4(X,Y,A,B)
+`else
+    `define STROBE(X) $strobe(X)
+    `define STROBE2(X,Y) $strobe(X,Y)
+    `define STROBE4(X,Y,A,B) $strobe(X,Y,A,B)
+`endif
+
+// Define Functions
+// Normalized pinch-off voltage
+
+
+
+//------------------ Pinch Function ------------------------------------
+`define pinch_norm(vg_vA, gamma, pinch_n) \
+    T1       = 0.5*vg_vA - 3.0 * (1.0 + gamma / `M_SQRT2); \
+    T2       = (T1 + sqrt(T1 * T1 + 6.0 * vg_vA)); \
+    if (vg_vA < 0.0) begin \
+        T3   = (vg_vA - T2) / gamma; \
+        pinch_n = -lln(1.0 - T2 + T3 * T3); \
+    end else begin \
+        T3   = lexp(-T2); \
+        T1   = 0.5 * gamma; \
+        T2   = sqrt(vg_vA - 1.0 + T3 + T1 * T1) - T1; \
+        pinch_n = T2 * T2 + 1.0 - T3; \
+    end \
+
+
+
+
+
+// Smoothing function for (max of x, x0 with deltax)
+`define Smooth(x, x0, deltax, xsmooth) \
+    xsmooth = 0.5 * (x + x0 + sqrt((x - x0) * (x - x0) + 0.25 * deltax * deltax)); \
+
+// Smoothing function for (max of x, x0 with deltax)
+`define Smooth1(x, x0, deltax, xsmooth) \
+    xsmooth = 0.5 * (x + x0 + sqrt((x - x0) * (x - x0) + 0.25 * deltax * deltax)) - 0.25 * deltax; \
+
+// Smoothing function for (min of x, x0 with deltax)
+`define Smooth2(x, x0, deltax, xsmooth) \
+    xsmooth = 0.5 * (x + x0 - sqrt((x - x0) * (x - x0) + 0.25 * deltax * deltax)) + 0.25 * deltax; \
+
+// Smoothing function for (min of x, x0 with deltax)
+`define Min1(x, x0, deltax, xsmooth) \
+    xsmooth = 0.5 * (x + x0 - sqrt((x - x0) * (x - x0) + 0.25 * deltax * deltax)); \
+
+
+
+// Numerical Constants
+`define EXPL_THRESHOLD  80.0
+`define MAX_EXPL        5.540622384e34
+`define MIN_EXPL        1.804851387e-35
+`define N_MINLOG        1.0e-38
+`define DELTA_1         0.02
+`define Oneby3          0.33333333333333333
+//`define TNOM         300.15   // 27 degrees C
+
+// Physical Constants
+`define type_n       1
+`define type_p       -1
+`define q           1.60219e-19
+`define EP0        8.85418e-12
+`define Kb_q        8.617087e-5      // Joule/degree
+
+
+module EPFL_HEMT_10a(d, g, s, b, t);
+inout d, g, s, b, t;
+electrical d, g, s, b, di, si, gi, gm, bi, sbulk, dbulk;
+thermal t;
+
+
+// Clamped exponential function
+analog function real lexp;
+    input x;
+    real x;
+    begin
+        if (x > `EXPL_THRESHOLD) begin
+            lexp = `MAX_EXPL * (1.0 + x - `EXPL_THRESHOLD);
+        end else if (x < -`EXPL_THRESHOLD) begin
+            lexp = `MIN_EXPL;
+        end else begin
+            lexp = exp(x);
+        end
+    end
+endfunction
+
+// Clamped log function
+analog function real lln;
+    input x;
+    real x;
+    begin
+        lln = ln(max(x, `N_MINLOG));
+    end
+endfunction
+
+// Hyperbolic smoothing function
+analog function real hypsmooth;
+    input x, c;
+    real x, c;
+    begin
+        hypsmooth = 0.5 * (x + sqrt(x * x + 4.0 * c * c));
+    end
+endfunction
+
+
+// Common variables
+integer devsign;
+
+//real PSiso, PDiso, PSsha, PDsha, PSmer, PDmer, ASiso, ADiso, ASsha, ADsha, ASmer, ADmer;
+real T0, T1, T2, T3, T4, T5, T6, T7, T8, T9;
+real Weff, Leff;
+//real Vdb_noswap, Vsb_noswap,vgfbCV Vgs_noswap, Vgd_noswap, Vds_noswap;
+real sigvds, vA, vg_vA, Vbsx;
+real Vg, vg, Vd, Vs, vs, Vds, Vdsx,vd,VDAR,VSAR;
+real Vth_shift;
+real qia, qba, qbs, phib, phib_n;
+real nq, pinch_n, psiavg, pinch_norm_cl, sqrtpsip;
+real Cdep;
+//real wf, wr;
+real pi, q, me;
+real v_s,n0,dat,beta,n_q,Qsp;
+real Cb;
+// Material Parameters
+real EgGaN,EgAlN,EgAlGaN;
+real ep_AlGaN,ep_GaN, Ef_AlGaN,DOS_2D;
+real NC,NV,NV_AlGaN,NC_GaN,ni_gan;
+
+// Short channel effects
+real n, nUT, inv_nUT, UT, inv_UT;
+real PhistVbs, sqrtPhistVbs, Xdep, cdsc;
+real T1DEP;
+//real dVth_ldop, DVTP0_i, DVTP1_i, DVTP2_i, DVTP3_i, DVTP4_i, DVTP5_i;
+real dVth_dibl;
+real gam, inv_gam, Phist;
+// Vertical Field
+real EeffF,Eeffs,eta_mu,qis,Vmr,Eeffm;
+
+// charge variables
+real qs,vp;
+real DQSD2,Qb,Qs,Qd;
+
+//CLM
+//real diffVds;
+
+//drain saturation voltage
+real LambdaC,qdsat,vdsat,vdssat,qdeff;
+real g_clm,e_clm,e_clmx2,e_clm2,e_clmp2,e_clmx2xqs;
+real qs_qsat,qs_qsat2,mdm2,e_clmxmdm2_2,tmp_vdsat1,tmp_vdsat11,tmp_vdsat2;
+real dv_clm,tmp_vdp1,tmp_vdp2,tmp_vdp3,vdp,u_clm,alpha_clm,deltal;
+real GM,GMBS,GDS;
+
+//series resistance
+//real RSourceGeo,RDrainGeo,rdstemp;
+real Dr;
+real nsacc, vsatacc, muacc, qacc;
+real Rd0,Rs0,Rd,Rs,Rd1,Rs1,Iaccsat,Rcos,Rcod;
+
+//current
+real Dtot,ueff,ids,Isp,IDS;
+
+//Temperature
+real tambk, tsh, tdut, pdiss, mut, TRatio,UCRIT_T;
+// Velocity Saturation
+real Dvsat;
+
+
+//transconductance
+real  difqdeff_VG,difqs_VG,difqdeff_VD,Gm,Gds;
+
+parameter real    L          = 1E-6         from (0.0:inf); // Channel length [m]
+parameter real    Lard           = 2.0E-6       from [0.0:inf); // Channel length [m]
+parameter real    Lars           = 7.0E-6       from [0.0:inf); // Channel length [m]
+parameter real    W          = 3000E-6      from [0.0:inf); // Channel width [m]
+parameter real    NF             = 1        from [1:inf); // Number of Figures
+parameter real    x1         = 60e-9       from (0:inf);  // AlGaN Layer Thickness (with negative sign)
+parameter real    TNOM       = 300          from (0.0:inf); // Temperature [K]
+parameter real    VA             = -5.43          from(-inf:inf);       // V             Threshold Voltage
+parameter real    ETA0             = 0.02          from(-inf:inf);       //                DIBL Coefficeint
+parameter real    ETAB             = -0.01          from(-inf:inf);       // 1/V             Body Bias coefficent for DIBL Subthreshold
+parameter real    PHIN             = 0.045          from(-inf:inf);       // V             Non uniform vertical doping effect on surface
+parameter real    NDEP            = (1.0e13)*(1e6)  from (0.0:inf);      //"1/m^3"   Doping of GaN layer
+parameter real    xx         = 0.3          from (0.0:1);   // percentage of Al in AlxxGa(1-xx)N
+parameter real    gg      =1.6e-12      from [0.0:inf);  //Quantum charge potential coefficent
+
+parameter real    E0         = 2.0e8    from (0.0:inf);     // Vertical Field Effect [V/m]
+parameter real    UCRIT          = 8.0e6;                   // Crutucal Field for velocity saturation
+parameter real ACLM     = 200       from [0.0:inf);
+parameter real DELTA     = 1.0      from (0.0:inf); //  order of VSAT model between 1-2
+parameter real    CIT            = 0e-8  from [0.0:inf);      //"C/m^2"   Interface Trap density
+parameter real    NFACTOR            = 0.0  from [0.0:inf);      //                       Sub-threshold slope factor
+parameter real    CDSCD           =1e-9       from [0.0:inf);      //"F/m^2/V"        "Drain-bias sensitivity of sub-threshold slope" )
+parameter real    CDSCB           =0       from [0.0:inf);      //"F/m^2/V"        "Body-bias sensitivity of sub-threshold slope" )
+//parameter real    Cb       = 0.0026       from (0.0:inf); // AlGaN CAPACITANCE PER UNIT AREA
+parameter real    U0         = 0.165        from (0.0:inf); // Low field mobility
+parameter real    UA         = 1.0      from [0.0:inf); // Mobility reduction factor
+parameter real    UC         = 0.0      from [0.0:inf); // Mobility reduction with body bias
+parameter real    UD         = 0.0      from [0.0:inf); // Coulomb scattering parameter
+parameter real    EU         = 1.0      from [0.0:inf); // Mobility reduction exponent
+parameter real BEX       = -1.7;                    // Mobility temperature exponent
+parameter real UCEX          = -2.2;                    // Longitudinal critical field temperature exponent
+parameter real ETAVSAT       = 0.5;                     // Longitudinal critical field temperature coeff
+parameter real    USC        = 1.0      from [0.0:inf); // Coulomb scattering parameter
+parameter real    AVDSX          = 70       from [5.0:100]; // Smoothing parameter in Vdsx in Vbsx
+parameter real    LC         = 10e-9        from (0:inf); // LC
+parameter real LAMBDA     = 0.0     from [0.0:inf); // Depletion length coefficient (channel length modulation)
+
+parameter integer    TYPE=`type_n      from [-1:1];  // type_n=1  type_p=-1
+parameter real rth             =20         from [0:inf);         // K/W           Thermal resistance
+parameter real cth             = 1e-9          from [0:inf);         // s.W/K         Thermal capacitance
+parameter real ns0            = 5.0e17       from [0.0:inf);
+parameter real mu0acc             = 0.155        from [0.0:inf);
+parameter real vsat0acc           =3.0e4     from [0.0:inf);
+parameter real Rcs            = 2.2e-3       from [0.0:inf);
+parameter real ktrs               = 0.00          from [0.0:inf);
+parameter real ktrd               =0.00          from [0.0:inf);
+parameter real Rcd             = 2.2e-3       from [0.0:inf);
+parameter real kth1            = 0.0  from [0.0:inf);
+parameter real kth2            = 2.0      from [0.0:inf);
+parameter real kth3           = 0.0      from (-inf:inf);
+parameter real gsar            = 1.2      from (-inf:inf) exclude 0.0;
+
+analog function real core;
+    input vch,pinch_n,n_q,gam,Cb,DOS_2D,gg,q,UT,v_s,phib,beta;
+    real vrbl,vch,pinch_n,gam,Cb,DOS_2D,gg,q,UT,phib;
+    real v_s,a,n0,alpha,d,beta,n_q,Qsp;
+    real T0,T1,T2,T3,T4;
+    begin
+        vrbl=pinch_n-v_s+phib-vch;
+        Qsp=2*n_q*Cb*UT;
+        a=q/(Cb*n_q);
+        n0=DOS_2D*UT;
+        alpha=a*n0/UT;
+        if (vrbl <= 0.0) begin
+            T0 = 6 / exp(vrbl);
+            T1 =(T0+alpha+2/3*beta*(T0)**(1/3))/(1+vrbl+ln(T0)-1/3*beta*(T0)**(-2/3));
+            T2 =(T1+alpha+2/3*beta*(T1)**(1/3))/(1+vrbl+ln(T1)-1/3*beta*(T1)**(-2/3));
+            T4 =(1+vrbl+ln(T2)-1/3*beta*(T2)**(-2/3))/(T2+alpha+2/3*beta*(T2)**(1/3));
+            core =q*n0*T4/Qsp;
+        end else begin
+            if (vrbl<50) begin
+                T0=1/((vrbl/(alpha+beta))+0.5);
+                T1=(T0+alpha+2/3*beta*(T0)**(1/3))/(1+vrbl+ln(T0)-1/3*beta*(T0)**(-2/3));
+                T2=(T1+alpha+2/3*beta*(T1)**(1/3))/(1+vrbl+ln(T1)-1/3*beta*(T1)**(-2/3));
+                T4=(1.0+vrbl+ln(T2)-1/3*beta*(T2)**(-2/3))/(T2+alpha+2/3*beta*(T2)**(1/3));
+                core =q*n0*T4/Qsp;
+            end else begin
+                T0=3/((vrbl/(alpha+beta))+0.5);
+                T1=(1+alpha+2/3*beta*(T0)**(1/3))/(0.5+vrbl-1/3*beta*(T0)**(-2/3));
+                T2=(1+alpha+2/3*beta*(T1)**(1/3))/(0.5+vrbl-1/3*beta*(T1)**(-2/3));
+                T3=(1+alpha+2/3*beta*(T2)**(1/3))/(0.5+vrbl-1/3*beta*(T2)**(-2/3));
+                T4=(1.0+1*vrbl-1/3*beta*(T3)**(-2/3))/(1.0+alpha+2/3*beta*(T3)**(1/3));
+                core =q*n0*T4/Qsp;
+            end
+        end
+    end
+endfunction //core
+
+
+
+analog begin
+    pi = 3.14159;
+    q = 1.602e-19;
+    me = 9.11e-31;
+    ep_GaN=8.9*`EP0;
+    DOS_2D=0.2*me/((1/q)*pi*(1.05459e-34)**2);
+    NV=(1.8e19)*(1e6);
+    NC_GaN =(2.3e18)*(1e6);
+
+    // Bias independent calculations
+    if (TYPE == `type_n) begin
+        devsign = 1;
+    end else begin
+        devsign = -1;
+    end
+
+    // Temperature dependence of voltage independent terms
+    tambk              = $temperature;
+    tsh                = Temp(t);
+    tdut               = tambk + tsh;
+
+    TRatio     = tdut / TNOM;
+
+    EgGaN = 3.507*q-(0.909e-3)*tdut**2/(tdut+830)*q; //Joule
+    EgAlN = 6.23*q-(1.799e-3)*tdut**2/(tdut+1462)*q; //Joule
+    EgAlGaN= EgAlN*xx+EgGaN*(1-xx)*1.3*xx*(1-xx)*q; //Joule
+    NC=(3.5e18)*(1e6);
+    NV_AlGaN=(1.3e19)*(1e6);
+    ep_AlGaN=(8.5*xx+8.9*(1-xx))*`EP0;
+    Ef_AlGaN =0*q;
+
+
+
+    // Mobility degradation
+    eta_mu = (TYPE != `type_n) ? (`Oneby3) : (0.5);
+    mut   = U0 * pow(TRatio, BEX);
+
+    // NOMINAL TEMPERATURE PARAMETERS
+    UT = 0.0259*(tdut/TNOM);
+    Weff=W;
+    Leff=L;
+
+
+    inv_UT=1/UT;
+    ni_gan=sqrt(NC_GaN*NV)*exp(-EgGaN/(2*q*UT));
+    phib=lln(NDEP/(ni_gan));
+    Phist     = max(0.4 + UT * phib + PHIN, 0.4);
+    T1DEP     = sqrt(2.0 * ep_GaN / (q * NDEP));
+    Cb=ep_AlGaN/x1;
+
+
+    // Load Terminal Voltages
+
+    Vg =  V(g,si); // wg 22/04/08 corrected for device TYPE
+    //  VG =  V(g,b);
+    Vs =  V(si,si);
+    Vd =  V(di,si);
+    // VDAR=V(d,di);
+    // VSAR=V(si,s);
+
+    // V(gi, bi)<+V(g, b);
+    // V(di, bi)<+V(d, b);
+    // V(si, bi)<+V(s, b);
+    //  Vg            = devsign * V(gi, bi);
+    //  Vd            = devsign * V(di, bi);
+    //  Vs            = devsign * V(si, bi);
+
+    // Terminal voltage conditioning
+    // Source-drain interchange
+    //  sigvds = 1.0;
+    //  if (Vds < 0.0) begin
+    //    sigvds = -1.0;
+    //    Vd = devsign * V(si, bi);
+    //     Vs = devsign * V(di, bi);
+    //  end
+    Vds  = Vd - Vs;
+    T0   = AVDSX * Vds;
+    if (T0 > `EXPL_THRESHOLD) begin
+        T1 = T0;
+    end else begin
+        T1 = ln(1.0 + exp(T0));
+    end
+    Vdsx = ((2.0/AVDSX) * T1) - Vds - ((2.0/AVDSX) * ln(2.0));
+    Vbsx = -(Vs + 0.5 * (Vds - Vdsx));
+
+
+    // SCE, DIBL, SS degradation effects, Ref: BSIM4 Model
+    `Smooth(Phist - Vbsx, 0.05, 0.1, PhistVbs)
+    sqrtPhistVbs = sqrt(PhistVbs);
+    Xdep         = T1DEP * sqrtPhistVbs;
+    Cdep         = ep_GaN / Xdep;
+    cdsc         = CIT + NFACTOR + CDSCD * Vdsx - CDSCB* Vbsx;
+    T1           = 1.0 + cdsc/Cb;
+    `Smooth(T1, 1, 0.05, n)
+    nUT     = n * UT;
+    inv_nUT = 1.0 / nUT;
+    vd    = Vd * inv_nUT;
+    vg    = Vg * inv_nUT;
+    vs    = Vs * inv_nUT;
+    vA   = VA * inv_nUT;
+
+    // Vth Shift for DIBL
+    dVth_dibl = -(ETA0 + ETAB * Vbsx) * Vdsx;
+    Vth_shift = dVth_dibl;
+
+    vg_vA      = vg - vA - Vth_shift * inv_nUT;
+    gam     = sqrt(2.0 * q * ep_GaN* NDEP * inv_UT) / Cb;
+    inv_gam=1/gam;
+    phib_n = phib / n;
+
+    `pinch_norm(vg_vA, gam, pinch_n)
+    `Smooth(pinch_n, 1.0, 2.0, pinch_norm_cl)
+    sqrtpsip = sqrt(pinch_norm_cl);
+    n_q=1+gam/(2*sqrt(pinch_norm_cl));
+    Qsp=2*n_q*Cb*UT;
+    dat=gg/UT;
+    n0=DOS_2D*UT;
+    beta=dat*n0**(0.6666);
+    v_s=ln(NDEP/NV)+EgGaN/(q*UT);
+    //v_s=0;
+    qs=core(vs,pinch_n,n_q,gam,Cb,DOS_2D,gg,q,UT,v_s,phib,beta);
+    // source side surf pot.
+    psiavg = pinch_n - 2.0 * qs;
+    `Smooth(psiavg, 1.0, 2.0, T0)
+    nq = 1.0 + gam / (sqrtpsip + sqrt(T0));
+
+
+    EeffF =Cb /(E0*ep_GaN);
+    T0 = nUT * (vg_vA - pinch_n - 2.0 * qs * (nq - 1.0));
+    `Smooth(T0, 0, 0.1, qbs)
+
+    // Source side qi and qb for Vdsat
+    qis = 2.0 * nq * nUT * qs;
+    Eeffs = EeffF * (qbs + eta_mu * qis);
+
+    // Ref: BSIM4 Model mobility model
+    T2 = pow(0.5 * (1.0 + (qis / qbs)), USC);
+    T3 = (UA + UC * Vbsx) * pow(Eeffs, EU) + UD / T2;
+    T4 = 1.0 + T3;
+    `Smooth(T4, 1.0, 0.0015, Vmr)
+
+    //UCRIT_T  = UCRIT * pow(TRatio, UCEX)*Vmr;
+    UCRIT_T  = UCRIT * pow(TRatio, -UCEX);
+
+
+    //UCRIT_T  = UCRIT * ( 1.0 + ETAVSAT * TNOM ) / ( 1.0 + ETAVSAT * tdut )*Vmr;
+
+
+    // Drain Saturation Voltage
+    //    if_       = qs**2 + qs;
+    vp      = pinch_n  - phib;
+    // -- VELOCITY SATURATION (NOT DEPENDENT ON VD)
+    g_clm       = 0.1; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+    e_clm       = 2.0*nUT / (UCRIT_T*L); // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+    e_clm2      = e_clm * e_clm; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+    e_clmx2     = 2.0 * e_clm;
+    e_clmp2     = 2.0 + e_clm;
+    e_clmx2xqs  = e_clmx2 * qs;
+    qdsat       = e_clmx2 * (qs**2 + qs) / (e_clmp2 + e_clmx2xqs + sqrt(e_clmp2 * e_clmp2 + 4.0 * e_clmx2xqs)); // NOTE: The inversion charge at a point of maximum velocity saturation.
+    qs_qsat     = qs - qdsat;
+    qs_qsat2    = qs_qsat * qs_qsat;
+    mdm2        = 2.0 - DELTA; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+    e_clmxmdm2_2    = e_clm2 * mdm2 * mdm2; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+    tmp_vdsat1  = (2.0 * qdsat + ln(qdsat)) * (1.0 + e_clm * qs_qsat);
+    tmp_vdsat11 = g_clm + e_clm * mdm2 * qs_qsat;
+    tmp_vdsat2  = sqrt(1.0 + (2.0 * e_clm2 * mdm2 * mdm2 * qs_qsat2) / tmp_vdsat11 + e_clm2 * qs_qsat2);
+    vdsat       = vp - tmp_vdsat1 / tmp_vdsat2; // NOTE: The potential at a point of the channel of maximum velocity saturation.
+    `Smooth(vdsat - vs, 3.0, 4, vdssat)
+    // -- VELOCITY SATURATION (DEPENDENT ON VD)
+    dv_clm      = (ACLM / DELTA) * (4.0 * qdsat + DELTA) / (qs + 1.0);
+    tmp_vdp1    = (vd - vs) * sqrt(1.0 + 4.0 * dv_clm / vdssat);
+    tmp_vdp2    = sqrt((tmp_vdp1 + vdssat) * (tmp_vdp1 + vdssat) + 4.0 * dv_clm * vdssat);
+    tmp_vdp3    = sqrt((tmp_vdp1 - vdssat) * (tmp_vdp1 - vdssat) + 4.0 * dv_clm * vdssat);
+    vdp         = 0.5 * (tmp_vdp2 - tmp_vdp3) + vs; // NOTE: The potential at the velocity saturated point of the channel, limited by the maximum value (vdsat)
+    // -- CHANNEL LENGTH MODULATION
+    u_clm       = 0.5 * e_clm * Leff / LC * (vd - vdp);
+    alpha_clm   = LC / (Leff - 2.0 * LC);
+    deltal      = LAMBDA * LC * ln((alpha_clm + u_clm + sqrt(u_clm * u_clm + 2.0 * alpha_clm * u_clm + 1.0)) / (alpha_clm + 1.0)); // NOTE: The distance between the velocity saturated point of the channel and the (electrical) drain end. Used at the SPECIFIC CURRENT calculation.
+
+    // CALCULATION OF NORMALIZED INVERSION CHARGE OF THE VELOCITY SATURATED POINT (ELECTRICAL DRAIN END)
+    qdeff=core(vdp,pinch_n,nq,gam,Cb,DOS_2D,gg,q,UT,v_s,phib,beta);
+    // Reevaluation of nq to include qdeff
+    psiavg = pinch_n -qs-qdeff;
+    `Smooth(psiavg, 1.0, 2.0, T0)
+    T2 = sqrt(T0);
+    nq = 1.0 + gam / (sqrtpsip + T2);
+
+    // Inversion and bulk charge
+    DQSD2 = (qs - qdeff) * (qs - qdeff);
+    T0    = 1.0 / (1.0 + qs + qdeff);
+    T1    = DQSD2 * T0;
+    Qb    = vg_vA - pinch_n - (nq - 1.0) * (qs + qdeff + `Oneby3 * T1);
+    T2    = `Oneby3 * nq;
+    T3    = T1 * T0;
+    Qs    = T2 * (2.0 * qs + qdeff + 0.5 * (1.0 + 0.8 * qs + 1.2 * qdeff) * T3);
+    Qd    = T2 * (qs + 2.0 * qdeff + 0.5 * (1.0 + 1.2 * qs + 0.8 * qdeff) * T3);
+
+    // Mobility degradation, Ref: BSIM4
+    // Average charges (qba and qia) - normalized to Cb
+    `Smooth(nUT * Qb, 0, 0.1, qba)
+    qia   = nUT * (Qs + Qd);
+
+    Eeffm = EeffF * (qba + eta_mu * qia);
+    T2    = pow(0.5 * (1.0 + (qia / qba)), USC);
+    T3    = (UA + UC * Vbsx) * pow(Eeffm, EU) + UD / T2;
+    T4    = 1.0 + T3;
+    `Smooth(T4, 1.0, 0.0015, Vmr)
+
+
+    // Velocity saturation
+    LambdaC = e_clm / Vmr;
+    T1 = 2.0 * LambdaC * (qs - qdeff);
+    T2 = sqrt(1.0 + T1 * T1);
+    if (T1 != 0.0) begin
+        Dvsat = 0.5 * (T2 + (1.0 / T1) * asinh(T1));
+    end else begin
+        Dvsat = 0.5 * (T2 + (1.0 / T2));
+    end
+
+
+    Dr=1;
+    Dtot = Vmr * Dvsat * Dr;
+
+    // Effective mobility including mobility degradation
+
+
+    ueff = mut / Dtot;
+
+    Isp=2.0 * NF * nq * ueff * Weff / (Leff-deltal) * Cb * nUT * nUT ;
+
+
+    ids  = Isp * ((qs - qdeff) * (1.0 + qs + qdeff));
+
+
+    // S/D Series Resistance, Ref: BSIM4
+
+
+    nsacc=ns0;
+    vsatacc=vsat0acc*(1-kth1*(TRatio-1))**kth2;
+    muacc=mu0acc*pow(TRatio, kth3);
+    qacc=q*nsacc*Weff;
+    Rd0=Lard/(qacc*muacc)*(1-kth1*(TRatio-1));
+    Rs0=Lars/(qacc*muacc)*(1-kth1*(TRatio-1));
+    Iaccsat=qacc*vsatacc;
+    T8=ids/Iaccsat;
+    if (T8 >= 0.96)
+        T8=0.96;
+
+
+    T9=pow(T8, gsar);
+    T7=pow(1-T9,1/gsar);
+    Rcos=Rcs/Weff;
+    Rcod=Rcd/Weff;
+
+    Rd1=Rd0/T7;
+    Rs1=Rs0/T7;
+
+    Rd=Rcod*(1+ktrd*pow(TRatio,1))+Rd1;
+    Rs=Rcos*(1+ktrs*pow(TRatio,1))+Rs1;
+    `STROBE4(">- ids = %g V \t Rd1 = %g V \t Rd = %g V \t ", ids, Rd1, Rd)
+    Dr      = 1.0 + U0 /(Dvsat * Vmr) * Cb * Weff / (Leff-deltal) * qia * (Rs+Rd);
+    //Dr=1;
+    ids  = ids/Dr;
+    VDAR=Rd*ids;
+    VSAR=Rs*ids;
+
+
+    // Transconductance
+
+
+    T1=q/(nq*Qsp);
+    T2=1/DOS_2D;
+    T3=-(Qsp*qs/q)/(DOS_2D*UT);
+    T4=T2/(1-exp(T3));
+    T5=q/(Cb*nq);
+    T6=2*gg/(3*((Qsp*qs/q)**(1/3)));
+    difqs_VG=T1/(T4+T5+T6);
+    T1=q/(nq*Qsp);
+    T2=1/DOS_2D;
+    T3=-(Qsp*qdeff/q)/(DOS_2D*UT);
+    T4=T2/(1-exp(T3));
+    T5=q/(Cb*nq);
+    T6=2*gg/(3*((Qsp*qdeff/q)**(1/3)));
+    difqdeff_VG=T1/(T4+T5+T6);
+    T1=q/(nq*Qsp);
+    T2=1/DOS_2D;
+    T3=-(Qsp*qdeff/q)/(DOS_2D*UT);
+    T4=T2/(1-exp(T3));
+    T5=q/(Cb*nq);
+    T6=2*gg/(3*((Qsp*qdeff/q)**(1/3)));
+    difqdeff_VD=T1/(T4+T5+T6);
+
+    Gm=Isp * (difqs_VG*(1+2*qs)-difqdeff_VG*(1+2*qdeff));
+    Gds=-Isp *difqdeff_VD*(1+2*qdeff);
+
+    //T1 = 1.0/(1.0 + Gds*Rd);
+    T1=1;
+    ids = ids*T1;
+
+
+    //  GM    = ddx(IDS, V(gi));  // Transconductance
+    // GMBS  = ddx(IDS, V(bi));  // Body transconductance
+    // GDS   = ddx(IDS, V(di));  // Output conductance
+
+
+    `STROBE4(">- ids = %g V \t Iaccsat = %g V \t T1 = %g V \t ", ids, Iaccsat, T1)
+
+    V(si,s)          <+ VSAR;
+    I(di,si)          <+ ids;
+    V(d,di)          <+ VDAR;
+    //I(d, s) <+ ids;
+    //V(d, di) <+ 0.0;
+    //V(s, si) <+ 0.0;
+
+    V(b, bi)<+0;
+
+
+    // Self-heating
+    if (rth !=0) begin
+
+        pdiss            = -( ids * V(di,si)+ ids * ids* Rd + ids * ids* Rs );
+        Pwr(t)          <+ ddt( (cth ) * Temp(t));
+        Pwr(t)          <+ pdiss;
+        Pwr(t)          <+ Temp(t) / rth;
+    end
+    else
+        Pwr(t)          <+ Temp(t) * 1e9;
+
+end
+endmodule

@@ -1,0 +1,31 @@
+`include "disciplines.vams"
+
+`ifdef insideADMS
+    `define INITIAL_MODEL @(initial_model)
+`else
+    `define INITIAL_MODEL
+`endif
+
+module comparator (sigin, sigref, sigout);
+
+inout sigin,sigref;
+inout sigout;
+electrical sigin, sigref, sigout;
+
+parameter real sigout_high = 10;
+parameter real sigout_low = -10;
+parameter real sigin_offset = 0;
+parameter real comp_slope = 1000;
+
+analog begin
+
+    `INITIAL_MODEL
+    begin
+        if (sigout_high <= sigout_low) begin
+            $display("Range specification error. sigout_high = (%E) less than sigout_low = (%E).\n",sigout_high,sigout_low);
+        end
+    end
+
+    V(sigout) <+ 0.5 * (sigout_high - sigout_low)* tanh(comp_slope*(V(sigin, sigref) - sigin_offset))+(sigout_high + sigout_low)/2;
+end
+endmodule

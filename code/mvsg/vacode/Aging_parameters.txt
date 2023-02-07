@@ -1,0 +1,104 @@
+// Model parameters  
+   `MPRoz(cg,       4.00e-03, "F/m^2",   "Gate cap/area")    
+   `MPRcz(rsh,      150.0,    "Ohms/Sq", "2-DEG Sheet Resistance")    
+   `MPRcz(rcs,      800e-6,   "Ohms*m",  "Source contact resistance * Width")    
+   `MPRcz(rcd,      800e-6,   "Ohms*m",  "Drain contact resistance * Width")    
+   `MPRoz(vx0,      3.0e5,    "m/s",     "Source injection velocity")    
+   `MPRoz(mu0,      0.135,    "m^2/Vs",  "Low-field mobility")    
+   `MPRnb(vto,      -2.72,    "V",       "Threshold voltage") 
+   `MPRoz(ss,       0.120,    "V/dec",   "Sub-threshold slope")    
+   `MPRcz(delta1,   16e-3,    "",        "DIBL Coefficient 1")    
+   `MPRcz(nd,       0.0,      "",        "Punchthrough factor for subth slope")    
+
+// Source access region parameters
+   `MPRoz(cgrs,     5.0e-3,   "F/m^2",   "SAR gate-cap/area") 
+   `MPRoz(vx0rs,    100e3,    "m/s",     "SAR source injection velocity")    
+   `MPRoz(mu0rs,    100e-3,   "m^2/Vs",  "SAR low-field mobility")    
+   `MPRcz(delta1rs, 100e-3,   "",        "SAR DIBL Coefficient")    
+   `MPRoz(srs,      0.100,    "V/dec",   "SAR Sub-threshold slope")    
+   `MPRcz(ndrs,     0.0,      "",        "SAR punchthrough factor for subth slope")      
+
+// Drain access region parameters
+   `MPRoz(cgrd,     4.3e-3,   "F/m^2",   "DAR gate-cap/area") 
+   `MPRoz(vx0rd,    100e3,    "m/s",     "DAR source injection velocity")    
+   `MPRoz(mu0rd,    100e-3,   "m^2/Vs",  "DAR low-field mobility")    
+   `MPRcz(delta1rd, 0.35,     "",        "DAR DIBL Coefficient")    
+   `MPRoz(srd,      0.3,      "V/dec",   "DAR Sub-threshold slope")    
+   `MPRcz(ndrd,     3.8,      "",        "DAR punchthrough factor for subth slope")     
+
+// Field-Plate 1 parameters
+   `MPRnb(vtofp1,   -44.5,    "V",       "FP threshold voltage") 
+   `MPRoz(cgfp1,    2.0e-4,   "F/m^2",   "FP gate-cap/area") 
+   `MPRoz(vx0fp1,   1.2e5,    "m/s",     "FP source injection velocity")  
+   `MPRoz(mu0fp1,   0.2,      "m^2/Vs",  "FP low-field mobility")    
+   `MPRcz(delta1fp1,0.0,      "",        "FP DIBL Coefficient")    
+   `MPRoz(sfp1,     3.2,      "V/dec",   "FP Sub-threshold slope")    
+   `MPRcz(ndfp1,    0.0,      "",        "FP punchthrough factor for subth slope")    
+ 
+// Field-Plate 2 parameters                    
+   `MPRnb(vtofp2,   -74.5,    "V",       "FP threshold voltage") 
+   `MPRoz(cgfp2,    1.0e-4,   "F/m^2",   "FP gate-cap/area") 
+   `MPRoz(vx0fp2,   1.2e5,    "m/s",     "FP source injection velocity")  
+   `MPRoz(mu0fp2,   0.2,      "m^2/Vs",  "FP low-field mobility")    
+   `MPRcz(delta1fp2,0.0,      "",        "FP DIBL Coefficient")    
+   `MPRoz(sfp2,     3.2,      "V/dec",   "FP Sub-threshold slope")    
+   `MPRcz(ndfp2,    0.0,      "",        "FP punchthrough factor for subth slope")    
+
+// Field-Plate 3 parameters                    
+   `MPRnb(vtofp3,   -44.5,    "V",       "FP threshold voltage") 
+   `MPRoz(cgfp3,    2.0e-4,   "F/m^2",   "FP gate-cap/area") 
+   `MPRoz(vx0fp3,   1.2e5,    "m/s",     "FP source injection velocity")  
+   `MPRoz(mu0fp3,   0.2,      "m^2/Vs",  "FP low-field mobility")    
+   `MPRcz(delta1fp3,0.0,      "",        "FP DIBL Coefficient")    
+   `MPRoz(sfp3,     3.2,      "V/dec",   "FP Sub-threshold slope")    
+   `MPRcz(ndfp3,    0.0,      "",        "FP punchthrough factor for subth slope")    
+
+// Field-Plate 4 parameters                     
+   `MPRnb(vtofp4,   -44.5,    "V",       "FP threshold voltage") 
+   `MPRoz(cgfp4,    2.0e-4,   "F/m^2",   "FP gate-cap/area") 
+   `MPRoz(vx0fp4,   1.2e5,    "m/s",     "FP source injection velocity")  
+   `MPRoz(mu0fp4,   0.2,      "m^2/Vs",  "FP low-field mobility")    
+   `MPRcz(delta1fp4,0.0,      "",        "FP DIBL Coefficient")    
+   `MPRoz(sfp4,     3.2,      "V/dec",   "FP Sub-threshold slope")    
+   `MPRcz(ndfp4,    0.0,      "",        "FP punchthrough factor for subth slope")    
+
+// Source-side Field-Plate 1 parameters   `MPRnb(vtofps1,  -44.5,    "V",       "FP threshold voltage")   `MPRoz(cgfps1,   2.0e-4,   "F/m^2",   "FP gate-cap/area")   `MPRoz(vx0fps1,  1.2e5,    "m/s",     "FP source injection velocity")   `MPRoz(mu0fps1,  0.2,      "m^2/Vs",  "FP low-field mobility")   `MPRcz(delta1fps1,0.0,     "",        "FP DIBL Coefficient")   `MPRoz(sfps1,    3.2,      "V/dec",   "FP Sub-threshold slope")   `MPRcz(ndfps1,   0.0,      "",        "FP punchthrough factor for subth slope")// Source-side Field-Plate 2 parameters                      `MPRnb(vtofps2,   -74.5,   "V",       "FP threshold voltage")    `MPRoz(cgfps2,    1.0e-4,  "F/m^2",   "FP gate-cap/area")    `MPRoz(vx0fps2,   1.2e5,   "m/s",     "FP source injection velocity")     `MPRoz(mu0fps2,   0.2,     "m^2/Vs",  "FP low-field mobility")         `MPRcz(delta1fps2,0.0,     "",        "FP DIBL Coefficient")       `MPRoz(sfps2,     3.2,     "V/dec",   "FP Sub-threshold slope")       `MPRcz(ndfps2,    0.0,     "",        "FP punchthrough factor for subth slope")    // Source-side Field-Plate 3 parameters                  `MPRnb(vtofps3,   -74.5,   "V",       "FP threshold voltage")    `MPRoz(cgfps3,    1.0e-4,  "F/m^2",   "FP gate-cap/area")    `MPRoz(vx0fps3,   1.2e5,   "m/s",     "FP source injection velocity")     `MPRoz(mu0fps3,   0.2,     "m^2/Vs",  "FP low-field mobility")          `MPRcz(delta1fps3,0.0,     "",        "FP DIBL Coefficient")       `MPRoz(sfps3,     3.2,     "V/dec",   "FP Sub-threshold slope")       `MPRcz(ndfps3,    0.0,     "",        "FP punchthrough factor for subth slope")     // Source-side Field-Plate 4 parameters                      `MPRnb(vtofps4,   -74.5,   "V",       "FP threshold voltage")    `MPRoz(cgfps4,    1.0e-4,  "F/m^2",   "FP gate-cap/area")    `MPRoz(vx0fps4,   1.2e5,   "m/s",     "FP source injection velocity")     `MPRoz(mu0fps4,   0.2,     "m^2/Vs",  "FP low-field mobility")       `MPRcz(delta1fps4,0.0,     "",        "FP DIBL Coefficient")       `MPRoz(sfps4,     3.2,     "V/dec",   "FP Sub-threshold slope")       `MPRcz(ndfps4,    0.0,     "",        "FP punchthrough factor for subth slope")    
+// Gate leakage parameter   
+   `MPRcz(pg_params,1.00,     "1/V",     "G-S diode  inverse of ideality factor")  
+   `MPRcz(ijs,      1.00e-12, "A/m",     "G-S reverse leakage current normalized to width")     
+   `MPRcz(pg_paramd,1.00,     "1/V",     "G-D diode  inverse of ideality factor")  
+   `MPRcz(ijd,      1.00e-12, "A/m",     "G-D reverse leakage current normalized to width")   
+
+   `MPRcz(pgsrecs,  0.5,      "",        "G-S diode  inverse of ideality factor reverse recombination")    
+   `MPRcz(irecs,    1.0e-18,  "A/m",     "G-S reverse leakage current normalized to width")   
+   `MPRcz(pgsrecd,  0.8,      "",        "G-D diode  inverse of ideality factor for reverse recombination")    
+   `MPRcz(irecd,    2e-5,     "A/m",     "G-D reverse leakage current normalized to width")
+
+   `MPRcz(pgsrecs2, 0.5,      "",        "Secondary G-S diode  inverse of ideality factor reverse recombination")
+   `MPRcz(irecs2,   1.0e-18,  "A/m",     "Secondary G-S reverse leakage current normalized to width")
+   `MPRcz(pgsrecd2, 0.8,      "",        "Secondary G-D diode  inverse of ideality factor for reverse recombination")
+   `MPRcz(irecd2,   2e-5,     "A/m",     "Secondary G-D reverse leakage current normalized to width") 
+
+   `MPRcz(vbdgs,    600,      "V",       "G-S soft breakdown voltage of G-S diode")    
+   `MPRcz(pbdgs,    4.00,     "1/V",     "G-S fitting parameter for breakdown: inverse of ideality factor")  
+   `MPRcz(vbdgd,    600,      "V",       "G-D soft breakdown voltage of G-D diode")    
+   `MPRcz(pbdgd,    4.00,     "1/V",     "G-D fitting parameter for breakdown: inverse of ideality factor")  
+
+// Channel breakdown model
+   `MPRcz(ijscbd,   1.00e-9,  "A/m",     "G-S reverse channel breakdown leakage current normalized to width")   
+   `MPRcz(ijdcbd,   1.00e-9,  "A/m",     "G-S reverse channel breakdown leakage current normalized to width")   
+   `MPRcz(vchbdgs,  50,       "V",       "G-S soft breakdown voltage of channel diode")    
+   `MPRcz(pchbdgs,  4.00,     "1/V",     "G-S fitting parameter for channel breakdown: inverse of ideality factor")  
+   `MPRcz(vchbdgd,  50,       "V",       "G-D soft breakdown voltage of channel diode")    
+   `MPRcz(pchbdgd,  4.00,     "1/V",     "G-D fitting parameter for channel breakdown: inverse of ideality factor")  
+
+// Trapping model parameters for Ron increase
+   `MPRcz(vttrap,   230,      "V",       "Trapping stress threshold voltage")   
+   `MPRcz(taut,     3e-5,     "s",       "Trap time constant")   
+   `MPRcz(alphat1,  1e-4,     "",        "Trap coefficient 1 on bias stress")   
+   `MPRoz(alphat2,  21,       "V",       "Trap coefficient 2 on bias stress") 
+
+// Noise model parameters
+   `MPRcz(shs,      3.0,     "",         "G-S shot noise parameter")   
+   `MPRcz(shd,      3.0,     "",         "G-D shot noise parameter")   
+   `MPRcz(kf,       1.0e-4,  "",         "Flicker noise coefficient")   

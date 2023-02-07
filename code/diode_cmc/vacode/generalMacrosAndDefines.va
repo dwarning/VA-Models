@@ -1,0 +1,301 @@
+
+//
+//  generalMacrosAndDefines.va
+//
+//  Version: 1.0.0, October 30, 2014
+//
+//  This software is distributed as is, completely without warranty, liability,
+//  copyright, or service support. Users may use, modify, copy, and redistribute
+//  the software and documentation, both within the user's organization and externally,
+//  without restriction.
+//
+//  As a courtesy:
+//  1. If you use this software, please make an appropriate acknowledgement.
+//  2. If you correct a bug in the software or add an enhancement, feed the
+//     correction or enhancement back, to help maintain an open-source,
+//     useful, and high quality suite of general macros for everyone who
+//     is writing a model in Verilog-A.
+//
+
+//
+//  This file contains general macro and constant definitions for Verilog-A.
+//
+//  NOTE: macros that can be embedded in expressions do not include a trailing ";" termination
+//        whereas those that are to be used stand-alone do. If you add an extra ";" to the latter
+//        this is an error as NULL statements are not legal in Verilog-AMS.
+//  NOTE: some compilers have not yet implemented the IEEE std 1364-2005
+//        Verilog HDL style calls for mathematical functions; this is why
+//         ln(),  log()  ,  exp(),  sqrt(),  pow(), etc. are used instead of
+//        $ln(), $log10(), $exp(), $sqrt(), $pow(), etc.
+//        (the second forms are those "encouraged" to be used since LRM2.3)
+//
+
+//
+//  Physical constants and other generally useful numbers
+//
+//  NOTE: the following constants are defined in constants.vams
+//   `M_E           e
+//   `M_LOG2E       log2(e)
+//   `M_LOG10E      log10(e)
+//   `M_LN2         ln(2)
+//   `M_LN10        ln(10)
+//   `M_PI          pi
+//   `M_TWO_PI      pi*2.0
+//   `M_PI_2        pi/2.0
+//   `M_PI_4        pi/4.0
+//   `M_1_PI        1.0/pi
+//   `M_2_PI        2.0/pi
+//   `M_2_SQRTPI    2.0/sqrt(pi)
+//   `M_SQRT2       sqrt(2.0)
+//   `M_SQRT1_2     1.0/sqrt(2.0)=sqrt(0.5)
+//   `P_CELSIUS0    273.15          // This is a defined physical constant not subject to change
+//   `P_EPS0        8.854187817e-12 // This is a defined physical constant not subject to change
+//
+
+`define QQ_NIST2004       1.60217653e-19         // (NIST2004) mag. of electronic charge (C)
+`define KB_NIST2004       1.3806505e-23          // (NIST2004) Boltzmann constant (J/K)
+`define EPS_OX            3.45313324863e-11      // `P_EPS0*3.90 (F/m)
+`define EPS_SI            1.035939974589e-10     // `P_EPS0*11.7 (F/m)
+`define oneSixth          0.1666666666666667
+`define oneThird          0.3333333333333333
+`define twoThirds         0.6666666666666667
+`define egTsividis(Eg,tK) \
+    if ((tK)<300.0) begin \
+        Eg = 1.17850-(tK)*(9.025e-05-(tK)*3.05e-07); \
+    end else begin \
+        Eg = 1.20595-(tK)*2.7325e-04; \
+    end
+
+//
+//  Clipping macros. These smoothly limit to lower, upper, or both lower and upper
+//  limits. Rather than using a sqrt or log-exp form, which affects values
+//  everywhere, these use a conditional form that is continuous in function
+//  and derivative. If a value is not clipped then no exp() evaluation occurs.
+//  Smooth limiting is preferable to hard limiting (although latter can still
+//  be useful for enforcing parameter limits) for bias dependent quantities
+//  as derivatives do not become zero or have discontinuities. These macros
+//  are intended for efficient clipping of excessive values, to prevent numerical
+//  problems, and not for smoothing transitions between normal operating regions.
+//  Two forms are provided, one that starts the limiting within 0.1 of the
+//  limit, and one that starts within 1.0 of the limit. The former is appropriate
+//  for voltage clipping, the latter for temperature clipping for models that
+//  include self-heating.
+//
+
+`define CLIPL0p1(XCLIP,X,LOWER) \
+    if ((X)<((LOWER)+0.1)) begin \
+        XCLIP    =  (LOWER)+0.1*exp(10.0*((X)-(LOWER))-1.0); \
+    end else begin \
+        XCLIP    =  (X); \
+    end
+`define CLIPU0p1(XCLIP,X,UPPER) \
+    if ((X)>((UPPER)-0.1)) begin \
+        XCLIP    =  (UPPER)-0.1*exp(10.0*((UPPER)-(X))-1.0); \
+    end else begin \
+        XCLIP    =  (X); \
+    end
+`define CLIPB0p1(XCLIP,X,LOWER,UPPER) \
+    if ((X)<((LOWER)+0.1)) begin \
+        XCLIP    =  (LOWER)+0.1*exp(10.0*((X)-(LOWER))-1.0); \
+    end else if ((X)>((UPPER)-0.1)) begin \
+        XCLIP    =  (UPPER)-0.1*exp(10.0*((UPPER)-(X))-1.0); \
+    end else begin \
+        XCLIP    =  (X); \
+    end
+
+`define CLIPL1p0(XCLIP,X,LOWER) \
+    if ((X)<((LOWER)+1.0)) begin \
+        XCLIP    =  (LOWER)+exp((X)-(LOWER)-1.0); \
+    end else begin \
+        XCLIP    =  (X); \
+    end
+`define CLIPU1p0(XCLIP,X,UPPER) \
+    if ((X)>((UPPER)-1.0)) begin \
+        XCLIP    =  (UPPER)-exp((UPPER)-(X)-1.0); \
+    end else begin \
+        XCLIP    =  (X); \
+    end
+`define CLIPB1p0(XCLIP,X,LOWER,UPPER) \
+    if ((X)<((LOWER)+1.0)) begin \
+        XCLIP    =  (LOWER)+exp((X)-(LOWER)-1.0); \
+    end else if ((X)>((UPPER)-1.0)) begin \
+        XCLIP    =  (UPPER)-exp((UPPER)-(X)-1.0); \
+    end else begin \
+        XCLIP    =  (X); \
+    end
+
+//
+//  Hard clamping and sqrt clamping macros
+//
+
+`define MAX(x,y)            ((x)>(y)?(x):(y))
+`define MIN(x,y)            ((x)<(y)?(x):(y))
+`define CLAMP(val,min,max) `MIN(max,`MAX(val,min))
+`define MAXA(x,y,a)         (0.5*((x)+(y)+sqrt(((x)-(y))*((x)-(y))+(a))))
+`define MINA(x,y,a)         (0.5*((x)+(y)-sqrt(((x)-(y))*((x)-(y))+(a))))
+
+//
+//  Parameter definition macros: "des" description argument is intended to
+//  be a short description, the "inf" information argument is intended to be
+//  a detailed description (e.g. for display as part of on-line help).
+//
+//  MPR      model    parameter real
+//  MPI      model    parameter integer
+//  IPR      instance parameter real
+//  IPI      instance parameter integer
+//  OPP      operating point parameter, includes units and description for printing
+//  OPM      operating point parameter, scales with $mfactor
+//  OPD      operating point parameter, scales with 1/$mfactor
+//
+//  Instance parameters have the attribute *type="instance"* and note that
+//  compilers treat these as both instance and model parameters, with a
+//  specified instance value taking precedence over a specified model card value.
+//
+//  There are some issues with passing range directives with some compilers,
+//  so for each parameter declaration there are multiple versions:
+//  cc       closed lower bound, closed upper bound
+//  co       closed lower bound, open   upper bound
+//  cz       closed lower bound of zero (no upper bound)
+//  oc       open   lower bound, closed upper bound
+//  oo       open   lower bound, open   upper bound
+//  oz       open   lower bound of zero (no upper bound)
+//  nb       no bounds
+//  sw       switch (integer only, values  0=false  and >0=true)
+//  ty       switch (integer only, values -1=n-type and +1=p-type)
+//
+
+`define ALIAS(alias,paramName) aliasparam alias = paramName;
+`define OPP(nam,uni,des)               (*units=uni,                             desc=des*)           real    nam;
+`define OPM(nam,uni,des)               (*units=uni, multiplicity="multiply",    desc=des*)           real    nam;
+`define OPD(nam,uni,des)               (*units=uni, multiplicity="divide",      desc=des*)           real    nam;
+`define MPRcc(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from[lwr:upr];
+`define MPRco(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from[lwr:upr);
+`define MPRcz(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from[  0:inf);
+`define MPRoc(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from(lwr:upr];
+`define MPRoo(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from(lwr:upr);
+`define MPRoz(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from(  0:inf);
+`define MPRnb(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def;
+`define MPIcc(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[lwr:upr];
+`define MPIco(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[lwr:upr);
+`define MPIcz(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[  0:inf);
+`define MPIoc(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from(lwr:upr];
+`define MPIoo(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from(lwr:upr);
+`define MPIoz(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from(  0:inf);
+`define MPInb(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def;
+`define MPIsw(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[  0:inf);
+`define MPIty(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[ -1:  1] exclude 0;
+`define IPRcc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from[lwr:upr];
+`define IPRco(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from[lwr:upr);
+`define IPRcz(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from[  0:inf);
+`define IPRoc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from(lwr:upr];
+`define IPRoo(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from(lwr:upr);
+`define IPRoz(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from(  0:inf);
+`define IPRnb(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def;
+`define IPIcc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from[lwr:upr];
+`define IPIco(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from[lwr:upr);
+`define IPIcz(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from[  0:inf);
+`define IPIoc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from(lwr:upr];
+`define IPIoo(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from(lwr:upr);
+`define IPIoz(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from(  0:inf);
+`define IPInb(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def;
+`define IPIsw(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from[  0:inf);
+
+//
+//  Simulator variable macros, for use as defaults in model parameter definitions
+//
+
+`define SIMPARGMIN $simparam("gmin",1.0e-12)
+`define SIMPARIMAX $simparam("imax",1.0)
+`define SIMPARSCAL $simparam("scale",1.0)
+`define SIMPARSHRI $simparam("shrink",0.0)
+`define SIMPARRTHR $simparam("rthresh",1.0e-3)
+
+//
+//  exp(V*a) that linearizes for V>Vmax
+//
+//  Outputs:
+//    expv       exponential linearized for V>Vmax
+//  Inputs:
+//    V          input voltage
+//    Vmax       voltage at which to linearize the exponential contributions
+//    a          multiplicative factor for V in the exponential calculation
+//
+
+`define expLinA(expv,V,Vmax,a) \
+    if ((V)<(Vmax)) begin \
+        expv    = exp((V)*(a)); \
+    end else begin \
+        expv    = exp((Vmax)*(a))*(1.0+((V)-(Vmax))*(a)); \
+    end
+
+//
+//  Linear resistor, including noise, that can be collapsed
+//  if the resistance is zero or switches from an I=V*G form
+//  to a V=I*R form if the resistance is less than a
+//  specified value (for which the I=V*G form can cause
+//  numerical problems).
+//
+//  Outputs:
+//    none       directly sets up contributions
+//  Inputs:
+//    b_r        branch defined for the resistor
+//    r_t        resistance value
+//    r_tNom     resistance value at the nominal temperature
+//    tdevK      device temperature in K (for noise calculation)
+//    rThreshold value of r at which to switch formulations
+//    m          multiplicity (threshold scales with this)
+//    strict     1=strict collapse, 0=switch to V=I*R formulation
+//    sw_noise   switch to turn noise on (1) or off (0)
+//
+//  The conditional test must not depend on bias, so if self-heating
+//  modeling is included must be based on the value at the nominal
+//  temperature, hence the need to have that as an argument.
+//  Often model codes are written in a partitioned manner, so noise
+//  code is separate from branch element calculation code.
+//  However, here it simplifies things by grouping them together.
+//  The model must have appropriate geometry and temperature
+//  calculations for the resistor.
+//  It is assumed that any self-heating, or other, effect will
+//  not cause r_t to be significantly different from t_tNom,
+//  for example to become less than or equal to zero.
+//
+//  Some compilers give an error if a noise function is assigned
+//  to a branch that can have both current and voltage contribs.
+//  If you use one of those compilers comment out the definition below.
+//  This will cause noise to be switched off if the resistance is low,
+//  where the noise contribution should be small anyway.
+//
+
+//`define compilerDoesNotHandleNoiseProperly // uncomment this definition if true
+`ifdef compilerDoesNotHandleNoiseProperly
+`define collapsibleR(b_r,r_t,r_tNom,tdevK,rThreshold,m,strict,sw_noise) \
+    if ((r_tNom)>((m)*(rThreshold))) begin \
+        I(b_r) <+  V(b_r)/(r_t); \
+        if (sw_noise) begin \
+            I(b_r) <+  white_noise(4.0*`KB_NIST2004*(tdevK)/(r_t)); \
+        end \
+    end else begin \
+        if (strict) begin \
+            V(b_r) <+  0.0; \
+        end else begin \
+            V(b_r) <+ `MAX(r_t,0.0)*I(b_r); \
+        end \
+    end
+`else
+`define collapsibleR(b_r,r_t,r_tNom,tdevK,rThreshold,m,strict,sw_noise) \
+    if ((r_tNom)>((m)*(rThreshold))) begin \
+        I(b_r) <+  V(b_r)/(r_t); \
+        if (sw_noise) begin \
+            I(b_r) <+  white_noise(4.0*`KB_NIST2004*(tdevK)/(r_t)); \
+        end \
+    end else begin \
+        if (strict) begin \
+            V(b_r) <+  0.0; \
+        end else begin \
+            V(b_r) <+ `MAX(r_t,0.0)*I(b_r); \
+            if (sw_noise) begin \
+                V(b_r) <+  white_noise(4.0*`KB_NIST2004*(tdevK)*`MAX(r_t,0.0)); \
+            end \
+        end \
+    end
+`endif

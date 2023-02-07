@@ -1,0 +1,143 @@
+/*Key model parameters*/
+/* Note: Due to Vt shifts in the device, vto parameter needs to be changed at low temperature as in ICCAP file*/
+
+
+// Instance parameters               Default value   Range                    Units         Desc
+   parameter real    w               = 3e3           from(0.0:inf];        // um            Width per Finger
+   parameter real    l               = 1.0           from(0.0:inf];        // um            Length
+   parameter real    ngf             = 1.0           from(0.0:inf];        //               Number of Fingers
+
+// Model parameters                  Default value   Range                    Units         Desc
+   parameter real    version         = 1.00          from[0.0:inf];        //               Version
+   parameter real    tnom            = 27.0          from[-273.15:inf];    //               tnom for temperature model
+   parameter integer type            = 1             from[-1:1] exclude 0; //               nFET=1 pFET=-1
+   parameter real    cg              = 1.70e-03      from(0.0:inf];        // F/m^2         Gate Cap/Area
+   parameter real    cifm      	     = 0             from[0.0:inf);        // F/m           Inner fringing cap on each side (not used)
+   parameter real    cofsm           = 1.6e-9        from[0.0:inf];        // F/m           Gate - Source Outer Fringing Cap/Width
+   parameter real    cofdm           = 1.0e-19       from[0.0:inf];        // F/m           Gate - Drain Outer Fringing Cap/Width
+   parameter real    cofdsm          = 8.0e-10       from[0.0:inf];        // F/m           Source - Drain Outer Fringing Cap/Width
+   parameter real    cofdsubm        = 0.0e-14       from[0.0:inf];        // F/m           Sub - Drain Outer Fringing Cap/Width
+   parameter real    cofssubm        = 0.0e-14       from[0.0:inf];        // F/m           Sub - Source Outer Fringing Cap/Width
+   parameter real    cofgsubm        = 3e-10         from[0.0:inf];        // F/m           Sub - Gate Outer Fringing Cap/Width
+   parameter real    rsh             = 100.0         from[-inf:inf];       // Ohms/Sq       2-DEG Sheet Resistance
+   parameter real    rcs             = 0.21e-2       from[-inf:inf];       // Ohms*m        Source contact resistance * Width
+   parameter real    rcd             = 0.21e-2       from[-inf:inf];       // Ohms*m        Drain contact resistance * Width
+   parameter real    vx0             = 1.2e5         from(0.0:inf];        // m/s           Source injection velocity
+   parameter real    mu0             = 0.100         from(0.0:inf];        // m^2/Vs        Low-field Mobility
+   parameter real    beta            = 1.16          from(0.0:inf];        // m/s           Linear to Saturation Parameter
+   parameter real    vto             = -3.9          from[-inf:inf];       // V             Threshold Voltage
+   parameter real    ss              = 0.10          from(0.0:inf];        // V/dec         Sub-threshold Slope
+   parameter real    delta1          = 0.005         from[0.0:inf];        //               DIBL Coefficient
+   parameter real    delta2          = 0.00          from[0.0:inf];        //               DIBL Coefficient
+   parameter real    dibsat          = 10.0          from[0.0:inf];        // V             DIBL Saturation Voltage
+   parameter real    nd              = 0.0           from[0.0:inf];        //               Punchthrough factor for Subth Slope
+   parameter real    alpha           = 3.5           from[0.0:inf];        //               Weak to Strong Inversion Transition Factor
+   parameter real    lambda          = 0.0           from[0.0:inf];        // 1/V           CLM Parameter
+   parameter real    vtheta          = 0.0           from[0.0:inf];        //               Scattering: velocity reduction parameter with Vg
+   parameter real    mtheta          = 0.0           from[0.0:inf];        //               Scattering: mobility reduction parameter with Vg
+   parameter real    vzeta           = 4e-3          from[-inf:inf];       //               VXO dependence on temperature
+   parameter real    vtzeta          = -1e-3         from[-inf:inf];       //               vto dependence on temperature
+   parameter real    epsilon         = 3.0           from[0.0:inf];        //               Mobility dependence on temperature
+   parameter real    rct1            = 0.0           from[-inf:inf);       //               Rsh and Rc temperature coefficient
+   parameter real    rct2            = 0.0           from[-inf:inf);       //               Rsh and Rc temperature coefficient
+                                                                           //               Source access region parameter
+   parameter real    lgs             = 2.0           from[0.0:inf];        // um            Source access region distance
+   parameter real    vtors           = -650          from[-inf:inf];       // V             SAR Threshold Voltage
+   parameter real    cgrs            = 80e-5         from[0:inf];          // F/m^2         SAR to Drain Cap/Area
+   parameter real    vx0rs           = 1.0e5         from(0.0:inf];        // m/s           SAR Source injection velocity
+   parameter real    mu0rs           = 0.100         from(0.0:inf];        // m^2/Vs        SAR Low-field Mobility
+   parameter real    betars          = 1.1           from(0.0:inf];        //               Linear to Saturation Parameter   
+   parameter real    delta1rs        = 4e-4          from[0.0:inf];        //               SAR DIBL Coefficient
+   parameter real    srs             = 0.065         from(0.0:inf];        // V/dec         SAR Sub-threshold Slope
+   parameter real    ndrs            = 0.0           from[0.0:inf];        //               SAR Punchthrough factor for Subth Slope
+   parameter real    vthetars        = 0.0           from[0.0:inf];        //               SAR Scattering: velocity reduction parameter with Vg
+   parameter real    mthetars        = 0.0           from[0.0:inf];        //               SAR Scattering: mobility reduction parameter with Vg
+   parameter real    alphars         = 3.5           from[0.0:inf];        //               SAR Weak to Strong Inversion Transition Factor
+                                                                           //               Drain access region parameter
+   parameter real    lgd             = 7.0           from[0.0:inf];        // um            Drain access region distance
+   parameter real    vtord           = -650.0        from[-inf:inf];       // V             DAR Threshold Voltage
+   parameter real    cgrd            = 70e-5         from[0:inf];          // F/m^2         DAR to Drain Cap/Area
+   parameter real    vx0rd           = 1.0e5         from(0.0:inf];        // m/s           DAR Source injection velocity
+   parameter real    mu0rd           = 0.100         from(0.0:inf];        // m^2/Vs        DAR Low-field Mobility
+   parameter real    betard          = 1.1           from(0.0:inf];        //               Linear to Saturation Parameter
+   parameter real    delta1rd        = 4e-4          from[0.0:inf];        //               DAR DIBL Coefficient
+   parameter real    srd             = 0.08          from(0.0:inf];        // V/dec         DAR Sub-threshold Slope
+   parameter real    ndrd            = 0.0           from[0.0:inf];        //               DAR Punchthrough factor for Subth Slope
+   parameter real    vthetard        = 0.0           from[0.0:inf];        //               DAR Scattering: velocity reduction parameter with Vg
+   parameter real    mthetard        = 0.0           from[0.0:inf];        //               DAR Scattering: mobility reduction parameter with Vg
+   parameter real    alphard         = 3.5           from[0.0:inf];        //               DAR Weak to Strong Inversion Transition Factor
+                                                                           //               Field-Plate 1 parameters
+   parameter integer flagfp1         = 1             from[0:1];            //               Flag parameter: GFP=1 or SFP=0
+   parameter real    lgfp1           = 3.5           from[0.0:inf];        // um            FP Length
+   parameter real    vtofp1          = -44.5         from[-inf:inf];       // V             FP Threshold Voltage
+   parameter real    cgfp1           = 2.0e-4        from[0:inf];          // F/m^2         FP to Drain Cap/Area
+   parameter integer flagfp1s        = 1             from[0:1];            //               Flag parameter: cfp1s select=1 or cfp1s not select=0   
+   parameter real    cfp1s           = 1e-19         from[0:inf];          // F/m           FP (source-side) to Source Cap/Width
+   parameter real    ccfp1           = 0.9e-10       from[0:inf];          // F/m           Source or Gate to Drain (under FP) Cap/Width
+   parameter real    cbfp1           = 0.0           from[0:inf];          // F/m           Body to Drain (under FP) Cap/Width
+   parameter real    vx0fp1          = 1.2e5         from(0.0:inf];        // m/s           FP Source injection velocity
+   parameter real    mu0fp1          = 0.2           from(0.0:inf];        // m^2/Vs        FP Low-field Mobility
+   parameter real    betafp1         = 1.16          from(0.0:inf];        //               Linear to Saturation Parameter
+   parameter real    delta1fp1       = 0.00          from[0.0:inf];        //               FP DIBL Coefficient
+   parameter real    sfp1            = 3.2           from(0.0:inf];        // V/dec         FP Sub-threshold Slope
+   parameter real    ndfp1           = 0.0           from[0.0:inf];        //               FP Punchthrough factor for Subth Slope
+   parameter real    vthetafp1       = 0.0           from[0.0:inf];        //               FP Scattering: velocity reduction parameter with Vg
+   parameter real    mthetafp1       = 0.0           from[0.0:inf];        //               FP Scattering: mobility reduction parameter with Vg
+   parameter real    alphafp1        = 1e-2          from[0.0:inf];        //               FP Weak to Strong Inversion Transition Factor
+                                                                           //               Field-Plate 2 parameters
+   parameter integer flagfp2         = 0             from[0:1];            //               Flag parameter: GFP=1 or SFP=0
+   parameter real    lgfp2           = 3.5           from[0.0:inf];        // um            FP Length
+   parameter real    vtofp2          = -60.0         from[-inf:inf];       // V             FP Threshold Voltage
+   parameter real    cgfp2           = 9.0e-5        from[0:inf];          // F/m^2         FP to Drain Cap/Area
+   parameter integer flagfp2s        = 0             from[0:1];            //               Flag parameter: cfp2s select=1 or cfp2s not select=0
+   parameter real    cfp2s           = 0.0           from[0:inf];          // F/m           FP (source-side) to Source Cap/Width
+   parameter real    ccfp2           = 0.65e-10      from[0:inf];          // F/m           Source or Gate to Drain (under FP) Cap/Width
+   parameter real    cbfp2           = 0.0           from[0:inf];          // F/m           Body to Drain (under FP) Cap/Width
+   parameter real    vx0fp2          = 1.9e5         from(0.0:inf];        // m/s           FP Source injection velocity   
+   parameter real    mu0fp2          = 0.29          from(0.0:inf];        // m^2/Vs        FP Low-field Mobility
+   parameter real    betafp2         = 1.16           from(0.0:inf];        //               Linear to Saturation Parameter
+   parameter real    delta1fp2       = 0.00          from[0.0:inf];        //               FP DIBL Coefficient
+   parameter real    sfp2            = 4.1           from(0.0:inf];        // V/dec         FP Sub-threshold Slope
+   parameter real    ndfp2           = 0.0           from[0.0:inf];        //               FP Punchthrough factor for Subth Slope
+   parameter real    vthetafp2       = 0.0           from[0.0:inf];        //               FP Scattering: velocity reduction parameter with Vg
+   parameter real    mthetafp2       = 0.0           from[0.0:inf];        //               FP Scattering: mobility reduction parameter with Vg
+   parameter real    alphafp2        = 1.3e3         from[0.0:inf];        //               FP Weak to Strong Inversion Transition Factor
+                                                                           //               Field-Plate 3 parameters
+   parameter integer flagfp3         = 1             from[0:1];            //               Flag parameter: GFP=1 or SFP=0
+   parameter real    lgfp3           = 0.0           from[0.0:inf];        // um            FP Length
+   parameter real    vtofp3          = -120.0        from[-inf:inf];       // V             FP Threshold Voltage
+   parameter real    cgfp3           = 1.0e-3        from[0:inf];          // F/m^2         FP to Drain Cap/Area
+   parameter integer flagfp3s        = 0             from[0:1];            //               Flag parameter: cfp3s select=1 or cfp3s not select=0
+   parameter real    cfp3s           = 0.0           from[0:inf];          // F/m           FP (source-side) to Source Cap/Width
+   parameter real    ccfp3           = 0.0           from[0:inf];          // F/m           Source or Gate to Drain (under FP) Cap/Width
+   parameter real    cbfp3           = 0.0           from[0:inf];          // F/m           Body to Drain (under FP) Cap/Width
+   parameter real    vx0fp3          = 1.0e5         from(0.0:inf];        // m/s           FP Source injection velocity   
+   parameter real    mu0fp3          = 0.17          from(0.0:inf];        // m^2/Vs        FP Low-field Mobility
+   parameter real    betafp3         = 1.0           from(0.0:inf];        //               Linear to Saturation Parameter
+   parameter real    delta1fp3       = 0.01          from[0.0:inf];        //               FP DIBL Coefficient
+   parameter real    sfp3            = 0.1           from(0.0:inf];        // V/dec         FP Sub-threshold Slope
+   parameter real    ndfp3           = 0.0           from[0.0:inf];        //               FP Punchthrough factor for Subth Slope
+   parameter real    vthetafp3       = 0.0           from[0.0:inf];        //               FP Scattering: velocity reduction parameter with Vg
+   parameter real    mthetafp3       = 0.0           from[0.0:inf];        //               FP Scattering: mobility reduction parameter with Vg
+   parameter real    alphafp3        = 3.5           from[0.0:inf];        //               FP Weak to Strong Inversion Transition Factor
+                                                                           //               Gate Diode parameters
+   parameter integer flagfp4         = 1             from[0:1];            //               Flag parameter: GFP=1 or SFP=0
+   parameter real    lgfp4           = 0.0           from[0.0:inf];        // um            FP Length
+   parameter real    vtofp4          = -220.0        from[-inf:inf];       // V             FP Threshold Voltage
+   parameter real    cgfp4           = 1.0e-3        from[0:inf];          // F/m^2         FP to Drain Cap/Area
+   parameter integer flagfp4s        = 0             from[0:1];            //               Flag parameter: cfp4s select=1 or cfp4s not select=0   
+   parameter real    cfp4s           = 0.0           from[0:inf];          // F/m           FP (source-side) to Source Cap/Width
+   parameter real    ccfp4           = 0.0           from[0:inf];          // F/m           Source or Gate to Drain (under FP) Cap/Width
+   parameter real    cbfp4           = 0.0           from[0:inf];          // F/m           Body to Drain (under FP) Cap/Width
+   parameter real    vx0fp4          = 1.0e5         from(0.0:inf];        // m/s           FP Source injection velocity   
+   parameter real    mu0fp4          = 0.17          from(0.0:inf];        // m^2/Vs        FP Low-field Mobility
+   parameter real    betafp4         = 1.0           from(0.0:inf];        //               Linear to Saturation Parameter
+   parameter real    delta1fp4       = 0.01          from[0.0:inf];        //               FP DIBL Coefficient
+   parameter real    sfp4            = 0.1           from(0.0:inf];        // V/dec         FP Sub-threshold Slope
+   parameter real    ndfp4           = 0.0           from[0.0:inf];        //               FP Punchthrough factor for Subth Slope
+   parameter real    vthetafp4       = 0.0           from[0.0:inf];        //               FP Scattering: velocity reduction parameter with Vg
+   parameter real    mthetafp4       = 0.0           from[0.0:inf];        //               FP Scattering: mobility reduction parameter with Vg
+   parameter real    alphafp4        = 3.5           from[0.0:inf];        //               FP Weak to Strong Inversion Transition Factor
+   parameter real    rgsp            = 0.0           from[0.0:inf];        // Ohms*m        Gate resistance * Width
+
+

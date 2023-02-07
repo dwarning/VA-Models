@@ -1,0 +1,163 @@
+// r2_cmc and r2_et_cmc version 1.0.1
+
+/*
+Copyright (c) 2020 Silicon Integration Initiative, Inc.
+
+Licensed under Educational Community License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may
+obtain a copy of the license at
+http://opensource.org/licenses/ECL-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
+The R2_CMC standard has been developed by the Silicon Integration Initiative's Compact Model Coalition.
+
+CMC Release Date: May 15, 2020
+Public Release Date: November 15, 2021
+
+A link to the most recent version of this standard can be found at:
+http://www.si2.org/cmc
+*/
+
+
+//
+//  This file contains macros for r2_cmc and r2_et_cmc
+//
+
+//
+//  Physical constants and other generally useful numbers
+//
+
+`include "discipline.h"
+`define TABS_NIST2004     2.73150000e+02    // (NIST2004) 0C in K
+`define QQ_NIST2004       1.60217653e-19    // (NIST2004) mag. of electronic charge (C)
+`define KB_NIST2004       1.38065050e-23    // (NIST2004) Boltzmann constant (J/K)
+`define oneThird          3.3333333333333333e-01
+
+//
+//  Clipping macros, these smoothly limit to lower, upper, or both lower and upper
+//  limits. Rather than using a sqrt or log-exp form, which affects values
+//  everywhere, these use a conditional form that is continuous in function
+//  and derivative. If a value is not clipped then no exp() evaluation occurs.
+//  Smooth limiting is preferable to hard limiting (although latter can still
+//  be useful for enforcing parameter limits) for bias dependent quantities
+//  as derivatives do not become zero or have discontinuities.
+//
+
+`define CLIPL0p1(XCLIP,X,LOWER) \
+    if (X<(LOWER+0.1)) \
+        XCLIP    =  LOWER+0.1*exp(10.0*(X-LOWER)-1.0); \
+    else \
+        XCLIP    =  X;
+`define CLIPU0p1(XCLIP,X,UPPER) \
+    if (X>(UPPER-0.1)) \
+        XCLIP    =  UPPER-0.1*exp(10.0*(UPPER-X)-1.0); \
+    else \
+        XCLIP    =  X;
+`define CLIPB0p1(XCLIP,X,LOWER,UPPER) \
+    if (X<(LOWER+0.1)) \
+        XCLIP    =  LOWER+0.1*exp(10.0*(X-LOWER)-1.0); \
+    else if (X>(UPPER-0.1)) \
+        XCLIP    =  UPPER-0.1*exp(10.0*(UPPER-X)-1.0); \
+    else \
+        XCLIP    =  X;
+
+`define CLIPL1p0(XCLIP,X,LOWER) \
+    if (X<(LOWER+1.0)) \
+        XCLIP    =  LOWER+exp(X-LOWER-1.0); \
+    else \
+        XCLIP    =  X;
+`define CLIPU1p0(XCLIP,X,UPPER) \
+    if (X>(UPPER-1.0)) \
+        XCLIP    =  UPPER-exp(UPPER-X-1.0); \
+    else \
+        XCLIP    =  X;
+`define CLIPB1p0(XCLIP,X,LOWER,UPPER) \
+    if (X<(LOWER+1.0)) \
+        XCLIP    =  LOWER+exp(X-LOWER-1.0); \
+    else if (X>(UPPER-1.0)) \
+        XCLIP    =  UPPER-exp(UPPER-X-1.0); \
+    else \
+        XCLIP    =  X;
+
+//
+//  Macro definitions.  The "des" description argument is intended to be
+//  a short description, the "inf" information argument is intended to be
+//  a detailed description (e.g. for display as part of on-line help).
+//
+//  MPR      model    parameter real
+//  MPI      model    parameter integer
+//  IPR      instance parameter real
+//  IPI      instance parameter integer
+//  OPP      operating point parameter, includes units and description for printing
+//  OPM      operating point parameter, value scaled by $mfactor
+//  OPD      operating point parameter, value scaled by 1/$mfactor
+//
+//  There are 7 versions with different range options:
+//  cc       closed lower bound, closed upper bound
+//  co       closed lower bound, open   upper bound
+//  oc       open   lower bound, closed upper bound
+//  oo       open   lower bound, open   upper bound
+//  cz       closed lower bound of 0.0, no upper bound
+//  oz       open   lower bound of 0.0, no upper bound
+//  nb       no bounds
+//
+
+`define ERROR(str) \
+    begin \
+        $strobe(str); \
+        $finish(1); \
+    end
+`define WARNING(str) $strobe(str);
+`define OPP(nam,uni,des) (*units=uni, desc=des                         *) real nam;
+`define OPM(nam,uni,des) (*units=uni, desc=des, multiplicity="multiply"*) real nam;
+`define OPD(nam,uni,des) (*units=uni, desc=des, multiplicity="divide"  *) real nam;
+`define MPRcc(nam,def,uni,lwr,upr,des) (*units=uni,                  desc=des*) parameter real    nam=def from [lwr:upr];
+`define MPRco(nam,def,uni,lwr,upr,des) (*units=uni,                  desc=des*) parameter real    nam=def from [lwr:upr);
+`define MPRoc(nam,def,uni,lwr,upr,des) (*units=uni,                  desc=des*) parameter real    nam=def from (lwr:upr];
+`define MPRoo(nam,def,uni,lwr,upr,des) (*units=uni,                  desc=des*) parameter real    nam=def from (lwr:upr);
+`define MPRcz(nam,def,uni,        des) (*units=uni,                  desc=des*) parameter real    nam=def from [0.0:inf);
+`define MPRoz(nam,def,uni,        des) (*units=uni,                  desc=des*) parameter real    nam=def from (0.0:inf);
+`define MPRnb(nam,def,uni,        des) (*units=uni,                  desc=des*) parameter real    nam=def;
+`define MPIcc(nam,def,uni,lwr,upr,des) (*units=uni,                  desc=des*) parameter integer nam=def from [lwr:upr];
+`define MPIco(nam,def,uni,lwr,upr,des) (*units=uni,                  desc=des*) parameter integer nam=def from [lwr:upr);
+`define MPIoc(nam,def,uni,lwr,upr,des) (*units=uni,                  desc=des*) parameter integer nam=def from (lwr:upr];
+`define MPIoo(nam,def,uni,lwr,upr,des) (*units=uni,                  desc=des*) parameter integer nam=def from (lwr:upr);
+`define MPInb(nam,def,uni,        des) (*units=uni,                  desc=des*) parameter integer nam=def;
+`define IPRcc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", desc=des*) parameter real    nam=def from [lwr:upr];
+`define IPRco(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", desc=des*) parameter real    nam=def from [lwr:upr);
+`define IPRoc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", desc=des*) parameter real    nam=def from (lwr:upr];
+`define IPRoo(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", desc=des*) parameter real    nam=def from (lwr:upr);
+`define IPRcz(nam,def,uni,        des) (*units=uni, type="instance", desc=des*) parameter real    nam=def from [0.0:inf);
+`define IPRoz(nam,def,uni,        des) (*units=uni, type="instance", desc=des*) parameter real    nam=def from (0.0:inf);
+`define IPRnb(nam,def,uni,        des) (*units=uni, type="instance", desc=des*) parameter real    nam=def;
+`define IPIcc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", desc=des*) parameter integer nam=def from [lwr:upr];
+`define IPIco(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", desc=des*) parameter integer nam=def from [lwr:upr);
+`define IPIoc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", desc=des*) parameter integer nam=def from (lwr:upr];
+`define IPIoo(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", desc=des*) parameter integer nam=def from (lwr:upr);
+`define IPInb(nam,def,uni,        des) (*units=uni, type="instance", desc=des*) parameter integer nam=def;
+`define SCALE \
+    begin \
+        if ($param_given(scale)) \
+            scaleFac =  scale; \
+        else \
+            scaleFac = $simparam("scale",1.0); \
+    end
+`define SHRINKL \
+    begin \
+        if ($param_given(shrink)) \
+            shrinkL  =  1.0-0.01*shrink; \
+        else \
+            shrinkL  =  1.0-0.01*$simparam("shrink",0.0); \
+    end
+`define RTHRESH \
+    begin \
+        if ($param_given(rthresh)) \
+            rthrR2   =  rthresh; \
+        else \
+            rthrR2   = $simparam("rthresh",1.0e-03); \
+    end
+
