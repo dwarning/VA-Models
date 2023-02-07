@@ -71,7 +71,9 @@ Edit file 'spinit', typically found in share/ngspice/scripts: Comment out the li
 ## Acknowledgement
 
 The team of openVAF developer from Semimod GmbH https://semimod.de/.
+
 The ngspice development team https://ngspice.sourceforge.io/ .
+
 Geoffrey Coram for his excellent tool VAMPyRe https://si2.org/download-links/ .
 
 And last but not least: All the model authors for their elaborate and complex work.
