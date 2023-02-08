@@ -39,12 +39,13 @@ Xinv17 17  1 supply 0 inverter
 pre_osdi ../osdilibs/BSIM6.1.1.osdi
 tran 1n 10u
 plot v(1)
+meas tran t1 when v(1)=0.5 cross=1
+meas tran t2 when v(1)=0.5 cross=7
+let period=(t2-t1)/3
+print period
+let delay_per_stage=period/34
+print delay_per_stage
 .endc
-
-*.measure tran t1 when v(1)=0.5 cross=1
-*.measure tran t2 when v(1)=0.5 cross=7
-*.measure tran period param'(t2-t1)/3'
-*.measure tran delay_per_stage param'period/34'
 
 .end
 

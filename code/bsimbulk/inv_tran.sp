@@ -1,8 +1,5 @@
 * Sample netlist: Inverter transient *
 
-.option post ingold numdgt=10
-.temp 27
-
 *.hdl "bsimbulk.va"
 .include Modelcards/model.l
 
@@ -11,7 +8,7 @@ v2 in 0 dc=0.5 sin(0.5 0.5 1meg)
 
 .subckt inv vin vout vdd vss
     nmn vout vin vss vss BSIMBULK_osdi_N W=10u L=10u
-    nmp vout vin vdd vdd BSIMBULK_osdi_P W=20u L=10u
+    nmp vout vin vdd vdd BSIMBULK_osdi_P W=10u L=10u
 .ends
 
 x1 in 1 vdd 0 inv

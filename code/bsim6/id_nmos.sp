@@ -12,15 +12,11 @@ N1 d g s b nmos W = 10e-6 L = 10e-6
 
 .control
 pre_osdi ../osdilibs/BSIM6.1.1.osdi
-dc vg 0.0 1.3 0.01 vb 0 -0.5 -0.1
+dc vg 0.0 1.3 0.01 vb 0.0 -0.5 -0.1
 plot -i(vd)
-dc vd 0.0 1.3 0.01 vg 0.4 1 0.3
+dc vd 0.0 1.3 0.01 vg 0.4 1.0 0.3
 plot -i(vd)
 .endc
 
-*.probe dc ids=par'-i(vd)'
-*.probe dc gm=deriv(ids)
-*.probe dc gm2=deriv(gm)
-*.print dc par'ids' par'gm' par'gm2' i(vd)
 .end
 

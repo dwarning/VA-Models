@@ -1,7 +1,5 @@
 * Sample netlist: 17-stage ring oscillator *
 
-*.options abstol=1e-6 reltol=1e-6
-
 *.hdl "bsimbulk.va"
 .include Modelcards/model.l
 
@@ -9,7 +7,7 @@ v1 vdd 0 dc=1.0
 
 .subckt inv vin vout vdd vss
     nmn vout vin vss vss BSIMBULK_osdi_N W=10e-6 L=10e-6
-    nmp vout vin vdd vdd BSIMBULK_osdi_P W=20e-6 L=10e-6
+    nmp vout vin vdd vdd BSIMBULK_osdi_P W=10e-6 L=10e-6
 .ends
 
 x1 1 2 vdd 0 inv
@@ -33,17 +31,18 @@ x17 17 1 vdd 0 inv
 *.ic 1=1
 
 .tran 1n 10u uic
-*.print tran v(1)
-*.measure tran t1 when v(1)=0.5 cross=1
-*.measure tran t2 when v(1)=0.5 cross=7
-*.measure tran period param'(t2-t1)/3'
-*.measure tran delay_per_stage param'period/34'
 
 .control
 pre_osdi ../osdilibs/bsimbulk107.osdi
 run
 rusage all
 plot v(1)
+meas tran t1 when v(1)=0.5 cross=1
+meas tran t2 when v(1)=0.5 cross=7
+let period=(t2-t1)/3
+print period
+let delay_per_stage=period/34
+print delay_per_stage
 .endc
 
 .end
