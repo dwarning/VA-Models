@@ -4,4 +4,4 @@
 #
 # (compile "git ls-files -i --exclude-standard")
 
-/code/osdilibs/*.osdi
+/code/osdilibs/*.*
