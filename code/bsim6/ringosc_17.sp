@@ -1,9 +1,6 @@
-*Sample netlist for BSIM6
+Sample netlist for BSIM6
 *17-stage ring oscillator
 
-.options abstol=1e-6 reltol=1e-6 post ingold dcon=1
-
-.hdl "BSIM6.1.1.va"
 .include "Modelcards/modelcard.nmos"
 .include "Modelcards/modelcard.pmos"
 
@@ -12,8 +9,8 @@ vdd supply  0 dc=1.0
 
 * --- Inverter Subcircuit ---
 .subckt inverter vin vout vdd gnd
-    Xp1 vout vin vdd gnd pmos  W=10e-6 L=10e-6 
-    Xn1 vout vin gnd gnd nmos  W=10e-6 L=10e-6 
+    Np1 vout vin vdd gnd pmos  W=10e-6 L=10e-6 
+    Nn1 vout vin gnd gnd nmos  W=10e-6 L=10e-6 
 .ends
 
 * --- 17 Stage Ring oscillator ---
@@ -36,16 +33,18 @@ Xinv16 16 17 supply 0 inverter
 Xinv17 17  1 supply 0 inverter
 
 * --- Initial Condition ---
-.ic  1=1
+*.ic  1=1
 
-.tran 1n 10u
+.control
+pre_osdi ../osdilibs/BSIM6.1.1.osdi
+tran 1n 10u
+plot v(1)
+.endc
 
-.print tran v(1)
-
-.measure tran t1 when v(1)=0.5 cross=1
-.measure tran t2 when v(1)=0.5 cross=7
-.measure tran period param'(t2-t1)/3'
-.measure tran delay_per_stage param'period/34'
+*.measure tran t1 when v(1)=0.5 cross=1
+*.measure tran t2 when v(1)=0.5 cross=7
+*.measure tran period param'(t2-t1)/3'
+*.measure tran delay_per_stage param'period/34'
 
 .end
 

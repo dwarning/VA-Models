@@ -1,8 +1,6 @@
-*Sample netlist for BSIM6
+Sample netlist for BSIM6
 *Inverter DC Analysis
 
-.option abstol=1e-6 reltol=1e-6 post ingold
-.hdl "BSIM6.1.1.va"
 .include "Modelcards/modelcard.nmos"
 .include "Modelcards/modelcard.pmos"
 * --- Voltage Sources ---
@@ -11,16 +9,18 @@ vin   vi 0 dc=0.5
 
 * --- Inverter Subcircuit ---
 .subckt inverter vin vout vdd gnd
-    Xp1 vout vin vdd gnd pmos W=10u L=10u
-    Xn1 vout vin gnd gnd nmos W=10u L=10u
+    Np1 vout vin vdd gnd pmos W=10u L=10u
+    Nn1 vout vin gnd gnd nmos W=10u L=10u
 .ends
 
 * --- Inverter ---
 Xinv1  vi vo supply 0 inverter
 
-* --- Transient Analysis ---
-.dc vin 0 1 0.01
-
-.print dc v(vi) v(vo)
+* --- DC Analysis ---
+.control
+pre_osdi ../osdilibs/BSIM6.1.1.osdi
+dc vin 0 1 0.01
+plot v(vi) v(vo)
+.endc
 
 .end
