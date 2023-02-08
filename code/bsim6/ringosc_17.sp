@@ -4,8 +4,8 @@
 .options abstol=1e-6 reltol=1e-6 post ingold dcon=1
 
 .hdl "BSIM6.1.1.va"
-.include "modelcard.nmos"
-.include "modelcard.pmos"
+.include "Modelcards/modelcard.nmos"
+.include "Modelcards/modelcard.pmos"
 
 * --- Voltage Sources ---
 vdd supply  0 dc=1.0

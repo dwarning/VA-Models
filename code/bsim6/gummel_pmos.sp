@@ -3,7 +3,7 @@
 .option abstol=1e-6 reltol=1e-6 post ingold
 
 .hdl "BSIM6.1.1.va"
-.include "modelcard.pmos"
+.include "Modelcards/modelcard.pmos"
 
 * --- Voltage Sources ---
 vdrain drain 0 dc=0
