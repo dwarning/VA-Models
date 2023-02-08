@@ -1,19 +1,17 @@
 `include "disciplines.vams"
 `include "constants.vams"
 
-`define attr(txt) (*txt*)
-
 module knowmmemristor (p,n);
 
     inout p,n;
     electrical p,n;
 
-    parameter real R_OFF=1E-6 from (0:inf) `attr(info="R_OFF" type="instance");
-    parameter real R_ON=10E-6 from (0:inf) `attr(info="R_ON" type="instance");
-    parameter real V_OFF=.2 from (0:inf) `attr(info="V_OFF" type="instance");
-    parameter real V_ON=.2 from (0:inf) `attr(info="V_ON" type="instance");
-    parameter real TAU=0.0001 from (0:inf) `attr(info="TAU" type="instance");
-    parameter real XO=0 from [0:1] `attr(info="XO" type="instance");
+    (* info="R_OFF", type="instance" *) parameter real R_OFF=1E-6 from (0:inf);
+    (* info="R_ON", type="instance" *) parameter real R_ON=10E-6 from (0:inf);
+    (* info="V_OFF", type="instance" *) parameter real V_OFF=0.2 from (0:inf);
+    (* info="V_ON", type="instance" *) parameter real V_ON=0.2 from (0:inf);
+    (* info="TAU", type="instance" *) parameter real TAU=0.0001 from (0:inf);
+    (* info="XO", type="instance" *) parameter real XO=0 from [0:1];
     // TODO: use R_INIT instead of XO
 
     // local variables that should persist over time steps
@@ -25,7 +23,7 @@ module knowmmemristor (p,n);
 
     // local variables that hold temporary values
     real G;
-    real time;
+    real mtime;
     real time_delta;
 
     real exponent;
@@ -35,31 +33,23 @@ module knowmmemristor (p,n);
 
     real num_ON_to_OFF;
 
-   analog
-     begin
-      @(initial_instance)
+    analog
+    begin
+        @(initial_instance)
         begin
-          g_off = G_OFF / N;
-          g_on = G_ON / N;
-          Nb = (1 - N_ON_OFF_RATIO) * N;
-          time_last = 0;
-          global_on=0;
-        end      
-  
+            g_off = G_OFF / N;
+            g_on = G_ON / N;
+            Nb = (1 - N_ON_OFF_RATIO) * N;
+            time_last = 0;
+            global_on=0;
+        end
+
 
         $strobe ("****************");
-        time = $realtime;
-        time_delta = time - time_last;
+        mtime = $abstime;
+        time_delta = mtime - time_last;
 
         $strobe ("V(p,n) = ", V(p,n));
-
-
-
-
-
-
-
-
 
 
         // Probability from OFF to ON state
@@ -68,16 +58,12 @@ module knowmmemristor (p,n);
         Pa = alpha / (1.0 + (limexp(exponent)));
 
         if (Pa > 1.0) begin
-          Pa = 1.0;
+            Pa = 1.0;
         end
         else if (Pa < 0.0) begin
-          Pa = 0.0;
+            Pa = 0.0;
         end
         $strobe ("Pa = ", Pa);
-
-
-
-
 
 
         // Probability from ON to OFF state
@@ -86,15 +72,12 @@ module knowmmemristor (p,n);
         Pb = alpha * (1 - 1 / ((1.0 + (limexp(exponent)))));
 
         if (Pb > 1.0) begin
-          Pb = 1.0;
+            Pb = 1.0;
         end
         else if (Pb < 0.0) begin
-          Pb = 0.0;
+            Pb = 0.0;
         end
         $strobe ("Pb = ", Pb);
-
-
-
 
 
         // conductance
@@ -102,14 +85,13 @@ module knowmmemristor (p,n);
         $strobe ("G = ", G);
 
 
-
         I(p,n) <+ -1.0*G*V(p,n);
 
-        time_last = time;
+        time_last = mtime;
 
 
 
-     end
+    end
 endmodule
 
 

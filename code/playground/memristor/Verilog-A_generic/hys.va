@@ -1,10 +1,9 @@
 // A device with hysteresis
 `include "disciplines.vams"
-//`define attr(txt) (*txt*)
 
-module hys(p, n);
+module hys(p, n, ns);
 
-    inout p, n;
+    inout p, n, ns;
     electrical p, n, ns;
 
     (* desc="R", type="instance" *) parameter real R = 1e3 from (0:inf);

@@ -10,12 +10,12 @@ module memristor1 (p,n);
     inout p,n;
     electrical p,n;
 
-    parameter real Roff=16000 from (0:inf) `attr(info="Roff" type="instance");
-    parameter real Ron=100 from (0:inf) `attr(info="Ron" type="instance");
-    parameter real Rinit=11000 from (0:inf) `attr(info="Rinit" type="instance");
-    parameter real D=10n from (0:inf) `attr(info="D" type="instance");
-    parameter real uv=10e-15 from (0:inf) `attr(info="uv" type="instance");
-    parameter real p_coeff=1.0 from (0:inf) `attr(info="p_coeff" type="instance");
+    (* info="Roff", type="instance" *) parameter real Roff=16000 from (0:inf);
+    (* info="Ron", type="instance" *) parameter real Ron=100 from (0:inf);
+    (* info="Rinit", type="instance" *) parameter real Rinit=11000 from (0:inf);
+    (* info="D", type="instance" *) parameter real D=10n from (0:inf);
+    (* info="uv", type="instance" *) parameter real uv=10e-15 from (0:inf);
+    (* info="p_coeff", type="instance" *) parameter real p_coeff=1.0 from (0:inf);
 
     // local variables that should persist over time steps
     real w_last;
@@ -26,63 +26,63 @@ module memristor1 (p,n);
     real window_function;
     real w;
     real dw;
-    real R;
+    //    real R;
     real direction;
-    real current;
-    real time;
+    real mcurrent;
+    real mtime;
     real time_delta;
 
-   
-   analog
-     begin
 
-        @(initial_instance)
+    analog
+    begin
+
+        @(initial_step)
         begin
-          w_last = ((Roff - Rinit) / (Roff - Ron)) * D;
-          time_last = 0;
-        end      
+            w_last = ((Roff - Rinit) / (Roff - Ron)) * D;
+            time_last = 0;
+        end
 
         // calculate conductance
         G = 1 / (Ron * w_last / D + Roff * (1 - w_last / D));
-        current = G * V(p,n);
+        mcurrent = G * V(p,n);
 
 
         direction = 0;
-        if (current > 0) begin
-          if(w_last<=0) begin
-              direction=1;
-          end
+        if (mcurrent > 0) begin
+            if (w_last<=0) begin
+                direction=1;
+            end
         end
         else begin
-          if(w_last>=D) begin
+            if (w_last>=D) begin
                 direction=-1;
-          end
+            end
         end
 
-        time = $realtime;
-        time_delta = time - time_last;
+        mtime = $abstime;
+        time_delta = mtime - time_last;
         window_function = (1.0 - (pow(2 * w_last / D - 1, 2 * p_coeff)));
-        dw = uv * Ron / D * current * window_function * time_delta;
+        dw = uv * Ron / D * mcurrent * window_function * time_delta;
         w = w_last + dw + direction * `X_BORDER_BUMP;
 
-        if(w >= D) begin
-          w = D;
+        if (w >= D) begin
+            w = D;
         end
-        if(w <= 0) begin
-          w = 0;
+        if (w <= 0) begin
+            w = 0;
         end
 
         // calculate conductance
         G = 1 / (Ron * w / D + Roff * (1 - w / D));
 
-        // set the current
+        // set the mcurrent
         I(p,n) <+ -1.0*G*V(p,n);
 
         // persist variables
         w_last = w;
-        time_last = time;
+        time_last = mtime;
 
-     end
+    end
 endmodule
 
 

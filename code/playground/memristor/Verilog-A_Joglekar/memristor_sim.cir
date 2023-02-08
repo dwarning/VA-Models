@@ -1,13 +1,18 @@
+Memristor Test
+
+.model M1 memristor1
 
 * Voltage Sources
 V1 1 0 SIN(0V 1.2V 1Hz)
 
 * Memristors
-YMEMRISTOR1 M1 1 0 
+NMEMRISTOR1 1 0 M1
 
-* Analysis Command
-.TRAN 1ms 1s
-* Output
-.PRINT TRAN V(1) I(V1) 
+.control
+pre_osdi memristor.osdi
+* transient simulation
+TRAN 1ms 1s
+plot i(V1) vs V(1) retraceplot
+.endc
 
 .END
