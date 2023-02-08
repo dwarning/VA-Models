@@ -36,7 +36,8 @@ OpenVAF has been tested with a NGSPICE version 39. It can already support a larg
 Furthermore, some Verilog-A language features are currently not supported:
 
 * Noise analysis
-* Language constructs: abstime(), cross() 
+* No Laplace transform
+* Language constructs: abstime(), cross()
 
 ### NGSPICE
 
