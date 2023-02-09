@@ -746,13 +746,13 @@ analog begin : analogBlock
         //
 
 `ifdef __NGSPICE_COMPACT_MODELING__
-            Vbei     =  $limit(V(b_bei), "typedpnjlim", $vt, tVCrit, VBICtype);
-            Vbex     =  $limit(V(b_bex), "typedpnjlim", $vt, tVCrit, VBICtype);
-            Vbci     =  $limit(V(b_bci), "typedpnjlim", $vt, tVCrit, VBICtype);
-            Vbcx     =  $limit(V(b_bcx), "typedpnjlim", $vt, tVCrit, VBICtype);
-            Vbxcx    =  $limit(V(b_bxcx),"typedpnjlim", $vt, tVCrit, VBICtype);
-            Vbep     =  $limit(V(b_bep), "typedpnjlim", $vt, tVCrit, VBICtype);
-            Vbe      =  $limit(V(b_be), "pnjlim", $vt, tVCrit);
+            Vbei     =  $limit(V(b_bei), "typedpnjlim", vtv, tVCrit, VBICtype);
+            Vbex     =  $limit(V(b_bex), "typedpnjlim", vtv, tVCrit, VBICtype);
+            Vbci     =  $limit(V(b_bci), "typedpnjlim", vtv, tVCrit, VBICtype);
+            Vbcx     =  $limit(V(b_bcx), "typedpnjlim", vtv, tVCrit, VBICtype);
+            Vbxcx    =  $limit(V(b_bxcx),"typedpnjlim", vtv, tVCrit, VBICtype);
+            Vbep     =  $limit(V(b_bep), "typedpnjlim", vtv, tVCrit, VBICtype);
+            Vbe      =  $limit(V(b_be), "pnjlim", vtv, tVCrit);
 `else
             Vbei     =  VBICtype*V(b_bei);
             Vbex     =  VBICtype*V(b_bex);

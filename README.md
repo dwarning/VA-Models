@@ -37,7 +37,7 @@ Furthermore, some Verilog-A language features are currently not supported:
 
 * Noise analysis
 * No Laplace transform
-* Language constructs: abstime(), cross()
+* Language constructs: $abstime(), @cross()
 
 ### NGSPICE
 
