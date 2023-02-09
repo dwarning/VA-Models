@@ -27,15 +27,15 @@ NQVLGNPN5 NET10 NET11 NET9 VEE BJTRF1
 NQVLGNPN4 NET11 NET6 NET5 VEE BJTRF1
 NQVLGNPN3 NET6 D NET8 VEE BJTRF1
 
-.model BJTRF1 bjt504va
-*.model BJTRF1 bjt504tva
+*.model BJTRF1 bjt504va
+.model BJTRF1 bjt504tva
 *.model BJTRF1 bjt505_va
 *.model BJTRF1 bjt505t_va
 
 .SAVE V(D) V(CLK) V(Q)
 .control
-pre_osdi ../osdilibs/bjt504.osdi
-*pre_osdi ../osdilibs/bjt504t.osdi
+*pre_osdi ../osdilibs/bjt504.osdi
+pre_osdi ../osdilibs/bjt504t.osdi
 *pre_osdi ../osdilibs/bjt505.osdi
 *pre_osdi ../osdilibs/bjt505t.osdi
 *op
