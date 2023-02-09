@@ -684,9 +684,14 @@ module hic0_full (c,b,e,s,tnode);
 
         // assign voltages with regard to transistor type
 
-        Vbci  = HICUMtype*V(br_bci);
-        Vbici = HICUMtype*V(br_bici);
+`ifdef __NGSPICE_COMPACT_MODELING__
+        Vbiei = $limit(V(br_biei), "typedpnjlim", $vt, $vt*ln($vt/(`M_SQRT2*is_t)), HICUMtype);
+        Vbici = $limit(V(br_bici), "typedpnjlim", $vt, $vt*ln($vt/(`M_SQRT2*is_t)), HICUMtype);
+`else
         Vbiei = HICUMtype*V(br_biei);
+        Vbici = HICUMtype*V(br_bici);
+`endif
+        Vbci  = HICUMtype*V(br_bci);
         Vciei = HICUMtype*V(br_ciei);
         Vsci  = HICUMtype*V(br_sci);
         Veie  = V(br_eie_v);

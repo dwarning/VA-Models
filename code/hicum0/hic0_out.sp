@@ -14,7 +14,7 @@ Rdt dt 0 1G
 pre_osdi ../osdilibs/HICUML0-2.osdi
 dc vc 0.0 3.0 0.05 ib 10u 100u 10u
 set xbrushwidth=2
-plot i(vc)
+plot -i(vc)
 plot v(dt)
 .endc
 

@@ -7,9 +7,9 @@ X1 C B 0 S T bip_default
 
 .control
 pre_osdi ../osdilibs/HICUML0-2.osdi
-dc vb 0.2 1.4 0.01
-plot abs(i(vc)) abs(i(vb)) abs(i(vs)) ylimit 0.1p 100m ylog
-plot abs(i(vc))/abs(i(vb)) vs abs(i(vc)) xlog xlimit 100p 100m  ylimit 0 200 retraceplot
+dc vb 0.35 1.2 0.01
+plot abs(i(vc)) abs(i(vb)) abs(i(vs)) ylimit 0.1p 1.0 ylog
+plot abs(i(vc))/abs(i(vb)) vs abs(i(vc)) xlog xlimit 1n 1  ylimit 0 150 retraceplot
 .endc
 
 ********************************************************************************
