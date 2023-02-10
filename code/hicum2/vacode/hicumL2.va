@@ -968,12 +968,6 @@ real rbx_t;
 
 
 //end of variables
-analog function real test;
-    input x;
-    input y;
-    real x,y;
-    test = x*y;
-endfunction
 
 analog begin
 
@@ -1249,17 +1243,17 @@ analog begin
     end     //of Model_initialization
 
 `ifdef __NGSPICE_COMPACT_MODELING__
-    Vbiei = $limit(V(br_biei), "typedpnjlim", $vt, $vt*ln($vt/(`M_SQRT2*ibeis_t)), type);
-    Vbici = $limit(V(br_bici), "typedpnjlim", $vt, $vt*ln($vt/(`M_SQRT2*ibcis_t)), type);
+    Vbiei = $limit(V(br_biei), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis_t)), type);
+    Vbici = $limit(V(br_bici), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)), type);
 `else
     Vbiei = type*V(br_biei);
     Vbici = type*V(br_bici);
 `endif
+    Vciei = Vbiei-Vbici;
     Vbpei = type*V(br_bpei);
     Vbpci = type*V(br_bpci);
-    Vsici = type*V(br_sici);
-    Vciei = Vbiei-Vbici;
     Vbci  = type*V(br_bci);
+    Vsici = type*V(br_sici);
     Vsc   = type*V(br_sc);
 
     if (flsh!=0 && rth >= `MIN_R) begin : Thermal_update_with_self_heating
@@ -1591,7 +1585,7 @@ analog begin
             Qf      = sqrt(T_f0*itf*Q_fT);
             Q_pT    = Q_0+Qf+Qr;
             d_Q     = Q_pT;
-            while (abs(d_Q) >= test(`RTOLC,abs(Q_pT)) && l_it <= `l_itmax) begin
+            while (abs(d_Q) >= `RTOLC*abs(Q_pT) && l_it <= `l_itmax) begin
                 I_Tf1   = i_0f/Q_pT;
                 a_h     = Oich*I_Tf1;
                 itf     = I_Tf1*(1.0+a_h);

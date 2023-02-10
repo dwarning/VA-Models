@@ -16,7 +16,6 @@ nqhcm0 c b e s dt hicum0
 + level=7
 + type=1 ; npn=1 pnp=-1
 + tnom=27
-+ dummy=10
 + is=1.3525E-18 vef=8.0 iqf=3.0e-2 iqr=1e6
 + iqfh=1e6 tfh=1e-8 ibes=1.16E-20 mbe=1.015 ires=1.16e-16 mre=2.0 ibcs=1.16e-20
 + mbc=1.015 mcf=1.0 mcr=1 kavl=0.9488 eavl=11.96e10 alkav=0.825e-4
