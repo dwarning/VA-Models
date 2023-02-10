@@ -174,7 +174,7 @@ IZEB_TM = IZEB_T * MULT ;
 // end Zener tunneling parameters
 
 `ifdef __NGSPICE_COMPACT_MODELING__
-    tVCrit = $vt($temperature)*ln($vt($temperature)/(`CONSTroot2*IS_TM));
+    tVCrit = Vt*ln(Vt/(`CONSTroot2*IS_TM));
 `endif
 
 

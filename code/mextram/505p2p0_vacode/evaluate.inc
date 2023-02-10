@@ -8,13 +8,13 @@
 // Currents and charges
 // Nodal biases
 `ifdef __NGSPICE_COMPACT_MODELING__
-    Vb2c1 = $limit(V(b2, c1), "typedpnjlim", $vt, tVCrit, type);
-    Vb2c2 = $limit(V(b2, c2), "typedpnjlim", $vt, tVCrit, type);
-    Vb2e1 = $limit(V(b2, e1), "typedpnjlim", $vt, tVCrit, type);
-    Vb1e1 = $limit(V(b1, e1), "typedpnjlim", $vt, tVCrit, type);
-    Vb1b2 = $limit(V(b1, b2), "typedpnjlim", $vt, tVCrit, type);
+    Vb2c1 = $limit(V(b2, c1), "typedpnjlim", Vt, tVCrit, type);
+    Vb2c2 = $limit(V(b2, c2), "typedpnjlim", Vt, tVCrit, type);
+    Vb2e1 = $limit(V(b2, e1), "typedpnjlim", Vt, tVCrit, type);
+    Vb1e1 = $limit(V(b1, e1), "typedpnjlim", Vt, tVCrit, type);
+    Vb1b2 = $limit(V(b1, b2), "typedpnjlim", Vt, tVCrit, type);
     `ifdef SUBSTRATE
-        Vsc1 = $limit(V(s,  c1), "typedpnjlim", $vt, tVCrit, type);
+        Vsc1 = $limit(V(s,  c1), "typedpnjlim", Vt, tVCrit, type);
     `endif
 `else
     Vb2c1 = type * V(b2, c1);
@@ -653,16 +653,9 @@ I(e,  e1) <+ type * Vee1 / re_t * mult;
 I(b,  b1) <+ type * Vbb1 / rbc_t * mult;
 
 `ifdef SELFHEATING
-    `ifdef __NGSPICE_COMPACT_MODELING__
-        Temp_dt = $limit(Temp(dt), "limitlog", 100.0);
-        // Electrical equivalent for the thermal network
-        Pwr(dt) <+ Temp_dt / rth_tamb * mult;
-        Pwr(dt) <+ ddt(cth * Temp_dt) * mult;
-    `else
-        // Electrical equivalent for the thermal network
-        Pwr(dt) <+ Temp(dt) / rth_tamb * mult;
-        Pwr(dt) <+ ddt(cth * Temp(dt)) * mult;
-    `endif
+    // Electrical equivalent for the thermal network
+    Pwr(dt) <+ Temp(dt) / rth_tamb * mult;
+    Pwr(dt) <+ ddt(cth * Temp(dt)) * mult;
     Pwr(dt) <+ -1.0 *  power * mult;
 `endif
 

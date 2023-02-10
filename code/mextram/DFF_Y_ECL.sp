@@ -8,7 +8,7 @@ VVCS NET2 GND DC -0.8
 R6 GND NET6  800
 R5 GND NET11  800
 R4 NET12 VEE  350
-VEE VEE GND DC -2.0
+VVEE VEE GND DC -2.0
 R3 GND NET10  800
 R2 NET13 VEE  350
 R1 GND Q  800
@@ -27,15 +27,15 @@ NQVLGNPN5 NET10 NET11 NET9 VEE BJTRF1
 NQVLGNPN4 NET11 NET6 NET5 VEE BJTRF1
 NQVLGNPN3 NET6 D NET8 VEE BJTRF1
 
-*.model BJTRF1 bjt504va
-.model BJTRF1 bjt504tva
+.model BJTRF1 bjt504va
+*.model BJTRF1 bjt504tva
 *.model BJTRF1 bjt505_va
 *.model BJTRF1 bjt505t_va
 
 .SAVE V(D) V(CLK) V(Q)
 .control
-*pre_osdi ../osdilibs/bjt504.osdi
-pre_osdi ../osdilibs/bjt504t.osdi
+pre_osdi ../osdilibs/bjt504.osdi
+*pre_osdi ../osdilibs/bjt504t.osdi
 *pre_osdi ../osdilibs/bjt505.osdi
 *pre_osdi ../osdilibs/bjt505t.osdi
 *op

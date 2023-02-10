@@ -18,7 +18,6 @@ real dT;
 
 `ifdef __NGSPICE_COMPACT_MODELING__
     real tVCrit;
-    real Temp_dt;
 `endif
 
 real UdeT, vde_t, UdcT, vdc_t, vdc_ctc_t, UdcT_ctc, vdc_zener_t, UdcT_zener;

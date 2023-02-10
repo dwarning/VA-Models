@@ -7,13 +7,18 @@
 
 // The excess transistor temperature due to the self-heating
 `ifdef SELFHEATING
-    Tki = Temp(dt);
-    // *** Convergence related smoothing ***
-    if (Tki < 0.0) begin
-        Tki = - ln(1.0 - Tki);
-    end
-    `linLog(Vdt, Tki, 200.0)
-    //   `min_logexp(Vdt, Tki, 200.0, 10.0)
+    `ifdef __NGSPICE_COMPACT_MODELING__
+        Tki = $limit(Temp(dt), "limitlog", 100.0);
+        Vdt = Tki;
+    `else
+        Tki = Temp(dt);
+        // *** Convergence related smoothing ***
+        if (Tki < 0.0) begin
+            Tki = - ln(1.0 - Tki);
+        end
+        `linLog(Vdt, Tki, 200.0)
+    //  `min_logexp(Vdt, Tki, 200.0, 10.0)
+    `endif
 `else
     Vdt = 0.0;
 `endif
@@ -137,7 +142,7 @@ ibfs_t = ibfs * exp(lntN * (6.0 - 2.0 * mlfs)) * exp(-vgj * VdtINV / mlfs);
 isibrel_t = isibrel * exp(lntN * (4.0 / nfibrel)) * exp(-vgj * VdtINV / nfibrel);
 
 `ifdef __NGSPICE_COMPACT_MODELING__
-    tVCrit = $vt($temperature)*ln($vt($temperature)/(`CONSTroot2*is_t));
+    tVCrit = Vt*ln(Vt/(`CONSTroot2*is_t));
 `endif
 
 // begin  RvdT, November 2008, MXT504.8_alpha
