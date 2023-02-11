@@ -5,7 +5,7 @@
 
 // Front definitions
 
-`include "discipline.h"
+`include "disciplines.vams"
 
 // Numerical, physical and model constants
 `define TEN_M40 1.0e-40
