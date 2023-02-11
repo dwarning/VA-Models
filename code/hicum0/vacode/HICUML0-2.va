@@ -629,6 +629,10 @@ module hic0_full (c,b,e,s,tnode);
 
     real gmin;
 
+`ifdef __NGSPICE_COMPACT_MODELING__
+    real rtype;
+`endif
+
     // For .OP pt calculation
 `ifdef CALC_OP
         (* desc="Base terminal current", units="A", multiplicity="multiply" *) real IB;
@@ -685,8 +689,9 @@ module hic0_full (c,b,e,s,tnode);
         // assign voltages with regard to transistor type
 
 `ifdef __NGSPICE_COMPACT_MODELING__
-        Vbiei = $limit(V(br_biei), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*is_t)), HICUMtype);
-        Vbici = $limit(V(br_bici), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*is_t)), HICUMtype);
+        rtype = HICUMtype;
+        Vbiei = $limit(V(br_biei), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*is_t)), rtype);
+        Vbici = $limit(V(br_bici), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*is_t)), rtype);
 `else
         Vbiei = HICUMtype*V(br_biei);
         Vbici = HICUMtype*V(br_bici);

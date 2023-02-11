@@ -922,6 +922,10 @@ real Vbiei, Vbici, Vciei, Vbpei, Vbpci, Vbci, Vsici, Vsc;
 // Model flags
 integer use_aval;
 
+`ifdef __NGSPICE_COMPACT_MODELING__
+real rtype;
+`endif
+
 real rbx_t;
 
 `ifdef CALC_OP
@@ -1243,8 +1247,9 @@ analog begin
     end     //of Model_initialization
 
 `ifdef __NGSPICE_COMPACT_MODELING__
-    Vbiei = $limit(V(br_biei), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis_t)), type);
-    Vbici = $limit(V(br_bici), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)), type);
+    rtype = type;
+    Vbiei = $limit(V(br_biei), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis_t)), rtype);
+    Vbici = $limit(V(br_bici), "typedpnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)), rtype);
 `else
     Vbiei = type*V(br_biei);
     Vbici = type*V(br_bici);

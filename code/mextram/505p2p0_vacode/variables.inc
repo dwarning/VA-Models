@@ -188,3 +188,7 @@ real GMIN;
 // CB junction avalanche factors
 real alpha_brcb, Vcbr_stop, fbrcb, dfbrcb;
 real Vb1c1, Vcbeff, f_stop;
+
+`ifdef __NGSPICE_COMPACT_MODELING__
+    real rtype;
+`endif

@@ -10,13 +10,14 @@ begin  // Currents and charges
 
 //$strobe("1 %f %f %f %f %f %f\n", V(b2,c1), V(b2,c2), V(b2,e1), V(b1,e1), V(b1,b2), V(s,c1));
 `ifdef __NGSPICE_COMPACT_MODELING__
-    Vb2c1 = $limit(V(b2, c1), "typedpnjlim", $vt, tVCrit, TYPE);
-    Vb2c2 = $limit(V(b2, c2), "typedpnjlim", $vt, tVCrit, TYPE);
-    Vb2e1 = $limit(V(b2, e1), "typedpnjlim", $vt, tVCrit, TYPE);
-    Vb1e1 = $limit(V(b1, e1), "typedpnjlim", $vt, tVCrit, TYPE);
-    Vb1b2 = $limit(V(b1, b2), "typedpnjlim", $vt, tVCrit, TYPE);
+    rtype = TYPE;
+    Vb2c1 = $limit(V(b2, c1), "typedpnjlim", $vt, tVCrit, rtype);
+    Vb2c2 = $limit(V(b2, c2), "typedpnjlim", $vt, tVCrit, rtype);
+    Vb2e1 = $limit(V(b2, e1), "typedpnjlim", $vt, tVCrit, rtype);
+    Vb1e1 = $limit(V(b1, e1), "typedpnjlim", $vt, tVCrit, rtype);
+    Vb1b2 = $limit(V(b1, b2), "typedpnjlim", $vt, tVCrit, rtype);
 `ifdef SUBSTRATE
-    Vsc1 = $limit(V(s,  c1), "typedpnjlim", $vt, tVCrit, TYPE);
+    Vsc1 = $limit(V(s,  c1), "typedpnjlim", $vt, tVCrit, rtype);
 `endif
 `else
     Vb2c1 = TYPE * V(b2, c1);

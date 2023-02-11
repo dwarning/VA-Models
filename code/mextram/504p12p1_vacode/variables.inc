@@ -199,3 +199,6 @@ real powerSubsCS_B1S, powerSubsCS_BS;
 // noise correlation help variables
 real In_N, Gem_N, Taub_N, taun, Qbe_qs_eff;
 
+`ifdef __NGSPICE_COMPACT_MODELING__
+    real rtype;
+`endif
