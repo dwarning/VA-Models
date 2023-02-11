@@ -1,0 +1,6 @@
+Macro Fn_SU_POW double defined, commented out in HSMHV_eval_drift.inc
+
+Use disciplines.vams
+
+Origin of the model version 2.5.0:
+https://www.hisim.hiroshima-u.ac.jp/index.php?id=121
