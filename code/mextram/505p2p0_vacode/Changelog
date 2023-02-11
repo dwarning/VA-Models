@@ -1,0 +1,6 @@
+Use alternative ngspice specific limit function typedpnjlim for inner base-emitter and base-collector junctions
+
+Use disciplines.vams
+
+Origin of the model version 505.2:
+https://www.eng.auburn.edu/~niuguof/mextram/

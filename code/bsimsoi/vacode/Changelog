@@ -1,0 +1,7 @@
+Prevent division by 0 for certain parameters
+
+Use disciplines.vams
+Use constants.vams
+
+Origin of the model version 4.6.1:
+http://bsim.berkeley.edu/models/bsimsoi/

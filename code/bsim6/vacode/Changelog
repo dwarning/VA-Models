@@ -1,0 +1,4 @@
+Prevent division by 0 for parameters: MJS, MJD, MJSWS, MJSWD, MJSWGS, MJSWGD and NDR
+
+Origin of the model version 6.1.1:
+http://bsim.berkeley.edu/models/bsimbulk/

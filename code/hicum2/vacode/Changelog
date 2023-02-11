@@ -1,0 +1,7 @@
+Use alternative ngspice specific limit function typedpnjlim for inner base-emitter and base-collector junctions
+
+Use disciplines.vams
+Use constants.vams
+
+Origin of the model version 2.4.0:
+https://www.iee.et.tu-dresden.de/iee/eb/hic_new/hic_source.html#hicumL0

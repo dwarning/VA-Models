@@ -1,0 +1,11 @@
+
+Prevent division by 0 with some parameters
+
+bug: macro core needs beta as input
+
+give parameter ktrs and ktrd real type
+
+Repair strobe macro for 4 arguments
+
+Origin of the model:
+https://nanohub.org/publications/301/2

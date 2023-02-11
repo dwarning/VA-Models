@@ -1,0 +1,22 @@
+Reintroduction of y_fv() macro
+
+Use pnjlim limiting function for pn-junctions
+
+Use limexp() for tunnel current exponent
+
+Use param_given() function
+
+Introduced standard macros for model and instance parameter
+
+Include standard .vams files instead local definitions
+
+Introduction of overlap capacitances
+
+Rename slope variable n to nslope
+
+Rename parasitic diode parameter names to well introduced names (xd_)
+
+Repair bug for Temp with -P_CELSIUS0 as lower range limit
+
+Origin of the model:
+https://github.com/ekv26/model

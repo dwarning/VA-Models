@@ -1,0 +1,8 @@
+Prevent division by 0 for parameters: MJS2, MJD2, MJSWS2, MJSWD2, MJSWGS2, MJSWGD2
+Prevent division by 0 for parameters: MJS, MJD, MJSWS, MJSWD, MJSWGS, MJSWGD
+
+Use disciplines.vams
+Use constants.vams
+
+Origin of the model Version 111.0.0:
+http://bsim.berkeley.edu/models/bsimcmg/
