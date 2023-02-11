@@ -39,6 +39,29 @@ $RCSfile: ekv.va,v $ $Revision: 2.6.15 $ $Date: 2020/05/29 11:50:10 $
 `define REV -1
 // AB 040902
 `define DEFAULT_TNOM 27
+
+`define y_fv(tmp1,yk) \
+    if (tmp1 > -0.35) begin \
+        z0  = 2.0/(1.3 + tmp1 - ln(tmp1 + 1.6)); \
+        zk  = (2.0 + z0)/(1.0 + tmp1 + ln(z0)); \
+        yk  = (1.0 + tmp1 + ln(zk))/(2.0 + zk); \
+    end \
+    else begin \
+        if (tmp1 > -15.0) begin \
+            z0  = 1.55 + exp(-tmp1); \
+            zk  = (2.0 + z0)/(1.0 + tmp1 + ln(z0)); \
+            yk  = (1.0 + tmp1 + ln(zk))/(2.0 + zk); \
+        end \
+        else begin \
+            if (tmp1 > -23.0) begin \
+                yk  = 1.0/(2.0 + exp(-tmp1)); \
+            end \
+            else begin \
+                yk  = exp(tmp1) + 1E-64; \
+            end \
+        end \
+    end
+
 module ekv_va(d,g,s,b);
     // %%DEVICE_CLASS=MOS(NMOS:TYPE=1,PMOS:TYPE=-1)%%
     //  Node definitions
@@ -121,7 +144,7 @@ module ekv_va(d,g,s,b);
     real Leff, Weff;
     real RSeff, RDeff;
     real yk, z0, zk;
-    real EPSOX, epssil;
+    real epssil;
     real ddt_QD, ddt_QS;
     //DIODES realted variables [AB: 040902]
     real as_i, ad_i, ps_i, pd_i, v_di_b, v_si_b;
@@ -196,7 +219,7 @@ module ekv_va(d,g,s,b);
     `MPRco( IBN    ,  1.0     , ""     , 0.0 , inf ,   "Saturation voltage factor for impact ionization")
     //*** Series resistance parameters
     `MPRco( RSH    ,  0.0     , "Ohms" , 0.0 , inf ,   "Sheet resistance")
-    `MPRco( HDIF   ,  0.5E-6  , ""     , 0.0 , inf ,   "Sheet resistance multipler")
+    `MPRco( HDIF   ,  0.0     , ""     , 0.0 , inf ,   "Sheet resistance multipler")
     //*** for MC analysis fk 25/05/97
     `MPRco( AVTO   ,  1E-6    , "Vm"   , 0.0 , inf ,   "Area related threshold voltage mismatch parameter")
     `MPRco( AKP    ,  1E-6    , "m"    , 0.0 , inf ,   "Area related gain mismatch parameter")
@@ -244,7 +267,7 @@ module ekv_va(d,g,s,b);
         `INITIAL_MODEL     // Model Initialization
         begin
             // Set constant
-            EPSOX  = 3.9 * `P_EPS0;
+//            EPSOX  = 3.9 * `P_EPS0;
             epssil = 11.7 * `P_EPS0;
             Ibd = 0.0;
             // The following are necessary to prevent memory states being reserved:
@@ -373,23 +396,9 @@ module ekv_va(d,g,s,b);
         VP = VGprime-PHI_T-GAMMAprime*(big_sqrt_VP-0.5*GAMMAprime);
         // Forward normalized current:
         tmp1  = (VP - VS) * inv_Vt;
-        if (tmp1 > -0.35) begin
-            z0  = 2.0/(1.3 + tmp1 - ln(tmp1 + 1.6));
-            zk  = (2.0 + z0)/(1.0 + tmp1 + ln(z0));
-            yk  = (1.0 + tmp1 + ln(zk))/(2.0 + zk);
-        end else begin
-            if (tmp1 > -15.0) begin
-                z0  = 1.55 + exp(-tmp1);
-                zk  = (2.0 + z0)/(1.0 + tmp1 + ln(z0));
-                yk  = (1.0 + tmp1 + ln(zk))/(2.0 + zk);
-            end else begin
-                if (tmp1 > -23.0) begin
-                    yk  = 1.0/(2.0 + exp(-tmp1));
-                end else begin
-                    yk  = exp(tmp1) + 1E-64;
-                end
-            end
-        end
+
+        `y_fv(tmp1,yk)
+
         if_     = yk*(1.0 + yk);
         sqrt_if = sqrt(if_);
         dif_dv  = yk;
@@ -412,23 +421,9 @@ module ekv_va(d,g,s,b);
         tmp1 = (VP-Vds-VS-sqrt_VDSSprime_deltaV+
             sqrt_Vds_VDSSprime_deltaV)*inv_Vt;
         // include -> Charge F(x) interpolate function
-        if (tmp1 > -0.35) begin
-            z0  = 2.0/(1.3 + tmp1 - ln(tmp1 + 1.6));
-            zk  = (2.0 + z0)/(1.0 + tmp1 + ln(z0));
-            yk  = (1.0 + tmp1 + ln(zk))/(2.0 + zk);
-        end else begin
-            if (tmp1 > -15.0) begin
-                z0  = 1.55 + exp(-tmp1);
-                zk  = (2.0 + z0)/(1.0 + tmp1 + ln(z0));
-                yk  = (1.0 + tmp1 + ln(zk))/(2.0 + zk);
-            end else begin
-                if (tmp1 > -23.0) begin
-                    yk  = 1.0/(2.0 + exp(-tmp1));
-                end else begin
-                    yk  = exp(tmp1) + 1E-64;
-                end
-            end
-        end
+
+        `y_fv(tmp1,yk)
+
         irprime       = yk*(1.0 + yk);
         sqrt_irprime  = sqrt(irprime);
         dirprime_dv   = yk;
@@ -444,23 +439,9 @@ module ekv_va(d,g,s,b);
         // Reverse normalized current:
         // ratioV_ir
         tmp1 = (VP - VD) * inv_Vt;
-        if (tmp1 > -0.35) begin
-            z0  = 2.0/(1.3 + tmp1 - ln(tmp1 + 1.6));
-            zk  = (2.0 + z0)/(1.0 + tmp1 + ln(z0));
-            yk  = (1.0 + tmp1 + ln(zk))/(2.0 + zk);
-        end else begin
-            if (tmp1 > -15.0) begin
-                z0  = 1.55 + exp(-tmp1);
-                zk  = (2.0 + z0)/(1.0 + tmp1 + ln(z0));
-                yk  = (1.0 + tmp1 + ln(zk))/(2.0 + zk);
-            end else begin
-                if (tmp1 > -23.0) begin
-                    yk  = 1.0/(2.0 + exp(-tmp1));
-                end else begin
-                    yk  = exp(tmp1) + 1E-64;
-                end
-            end
-        end
+
+        `y_fv(tmp1,yk)
+
         ir      = yk*(1.0 + yk);
         sqrt_ir = sqrt(ir);
         dir_dv  = yk;
@@ -633,7 +614,7 @@ module ekv_va(d,g,s,b);
         gm =   Ispec*((dn_dVG + dbeta_dVG)*if_ir + dif_dVG - dirprime_dVG);
         gmbs = gms - gm - gds;
         // S/D resistance corrections including W and DW
-        if (HDIF > 0) begin
+        if ($param_given(HDIF)==1) begin
             RSeff = (RSH*HDIF)/(Weff-DW);
             RDeff = (RSH*HDIF)/(Weff-DW);
         end else begin
@@ -707,13 +688,13 @@ module ekv_va(d,g,s,b);
         //EXTRINSIC PART: JUNCTION DIODES//
         ///////////////////////////////////
     //diode area and perimeter computation
-        if ((AS == 0.0) && (HDIF>0.0)) as_i = 2.0*HDIF*Weff;
+        if (($param_given(AS)==0) && ($param_given(HDIF)==1)) as_i = 2.0*HDIF*Weff;
         else as_i = AS;
-        if ((PS == 0.0) && (HDIF>0.0)) ps_i = 4.0*HDIF+1.0*Weff;
+        if (($param_given(PS)==0) && ($param_given(HDIF)==1)) ps_i = 4.0*HDIF+1.0*Weff;
         else ps_i = PS;
-        if ((AD == 0.0) && (HDIF>0.0)) ad_i = 2.0*HDIF*Weff;
+        if (($param_given(AD)==0) && ($param_given(HDIF)==1)) ad_i = 2.0*HDIF*Weff;
         else ad_i = AD;
-        if ((PD == 0.0) && (HDIF>0.0)) pd_i = 4.0*HDIF+1.0*Weff;
+        if (($param_given(PD)==0) && ($param_given(HDIF)==1)) pd_i = 4.0*HDIF+1.0*Weff;
         else pd_i = PD;
     //temperature update for diodes
         temp_arg = exp((refEg/$vt(Tnom) - Eg/Vt + xti*ln(ratioT))/n);
