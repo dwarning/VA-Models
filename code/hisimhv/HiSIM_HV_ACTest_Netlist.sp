@@ -1,4 +1,4 @@
-AC Analysis with Noise Model for HiSIM-HV 2.5.0
+AC Analysis with Noise Model for HiSIM-HV
 
 .model MOSFET hisimhv_va level=62 version=2.50
 .INCLUDE HiSIM_HV_2.5.0_Default_Model.txt
@@ -16,7 +16,7 @@ CLOAD  dd d  10f
 VGS     g 0  dc 5 ac 1.0
 
 .control
-pre_osdi ../osdilibs/hisimhv242.osdi
+pre_osdi ../osdilibs/hisimhv250.osdi
 show all
 ac DEC 10 1k 1T
 plot  vdB(d)

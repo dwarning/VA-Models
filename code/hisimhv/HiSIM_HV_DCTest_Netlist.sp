@@ -1,4 +1,4 @@
-* DC Analysis wthout SHE for HiSIM_HV 2.5.0
+* DC Analysis wthout SHE for HiSIM_HV
 
 .model MOSFET hisimhv_va LEVEL=62 VERSION=2.50
 .INCLUDE HiSIM_HV_2.5.0_Default_Model.txt
@@ -17,7 +17,7 @@ Vgs   g 0  dc   0.0
 Vss sub 0  dc -20.0
 
 .control
-pre_osdi ../osdilibs/hisimhv242.osdi
+pre_osdi ../osdilibs/hisimhv250.osdi
 dc  Vds 0 20.0 0.2  Vgs 2 20.0 2.0
 plot  -I(Vds)
 .endc
