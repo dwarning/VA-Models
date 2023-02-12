@@ -18,15 +18,15 @@
 
 ***********************************************************************/
 
-    // calc. bias dependent Lover for 2.4.0
-    if( Lover_func < 0.0 && QOVJUNC > 0 && COTRENCH == 1 ) begin
-      Lover_func = - Lover_func ; // now, Lover_func positive.
-      T1 = LOVERLD ;
-      Vxb_lim = (T1 * T1 / kjunc) - VBI ;
-      if( OLMDLT > 0 ) begin
+// calc. bias dependent Lover for 2.4.0
+if ( Lover_func < 0.0 && QOVJUNC > 0 && COTRENCH == 1 ) begin
+    Lover_func = - Lover_func ; // now, Lover_func positive.
+    T1 = LOVERLD ;
+    Vxb_lim = (T1 * T1 / kjunc) - VBI ;
+    if ( OLMDLT > 0 ) begin
         `Fn_SU_POW( Vxbgmt , Vxbgmt , Vxb_lim , OLMDLT )
         `Fn_SZ( T2 , (Vxbgmt + VBI) , 0.1 , T9 )
         Wjunc0 = sqrt ( kjunc * T2 ) * QOVJUNC ;
         Lover_func = Lover_func - Wjunc0 ;
-      end
-    end // if ( Lover_func < 0.0 && QOVJUNC > 0 && COTRENCH == 1 )
+    end
+end // if ( Lover_func < 0.0 && QOVJUNC > 0 && COTRENCH == 1 )
