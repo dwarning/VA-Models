@@ -7,18 +7,26 @@
 
 begin  // Currents and charges
     // Nodal biases
-
-//$strobe("1 %f %f %f %f %f %f\n", V(b2,c1), V(b2,c2), V(b2,e1), V(b1,e1), V(b1,b2), V(s,c1));
 `ifdef __NGSPICE_COMPACT_MODELING__
-    rtype = TYPE;
-    Vb2c1 = $limit(V(b2, c1), "typedpnjlim", $vt, tVCrit, rtype);
-    Vb2c2 = $limit(V(b2, c2), "typedpnjlim", $vt, tVCrit, rtype);
-    Vb2e1 = $limit(V(b2, e1), "typedpnjlim", $vt, tVCrit, rtype);
-    Vb1e1 = $limit(V(b1, e1), "typedpnjlim", $vt, tVCrit, rtype);
-    Vb1b2 = $limit(V(b1, b2), "typedpnjlim", $vt, tVCrit, rtype);
+    if (TYPE == 1) begin
+        Vb2c1 = $limit(V(b2, c1), "pnjlim", $vt, tVCrit);
+        Vb2c2 = $limit(V(b2, c2), "pnjlim", $vt, tVCrit);
+        Vb2e1 = $limit(V(b2, e1), "pnjlim", $vt, tVCrit);
+        Vb1e1 = $limit(V(b1, e1), "pnjlim", $vt, tVCrit);
+        Vb1b2 = $limit(V(b1, b2), "pnjlim", $vt, tVCrit);
 `ifdef SUBSTRATE
-    Vsc1 = $limit(V(s,  c1), "typedpnjlim", $vt, tVCrit, rtype);
+        Vsc1 = $limit(V(s,  c1), "pnjlim", $vt, tVCrit);
 `endif
+    end else begin
+        Vb2c1 = $limit(V(c1, b2), "pnjlim", $vt, tVCrit);
+        Vb2c2 = $limit(V(c2, b2), "pnjlim", $vt, tVCrit);
+        Vb2e1 = $limit(V(e1, b2), "pnjlim", $vt, tVCrit);
+        Vb1e1 = $limit(V(e1, b1), "pnjlim", $vt, tVCrit);
+        Vb1b2 = $limit(V(b2, b1), "pnjlim", $vt, tVCrit);
+`ifdef SUBSTRATE
+        Vsc1 = $limit(V(c1, s), "pnjlim", $vt, tVCrit);
+`endif
+    end
 `else
     Vb2c1 = TYPE * V(b2, c1);
     Vb2c2 = TYPE * V(b2, c2);
@@ -34,7 +42,6 @@ begin  // Currents and charges
     Vbb1  = TYPE * V(b,  b1);
     Vbe   = TYPE * V(b,  e);
     Vbc   = TYPE * V(b,  c);
-//$strobe("2 %f %f %f %f %f %f\n", Vb2c1, Vb2c2, Vb2e1, Vb1e1, Vb1b2, Vsc1);
 
     /* RvdT, 03-12-2007, voltage differences
  associated with distributed parasitic collector.

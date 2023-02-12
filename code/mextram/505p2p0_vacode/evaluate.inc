@@ -8,15 +8,25 @@
 // Currents and charges
 // Nodal biases
 `ifdef __NGSPICE_COMPACT_MODELING__
-    rtype = type;
-    Vb2c1 = $limit(V(b2, c1), "typedpnjlim", Vt, tVCrit, rtype);
-    Vb2c2 = $limit(V(b2, c2), "typedpnjlim", Vt, tVCrit, rtype);
-    Vb2e1 = $limit(V(b2, e1), "typedpnjlim", Vt, tVCrit, rtype);
-    Vb1e1 = $limit(V(b1, e1), "typedpnjlim", Vt, tVCrit, rtype);
-    Vb1b2 = $limit(V(b1, b2), "typedpnjlim", Vt, tVCrit, rtype);
-    `ifdef SUBSTRATE
-        Vsc1 = $limit(V(s,  c1), "typedpnjlim", Vt, tVCrit, rtype);
-    `endif
+    if (type == 1) begin
+        Vb2c1 = $limit(V(b2, c1), "pnjlim", Vt, tVCrit);
+        Vb2c2 = $limit(V(b2, c2), "pnjlim", Vt, tVCrit);
+        Vb2e1 = $limit(V(b2, e1), "pnjlim", Vt, tVCrit);
+        Vb1e1 = $limit(V(b1, e1), "pnjlim", Vt, tVCrit);
+        Vb1b2 = $limit(V(b1, b2), "pnjlim", Vt, tVCrit);
+        `ifdef SUBSTRATE
+            Vsc1 = $limit(V(s,  c1), "pnjlim", Vt, tVCrit);
+        `endif
+    end else begin
+        Vb2c1 = $limit(V(c1, b2), "pnjlim", Vt, tVCrit);
+        Vb2c2 = $limit(V(c2, b2), "pnjlim", Vt, tVCrit);
+        Vb2e1 = $limit(V(e1, b2), "pnjlim", Vt, tVCrit);
+        Vb1e1 = $limit(V(e1, b1), "pnjlim", Vt, tVCrit);
+        Vb1b2 = $limit(V(b2, b1), "pnjlim", Vt, tVCrit);
+        `ifdef SUBSTRATE
+            Vsc1 = $limit(V(c1, s), "pnjlim", Vt, tVCrit);
+        `endif
+    end
 `else
     Vb2c1 = type * V(b2, c1);
     Vb2c2 = type * V(b2, c2);

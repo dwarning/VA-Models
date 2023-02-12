@@ -714,7 +714,15 @@ module ekv_va(d,g,s,b);
         Vtn = Vt*n;
     //DRAIN - BULK
         is_d = js_t*ad_i+jsw_t*pd_i+jswg_t*Weff;
-        v_di_b = TYPE*$limit(V(d,b), "pnjlim", Vtn, Vtn*ln(Vtn/(`M_SQRT2*is_d)));
+`ifdef __NGSPICE_COMPACT_MODELING__
+        if (TYPE == 1) begin
+            v_di_b = $limit(V(d,b), "pnjlim", Vtn, Vtn*ln(Vtn/(`M_SQRT2*is_d)));
+        end else begin
+            v_di_b = $limit(V(b,d), "pnjlim", Vtn, Vtn*ln(Vtn/(`M_SQRT2*is_d)));
+        end
+`else
+        v_di_b = TYPE*V(d,b);
+`endif
         arg_d = -v_di_b*ratioT/(Vtn);
         if (arg_d < -40.0) arg_d = -40.0;
         tmp0 = (-v_di_b+bv)*ratioT/(Vtn);
@@ -727,7 +735,15 @@ module ekv_va(d,g,s,b);
         I(d,b) <+ (is_d * (1.0 - limexp(arg_d))*f_breakdown_d+v_di_b*gmin + idb_tun)*TYPE*M;
     //SOURCE - BULK
         is_s = js_t*as_i+jsw_t*ps_i+jswg_t*Weff;
-        v_si_b = TYPE*$limit(V(s,b), "pnjlim", Vtn, Vtn*ln(Vtn/(`M_SQRT2*is_s)));
+`ifdef __NGSPICE_COMPACT_MODELING__
+        if (TYPE == 1) begin
+            v_si_b = $limit(V(s,b), "pnjlim", Vtn, Vtn*ln(Vtn/(`M_SQRT2*is_s)));
+        end else begin
+            v_si_b = $limit(V(b,s), "pnjlim", Vtn, Vtn*ln(Vtn/(`M_SQRT2*is_s)));
+        end
+`else
+        v_si_b = TYPE*V(s,b);
+`endif
         arg_s = -v_si_b*ratioT/(Vtn);
         if (arg_s < -40.0) arg_s = -40.0;
         tmp0 = (-v_si_b+bv)*ratioT/(Vtn);
