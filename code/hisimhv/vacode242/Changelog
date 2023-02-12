@@ -1,0 +1,7 @@
+Macro Fn_SU_POW double defined, commented out in HSMHV_eval_drift.inc
+Macros HSMHV_Idio_args1, HSMHV_Idio_args2_compat and HSMHV_Qdio_args1 commented out in HSMHV_temp_eval_dio.inc
+
+Use disciplines.vams
+
+Origin of the model version 2.4.2:
+https://www.hisim.hiroshima-u.ac.jp/index.php?id=121

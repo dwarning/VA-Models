@@ -22,7 +22,8 @@ openvaf -D__NGSPICE_COMPACT_MODELING__ -o fbhhbt-2.3.osdi ../fbh_hbt/vacode/fbhh
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o HICUML0-2.osdi ../hicum0/vacode/HICUML0-2.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o hicumL2.osdi ../hicum2/vacode/hicumL2.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o hisim2.osdi ../hisim2/vacode/hisim2.va
-openvaf -D__NGSPICE_COMPACT_MODELING__ -o hisimhv.osdi ../hisimhv/vacode/hisimhv.va
+openvaf -D__NGSPICE_COMPACT_MODELING__ -o hisimhv242.osdi ../hisimhv/vacode242/hisimhv.va
+openvaf -D__NGSPICE_COMPACT_MODELING__ -o hisimhv250.osdi ../hisimhv/vacode250/hisimhv.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o L_UTSOI_102.osdi ../L-UTSOI/vacode/L_UTSOI_102.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o bjt504.osdi ../mextram/504p12p1_vacode/bjt504.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o bjt504t.osdi ../mextram/504p12p1_vacode/bjt504t.va
