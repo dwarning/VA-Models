@@ -92,7 +92,7 @@
 //*********************************************************************/
 //
 
-`include "discipline.h"
+`include "disciplines.vams"
 
 //
 // Macros for the model/instance parameters
@@ -1456,7 +1456,7 @@ module hisim2_va(d, g, s, b);
     //`MPIsw( COPSPT     , 0          , "-"                             , "flag Ps0 method for deep punchthrough ")
     `MPRoc( XJPT       , 3E-8       , "m"                 ,   0 ,   1 , "Junction depth; deep punchthrough ")
     `MPRoo( NJUNC      , 1e20       , "cm-3"              ,   0 , inf , "Junction doping conc; deep punchthrough  ")
-    `MPRcc( MUPT       , 0.0        , "m^2/V/s"           ,   0 , inf , "mobility for deep punchthrough ")
+    `MPRco( MUPT       , 0.0        , "m^2/V/s"           ,   0 , inf , "mobility for deep punchthrough ")
     `MPRnb( VFBPT      , 0.0        , "V"                             , "dVfb for deep punchthrough ")
     `MPRnb( PSLIMPT    , 0.0        , "V"                             , "Ps0 limit for deep punchthrough ")
 
@@ -2904,7 +2904,7 @@ end
                     Xilp12     = 0.0;
                     Xilp32     = 0.0;
                     betaWL     = 0.0;
-                    codqb      = 0.0;
+                    codqb      = 0;
                     crl_f      = 0.0;
                     dVthLP_dPS0Z = 0.0;
                     dVthSC_dPS0Z = 0.0;
@@ -2915,7 +2915,7 @@ end
                     kusai00L   = 0.0;
                     kusaiL     = 0.0;
                     kusai_ig   = 0.0;
-                    mm         = 0.0;
+                    mm         = 0;
                     sqrtkusaiL = 0.0;
                     flg_zone   = 0;
                     Qb0Cox     = 0.0;

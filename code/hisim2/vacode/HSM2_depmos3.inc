@@ -94,24 +94,24 @@ begin : HSM2_depmos3
     // dummy for hisim2
     //   real Vdsi,Vgsi,Vbsi;
 
-  `define C_PHI_1_MINIMUM (1e-7)
-  `define C_leak_delta 1e-4
-  `define C_sum_Q_nx_cur_delta (`VgVt_Small*`Cox_Small)
+    `define C_PHI_1_MINIMUM (1e-7)
+    `define C_leak_delta 1e-4
+    `define C_sum_Q_nx_cur_delta (`VgVt_Small*`Cox_Small)
 
-  `define WK_PS0DEPMAX             0    // "V", -0.5, 0.5, "Ps0DEP max Fn_SU_CP depmos3")                                                                                      MPRco
-  `define WK_IACC                  1.0  //"-", 0, 4.0,"Ids_acc enabler; depmos3")                                                                                              MPRco
-  `define WK_IRES                  1.0  //"-", 0, 4.0,"Ids_res enabler; depmos3")                                                                                              MPRco
+    `define WK_PS0DEPMAX             0    // "V", -0.5, 0.5, "Ps0DEP max Fn_SU_CP depmos3")                                                                                      MPRco
+    `define WK_IACC                  1.0  //"-", 0, 4.0,"Ids_acc enabler; depmos3")                                                                                              MPRco
+    `define WK_IRES                  1.0  //"-", 0, 4.0,"Ids_res enabler; depmos3")                                                                                              MPRco
 
-  `define WK_CO_DEPMUE             1    // "-", "DEPMUE enabler depmos3") // 20170902                                                                                          MPIsw
-  `define WK_CO_DEPMUEPH           1    // "-", "DEPMUEPH enabler depmos3") // 20170902                                                                                        MPIsw
-  `define WK_CO_NEWVGPRES          0    //"-", 0,2, "Disregard dVth etc for Vgpres (1) furthermore Vgs (2) instead of Vgsz depmos3") // 20170902                               MPIcc
-  `define WK_CO_MUECB              1    // "-", "MUECB enabler depmos3") // 20170920                                                                                           MPIsw
-  `define WK_CO_MUEPH              1    // "-", "MUEPH enabler depmos3") // 20170920                                                                                           MPIsw
-  `define WK_CO_MUESR              1    // "-", "MUESR enabler depmos3") // 20170920                                                                                           MPIsw
-  `define WK_CO_DVGPACC            1    // "-", "Vgp acc dVgp on(1)  off(0) depmos3") // 20171002                                                                              MPIsw
-  `define WK_CO_SMOOTHCHARGE_IDD   1    // "-","Smooth Q_n0, Q_nL for IDD using DEPPS (1); depmos3")// 20171006 Kiku                                                           MPIsw
-  `define WK_DVTHRES_MULT          1    // "-", -0.5, 1.5, "dVth multiplier for Vgp_res; depmos3") // 20171015                                                                 MPRco
-  `define WK_CO_UWE20171213        0    //"-","Calc Wres 20171213 Uwe depmos3")                                                                                                MPIsw
+    `define WK_CO_DEPMUE             1    // "-", "DEPMUE enabler depmos3") // 20170902                                                                                          MPIsw
+    `define WK_CO_DEPMUEPH           1    // "-", "DEPMUEPH enabler depmos3") // 20170902                                                                                        MPIsw
+    `define WK_CO_NEWVGPRES          0    //"-", 0,2, "Disregard dVth etc for Vgpres (1) furthermore Vgs (2) instead of Vgsz depmos3") // 20170902                               MPIcc
+    `define WK_CO_MUECB              1    // "-", "MUECB enabler depmos3") // 20170920                                                                                           MPIsw
+    `define WK_CO_MUEPH              1    // "-", "MUEPH enabler depmos3") // 20170920                                                                                           MPIsw
+    `define WK_CO_MUESR              1    // "-", "MUESR enabler depmos3") // 20170920                                                                                           MPIsw
+    `define WK_CO_DVGPACC            1    // "-", "Vgp acc dVgp on(1)  off(0) depmos3") // 20171002                                                                              MPIsw
+    `define WK_CO_SMOOTHCHARGE_IDD   1    // "-","Smooth Q_n0, Q_nL for IDD using DEPPS (1); depmos3")// 20171006 Kiku                                                           MPIsw
+    `define WK_DVTHRES_MULT          1    // "-", -0.5, 1.5, "dVth multiplier for Vgp_res; depmos3") // 20171015                                                                 MPRco
+    `define WK_CO_UWE20171213        0    //"-","Calc Wres 20171213 Uwe depmos3")                                                                                                MPIsw
 
     // Constants
     Vbi_DEP = Vbipn ;
