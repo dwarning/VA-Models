@@ -14,12 +14,12 @@ The models covering a wide range of devices :
 * **Sensors**
 
 All models are checked for syntax belong Verilog-AMS Language Reference Manual Version 2.4.0. https://accellera.org/downloads/standards/v-ams 
-The models are modified mostly for convergence improvements.
-So few parameter limits are changed to prevent division by zero and especially bipolar models lacks suitable limit function to prevent divergence in Newton-Raphson iteration process.
+The models are modified mostly for convergence improvements. Equations are untouched.
+So few parameter limits are changed to prevent division by zero and especially bipolar models lacks suitable limit function to prevent divergence in Newton-Raphson iteration process. Changes are noticed in Changelog.
 
-At the moment this code modifications are adapted to ngspice simulator. But in future the code can adapted to the requirements and restrictions of ADMS like compilers e.g. for XYCE or QUCS.
+At the moment this code modifications are adapted to NGSPICE simulator. But in future the code can adapted to the requirements and restrictions of ADMS like compilers e.g. for XYCE or QUCS.
 
-Any code directory has a set of test cases for ngspice to show main functionality and performance of the models. Contributions for more practical use cases are welcome.
+Any code directory has a set of test cases for NGSPICE to show main functionality and performance of the models. Contributions for more practical use cases are welcome.
 
 ## Related Projects
 
@@ -31,12 +31,12 @@ OpenVAF can be build as a standalone CLI program that can compile Verilog-A file
 
 Detailed documentation, examples and precompiled binaries of all release are **available on the [website](https://openvaf.semimod.de)**. To test the latest development version you can download nightly version of OpenVAF for linux [here](https://openva.fra1.cdn.digitaloceanspaces.com/openvaf_devel_linux_amd64.tar.gz).
 
-OpenVAF has been tested with a NGSPICE version 39. It can already support a large array of compact models.
+OpenVAF has been tested with NGSPICE version 39. It can already support a large array of compact models.
 
-Furthermore, some Verilog-A language features are currently not supported:
+Furthermore, some Verilog-A language features are currently not supported by openVAF:
 
-* Noise analysis
-* No Laplace transform
+* Noise analysis (white_noise(), flicker_noise())
+* Laplace transform filters
 * Language constructs: $abstime(), @cross()
 
 ### NGSPICE
@@ -73,7 +73,7 @@ Edit file 'spinit', typically found in share/ngspice/scripts: Comment out the li
 
 The team of openVAF developer from Semimod GmbH https://semimod.de/.
 
-The ngspice development team https://ngspice.sourceforge.io/ .
+The NGSPICE development team https://ngspice.sourceforge.io/ .
 
 Geoffrey Coram for his excellent tool VAMPyRe https://si2.org/download-links/ .
 
