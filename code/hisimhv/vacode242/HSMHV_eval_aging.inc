@@ -20,25 +20,25 @@
 //
 ////////////////////////////////////////////////////////////////
 //
-//Licensed under the Educational Community License, Version 2.0 
-//(the "License"); you may not use this file except in 
-//compliance with the License. 
+//Licensed under the Educational Community License, Version 2.0
+//(the "License"); you may not use this file except in
+//compliance with the License.
 //
-//You may obtain a copy of the License at: 
+//You may obtain a copy of the License at:
 //
-//	http://opensource.org/licenses/ECL-2.0
+//  http://opensource.org/licenses/ECL-2.0
 //
-//Unless required by applicable law or agreed to in writing, 
-//software distributed under the License is distributed on an 
-//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
-//either express or implied. See the License for the specific 
-//language governing permissions and limitations under the 
+//Unless required by applicable law or agreed to in writing,
+//software distributed under the License is distributed on an
+//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+//either express or implied. See the License for the specific
+//language governing permissions and limitations under the
 //License.
 //
 //
-//The HiSIM_HV standard has been supported by the members of 
-//Silicon Integration Initiative's Compact Model Coalition. A 
-//link to the most recent version of this standard can be found 
+//The HiSIM_HV standard has been supported by the members of
+//Silicon Integration Initiative's Compact Model Coalition. A
+//link to the most recent version of this standard can be found
 //at:
 //
 //http://www.si2.org/cmc
@@ -53,7 +53,7 @@ begin : HSMHV_eval_aging
    real gc_time1 , gc_time2 , gc_time , e_time1 , e_time2 , Isub_fac ;
 `ifdef _AGING_DEBUG_
    real NtK1 ;
-`endif 
+`endif
 
 // Macro definition
 `define C2p72_GCTIME1     2.72/TRAPGCTIME1
@@ -108,8 +108,8 @@ begin : HSMHV_eval_aging
  end
 
    // Initilization variables
-   gc1deg0   = TRAPGC1 / `C_cm2m_p3 ; 
-   e1deg0    = TRAPES1 ; 
+   gc1deg0   = TRAPGC1 / `C_cm2m_p3 ;
+   e1deg0    = TRAPES1 ;
    abstime   = ($abstime - `pretime) + `Small ;
    Isub_trap = 0.0 ;
 
@@ -117,8 +117,8 @@ begin : HSMHV_eval_aging
 
      if( CODEGSTEP == 0 ) begin // DC simulation
        // DC simulation with Isub
-       Isub_trap = Isub ; 
-       Ids_trap  = Ids ; 
+       Isub_trap = Isub ;
+       Ids_trap  = Ids ;
      end else begin
        // transient simulation with idt( Isuba )
        Isub_trap = V(idtag1) / abstime ;  // idt( Isuba  );
@@ -129,7 +129,7 @@ begin : HSMHV_eval_aging
      //* Calculation of trap density gc1, e1 and DVddp
      //*-----------------//
      `Fn_calcGC1ES1(gc1,e1,Isub_trap)
-     `Fn_calcGC1ES1_drift(DVddp, Ids_trap) 
+     `Fn_calcGC1ES1_drift(DVddp, Ids_trap)
 
       if ( TRAPA > 0 && ($abstime > pretime0 || CODEGSTEP==0) ) begin
          if( TRAPBTI > 0.0 ) begin
@@ -143,7 +143,7 @@ begin : HSMHV_eval_aging
          end
 //       Eox = ( Vgp - Pb2 ) / TOX ;
          Vgpon = Vgsonave - Vfb ; // Vfb = VFBC + dVth_bti ; calc. in main module
-         Eox = ( Vgpon - Pb2 ) / TOX ; 
+         Eox = ( Vgpon - Pb2 ) / TOX ;
          dVth_bti = TRAPA * lexp( TRAPB * Eox ) * exp_time ;
 `ifdef _AGING_DEBUG_
   $write(" %M abstime %g ts_bti %g tcycle %g exp_time %g dVth_bti %g TRAPA %g TRAPB %g Eox %g T1 %g \n",
@@ -154,7 +154,7 @@ begin : HSMHV_eval_aging
       end
 
 `ifdef _AGING_DEBUG_
-       // check the convergency of Ntrap 
+       // check the convergency of Ntrap
        `Fn_calcNKT(NtK1,gc1,e1)
        T1 = (NtK1 <= 0 ) ? 0.0 : abs(NtK1 - NtK10) /NtK1 * 100 ;
        $write("%M Isub = %g Isub_trap = %g gc1 %g e1 %g NtK10 %g NtK1 %g Err: %g \n",

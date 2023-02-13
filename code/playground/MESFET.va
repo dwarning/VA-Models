@@ -7,12 +7,12 @@
 //   it under the terms of the GNU General Public License as published by
 //   the Free Software Foundation; either version 2, or (at your option)
 //   any later version.
-// 
+//
 //   Copyright (C), Mike Brinson, mbrin72043@yahoo.co.uk, March 2008.
 //
 `include "disciplines.vams"
 `include "constants.vams"
-// 
+//
  module MESFET (Drain, Gate, Source);
  inout Drain, Gate, Source;
 //
@@ -178,173 +178,173 @@ F3=1-Fc*(1+M);
 Vbi_T2=(Tr*Vbi)-(2*Vt_T2*ln(con1)) - ( Tr*Eg_T1-Eg_T2);
 Is_T2=Area*Is*pow( Tr, (Xti/N))*limexp(-(`P_Q*Eg_T1)*(1-Tr)/(`P_K*T2));
 Cgs_T2=Area*Cgs*(1+M*(`K3*(T2-T1)-(Vbi_T2-Vbi)/Vbi));
-Cgd_T2=Area*Cgd*(1+M*(`K3*(T2-T1)-(Vbi_T2-Vbi)/Vbi)); 
+Cgd_T2=Area*Cgd*(1+M*(`K3*(T2-T1)-(Vbi_T2-Vbi)/Vbi));
 Vto_T2=Vto+Vtotc*(T2-T1);
 Gamma_T2=Gamma*(1+Gammatc*(T2-T1));
 Alpha_T2=Alpha*( pow( 1.01, Alphatc*(T2-T1)));
 //
 case (LEVEL) // Basic Curtice quadratic model
-	1 : begin
-		if ( (V(b1)-Vto_T2) > 0 ) Ids=Beta_T2*pow( (V(b1) - Vto_T2), 2.0 )*(1+Lambda*V(b3))*tanh(Alpha*V(b3));
-		else Ids=0;
-	    end
-	2 : begin // Advanced Curtice quadratic model
-		Ah=1/(2*Vt_T2*Nsc);
-		Vf=ln( 1+exp(Ah*(V(b1)-Vto_T2)))/Ah;
-		Ids=Beta_T2*pow( Vf, 2.0 )*(1+Lambda*V(b3))*tanh(Alpha*V(b3));
-	    end
-	3 : begin // Statz - Raytheon model [same as SPICE 3f5]		
-		if ( (V(b1)-Vto_T2) > 0 )
-			begin
-				if ( (0<V(b3))&&(V(b3)<(3/Alpha)) )  Ids=(Beta_T2*(1+Lambda*V(b3))*pow( (V(b1)-Vto_T2), 2.0) )*(1-pow( (1-Alpha*V(b3)/3), 3.0))/(1+B*(V(b1)-Vto_T2));
-	        		if ( V(b3)>=3/Alpha ) Ids=(Beta_T2*(1+Lambda*V(b3))*pow( (V(b1)-Vto_T2), 2.0))/(1+B*(V(b1)-Vto_T2));
-				if ( V(b3)<0 ) Ids=0;
-			end
-		else Ids=0;
-	    end
-	
-	4 : begin   // TOM 1 model"
+    1 : begin
+        if ( (V(b1)-Vto_T2) > 0 ) Ids=Beta_T2*pow( (V(b1) - Vto_T2), 2.0 )*(1+Lambda*V(b3))*tanh(Alpha*V(b3));
+        else Ids=0;
+        end
+    2 : begin // Advanced Curtice quadratic model
+        Ah=1/(2*Vt_T2*Nsc);
+        Vf=ln( 1+exp(Ah*(V(b1)-Vto_T2)))/Ah;
+        Ids=Beta_T2*pow( Vf, 2.0 )*(1+Lambda*V(b3))*tanh(Alpha*V(b3));
+        end
+    3 : begin // Statz - Raytheon model [same as SPICE 3f5]
+        if ( (V(b1)-Vto_T2) > 0 )
+            begin
+                if ( (0<V(b3))&&(V(b3)<(3/Alpha)) )  Ids=(Beta_T2*(1+Lambda*V(b3))*pow( (V(b1)-Vto_T2), 2.0) )*(1-pow( (1-Alpha*V(b3)/3), 3.0))/(1+B*(V(b1)-Vto_T2));
+                    if ( V(b3)>=3/Alpha ) Ids=(Beta_T2*(1+Lambda*V(b3))*pow( (V(b1)-Vto_T2), 2.0))/(1+B*(V(b1)-Vto_T2));
+                if ( V(b3)<0 ) Ids=0;
+            end
+        else Ids=0;
+        end
 
-		if ( (V(b1)-Vto_T2) > 0 )
-			begin
-				if ( (0<V(b3))&&(V(b3)<(3/Alpha)) )  
-					begin
-					 Ids1=(Beta_T2*pow( (V(b1)-Vto_T2), Qp) )*(1-pow( (1-Alpha*V(b3)/3), 3.0));
-					 Ids=Ids1*(1+Lambda*V(b3))/(1+Delta*V(b3)*Ids1);
-					end
-	        		if ( V(b3)>=3/Alpha ) 
-					begin
-					 Ids1=Beta_T2*pow( (V(b1)-Vto_T2), Qp) ;
-					 Ids=Ids1*(1+Lambda*V(b3))/(1+Delta*V(b3)*Ids1);
-					end
-				if ( V(b3)<0 ) Ids=0;
-			end
-		else Ids=0;
-	    end
+    4 : begin   // TOM 1 model"
 
-	5 : begin   // TOM 2 model
-		if ( (V(b1)-Vto_T2) > 0 )
-			begin
-				Nst=Ng+Nd*V(b3);
-				if ( Nst < 1.0) Nst=1.0;
-				Vst=Nst*Vt_T2;
-				Vg=Qp*Vst*ln( exp( (V(b1)-Vto_T2+Gamma_T2*V(b3)) / (Qp*Vst) ) + 1);
-				Al= Alpha_T2*V(b3);
-				Fd=Al/sqrt( 1.0+(Al*Al) );
-				Ids1=Beta_T2*pow( Vg, Qp)*Fd;
-				Ids=Ids1*(1+Lambda*V(b3))/(1+Delta*V(b3)*Ids1);
-			end
-		else Ids=0;
-	    end
+        if ( (V(b1)-Vto_T2) > 0 )
+            begin
+                if ( (0<V(b3))&&(V(b3)<(3/Alpha)) )
+                    begin
+                     Ids1=(Beta_T2*pow( (V(b1)-Vto_T2), Qp) )*(1-pow( (1-Alpha*V(b3)/3), 3.0));
+                     Ids=Ids1*(1+Lambda*V(b3))/(1+Delta*V(b3)*Ids1);
+                    end
+                    if ( V(b3)>=3/Alpha )
+                    begin
+                     Ids1=Beta_T2*pow( (V(b1)-Vto_T2), Qp) ;
+                     Ids=Ids1*(1+Lambda*V(b3))/(1+Delta*V(b3)*Ids1);
+                    end
+                if ( V(b3)<0 ) Ids=0;
+            end
+        else Ids=0;
+        end
+
+    5 : begin   // TOM 2 model
+        if ( (V(b1)-Vto_T2) > 0 )
+            begin
+                Nst=Ng+Nd*V(b3);
+                if ( Nst < 1.0) Nst=1.0;
+                Vst=Nst*Vt_T2;
+                Vg=Qp*Vst*ln( exp( (V(b1)-Vto_T2+Gamma_T2*V(b3)) / (Qp*Vst) ) + 1);
+                Al= Alpha_T2*V(b3);
+                Fd=Al/sqrt( 1.0+(Al*Al) );
+                Ids1=Beta_T2*pow( Vg, Qp)*Fd;
+                Ids=Ids1*(1+Lambda*V(b3))/(1+Delta*V(b3)*Ids1);
+            end
+        else Ids=0;
+        end
 
 endcase
 //
 case (ILEVELS)
-	0 :	begin 
-		 Igs=0; 
-		end	
-  	1 :	begin 
-   		 if ( V(b1)>Vbi ) Igs=(V(b1)-Vbi)/Rf;
-   		 else Igs=-Area*Is+V(b1)*`GMIN;
-  		end
-  	2 :	begin
-		 if (V(b1)>Vbi) Igs1=(V(b1)-Vbi)/Rf;
-		 else Igs1=-Area*Is+V(b1)*`GMIN;
-		 if (V(b1)<-Bv) Igs2=(V(b1)+Bv)/R1;
-		 Igs=Igs1+Igs2;
-  		end
-	3 :	begin		  
+    0 : begin
+         Igs=0;
+        end
+    1 : begin
+         if ( V(b1)>Vbi ) Igs=(V(b1)-Vbi)/Rf;
+         else Igs=-Area*Is+V(b1)*`GMIN;
+        end
+    2 : begin
+         if (V(b1)>Vbi) Igs1=(V(b1)-Vbi)/Rf;
+         else Igs1=-Area*Is+V(b1)*`GMIN;
+         if (V(b1)<-Bv) Igs2=(V(b1)+Bv)/R1;
+         Igs=Igs1+Igs2;
+        end
+    3 : begin
 
-		  if (V(b1)>-5.0*N*Vt_T2) 
-			begin
-			 Igs=Is_T2*( limexp(V(b1)/(N*Vt_T2)) -1.0)+V(b1)*`GMIN;
-			end
-		  else Igs=-Is_T2+V(b1)*`GMIN;
-		end
-	4 :	begin
-		 if (V(b1)>-5.0*N*Vt_T2) Igs1= Area*Is_T2*( limexp(V(b1)/(N*Vt_T2)) -1.0) + V(b1)*`GMIN;
-		 else Igs1=0;
-		 if ((-Bv<V(b1))&&(V(b1) < -5.0*N*Vt_T2)) Igs2=-Area*Is_T2 +V(b1)*`GMIN;
-		 else Igs2=0;
-		 if (V(b1) == -Bv) Igs3=-Ibv;
-		 else Igs3=0;
-		 if (V(b1)<-Bv ) Igs4=-Area*Is_T2*(limexp(-(Bv+V(b1))/Vt_T2)-1.0+Bv/Vt_T2);
-		 else Igs4=0;
-		 Igs=Igs1+Igs2+Igs3+Igs4;
-		end
+          if (V(b1)>-5.0*N*Vt_T2)
+            begin
+             Igs=Is_T2*( limexp(V(b1)/(N*Vt_T2)) -1.0)+V(b1)*`GMIN;
+            end
+          else Igs=-Is_T2+V(b1)*`GMIN;
+        end
+    4 : begin
+         if (V(b1)>-5.0*N*Vt_T2) Igs1= Area*Is_T2*( limexp(V(b1)/(N*Vt_T2)) -1.0) + V(b1)*`GMIN;
+         else Igs1=0;
+         if ((-Bv<V(b1))&&(V(b1) < -5.0*N*Vt_T2)) Igs2=-Area*Is_T2 +V(b1)*`GMIN;
+         else Igs2=0;
+         if (V(b1) == -Bv) Igs3=-Ibv;
+         else Igs3=0;
+         if (V(b1)<-Bv ) Igs4=-Area*Is_T2*(limexp(-(Bv+V(b1))/Vt_T2)-1.0+Bv/Vt_T2);
+         else Igs4=0;
+         Igs=Igs1+Igs2+Igs3+Igs4;
+        end
 endcase
 //
-case (ILEVELD) 
-	0 : begin 
-	     Igd=0;
-	    end
-	1 : begin
-	     if (V(b2)>Vbi) Igd=(V(b2)-Vbi)/Rf;
-	     else Igd=-Area*Is+V(b2)*`GMIN;
-	    end
-	2 : begin 
-	     if (V(b2)>Vbi) Igd1=(V(b2)-Vbi)/Rf;
-	     else Igd1=-Area*Is+V(b2)*`GMIN;
-	     if (V(b2)<-Bv) Igd2=(V(b2)+Bv)/R1;
-	     Igd=Igd1+Igd2;
-	    end
-	3 : begin
-	     if (V(b2)>-5.0*N*Vt_T2) Igd=Area*Is_T2*( limexp(V(b2)/(N*Vt_T2)) -1.0) + V(b2)*`GMIN;
-	     else Igd=-Is_T2+V(b2)*`GMIN;
-	    end
-	4 : begin
-	     if (V(b2)>-5.0*N*Vt_T2) Igd1= Area*Is_T2*( limexp(V(b2)/(N*Vt_T2)) -1.0) + V(b2)*`GMIN;
-	     else Igd1=0;
-	     if ((-Bv<V(b2))&&(V(b2) < -5.0*N*Vt_T2)) Igd2=-Area*Is_T2 +V(b2)*`GMIN;
-	     else Igd2=0;
-	     if (V(b2)==-Bv) Igd3=-Ibv;
-	     else Igd3=0;
-	     if (V(b2)<-Bv ) Igd4=-Area*Is_T2*(limexp(-(Bv+V(b2))/Vt_T2)-1.0+Bv/Vt_T2);
-	     else Igd4=0;
-	     Igd=Igd1+Igd2+Igd3+Igd4;
-	   end
+case (ILEVELD)
+    0 : begin
+         Igd=0;
+        end
+    1 : begin
+         if (V(b2)>Vbi) Igd=(V(b2)-Vbi)/Rf;
+         else Igd=-Area*Is+V(b2)*`GMIN;
+        end
+    2 : begin
+         if (V(b2)>Vbi) Igd1=(V(b2)-Vbi)/Rf;
+         else Igd1=-Area*Is+V(b2)*`GMIN;
+         if (V(b2)<-Bv) Igd2=(V(b2)+Bv)/R1;
+         Igd=Igd1+Igd2;
+        end
+    3 : begin
+         if (V(b2)>-5.0*N*Vt_T2) Igd=Area*Is_T2*( limexp(V(b2)/(N*Vt_T2)) -1.0) + V(b2)*`GMIN;
+         else Igd=-Is_T2+V(b2)*`GMIN;
+        end
+    4 : begin
+         if (V(b2)>-5.0*N*Vt_T2) Igd1= Area*Is_T2*( limexp(V(b2)/(N*Vt_T2)) -1.0) + V(b2)*`GMIN;
+         else Igd1=0;
+         if ((-Bv<V(b2))&&(V(b2) < -5.0*N*Vt_T2)) Igd2=-Area*Is_T2 +V(b2)*`GMIN;
+         else Igd2=0;
+         if (V(b2)==-Bv) Igd3=-Ibv;
+         else Igd3=0;
+         if (V(b2)<-Bv ) Igd4=-Area*Is_T2*(limexp(-(Bv+V(b2))/Vt_T2)-1.0+Bv/Vt_T2);
+         else Igd4=0;
+         Igd=Igd1+Igd2+Igd3+Igd4;
+       end
 endcase
 //
 if (QLEVELS==0) Qgs=0;
 if (QLEVELS==1) Qgs=Area*Cgs*V(b4);
 if (QLEVELS==2) begin
-		 if (V(b4)<(Fc*Vbi)) Qgs1=((Cgs_T2*Vbi_T2)/(1-M))*(1-pow( (1-V(b4)/Vbi_T2), (1-M)));
+         if (V(b4)<(Fc*Vbi)) Qgs1=((Cgs_T2*Vbi_T2)/(1-M))*(1-pow( (1-V(b4)/Vbi_T2), (1-M)));
                  else Qgs1=0;
                  if (V(b4)>=(Fc*Vbi)) Qgs2=Cgs_T2*(F1+(1/F2)*(F3*(V(b4)-(Fc*Vbi_T2))+(M/(2*Vbi_T2))*(V(b4)*V(b4)-Fc*Vbi_T2*Fc*Vbi_T2)));
-	         else Qgs2=0;
+             else Qgs2=0;
                  Qgs=Qgs1+Qgs2;
-                end 
+                end
 if (QLEVELS==3) begin
-		 Veff1=0.5*( V(b4)+V(b6)+sqrt( pow( V(b4)-V(b6), 2.0)+Vdelta1*Vdelta1 ) );
-		 Vnew =0.5*( Veff1+Vto_T2+sqrt( pow( Veff1-Vto, 2.0 )+Vdelta2*Vdelta2 ) );
-		 if (Vnew>Vmax) Qgs=Cgs_T2*(2*Vbi_T2*(1-sqrt( 1-Vmax/Vbi_T2 ) )+(Vnew-Vmax)/sqrt(1-Vmax/Vbi) );
-		 else Qgs=Cgs_T2*2*Vbi*( 1-sqrt( 1-Vnew/Vbi));
-	        end
+         Veff1=0.5*( V(b4)+V(b6)+sqrt( pow( V(b4)-V(b6), 2.0)+Vdelta1*Vdelta1 ) );
+         Vnew =0.5*( Veff1+Vto_T2+sqrt( pow( Veff1-Vto, 2.0 )+Vdelta2*Vdelta2 ) );
+         if (Vnew>Vmax) Qgs=Cgs_T2*(2*Vbi_T2*(1-sqrt( 1-Vmax/Vbi_T2 ) )+(Vnew-Vmax)/sqrt(1-Vmax/Vbi) );
+         else Qgs=Cgs_T2*2*Vbi*( 1-sqrt( 1-Vnew/Vbi));
+            end
 //
 if (QLEVELD==0) Qgd=0;
 if (QLEVELD==1) Qgd=Area*Cgd*V(b6);
 if (QLEVELD==2) begin
-		 if (V(b6)<(Fc*Vbi))  Qgd1=((Cgd_T2*Vbi_T2)/(1-M))*(1-pow( (1-V(b6)/Vbi_T2), (1-M)));
+         if (V(b6)<(Fc*Vbi))  Qgd1=((Cgd_T2*Vbi_T2)/(1-M))*(1-pow( (1-V(b6)/Vbi_T2), (1-M)));
                  else Qgd1=0;
                  if (V(b6)>=(Fc*Vbi)) Qgd2=Cgd_T2*(F1+(1/F2)*(F3*(V(b6)-(Fc*Vbi_T2))+(M/(2*Vbi_T2))*(V(b6)*V(b6)-Fc*Vbi_T2*Fc*Vbi_T2)));
-	         else Qgd2=0;
+             else Qgd2=0;
                  Qgd=Qgd1+Qgd2;
-                end 
+                end
 if (QLEVELD==3) begin
-		 Veff2=0.5*( V(b4)+V(b6)-sqrt( pow( V(b4)-V(b6), 2.0)+Vdelta1*Vdelta1 ) );
-		 Qgd=Cgd_T2*Veff2;
-	        end
+         Veff2=0.5*( V(b4)+V(b6)-sqrt( pow( V(b4)-V(b6), 2.0)+Vdelta1*Vdelta1 ) );
+         Qgd=Cgd_T2*Veff2;
+            end
 //
-case (QLEVELDS) 
-	0 : begin 
-	     Qds=0;
-	    end
-	1 : begin 
-	     Qds=Area*Cds*V(b3);
-	    end
-	2 : begin 
-	      Qds=Area*Cds*V(b3)+Tau*Ids;
-	    end
+case (QLEVELDS)
+    0 : begin
+         Qds=0;
+        end
+    1 : begin
+         Qds=Area*Cds*V(b3);
+        end
+    2 : begin
+          Qds=Area*Cds*V(b3)+Tau*Ids;
+        end
 endcase
 //
 I(b1) <+ Igs;
@@ -362,98 +362,98 @@ I(b9) <+ Area*V(b9)/Rs_T2;
 //
 fourkt=4.0*`P_K*T2;
 if ((LEVEL==1)||(LEVEL==2))
-	begin
-		gm=2*Beta_T2*(V(b1)-Vto_T2)*(1+Lambda*V(b3))*tanh(Alpha_T2*V(b3));
-		if ( V(b3) < 3/Alpha )
-		   begin
-		      An=1-V(b3)/(V(b1)-Vto_T2);
- 		      thermal_pwr= (8*`P_K*T2*gm/3)*((1+An+An*An)/(1+An))*Gdsnoi;
-		   end
-		else
-		thermal_pwr=(8*`P_K*T2*gm/3)*Gdsnoi;
+    begin
+        gm=2*Beta_T2*(V(b1)-Vto_T2)*(1+Lambda*V(b3))*tanh(Alpha_T2*V(b3));
+        if ( V(b3) < 3/Alpha )
+           begin
+              An=1-V(b3)/(V(b1)-Vto_T2);
+              thermal_pwr= (8*`P_K*T2*gm/3)*((1+An+An*An)/(1+An))*Gdsnoi;
+           end
+        else
+        thermal_pwr=(8*`P_K*T2*gm/3)*Gdsnoi;
 
-		I(b3) <+ white_noise(thermal_pwr, "thermal");
-		flicker_pwr = Kf*pow(Ids,Af);
-		I(b3) <+ flicker_noise(flicker_pwr,1.0, "flicker");
-	end
+        I(b3) <+ white_noise(thermal_pwr, "thermal");
+        flicker_pwr = Kf*pow(Ids,Af);
+        I(b3) <+ flicker_noise(flicker_pwr,1.0, "flicker");
+    end
 //
 if (LEVEL==3)
-	begin
-		
-		if ( V(b3) < 3/Alpha )
-		   begin
-		      H1=(1-(1-(Alpha*V(b3))/3))/(1+B*(V(b1)-Vto_T2));
-		      gm=2*Beta_T2*(V(b1)-Vto_T2)*(1+Lambda*V(b3))*H1+(Beta_T2*(1+Lambda*V(b3))*pow((V(b1)-Vto_T2),2.0))*B*H1/(1+B*(V(b1)-Vto_T2));
-		      An=1-V(b3)/(V(b1)-Vto_T2);
- 		      thermal_pwr= (8*`P_K*T2*gm/3)*((1+An+An*An)/(1+An))*Gdsnoi;
-		   end
-		else
-		 begin
-		  gm=2*Beta_T2*(V(b1)-Vto_T2)*(1+Lambda*V(b3))/(1+B*(V(b1)-Vto_T2))+(Beta_T2*(1+Lambda*V(b3))*pow((V(b1)-Vto_T2),2.0))*B/pow( (1+B*(V(b1)-Vto_T2)),2.0);
-		  thermal_pwr=(8*`P_K*T2*gm/3)*Gdsnoi;
-		 end
-		I(b3) <+ white_noise(thermal_pwr, "thermal");
-		flicker_pwr = Kf*pow(Ids,Af);
-		I(b3) <+ flicker_noise(flicker_pwr,1.0, "flicker");
-	end
+    begin
+
+        if ( V(b3) < 3/Alpha )
+           begin
+              H1=(1-(1-(Alpha*V(b3))/3))/(1+B*(V(b1)-Vto_T2));
+              gm=2*Beta_T2*(V(b1)-Vto_T2)*(1+Lambda*V(b3))*H1+(Beta_T2*(1+Lambda*V(b3))*pow((V(b1)-Vto_T2),2.0))*B*H1/(1+B*(V(b1)-Vto_T2));
+              An=1-V(b3)/(V(b1)-Vto_T2);
+              thermal_pwr= (8*`P_K*T2*gm/3)*((1+An+An*An)/(1+An))*Gdsnoi;
+           end
+        else
+         begin
+          gm=2*Beta_T2*(V(b1)-Vto_T2)*(1+Lambda*V(b3))/(1+B*(V(b1)-Vto_T2))+(Beta_T2*(1+Lambda*V(b3))*pow((V(b1)-Vto_T2),2.0))*B/pow( (1+B*(V(b1)-Vto_T2)),2.0);
+          thermal_pwr=(8*`P_K*T2*gm/3)*Gdsnoi;
+         end
+        I(b3) <+ white_noise(thermal_pwr, "thermal");
+        flicker_pwr = Kf*pow(Ids,Af);
+        I(b3) <+ flicker_noise(flicker_pwr,1.0, "flicker");
+    end
 //
 if (LEVEL==4)
-	begin
-		
-		if ( V(b3) < 3/Alpha )
-		   begin
-		      Ids1=(Beta_T2*pow( (V(b1)-Vto_T2), Qp) )*(1-pow( (1-Alpha*V(b3)/3), 3.0));
-		      gm1=Qp*Beta_T2*pow( V(b1)-Vto_T2, Qp-1)*(1-(1-pow(Alpha*V(b3)/3, 3.0)));
-		      gm=(gm1*(1+Lambda*V(b3))/(1+Delta*V(b1)*Ids1))*(1+(Delta*V(b3)*Ids1)/(1+Delta*V(b3)*Ids1));
-		      An=1-V(b3)/(V(b1)-Vto_T2);
- 		      thermal_pwr= (8*`P_K*T2*gm/3)*((1+An+An*An)/(1+An))*Gdsnoi;
-		   end
-		else
-		 begin
-		  Ids1=(Beta_T2*pow( (V(b1)-Vto_T2), Qp) );
-		      gm1=Qp*Beta_T2*pow( V(b1)-Vto_T2, Qp-1);
-		      gm=(gm1*(1+Lambda*V(b3))/(1+Delta*V(b1)*Ids1))*(1+(Delta*V(b3)*Ids1)/(1+Delta*V(b3)*Ids1));
-		  thermal_pwr=(8*`P_K*T2*gm/3)*Gdsnoi;
-		 end
-		I(b3) <+ white_noise(thermal_pwr, "thermal");
-		flicker_pwr = Kf*pow(Ids,Af);
-		I(b3) <+ flicker_noise(flicker_pwr,1.0, "flicker");
-	end
+    begin
+
+        if ( V(b3) < 3/Alpha )
+           begin
+              Ids1=(Beta_T2*pow( (V(b1)-Vto_T2), Qp) )*(1-pow( (1-Alpha*V(b3)/3), 3.0));
+              gm1=Qp*Beta_T2*pow( V(b1)-Vto_T2, Qp-1)*(1-(1-pow(Alpha*V(b3)/3, 3.0)));
+              gm=(gm1*(1+Lambda*V(b3))/(1+Delta*V(b1)*Ids1))*(1+(Delta*V(b3)*Ids1)/(1+Delta*V(b3)*Ids1));
+              An=1-V(b3)/(V(b1)-Vto_T2);
+              thermal_pwr= (8*`P_K*T2*gm/3)*((1+An+An*An)/(1+An))*Gdsnoi;
+           end
+        else
+         begin
+          Ids1=(Beta_T2*pow( (V(b1)-Vto_T2), Qp) );
+              gm1=Qp*Beta_T2*pow( V(b1)-Vto_T2, Qp-1);
+              gm=(gm1*(1+Lambda*V(b3))/(1+Delta*V(b1)*Ids1))*(1+(Delta*V(b3)*Ids1)/(1+Delta*V(b3)*Ids1));
+          thermal_pwr=(8*`P_K*T2*gm/3)*Gdsnoi;
+         end
+        I(b3) <+ white_noise(thermal_pwr, "thermal");
+        flicker_pwr = Kf*pow(Ids,Af);
+        I(b3) <+ flicker_noise(flicker_pwr,1.0, "flicker");
+    end
 //
 if (LEVEL==5)
-	begin
-		
-		if ( V(b3) < 3/Alpha )
-		   begin
-		      Nst=Ng+Nd*V(b3);
-		      if ( Nst < 1.0) Nst=1.0;
-		      Vst=Nst*Vt_T2;
-		      Vg=Qp*Vst*ln( exp( (V(b1)-Vto_T2+Gamma_T2*V(b3)) / (Qp*Vst) ) + 1);
-		      Al= Alpha_T2*V(b3);
-		      Fd=Al/sqrt( 1.0+(Al*Al) );
-		      Ids1=Beta_T2*pow( Vg, Qp)*Fd;
-		      gm1=(Ids1/Vg)*Qp/(exp(-((V(b1)-Vto_T2+Delta*V(b3))/(Qp*Vst)))+1);
-		      gm=gm1/pow( (1+Delta*V(b3)*Ids1),2.0);
-		      An=1-V(b3)/(V(b1)-Vto_T2);
- 		      thermal_pwr= (8*`P_K*T2*gm/3)*((1+An+An*An)/(1+An))*Gdsnoi;
-		   end
-		else
-		 begin
-		  Nst=Ng+Nd*V(b3);
-		  if ( Nst < 1.0) Nst=1.0;
-		  Vst=Nst*Vt_T2;
-		  Vg=Qp*Vst*ln( exp( (V(b1)-Vto_T2+Gamma_T2*V(b3)) / (Qp*Vst) ) + 1);
-		  Al= Alpha_T2*V(b3);
-		  Fd=Al/sqrt( 1.0+(Al*Al) );
-		  Ids1=Beta_T2*pow( Vg, Qp)*Fd;
-		  gm1=(Ids1/Vg)*Qp/(exp(-((V(b1)-Vto_T2+Delta*V(b3))/(Qp*Vst)))+1);
-		  gm=gm1/pow( (1+Delta*V(b3)*Ids1),2.0);
-		  thermal_pwr=(8*`P_K*T2*gm/3)*Gdsnoi;
-		 end
-		I(b3) <+ white_noise(thermal_pwr, "thermal");
-		flicker_pwr = Kf*pow(Ids,Af);
-		I(b3) <+ flicker_noise(flicker_pwr,1.0, "flicker");
-	end
+    begin
+
+        if ( V(b3) < 3/Alpha )
+           begin
+              Nst=Ng+Nd*V(b3);
+              if ( Nst < 1.0) Nst=1.0;
+              Vst=Nst*Vt_T2;
+              Vg=Qp*Vst*ln( exp( (V(b1)-Vto_T2+Gamma_T2*V(b3)) / (Qp*Vst) ) + 1);
+              Al= Alpha_T2*V(b3);
+              Fd=Al/sqrt( 1.0+(Al*Al) );
+              Ids1=Beta_T2*pow( Vg, Qp)*Fd;
+              gm1=(Ids1/Vg)*Qp/(exp(-((V(b1)-Vto_T2+Delta*V(b3))/(Qp*Vst)))+1);
+              gm=gm1/pow( (1+Delta*V(b3)*Ids1),2.0);
+              An=1-V(b3)/(V(b1)-Vto_T2);
+              thermal_pwr= (8*`P_K*T2*gm/3)*((1+An+An*An)/(1+An))*Gdsnoi;
+           end
+        else
+         begin
+          Nst=Ng+Nd*V(b3);
+          if ( Nst < 1.0) Nst=1.0;
+          Vst=Nst*Vt_T2;
+          Vg=Qp*Vst*ln( exp( (V(b1)-Vto_T2+Gamma_T2*V(b3)) / (Qp*Vst) ) + 1);
+          Al= Alpha_T2*V(b3);
+          Fd=Al/sqrt( 1.0+(Al*Al) );
+          Ids1=Beta_T2*pow( Vg, Qp)*Fd;
+          gm1=(Ids1/Vg)*Qp/(exp(-((V(b1)-Vto_T2+Delta*V(b3))/(Qp*Vst)))+1);
+          gm=gm1/pow( (1+Delta*V(b3)*Ids1),2.0);
+          thermal_pwr=(8*`P_K*T2*gm/3)*Gdsnoi;
+         end
+        I(b3) <+ white_noise(thermal_pwr, "thermal");
+        flicker_pwr = Kf*pow(Ids,Af);
+        I(b3) <+ flicker_noise(flicker_pwr,1.0, "flicker");
+    end
 I(b8) <+ white_noise(Area*fourkt/Rd_T2, "thermal");
 I(b7) <+ white_noise(Area*fourkt/Rg_T2, "thermal");
 I(b9) <+ white_noise(Area*fourkt/Rs_T2, "thermal");
