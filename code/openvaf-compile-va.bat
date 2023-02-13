@@ -22,6 +22,7 @@ openvaf.exe -D__NGSPICE_COMPACT_MODELING__ -o hicumL2.osdi ../hicum2/vacode/hicu
 openvaf.exe -D__NGSPICE_COMPACT_MODELING__ -o hisim2.osdi ../hisim2/vacode/hisim2.va
 openvaf.exe -D__NGSPICE_COMPACT_MODELING__ -o hisimhv242.osdi ../hisimhv/vacode242/hisimhv.va
 openvaf.exe -D__NGSPICE_COMPACT_MODELING__ -o hisimhv250.osdi ../hisimhv/vacode250/hisimhv.va
+openvaf.exe -D__NGSPICE_COMPACT_MODELING__ -o hisimsoi.osdi ../hisimsoi/vacode/hisimsoi.va
 openvaf.exe -D__NGSPICE_COMPACT_MODELING__ -o L_UTSOI_102.osdi ../L-UTSOI/vacode/L_UTSOI_102.va
 openvaf.exe -D__NGSPICE_COMPACT_MODELING__ -o bjt504.osdi ../mextram/504p12p1_vacode/bjt504.va
 openvaf.exe -D__NGSPICE_COMPACT_MODELING__ -o bjt504t.osdi ../mextram/504p12p1_vacode/bjt504t.va

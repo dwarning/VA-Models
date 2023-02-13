@@ -1,0 +1,40 @@
+*********************************************
+*** HiSIM_SOI default instance parameters ***
+*********************************************
+
+* Version : HiSIM_SOI 1.4.0
+* Date    : 2018.07.30
+
+
+*** Parameters ***
++ L            = 5e-06
++ W            = 5e-06
++ AD           = 0
++ AS           = 0
++ PD           = 0
++ PS           = 0
++ NGCON        = 1
++ XGW          = 0
++ XGL          = 0
++ M            = 1
++ NF           = 1
++ SA           = 0
++ SB           = 0
++ SD           = 0
+****(used only if specified)+ PDBCP        = NOT_GIVEN
+****(used only if specified)+ PSBCP        = NOT_GIVEN
++ LOD          = 1e-05
+****(used only if specified)+ TEMP         = NOT_GIVEN
++ DTEMP        = 0
++ NBT          = 1
++ LBT          = 0
++ WBTP         = 0
++ WBTN         = 0
+****(used only if specified)+ ABTN         = NOT_GIVEN
+****(used only if specified)+ ABTP         = NOT_GIVEN
++ NRS          = 1
++ NRD          = 1
+
+***** Model and Instance Parameters *****
++ LDRIFT       = 1e-06
++ LDRIFTS      = 1e-06

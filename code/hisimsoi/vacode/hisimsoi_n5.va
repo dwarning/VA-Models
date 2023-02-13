@@ -1,0 +1,84 @@
+/***********************************************************************
+
+ HiSIM (Hiroshima University STARC IGFET Model)
+ Copyright (C) 2000-2016 Hiroshima University and STARC
+ Copyright (C) 2016-2018 Hiroshima University
+ HiSIM_SOI (Silicon-On-Insulator Model)
+ Copyright (C) 2012-2016 Hiroshima University and STARC
+ Copyright (C) 2016-2018 Hiroshima University 
+ 
+ MODEL NAME : HiSIM_SOI
+ ( VERSION : 1  SUBVERSION : 4  REVISION : 0 )
+ Model Parameter 'VERSION' : 1.40
+ FILE : hisimsoi_n5.va
+
+ Date : 2018.07.30
+
+ released by Hiroshima University
+
+***********************************************************************/
+//
+////////////////////////////////////////////////////////////////
+//
+//Licensed under the Educational Community License, Version 2.0 
+//(the "License"); you may not use this file except in 
+//compliance with the License. 
+//
+//You may obtain a copy of the License at: 
+//
+//	http://opensource.org/licenses/ECL-2.0
+//
+//Unless required by applicable law or agreed to in writing, 
+//software distributed under the License is distributed on an 
+//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+//either express or implied. See the License for the specific 
+//language governing permissions and limitations under the 
+//License.
+//
+//
+//The HiSIM_SOI standard has been supported by the members of 
+//Silicon Integration Initiative's Compact Model Coalition. A 
+//link to the most recent version of this standard can be found 
+//at:
+//
+//http://www.si2.org/cmc
+//
+////////////////////////////////////////////////////////////////
+//
+
+`include "discipline.h"
+
+// Definitions for `ifdef directives
+
+// Disable COPPRV flag that cause issues in RF simulation.
+`define DISABLE_COPPRV
+
+`include "HSMSOI_macrosAndDefs.inc"
+
+//Start of HiSIM_SOI model code
+
+// Module Definition
+//`define _4_PORTS_CONNECTED_
+`ifdef  _4_PORTS_CONNECTED_
+module hisimsoi_va(d, g, s, e) ;
+   inout      d, g, s, e ;
+`else
+`define _5_PORTS_CONNECTED_
+`ifdef  _5_PORTS_CONNECTED_
+module hisimsoi_va(d, g, s, e, bc) ;
+   inout      d, g, s, e, bc ;
+`else
+module hisimsoi_va(d, g, s, e, bc, n6) ;
+   inout      d, g, s, e, bc, n6 ;
+`endif
+`endif
+   electrical d, g, s, e, bc, n6 ;        // External Nodes
+   electrical dp, sp ;                    // D/S Internal Nodes
+   electrical temp, gp, bp,  nqs_qb, n ;  // Common Internal Nodes
+   electrical nqs_qd, nqs_qs, nqs_qhs ;   // for fb
+   electrical nqs_qi ;                    // for bt
+//
+
+`include "HSMSOI_TOP_module.inc"
+
+endmodule
