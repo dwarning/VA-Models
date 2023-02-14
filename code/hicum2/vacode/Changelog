@@ -1,4 +1,4 @@
-Use alternative ngspice specific limit function typedpnjlim for inner base-emitter and base-collector junctions
+Use alternative ngspice specific limit function pnjlim for inner base-emitter and base-collector junctions
 
 Use disciplines.vams
 Use constants.vams

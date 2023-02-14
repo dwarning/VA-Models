@@ -1,0 +1,4 @@
+
+Use conventional type definition: +1 NPN and -1 PNP
+
+Use alternative ngspice specific limit function pnjlim for inner base-emitter and base-collector junctions
