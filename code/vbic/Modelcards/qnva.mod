@@ -15,12 +15,12 @@
 +qnva_aibei=0.000e+00
 +qnva_aiben=0.000e+00
 
-.subckt qnva c b e s t le=2.02 par1=1
-nq1 c b e s qnvamod
+.subckt qnva c b e s t le=2.02 m=1 par1=1
+nq1 c b e s qnvamod m='m'
 .model qnvamod vbic13_4t
 + type=1
 + tref=2.700e+01
-+ ebbe=2.111e-05
+*+ ebbe=2.111e-05
 + vo=0.000e+00
 + gamm=1.493e-13               hrcf=0.000e+00
 + nf=1.000e+00                 nr=1.008e+00
