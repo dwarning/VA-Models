@@ -29,7 +29,7 @@ NQVLGNPN3 NET6 D NET8 VEE NPN_VBIC_VLG sw_et=0
 *
 *.MODEL NPN_VBIC_VLG vbic_4T_et_cf 
 .MODEL NPN_VBIC_VLG vbic13_4t 
-+Type=-1
++Type=1
 +TNOM    = 27             RCI     = 1E3            RCX     = 50                 
 +VO      = 1.5            GAMM    = 3.402097E-11   HRCF    = 1                  
 +RBX     = 243            RBI     = 20             RE      = 30                 
@@ -48,7 +48,6 @@ NQVLGNPN3 NET6 D NET8 VEE NPN_VBIC_VLG sw_et=0
 +VER     = 2.2052435      IKF     = 6.03524E-3     IKR     = 1.807895E-4        
 +IKP     = 2.908576E-5    TF      = 1.1E-12        XTF     = 21.5423            
 +VTF     = 12.4758677     ITF     = 0.0175231      TR      = 2.23542E-9       
-+RTH = 100 CTH=0
 
 .SAVE V(D) V(CLK) V(Q)
 .control

@@ -1,5 +1,5 @@
 .model vbicmod vbic13_4t
-+ Type=-1
++ Type=1
 + Tnom=27 RCX=10 RCI=60 VO=2 GAMM=2.e-11
 + HRCF=2 RBX=10 RBI=40 RE=2
 + RS=20 RBP=40 IS=1e-16 NF=1.00000e+00

@@ -61,7 +61,7 @@ NQ1 11 22 33 44 M_BFP780
 *
 .ENDS BFP780
 .MODEL  M_BFP780 vbic13_4t (
-+ Type=-1
++ Type=1
 + Tnom=25
 + Cbeo=2.47E-012
 + Cje=561.3E-015
@@ -197,7 +197,8 @@ Q1 11 22 33 44 M_BFQ790
 * with access to the thermal node
 * Q1 11 22 33 44 55 M_BFQ790
 *
-.MODEL  M_BFQ790 NPN Level=4(
+.MODEL  M_BFQ790 vbic13_4t (
++ Type=1
 + Tnom=25
 + Cbeo=9.31E-012
 + Cje=7.693E-013

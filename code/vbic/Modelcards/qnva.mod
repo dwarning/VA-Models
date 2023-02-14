@@ -18,7 +18,7 @@
 .subckt qnva c b e s t le=2.02 par1=1
 nq1 c b e s qnvamod
 .model qnvamod vbic13_4t
-+ type=-1
++ type=1
 + tref=2.700e+01
 + ebbe=2.111e-05
 + vo=0.000e+00
