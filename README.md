@@ -13,7 +13,7 @@ The models covering a wide range of devices :
 * **HEMT** like ASMHEMT, mvsg_cmc
 * **Sensors**
 
-All models are checked for syntax belong Verilog-AMS Language Reference Manual Version 2.4.0. https://accellera.org/downloads/standards/v-ams 
+All models are checked for syntax belong Verilog-AMS Language Reference Manual Version 2.4.0. https://accellera.org/downloads/standards/v-ams
 The models are modified mostly for convergence improvements. Equations are untouched.
 So few parameter limits are changed to prevent division by zero and especially bipolar models lacks suitable limit function to prevent divergence in Newton-Raphson iteration process. Changes are noticed in Changelog.
 
@@ -43,7 +43,7 @@ Furthermore, some Verilog-A language features are currently not supported by ope
 
 **NGSPICE [website](https://ngspice.sourceforge.io/)** is the open source simulator for electronic circuit simulation. Source code, examples and precompiled binaries of all release are **available on the [website](https://sourceforge.net/projects/ngspice/)**.
 
-NGSPICE is stable and in an regulary update process. 
+NGSPICE is stable and in an regulary update process.
 
 ## How to build the models
 
@@ -60,9 +60,12 @@ cd code
 openvaf-compile-va.bat for MS Windows
 ```
 
-## General Usage Instructions 
+## General Usage Instructions
 
-Copy the *.osdi files from directory osdilibs to the place where then code models (*.cm) are located, typically in lib/ngspice or similar.
+Copy the *.osdi* files from directory osdilibs to the place where the NGSPICE code models (*.cm*) are located, typically in lib/ngspice or similar.
+Other way (as shown in the example files) is the load command *pre_osdi ../osdilibs/bsimcmg.osdi* in the NGSPICE control section. 
+It is important that the *.model* card use the name of the Verilog-A module, e.g. in case of bsimcmg: *.model BSIMCMG_N bsimcmg_va*.
+
 
 Edit file 'spinit', typically found in share/ngspice/scripts: Comment out the line
 
