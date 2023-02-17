@@ -6,3 +6,4 @@
 
 /code/osdilibs
 /code/osdilibs/*.*
+/test/*.vlog
