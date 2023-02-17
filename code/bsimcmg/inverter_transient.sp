@@ -23,7 +23,7 @@ Xinv4  3 4 supply ss mg_inv
 Xinv5  4 vo supply ss mg_inv
 
 * --- Transient Analysis ---
-.tran 20n 5u
+.tran 0.1n 2u
 
 .control
 pre_osdi ../osdilibs/bsimcmg.osdi

@@ -16,7 +16,7 @@ cout  buf ss 1pF
 
 .control
 pre_osdi ../osdilibs/bsimsoi.osdi
-*option itl1=500 gmin=1e-15 itl4=10 
+option reltol=1e-4
 *option itl1=1000 itl4=20 temp=85 gmin=1e-15 abstol=1e-12 reltol=1e-4
 tran 0.2n 10n
 plot v(out25) v(out50)
