@@ -241,6 +241,47 @@ $VALGRIND --log-file=../../test/hicum2_hic2_ft.vlog      $NGSPICE hic2_ft.spv
 rm *.spv
 cd ../../test
 
+cd ../code/hisim2
+cp HiSIM2_TRTest_Netlist.sp HiSIM2_TRTest_Netlist.spv
+cp HiSIM2_DCTest_Netlist.sp HiSIM2_DCTest_Netlist.spv
+cp HiSIM2_ACTest_Netlist.sp HiSIM2_ACTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM2_TRTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM2_DCTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM2_ACTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM2_TRTest_Netlist.vlog $NGSPICE HiSIM2_TRTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM2_DCTest_Netlist.vlog $NGSPICE HiSIM2_DCTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM2_ACTest_Netlist.vlog $NGSPICE HiSIM2_ACTest_Netlist.spv
+rm *.spv
+cd ../../test
+
+cd ../code/hisimhv
+cp HiSIM_HV_TRTest_Netlist.sp HiSIM_HV_TRTest_Netlist.spv
+cp HiSIM_HV_DCTest_Netlist.sp HiSIM_HV_DCTest_Netlist.spv
+cp HiSIM_HV_ACTest_Netlist.sp HiSIM_HV_ACTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_TRTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_DCTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_ACTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_HV_TRTest_Netlist.vlog $NGSPICE HiSIM_HV_TRTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_HV_DCTest_Netlist.vlog $NGSPICE HiSIM_HV_DCTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_HV_ACTest_Netlist.vlog $NGSPICE HiSIM_HV_ACTest_Netlist.spv
+rm *.spv
+cd ../../test
+
+cd ../code/hisimsoi
+cp HiSIM_SOI_TRTest_Netlist.sp HiSIM_SOI_TRTest_Netlist.spv
+cp HiSIM_SOI_DCTest_Netlist.sp HiSIM_SOI_DCTest_Netlist.spv
+cp HiSIM_SOI_ACTest_Netlist.sp HiSIM_SOI_ACTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_TRTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_DCTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_ACTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_SOI_TRTest_Netlist.vlog $NGSPICE HiSIM_SOI_TRTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_SOI_DCTest_Netlist.vlog $NGSPICE HiSIM_SOI_DCTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_SOI_ACTest_Netlist.vlog $NGSPICE HiSIM_SOI_ACTest_Netlist.spv
+rm *.spv
+cd ../../test
+
+
+
 # Check the results
 # Find correct response: ngspice-<version> done
 #NGSPICE_OK="ngspice-`$NGSPICE -v | awk '/^ngspice/ {print $6;}'` done"
