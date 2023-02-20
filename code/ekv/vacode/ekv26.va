@@ -83,7 +83,8 @@ module ekv_va(d,g,s,b);
     real nslope;         // slope factor
     real Ispec;          // specific current
     real Vt, Vtn;        // k*T/q, Vt*n
-    real gm, gms, gmbs, gds;
+//    real gm, gms, gmbs, gds;
+    real gms;
     real isub, Isub;
     real inv_Vt, Vt_01, Vt_2, Vt_4, Vt_Vt, Vt_Vt_2, Vt_Vt_16;
     real eps_COX, eps_COX_W, eps_COX_L;
@@ -129,7 +130,7 @@ module ekv_va(d,g,s,b);
     real dbeta_dVD, dbeta_dVG, dbeta_dVS;
     real VGstar, sqrt_VGstar;
     real VG, VD, VS;
-    real Von, Vdsat, Id, Ibd;
+    real Von, Ibd;
     real Gn;
     real GAMMA_sqrt_PHI, Lmin, Lprime, T0_GAMMA_1, THETA_VP_1, Vc;
     real Vdsprime, Vt_Vc, dGAMMAprime_dVD, dGAMMAprime_dVG, dGAMMAprime_dVS;
@@ -263,6 +264,13 @@ module ekv_va(d,g,s,b);
     `MPRco( tnjts      ,  0.0      , "" ,      0.0 , inf  , "")
     `MPRco( tnjtssw    ,  0.0      , "" ,      0.0 , inf  , "")
     `MPRco( tnjtsswg   ,  0.0      , "" ,      0.0 , inf  , "")
+
+    `OPM(gm, "A/V", "Transconductance")
+    `OPM(gds, "A/V", "Output conductance")
+    `OPM(gmbs, "A/V", "Substrate conductance")
+    `OPP(Vdsat, "V", "Saturation voltage")
+    `OPM(Id, "A", "Drain current")
+
     analog begin
         `INITIAL_MODEL     // Model Initialization
         begin

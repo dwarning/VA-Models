@@ -1,3 +1,5 @@
+Introduce OP info variables: gm, gds, gmbs, Id and Vdsat
+
 Reintroduction of y_fv() macro
 
 Use pnjlim limiting function for pn-junctions
