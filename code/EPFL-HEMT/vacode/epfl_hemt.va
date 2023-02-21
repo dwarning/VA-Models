@@ -206,8 +206,8 @@ integer devsign;
 //real PSiso, PDiso, PSsha, PDsha, PSmer, PDmer, ASiso, ADiso, ASsha, ADsha, ASmer, ADmer;
 real T0, T1, T2, T3, T4, T5, T6, T7, T8, T9;
 real Weff, Leff;
-//real Vdb_noswap, Vsb_noswap,vgfbCV Vgs_noswap, Vgd_noswap, Vds_noswap;
-real sigvds, vA, vg_vA, Vbsx;
+//real Vdb_noswap, Vsb_noswap,vgfbCV Vgs_noswap, Vgd_noswap, Vds_noswap, sigvds;
+real vA, vg_vA, Vbsx;
 real Vg, vg, Vd, Vs, vs, Vds, Vdsx,vd,VDAR,VSAR;
 real Vth_shift;
 real qia, qba, qbs, phib, phib_n;
@@ -244,7 +244,7 @@ real LambdaC,qdsat,vdsat,vdssat,qdeff;
 real g_clm,e_clm,e_clmx2,e_clm2,e_clmp2,e_clmx2xqs;
 real qs_qsat,qs_qsat2,mdm2,e_clmxmdm2_2,tmp_vdsat1,tmp_vdsat11,tmp_vdsat2;
 real dv_clm,tmp_vdp1,tmp_vdp2,tmp_vdp3,vdp,u_clm,alpha_clm,deltal;
-real GM,GMBS,GDS;
+//real GM,GMBS,GDS,IDS;
 
 //series resistance
 //real RSourceGeo,RDrainGeo,rdstemp;
@@ -253,7 +253,7 @@ real nsacc, vsatacc, muacc, qacc;
 real Rd0,Rs0,Rd,Rs,Rd1,Rs1,Iaccsat,Rcos,Rcod;
 
 //current
-real Dtot,ueff,ids,Isp,IDS;
+real Dtot,ueff,ids,Isp;
 
 //Temperature
 real tambk, tsh, tdut, pdiss, mut, TRatio,UCRIT_T;
@@ -319,7 +319,7 @@ parameter real gsar            = 1.2      from (-inf:inf) exclude 0.0;
 analog function real core;
     input vch,pinch_n,n_q,gam,Cb,DOS_2D,gg,q,UT,v_s,phib,beta;
     real vrbl,vch,pinch_n,gam,Cb,DOS_2D,gg,q,UT,phib;
-    real v_s,a,n0,alpha,d,beta,n_q,Qsp;
+    real v_s,a,n0,alpha,beta,n_q,Qsp;
     real T0,T1,T2,T3,T4;
     begin
         vrbl=pinch_n-v_s+phib-vch;
