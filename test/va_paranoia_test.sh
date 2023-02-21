@@ -218,69 +218,182 @@ VALGRIND="valgrind --leak-check=full --suppressions=$(pwd)/ignore_shared_libs.su
 #$VALGRIND --log-file=../../test/hicum0_bip_subsmod.vlog      $NGSPICE bip_subsmod.spv
 #rm *.spv
 #cd ../../test
+#
+#cd ../code/hicum2
+#cp hic2_tran.sp    hic2_tran.spv
+#cp hic2_out.sp     hic2_out.spv
+#cp hic2_gum.sp     hic2_gum.spv
+#cp hic2_gum_inv.sp hic2_gum_inv.spv
+#cp hic2_gain.sp    hic2_gain.spv
+#cp hic2_ft.sp      hic2_ft.spv
+#sed -i 's/.endc/quit\n.endc/g' hic2_tran.spv
+#sed -i 's/.endc/quit\n.endc/g' hic2_out.spv
+#sed -i 's/.endc/quit\n.endc/g' hic2_gum.spv
+#sed -i 's/.endc/quit\n.endc/g' hic2_gum_inv.spv
+#sed -i 's/.endc/quit\n.endc/g' hic2_gain.spv
+#sed -i 's/.endc/quit\n.endc/g' hic2_ft.spv
+#$VALGRIND --log-file=../../test/hicum2_hic2_tran.vlog    $NGSPICE hic2_tran.spv
+#$VALGRIND --log-file=../../test/hicum2_hic2_out.vlog     $NGSPICE hic2_out.spv
+#$VALGRIND --log-file=../../test/hicum2_hic2_gum.vlog     $NGSPICE hic2_gum.spv
+#$VALGRIND --log-file=../../test/hicum2_hic2_gum_inv.vlog $NGSPICE hic2_gum_inv.spv
+#$VALGRIND --log-file=../../test/hicum2_hic2_gain.vlog    $NGSPICE hic2_gain.spv
+#$VALGRIND --log-file=../../test/hicum2_hic2_ft.vlog      $NGSPICE hic2_ft.spv
+#rm *.spv
+#cd ../../test
+#
+#cd ../code/hisim2
+#cp HiSIM2_TRTest_Netlist.sp HiSIM2_TRTest_Netlist.spv
+#cp HiSIM2_DCTest_Netlist.sp HiSIM2_DCTest_Netlist.spv
+#cp HiSIM2_ACTest_Netlist.sp HiSIM2_ACTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM2_TRTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM2_DCTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM2_ACTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM2_TRTest_Netlist.vlog $NGSPICE HiSIM2_TRTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM2_DCTest_Netlist.vlog $NGSPICE HiSIM2_DCTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM2_ACTest_Netlist.vlog $NGSPICE HiSIM2_ACTest_Netlist.spv
+#rm *.spv
+#cd ../../test
+#
+#cd ../code/hisimhv
+#cp HiSIM_HV_TRTest_Netlist.sp HiSIM_HV_TRTest_Netlist.spv
+#cp HiSIM_HV_DCTest_Netlist.sp HiSIM_HV_DCTest_Netlist.spv
+#cp HiSIM_HV_ACTest_Netlist.sp HiSIM_HV_ACTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_TRTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_DCTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_ACTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM_HV_TRTest_Netlist.vlog $NGSPICE HiSIM_HV_TRTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM_HV_DCTest_Netlist.vlog $NGSPICE HiSIM_HV_DCTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM_HV_ACTest_Netlist.vlog $NGSPICE HiSIM_HV_ACTest_Netlist.spv
+#rm *.spv
+#cd ../../test
+#
+#cd ../code/hisimsoi
+#cp HiSIM_SOI_TRTest_Netlist.sp HiSIM_SOI_TRTest_Netlist.spv
+#cp HiSIM_SOI_DCTest_Netlist.sp HiSIM_SOI_DCTest_Netlist.spv
+#cp HiSIM_SOI_ACTest_Netlist.sp HiSIM_SOI_ACTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_TRTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_DCTest_Netlist.spv
+#sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_ACTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM_SOI_TRTest_Netlist.vlog $NGSPICE HiSIM_SOI_TRTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM_SOI_DCTest_Netlist.vlog $NGSPICE HiSIM_SOI_DCTest_Netlist.spv
+#$VALGRIND --log-file=../../test/HiSIM_SOI_ACTest_Netlist.vlog $NGSPICE HiSIM_SOI_ACTest_Netlist.spv
+#rm *.spv
+#cd ../../test
+#
+#cd ../code/L-UTSOI
+#cp id_pmos.sp            id_pmos.spv
+#cp id_nmos.sp            id_nmos.spv
+#sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
+#sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
+#$VALGRIND --log-file=../../test/L-UTSOI_id_pmos.vlog            $NGSPICE id_pmos.spv
+#$VALGRIND --log-file=../../test/L-UTSOI_id_nmos.vlog            $NGSPICE id_nmos.spv
+#rm *.spv
+#cd ../../test
+#
+#cd ../code/mextram
+#cp mex_out.sp            mex_out.spv
+#cp mex_gum.sp            mex_gum.spv
+#cp meclgate.cir          meclgate.spv
+#sed -i 's/.endc/quit\n.endc/g' mex_out.spv
+#sed -i 's/.endc/quit\n.endc/g' mex_gum.spv
+#sed -i 's/.endc/quit\n.endc/g' meclgate.spv
+#$VALGRIND --log-file=../../test/mextram_mex_out.vlog            $NGSPICE mex_out.spv
+#$VALGRIND --log-file=../../test/mextram_mex_gum.vlog            $NGSPICE mex_gum.spv
+#$VALGRIND --log-file=../../test/mextram_meclgate.vlog           $NGSPICE meclgate.spv
+#rm *.spv
+#cd ../../test
+#
+#cd ../code/MOSVAR
+#cp test_mosvar.sp            test_mosvar.spv
+#sed -i 's/.endc/quit\n.endc/g' test_mosvar.spv
+#$VALGRIND --log-file=../../test/MOSVAR_test_mosvar.vlog        $NGSPICE test_mosvar.spv
+#rm *.spv
+#cd ../../test
+#
+#cd ../code/mvsg
+#cp id_pfet.sp            id_pfet.spv
+#cp id_nfet.sp            id_nfet.spv
+#cp gummel_nfet.sp        gummel_nfet.spv
+#sed -i 's/.endc/quit\n.endc/g' id_pfet.spv
+#sed -i 's/.endc/quit\n.endc/g' id_nfet.spv
+#sed -i 's/.endc/quit\n.endc/g' gummel_nfet.spv
+#$VALGRIND --log-file=../../test/mvsg_id_pfet.vlog            $NGSPICE id_pfet.spv
+#$VALGRIND --log-file=../../test/mvsg_id_nfet.vlog            $NGSPICE id_nfet.spv
+#$VALGRIND --log-file=../../test/mvsg_gummel_nfet.vlog        $NGSPICE gummel_nfet.spv
+#rm *.spv
+#cd ../../test
+#
+#cd ../code/psp102
+#cp id_pmos.sp            id_pmos.spv
+#cp id_nmos.sp            id_nmos.spv
+#sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
+#sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
+#$VALGRIND --log-file=../../test/psp102_id_pmos.vlog            $NGSPICE id_pmos.spv
+#$VALGRIND --log-file=../../test/psp102_id_nmos.vlog            $NGSPICE id_nmos.spv
+#rm *.spv
+#cd ../../test
 
-cd ../code/hicum2
-cp hic2_tran.sp    hic2_tran.spv
-cp hic2_out.sp     hic2_out.spv
-cp hic2_gum.sp     hic2_gum.spv
-cp hic2_gum_inv.sp hic2_gum_inv.spv
-cp hic2_gain.sp    hic2_gain.spv
-cp hic2_ft.sp      hic2_ft.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_tran.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_out.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_gum.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_gum_inv.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_gain.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_ft.spv
-$VALGRIND --log-file=../../test/hicum2_hic2_tran.vlog    $NGSPICE hic2_tran.spv
-$VALGRIND --log-file=../../test/hicum2_hic2_out.vlog     $NGSPICE hic2_out.spv
-$VALGRIND --log-file=../../test/hicum2_hic2_gum.vlog     $NGSPICE hic2_gum.spv
-$VALGRIND --log-file=../../test/hicum2_hic2_gum_inv.vlog $NGSPICE hic2_gum_inv.spv
-$VALGRIND --log-file=../../test/hicum2_hic2_gain.vlog    $NGSPICE hic2_gain.spv
-$VALGRIND --log-file=../../test/hicum2_hic2_ft.vlog      $NGSPICE hic2_ft.spv
+cd ../code/psp103
+cp psp_transfer.sp    psp_transfer.spv
+cp psp_ro.sp          psp_ro.spv
+cp psp_out_pmos_nm.sp psp_out_pmos_nm.spv
+cp psp_out_nmos_nm.sp psp_out_nmos_nm.spv
+cp psp_inverter.sp    psp_inverter.spv
+cp nmos_pmos_PSP.sp   nmos_pmos_PSP.spv
+cp c7552_ann_psp.net  c7552_ann_psp.spv
+sed -i 's/.endc/quit\n.endc/g' psp_transfer.spv
+sed -i 's/.endc/quit\n.endc/g' psp_ro.spv
+sed -i 's/.endc/quit\n.endc/g' psp_out_pmos_nm.spv
+sed -i 's/.endc/quit\n.endc/g' psp_out_nmos_nm.spv
+sed -i 's/.endc/quit\n.endc/g' psp_inverter.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_pmos_PSP.spv
+sed -i 's/.endc/quit\n.endc/g' c7552_ann_psp.spv
+sed -i 's/15ns/0.1ns/g' c7552_ann_psp.spv
+$VALGRIND --log-file=../../test/psp103_psp_transfer.vlog    $NGSPICE psp_transfer.spv
+$VALGRIND --log-file=../../test/psp103_psp_ro.vlog          $NGSPICE psp_ro.spv
+$VALGRIND --log-file=../../test/psp103_psp_out_pmos_nm.vlog $NGSPICE psp_out_pmos_nm.spv
+$VALGRIND --log-file=../../test/psp103_psp_out_nmos_nm.vlog $NGSPICE psp_out_nmos_nm.spv
+$VALGRIND --log-file=../../test/psp103_psp_inverter.vlog    $NGSPICE psp_inverter.spv
+$VALGRIND --log-file=../../test/psp103_nmos_pmos_PSP.vlog   $NGSPICE nmos_pmos_PSP.spv
+$VALGRIND --log-file=../../test/psp103_c7552_ann_psp.vlog   $NGSPICE c7552_ann_psp.spv
 rm *.spv
 cd ../../test
 
-cd ../code/hisim2
-cp HiSIM2_TRTest_Netlist.sp HiSIM2_TRTest_Netlist.spv
-cp HiSIM2_DCTest_Netlist.sp HiSIM2_DCTest_Netlist.spv
-cp HiSIM2_ACTest_Netlist.sp HiSIM2_ACTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM2_TRTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM2_DCTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM2_ACTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM2_TRTest_Netlist.vlog $NGSPICE HiSIM2_TRTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM2_DCTest_Netlist.vlog $NGSPICE HiSIM2_DCTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM2_ACTest_Netlist.vlog $NGSPICE HiSIM2_ACTest_Netlist.spv
+cd ../code/r2_cmc
+cp res_r2_cmc.cir              res_r2_cmc.spv
+sed -i 's/.endc/quit\n.endc/g' res_r2_cmc.spv
+$VALGRIND --log-file=../../test/r2_res_r2_cmc.vlog          $NGSPICE res_r2_cmc.spv
 rm *.spv
 cd ../../test
 
-cd ../code/hisimhv
-cp HiSIM_HV_TRTest_Netlist.sp HiSIM_HV_TRTest_Netlist.spv
-cp HiSIM_HV_DCTest_Netlist.sp HiSIM_HV_DCTest_Netlist.spv
-cp HiSIM_HV_ACTest_Netlist.sp HiSIM_HV_ACTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_TRTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_DCTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM_HV_ACTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM_HV_TRTest_Netlist.vlog $NGSPICE HiSIM_HV_TRTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM_HV_DCTest_Netlist.vlog $NGSPICE HiSIM_HV_DCTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM_HV_ACTest_Netlist.vlog $NGSPICE HiSIM_HV_ACTest_Netlist.spv
+cd ../code/r3_cmc
+cp res_r3_cmc.sp               res_r3_cmc.spv
+sed -i 's/.endc/quit\n.endc/g' res_r3_cmc.spv
+$VALGRIND --log-file=../../test/r3_res_r3_cmc.vlog          $NGSPICE res_r3_cmc.spv
 rm *.spv
 cd ../../test
 
-cd ../code/hisimsoi
-cp HiSIM_SOI_TRTest_Netlist.sp HiSIM_SOI_TRTest_Netlist.spv
-cp HiSIM_SOI_DCTest_Netlist.sp HiSIM_SOI_DCTest_Netlist.spv
-cp HiSIM_SOI_ACTest_Netlist.sp HiSIM_SOI_ACTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_TRTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_DCTest_Netlist.spv
-sed -i 's/.endc/quit\n.endc/g' HiSIM_SOI_ACTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM_SOI_TRTest_Netlist.vlog $NGSPICE HiSIM_SOI_TRTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM_SOI_DCTest_Netlist.vlog $NGSPICE HiSIM_SOI_DCTest_Netlist.spv
-$VALGRIND --log-file=../../test/HiSIM_SOI_ACTest_Netlist.vlog $NGSPICE HiSIM_SOI_ACTest_Netlist.spv
+cd ../code/vbic
+cp vbic_ac_par.sp vbic_ac_par.spv
+cp self-heat.sp   self-heat.spv
+cp npn_out.sp     npn_out.spv
+cp npn_out_qs.sp  npn_out_qs.spv
+cp npn_gum.sp     npn_gum.spv
+cp DFF_Y_ECL.sp   DFF_Y_ECL.spv
+sed -i 's/.endc/quit\n.endc/g' vbic_ac_par.spv
+sed -i 's/.endc/quit\n.endc/g' self-heat.spv
+sed -i 's/.endc/quit\n.endc/g' npn_out.spv
+sed -i 's/.endc/quit\n.endc/g' npn_out_qs.spv
+sed -i 's/.endc/quit\n.endc/g' npn_gum.spv
+sed -i 's/.endc/quit\n.endc/g' DFF_Y_ECL.spv
+$VALGRIND --log-file=../../test/vbic_vbic_ac_par.vlog       $NGSPICE vbic_ac_par.spv
+$VALGRIND --log-file=../../test/vbic_self-heat.vlog         $NGSPICE self-heat.spv
+$VALGRIND --log-file=../../test/vbic_npn_out.vlog           $NGSPICE npn_out.spv
+$VALGRIND --log-file=../../test/vbic_npn_out_qs.vlog        $NGSPICE npn_out_qs.spv
+$VALGRIND --log-file=../../test/vbic_npn_gum.vlog           $NGSPICE npn_gum.spv
+$VALGRIND --log-file=../../test/vbic_DFF_Y_ECL.vlog         $NGSPICE DFF_Y_ECL.spv
 rm *.spv
 cd ../../test
-
-
 
 # Check the results
 # Find correct response: ngspice-<version> done
@@ -297,57 +410,3 @@ cd ../../test
 ELAPSED="Elapsed: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec"
 echo
 echo $ELAPSED
-
-#vbic/vbic_ac_par.sp
-#vbic/self-heat.sp
-#vbic/npn_out.sp
-#vbic/npn_out_qs.sp
-#vbic/npn_gum.sp
-#vbic/DFF_Y_ECL.sp
-#r3_cmc/res_r3_cmc.sp
-#r2_cmc/res_r2_cmc.cir
-#psp103/psp_transfer.sp
-#psp103/psp_ro.sp
-#psp103/psp_out_pmos_nm.sp
-#psp103/psp_out_nmos_nm.sp
-#psp103/psp_inverter.sp
-#psp103/nmos_pmos_PSP.sp
-#psp103/c7552_ann_psp.net
-#psp102/id_pmos.sp
-#psp102/id_nmos.sp
-#mvsg/id_pfet.sp
-#mvsg/id_nfet.sp
-#mvsg/gummel_nfet.sp
-#MOSVAR/test_mosvar.sp
-#mextram/mex_out.sp
-#mextram/mex_gum.sp
-#mextram/meclgate.cir
-#L-UTSOI/id_pmos.sp
-#L-UTSOI/id_nmos.sp
-#hisimsoi/HiSIM_SOI_TRTest_Netlist.sp
-#hisimsoi/HiSIM_SOI_DCTest_Netlist.sp
-#hisimsoi/HiSIM_SOI_ACTest_Netlist.sp
-#hisimhv/HiSIM_HV_TRTest_Netlist.sp
-#hisimhv/HiSIM_HV_DCTest_Netlist.sp
-#hisimhv/HiSIM_HV_ACTest_Netlist.sp
-#hisim2/HiSIM2_TRTest_Netlist.sp
-#hisim2/HiSIM2_DCTest_Netlist.sp
-#hisim2/HiSIM2_ACTest_Netlist.sp
-#hicum2/hic2_tran.sp
-#hicum2/hic2_out.sp
-#hicum2/hic2_noise_V.sp
-#hicum2/hic2_noise.sp
-#hicum2/hic2_noise_I.sp
-#hicum2/hic2_gum.sp
-#hicum2/hic2_gum_inv.sp
-#hicum2/hic2_gain.sp
-#hicum2/hic2_ft.sp
-#hicum0/hic0_out.sp
-#hicum0/hic0_gum.sp
-#hicum0/ECL-RO.cir
-#hicum0/ECL-RO-5.cir
-#hicum0/DFF_Y_ECL_HICUM.sp
-#hicum0/bip_subsmod.sp
-#fbh_hbt/hbt_out.sp
-#fbh_hbt/hbt_gum.sp
-#EPFL-HEMT/id_nfet.sp
