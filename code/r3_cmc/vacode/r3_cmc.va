@@ -40,7 +40,7 @@ http://www.si2.org/cmc
 //  Comments: Beta2 release
 //
 
-`include "disciplines.vams"
+`include "discipline.h"
 `include "r3_cmc_macros.include"
 
 //

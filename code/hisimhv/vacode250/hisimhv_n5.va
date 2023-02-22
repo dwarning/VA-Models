@@ -84,7 +84,7 @@
 //*********************************************************************/
 //
 
-`include "disciplines.vams"
+`include "discipline.h"
 
 // Definitions for `ifdef directives
 `define _5_PORTS_CONNECTED_

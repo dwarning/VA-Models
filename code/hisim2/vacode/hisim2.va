@@ -92,7 +92,7 @@
 //*********************************************************************/
 //
 
-`include "disciplines.vams"
+`include "discipline.h"
 
 //
 // Macros for the model/instance parameters

@@ -137,8 +137,8 @@ organization and externally, subject to the following restrictions.
 `endif
 
 //ADS
-`include "constants.vams"
-`include "disciplines.vams"
+`include "constants.h"
+`include "discipline.h"
 //`include "compact.vams"
 
 //Spectre

@@ -19,8 +19,8 @@ under the License.
 ASM HEMT model is supported by the memebrs of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
 standard can be found at: http://www.si2.org/cmc
 */
-`include "disciplines.vams"
-`include "constants.vams"
+`include "discipline.h"
+`include "constants.h"
 
 ////////// Numerical and Physical Constants //////////
 `define DOS 3.240e17           //Density of states, Reference M. Shur Plenum Press 1987, GaAs Device and Circuits

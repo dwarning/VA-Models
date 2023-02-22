@@ -22,7 +22,7 @@
 // Further information can be found in the file releasenotesPSP102.txt
 //
 
-`include "disciplines.vams"
+`include "discipline.h"
 
 `define Binning true
 

@@ -31,7 +31,7 @@ http://www.si2.org/cmc
 //  Physical constants and other generally useful numbers
 //
 
-`include "disciplines.vams"
+`include "discipline.h"
 `define TABS_NIST2004     2.73150000e+02    // (NIST2004) 0C in K
 `define QQ_NIST2004       1.60217653e-19    // (NIST2004) mag. of electronic charge (C)
 `define KB_NIST2004       1.38065050e-23    // (NIST2004) Boltzmann constant (J/K)
