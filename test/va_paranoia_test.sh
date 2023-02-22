@@ -280,6 +280,19 @@ $VALGRIND --log-file=../../test/HiSIM_SOI_ACTest_Netlist.vlog $NGSPICE HiSIM_SOI
 rm *.spv
 cd ../../test
 
+cd ../code/hisimsotb
+cp HiSIM_SOTB_TRTest_Netlist.sp HiSIM_SOTB_TRTest_Netlist.spv
+cp HiSIM_SOTB_DCTest_Netlist.sp HiSIM_SOTB_DCTest_Netlist.spv
+cp HiSIM_SOTB_ACTest_Netlist.sp HiSIM_SOTB_ACTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_SOTB_TRTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_SOTB_DCTest_Netlist.spv
+sed -i 's/.endc/quit\n.endc/g' HiSIM_SOTB_ACTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_SOTB_TRTest_Netlist.vlog $NGSPICE HiSIM_SOTB_TRTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_SOTB_DCTest_Netlist.vlog $NGSPICE HiSIM_SOTB_DCTest_Netlist.spv
+$VALGRIND --log-file=../../test/HiSIM_SOTB_ACTest_Netlist.vlog $NGSPICE HiSIM_SOTB_ACTest_Netlist.spv
+rm *.spv
+cd ../../test
+
 cd ../code/L-UTSOI
 cp id_pmos.sp            id_pmos.spv
 cp id_nmos.sp            id_nmos.spv
