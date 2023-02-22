@@ -913,8 +913,8 @@
 `endif // SelfHeating
 
 //  Stress model parameters
-`MPRcc(SAREF          ,1.0e-6     ,"m"        ,1.0e-9      ,inf         ,"Reference distance between OD-edge and poly from one side")
-`MPRcc(SBREF          ,1.0e-6     ,"m"        ,1.0e-9      ,inf         ,"Reference distance between OD-edge and poly from other side")
+`MPRco(SAREF          ,1.0e-6     ,"m"        ,1.0e-9      ,inf         ,"Reference distance between OD-edge and poly from one side")
+`MPRco(SBREF          ,1.0e-6     ,"m"        ,1.0e-9      ,inf         ,"Reference distance between OD-edge and poly from other side")
 `MPRnb(WLOD           ,0.0        ,"m"                                  ,"Width parameter")
 `MPRnb(KUO            ,0.0        ,"m"                                  ,"Mobility degradation/enhancement coefficient")
 `MPRcc(KVSAT          ,0.0        ,"m"        ,-1.0        ,1.0         ,"Saturation velocity degradation/enhancement coefficient")

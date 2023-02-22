@@ -24,7 +24,7 @@
 // Further information can be found in the file releasenotesPSP103.txt
 //
 
-`include "discipline.h"
+`include "disciplines.vams"
 
 `define NQSmodel true
 
