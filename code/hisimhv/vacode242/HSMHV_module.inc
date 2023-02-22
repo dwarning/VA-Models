@@ -234,7 +234,7 @@ branch(s ,bp) BRsbp  ;
 `MPRnb( VBI       , 1.1        , "V"                             , "Built-in potential  ")
 `MPRoo( NSUBC     , (CODEP!=0 ? 5e16 : 3E17) , "1/cm^3", 0 , inf , "Constant part of Nsub  ")
 `MPRoo( PARL2     , 10.0E-9    , "m"                , -inf ,   L , "Under diffusion  ")
-`MPRcc( LP       , (CODEP!=0 ? 0 : 1.5e-8 ) , "m" ,      0 ,   L , "Length of pocket potential  ")
+`MPRoc( LP       , (CODEP!=0 ? 0 : 1.5e-8 ) , "m" ,      0 ,   L , "Length of pocket potential  ")
 `MPRoo( NSUBP    , (CODEP!=0 ? 1e17 : 1e18) , "1/cm^3" , 0 , inf , "Maximum pocket concentration ")
 `MPRnb( NSUBP0    , 0.0        , ""                              , "Pocket implant parameter ")
 `MPRnb( NSUBWP    , 1.0        , ""                              , "Pocket implant parameter ")
@@ -389,7 +389,7 @@ branch(s ,bp) BRsbp  ;
 `MPRnb( RDVG12    , 100.0      , ""                              , "Vgs dependence of RD for CORSRD=1,3") //HV1
 `MPRco( CTH0      , 1.0E-7     , "Ws/(Kcm)"          ,   0 , inf , "Thermal capacitance ")
 `MPRco( XLDLD     , 1.0E-6     , "m"                 ,   0 , inf , "Lateral diffusion of Drain under the gate  ")
-`MPRnb( XWDLD     , XWD        , ""                              , "Widening of drift width")
+`MPRnb( XWDLD     , XWD        , "m"                             , "Widening of drift width")
 `MPRnb( RD20      , 0.0        , ""                              , "RD23 boundary for CORSRD=2,3")                        //HV1
 `MPRnb( RD21      , 1.0        , ""                              , "Vds dependence of RD for CORSRD=2,3")           //HV1
 `BPRnb( RD22      , 0.0        , ""                              , "Vbs dependence of RD for CORSRD=2,3")           //HV1
@@ -604,7 +604,7 @@ branch(s ,bp) BRsbp  ;
     `MPRnb( CVB       , 0.0E0      , "-"                             , "Bias dependence coefficient of cisb  ")
     `MPRnb( CTEMP     , 0.0E0      , "-"                             , "Temperature coefficient  ")
     `MPRnb( CISBK     , 0.0E0      , "A"                             , "Reverse bias saturation current  ")
-    `MPRnb( CVBK      , CVB        , "-"                             , "Inactivated by CVB ")
+//    `MPRnb( CVBK      , CVB        , "-"                             , "Inactivated by CVB ")
     `MPRnb( DIVX      , 0.0        , "1/V"                           , "Reverse current coefficient")
     `MPRnb( VDIFFJ    , 0.6E-3     , "V"                             , "Threshold voltage for S/D junction diode  ")
     `MPRnb( TCJBD     , 0.0        , "1/K"                           , "Temperature dependence of cjbd ")

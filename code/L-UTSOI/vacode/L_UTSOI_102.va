@@ -64,7 +64,7 @@
 // ****                                                                                     ****
 // *********************************************************************************************
 
-`include "discipline.h"
+`include "disciplines.vams"
 
 // Flag for .OP calculations. Commenting this line cancels OP-related variables definition and OP calculations
 `define OP_CALC
