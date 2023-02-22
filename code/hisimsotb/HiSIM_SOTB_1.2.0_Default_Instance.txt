@@ -1,0 +1,22 @@
+*************************************************
+*** HiSIM_SOTB default instance parameter card ***
+*************************************************
+
+* Version : HiSIM_SOTB 1.2.0
+* Date    : 2018.2.21
+
++ L        = 5e-06 
++ W        = 5e-06 
++ NGCON    = 1 
++ XGW      = 0 
++ XGL      = 0 
++ M        = 1 
++ NF       = 1 
++ SA       = 0 
++ SB       = 0 
++ SD       = 0 
++ TEMP     = 27 
++ DTEMP    = 0 
++ SCA      = 0 
++ SCB      = 0 
++ SCC      = 0 

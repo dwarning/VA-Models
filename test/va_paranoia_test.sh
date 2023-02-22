@@ -75,6 +75,7 @@ sed -i 's/.endc/quit\n.endc/g' gummel_nmos.spv
 sed -i 's/.endc/quit\n.endc/g' bsimbulk_ro.spv
 sed -i 's/.endc/quit\n.endc/g' simbulk_inverter.spv
 sed -i 's/.endc/quit\n.endc/g' c7552_ann_bsimbulk.spv
+sed -i 's/1ns/0.1ns/g' c7552_ann_bsimbulk.spv
 $VALGRIND --log-file=../../test/bsimbulk_ring_osc.vlog           $NGSPICE ring_osc.spv
 $VALGRIND --log-file=../../test/bsimbulk_inv_tran.vlog           $NGSPICE inv_tran.spv
 $VALGRIND --log-file=../../test/bsimbulk_inv_dc.vlog             $NGSPICE inv_dc.spv
@@ -100,6 +101,7 @@ cp ac.sp                 ac.spv
 sed -i 's/.endc/quit\n.endc/g' simple_inverter_dc.spv
 sed -i 's/.endc/quit\n.endc/g' ringosc_17stg.spv
 sed -i 's/.endc/quit\n.endc/g' NuV-test.spv
+sed -i 's/1.2ns/0.2ns/g' NuV-test.spv
 sed -i 's/.endc/quit\n.endc/g' inverter_transient.spv
 sed -i 's/.endc/quit\n.endc/g' inverter_ro.spv
 sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
@@ -207,6 +209,7 @@ cp bip_subsmod.sp     bip_subsmod.spv
 sed -i 's/.endc/quit\n.endc/g' hic0_out.spv
 sed -i 's/.endc/quit\n.endc/g' hic0_gum.spv
 sed -i 's/.endc/quit\n.endc/g' ECL-RO.spv
+sed -i 's/100u/1u/g' ECL-RO.spv
 sed -i 's/.endc/quit\n.endc/g' ECL-RO-5.spv
 sed -i 's/.endc/quit\n.endc/g' DFF_Y_ECL_HICUM.spv
 sed -i 's/.endc/quit\n.endc/g' bip_subsmod.spv
