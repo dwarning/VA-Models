@@ -9,7 +9,7 @@ vdd supply  0 dc=1.0
 
 * --- Inverter Subcircuit ---
 .subckt inverter vin vout vdd gnd
-    Np1 vout vin vdd gnd pmos  W=10e-6 L=10e-6 
+    Np1 vout vin vdd vdd pmos  W=20e-6 L=10e-6 
     Nn1 vout vin gnd gnd nmos  W=10e-6 L=10e-6 
 .ends
 

@@ -9,7 +9,7 @@ vin   vi 0 dc=0.5
 
 * --- Inverter Subcircuit ---
 .subckt inverter vin vout vdd gnd
-    Np1 vout vin vdd gnd pmos W=10u L=10u
+    Np1 vout vin vdd vdd pmos W=20u L=10u
     Nn1 vout vin gnd gnd nmos W=10u L=10u
 .ends
 
