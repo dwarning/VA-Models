@@ -1,59 +1,27 @@
-// **************************************************************************
-// voltage-dependent capacitance
-// demonstrates VerilogA model in QucsStudio
-// It can be compiled by pressing F2 key.
-// If successful the corresponding C++ file is viewed with F4 key.
+// Varactor Model
 //
-// created in July 2015 by M. Margraf
-// based on Varactor Model Version 1b, 23 October 2006, by Ken Kundert
-// see www.designers-guide.org
-// **************************************************************************
+// Version 1b, 23 October 2006
+//
+// Ken Kundert
+//
+// downloaded from the designer's guide (www.designers-guide.org).
+// post any questions on www.designers-guide.org/forum.
+// Documentation on the model can be found at www.designers-guide.org/Modeling
 
 `include "disciplines.vams"
-`include "constants.vams"
 
 module varactor(p, n);
-  inout p, n;
-  electrical p, n, p_intrinsic;
+    inout p, n;
+    electrical p, n;
+    parameter real c0 = 1p from (0:inf);    // nominal capacitance (F)
+    parameter real c1 = 0.5p from [0:c0);   // maximum capacitance change from nominal (F)
+    parameter real v0 = 0;          // voltage for nominal capacitance (V)
+    parameter real v1 = 1 from (0:inf);     // voltage change for maximum capacitance (V)
+    real q, v;
 
-  `define attr(txt) (*txt*)
-  parameter real c0 = 1p from (0:inf)   `attr(info="nominal capacitance" unit="F");
-  parameter real c1 = 0.5p from [0:c0)  `attr(info="maximum capacitance change from nominal" unit="F");
-  parameter real v0 = 0                 `attr(info="voltage for nominal capacitance" unit="V");
-  parameter real v1 = 1 from (0:inf)    `attr(info="voltage change for maximum capacitance" unit="V");
-  parameter real Rs = 0                 `attr(info="series resistance" unit="ohms");
-  parameter real Temp = 25              `attr(info="device temperature" unit="°C");
-
-  real q, v;
-
-  analog begin
-    // linear resistance
-    `ifdef insideQucsStudio
-      R(p,p_intrinsic) <+ Rs;
-    `else
-      V(p,p_intrinsic) <+ Rs * I(p,p_intrinsic);
-    `endif
-
-    if(v1 < 1e-50)
-    begin
-      $error("Parameter 'v1' must be greater than zero.");
-      $finish;
+    analog begin
+        v = V(p,n);
+        q = c0*v + c1*v1*ln(cosh((v - v0)/v1));
+        I(p, n) <+ ddt(q);
     end
-
-    // non-linear capacitance
-    v = V(p,n);
-    q = c0*v + c1*v1*ln(cosh((v - v0)/v1));
-    I(p,n) <+ ddt(q);
-
-    // noise of linear resistance
-    if(Rs > 1e-6)
-    begin
-      Temp = Temp + `P_CELSIUS0;
-      `ifdef insideQucsStudio
-        G(p,p_intrinsic) <+ white_noise(4.0*`P_K*Temp/Rs, "thermal");
-      `else
-        I(p,p_intrinsic) <+ white_noise(4.0*`P_K*Temp/Rs, "thermal");
-      `endif
-    end
-  end
 endmodule
