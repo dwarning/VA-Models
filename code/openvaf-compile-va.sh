@@ -18,7 +18,8 @@ openvaf -D__NGSPICE_COMPACT_MODELING__ -o bsimsoi.osdi ../bsimsoi/vacode/bsimsoi
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o diode_cmc.osdi ../diode_cmc/vacode/diode_cmc.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o ekv26.osdi ../ekv/vacode/ekv26.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o epfl_hemt.osdi ../EPFL-HEMT/vacode/epfl_hemt.va
-openvaf -D__NGSPICE_COMPACT_MODELING__ -o fbhhbt-2.3.osdi ../fbh_hbt/vacode/fbhhbt-2.3.va
+openvaf -D__NGSPICE_COMPACT_MODELING__ -o fbh_hbt-2_1.osdi ../fbh_hbt/vacode/fbh_hbt-2_1.va
+openvaf -D__NGSPICE_COMPACT_MODELING__ -o fbh_hbt-2_3.osdi ../fbh_hbt/vacode/fbh_hbt-2_3.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o HICUML0-2.osdi ../hicum0/vacode/HICUML0-2.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o hicumL2.osdi ../hicum2/vacode/hicumL2.va
 openvaf -D__NGSPICE_COMPACT_MODELING__ -o hisim2.osdi ../hisim2/vacode/hisim2.va
