@@ -19,6 +19,9 @@
 
      www.fbh-berlin.de/modeling.html
      rudolph@fbh-berlin.de
+
+  Downloaded from The Designer's Guide Community (www.designers-guide.org).
+  Post any questions on www.designers-guide.org/Forum.
 */
 
 `include "disciplines.vams"
@@ -33,11 +36,11 @@
 `define sqr(x)  (x*x)
 
 // begin of FBH HBT model
-module HBT_X(c,b,e,t);
+module FBH_HBT(c,b,e,t);
 
 //external nodes
     inout e,b,c,t;
-    electrical e,b,c, t;
+    electrical e,b,c,t;
 
     //internal nodes
     electrical ei, bi, bii, ci, ti, ex, exx, cx, ni, nii;
@@ -48,8 +51,8 @@ module HBT_X(c,b,e,t);
     parameter integer Debug = 0  from [0:inf);          // Ignored
     parameter integer DebugPlus = 0  from [0:inf);      // Ignored
 
-    parameter real Temp = 25.0    from [-273.15:inf);   // Device operating temperature, Celsius
-    parameter real Rth = 0.1    from (0.0:inf);         // Thermal resistance, K/W
+    parameter real temp = 25.0    from [-273.15:inf);   // Device operating temperature, Celsius
+    parameter real Rth = 0.1    from [0.0:inf);         // Thermal resistance, K/W
     parameter real Cth = 700n     from [0.0:inf);       // Thermal capacitance
 
     parameter integer N = 1      from (0:inf);          // Scaling factor, number of emitter fingers
@@ -80,9 +83,9 @@ module HBT_X(c,b,e,t);
     parameter real Rcxx = 1e6    from (0.0:inf);        // Limiting resistor of B-C leakage diode, Ohm
     parameter real Vgc = 0.0    from [0.0:inf);         // B-C leakage thermal activation energy, V, (0 == disables temperature dependence)
 
-    parameter real Bf = 100.0    from [0.0:inf);        // Ideal forward beta
+    parameter real Bf = 100.0    from (0.0:inf);        // Ideal forward beta
     parameter real kBeta= 0.0    from [0.0:inf);        // Temperature coefficient of forward current gain, -1/K,  (0 == disables temperature dependence)
-    parameter real Br = 1.0    from [0.0:inf);          // Ideal reverse beta
+    parameter real Br = 1.0    from (0.0:inf);          // Ideal reverse beta
 
     parameter real VAF = 0.0    from [0.0:inf);         // Forward Early voltage, V,  (0 == disables Early Effect)
     parameter real VAR = 0.0    from [0.0:inf);         // Reverse Early voltage, V, (0 == disables Early Effect)
@@ -348,7 +351,7 @@ module HBT_X(c,b,e,t);
         vcei = V(ci,ei);
 
         Texi = V(ti);
-        Tj = Texi + Temp;  // Junction temperature
+        Tj = Texi + temp;  // Junction temperature
         TjK = Tj+273.15;   // Junction temperature in K
         Tex = Tj - Tnom;    // Temperature difference to reference
 
@@ -657,7 +660,7 @@ module HBT_X(c,b,e,t);
             I(t,ti) <+ Cth * ddt(V(t,ti));
         end
         else begin
-            I(t,ti) <+ V(t,ti) * 1e3;
+            I(t,ti) <+ V(t,ti) * 1e4;
         end
 
     end
