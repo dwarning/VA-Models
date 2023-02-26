@@ -1,0 +1,842 @@
+// MOS Model 11
+//
+// Version 2, 1 Apr 05
+//
+// Geoffrey Coram, Analog Devices
+//
+// Downloaded from The Designer's Guide (www.designers-guide.org).
+// Post any questions on www.designers-guide.org/Forum.
+
+// MOS Model 11 Verilog-A implementation
+// Level 11010 "physical scaling"
+// Based on the report "NL-UR2002/802: MOS Model 11 Level 1101"
+// by R. van Langevelde, A.J. Scholten, and D.B.M Klaassen
+// Copyright Koninklijke Philips Electronics N.V. 2003/2004
+
+// Verilog-A implementation by Geoffrey Coram, Analog Devices, Inc.
+// revision 0.9
+
+`include "discipline.h"
+`include "constants.h"
+
+`define NMOS 1
+`define PMOS -1
+`define TYPE(ndef,pdef) ((type==`NMOS) ? ndef : pdef)
+
+// model constants for hyp smoothing functions
+`define EPS1 2e-2
+`define EPS2 1e-2
+`define EPS3 4e-2
+`define EPS4 1e-1
+`define EPS5 1e-4
+
+`define LEN 1.0e-6
+`define WEN 1.0e-6
+`define LN_MINDOUBLE (-800.0)
+
+// extra physical constants
+`define PHY_EPSOX   (3.9 * `P_EPS0)
+`define PHY_QMN     5.951993000e+00 // Constant of quantum-mechanical behaviour of electrons
+`define PHY_QMP     7.448711000e+00 // Constant of quantum-mechanical behaviour of holes
+`define PHY_CHIBN   3.100000000e+00 // Oxide potential barrier for electrons
+`define PHY_CHIBP   4.500000000e+00 // Oxide potential barrier for holes
+
+
+module mos11010(d,g,s,b);
+inout d,g,s,b;
+electrical d,g,s,b;
+`ifdef __VAMS_COMPACT_MODELING__
+electrical noi_filt, noi_corr;
+`endif
+
+parameter integer type   = `NMOS      from [-1 : 1] exclude 0;
+parameter integer level  =    11010   from [11010 : 11011);
+parameter real lvar      =  0.00;
+parameter real lap       =  4.00e-08;
+parameter real wvar      =  0.00;
+parameter real wot       =  0.00;
+parameter real tr        = 21.0       from [-273.15 : inf);
+parameter real vfb       = -1.05e-00;
+parameter real stvfb     =  0.50e-03;
+parameter real kor       =  0.500;
+parameter real slko      =  0.00;
+parameter real sl2ko     =  0.00;
+parameter real swko      =  0.00;
+parameter real kpinv     =  0.00;
+parameter real phibr     =  0.950;
+parameter real stphib    = -8.50e-04;
+parameter real slphib    =  0.00;
+parameter real sl2phib   =  0.00;
+parameter real swphib    =  0.00;
+parameter real betsq     = `TYPE(370.9e-6,1.15e-04);
+parameter real etabetr   = `TYPE(1.30,0.50);
+parameter real sletabet  =  0.00;
+parameter real fbet1     =  0.00;
+parameter real lp1       =  0.800e-6  from [1.0e-10 : inf);
+parameter real fbet2     =  0.00;
+parameter real lp2       =  0.800e-6  from [1.0e-10 : inf);
+parameter real thesrr    = `TYPE(0.400,0.730);
+parameter real etasr     = `TYPE(0.65e-00,0.50e-00);
+parameter real swthesr   =  0.00;
+parameter real thephr    = `TYPE(1.29e-02,1.00e-03);
+parameter real etaph     = `TYPE(1.35e-00,3.75e-00);
+parameter real swtheph   =  0.00;
+parameter real etamobr   = `TYPE(1.400,3.000);
+parameter real stetamob  =  0.00;
+parameter real swetamob  =  0.00;
+parameter real nu        =  2.000     from [1.000 : inf);
+parameter real nuexp     = `TYPE(5.250,3.230);
+parameter real therr     = `TYPE(0.155,0.080)   from [1.0e-10 :inf);
+parameter real etar      = `TYPE(0.950,0.400);
+parameter real swther    =  0.00;
+parameter real ther1     =  0.00;
+parameter real ther2     =  1.000     from (-0.5 : inf);
+parameter real thesatr   = `TYPE(0.500,0.200);
+parameter real etasat    = `TYPE(1.04e-00,0.86e-00);
+parameter real slthesat  =  1.000;
+parameter real thesatexp =  1.000     from [0.0 : inf);
+parameter real swthesat  =  0.00;
+parameter real thethr    = `TYPE(1.00e-03,0.50e-03);
+parameter real thethexp  =  1.00e-00  from [0.0 : inf);
+parameter real swtheth   =  0.00;
+parameter real sdiblo    =  1.00e-04;
+parameter real sdiblexp  =  1.350;
+parameter real moo       =  0.00;
+parameter real mor       =  0.00;
+parameter real moexp     =  1.340;
+parameter real ssfr      =  6.25e-03;
+parameter real slssf     =  1.00e-00;
+parameter real swssf     =  0.00;
+parameter real alpr      =  0.010;
+parameter real slalp     =  1.000;
+parameter real alpexp    =  1.000     from [0.0 : inf);
+parameter real swalp     =  0.00;
+parameter real vp        =  0.050     from (0.0 : inf);
+parameter real lmin      =  0.150e-6  from [1.0e-10 : 2.5e-6);
+parameter real a1r       =  6.00;
+parameter real sta1      =  0.00;
+parameter real sla1      =  0.00;
+parameter real swa1      =  0.00;
+parameter real a2r       = 38.0;
+parameter real sla2      =  0.00;
+parameter real swa2      =  0.00;
+parameter real a3r       =  1.000;
+parameter real sla3      =  0.00;
+parameter real swa3      =  0.00;
+parameter real iginvr    =  0.00      from [0.0 : inf);
+parameter real binv      = `TYPE(48.000,87.500)     from [0.0 : inf);
+parameter real igaccr    =  0.00      from [0.0 : inf);
+parameter real bacc      = 48.000     from [0.0 : inf);
+parameter real vfbov     =  0.00;
+parameter real kov       =  2.50e-00  from [1.0e-12 : inf);
+parameter real igovr     =  0.00      from [0.0 : inf);
+parameter real agidlr    =  0.00      from [0.0 : inf);
+parameter real bgidl     = 41.00      from [0.0 : inf);
+parameter real stbgidl   = -3.638e-4;
+parameter real cgidl     =  0.00      from [0.0 : inf);
+parameter real tox       =  3.20e-09  from [1.0e-12 : inf);
+parameter real col       =  3.20e-16;
+parameter integer gatenoise =  0      from [0 : 1];
+parameter real nt        =  1.656e-20 from [0.0 : inf);
+parameter real nfar      = `TYPE(1.573e+23,3.825e+24);
+parameter real nfbr      = `TYPE(4.752e+09,1.015e+09);
+parameter real nfcr      = `TYPE(0.00,7.300e-08);
+//parameter real l         =  2.00e-6   from [0.0 : inf);
+(*units="m", type="instance", desc="length"*) parameter real l=2.00e-6 from(0.0:inf);
+//parameter real w         = 10.00e-6   from [0.0 : inf);
+(*units="m", type="instance", desc="width"*) parameter real w=10.00e-6 from(0.0:inf);
+//parameter real dta       =  0.00;
+(*units="degC", type="instance", desc="device temperature"*) parameter real dta=0.00 from[0.0:inf);
+//parameter real mult      =  1.0       from [0.0 : inf);
+(*units="", type="instance", desc="multiplier"*) parameter real mult=1.0 from[1.0:inf);
+
+analog function real hypf;
+    input x, delta;
+    real  x, delta, d, a;
+    begin
+        d = 0.5 * x / delta;
+        a = sqrt(1.0 + d * d);
+        if (x < 0.0)
+            hypf = delta / (a-d);
+        else
+            hypf = delta * (a+d);
+    end
+endfunction // hypf
+
+
+analog function real psi_s_val; // (6.19)..(6.23)
+    input Vgb_eff, psisat, Vin, delacc, NPhit2, phiT, kpi2_4, ko, MPhit;
+    real  Vgb_eff, psisat, Vin, delacc, NPhit2, phiT, kpi2_4, ko, MPhit;
+    real  f1, f2, f3;
+    begin
+        f1 = psisat - hypf(psisat - Vin, `EPS1);
+        f2 = f1 + (psisat - f1)/sqrt(1.0 + (psisat-f1)*(psisat-f1)/NPhit2);
+        f3 = 2.0*(Vgb_eff - f2)/(1.0 + sqrt(1.0 + kpi2_4*(Vgb_eff-f2))) / ko;
+        psi_s_val = f1 + MPhit*ln((f3*f3 - f1 - delacc + phiT)/phiT);
+    end
+endfunction // psi_s_val
+
+
+analog function real Vinv_val; // (6.47)..(6.50)
+    input delacc, Vin, psi_s, ko, phiT, MPhit;
+    real  delacc, Vin, psi_s, ko, phiT, MPhit;
+    real  psi_s_star, x0;
+    begin
+        psi_s_star = hypf(psi_s + delacc, `EPS2);
+        x0 = exp((psi_s - Vin) / MPhit);
+        Vinv_val = ko * phiT * x0 / (sqrt(psi_s_star) + sqrt(psi_s_star + phiT*x0));
+    end
+endfunction // Vinv_val
+
+
+analog function real Vov_val; // (6.59)..(6.68)
+    input Vgx, vfbov, phiT, Accov, kov, NPhit2, kpi2_4;
+    real  Vgx, vfbov, phiT, Accov, kov, NPhit2, kpi2_4;
+    real  Vgx_eff, delacc, kovby2, psisat, psi_acc, f1, f2, f2_etc, f3, x1, x1_etc, x2;
+    begin
+        Vgx_eff = Vgx - vfbov - hypf(Vgx - vfbov, `EPS1);
+        delacc = phiT * ( exp(Accov*(Vgx_eff + `EPS1)/phiT) - 1.0);
+        kovby2 = 0.5*kov;
+        x1 = sqrt( -Vgx_eff + delacc + kovby2*kovby2) - kovby2;
+        psisat = -x1*x1 + delacc;
+        f1 = Accov * (Vgx - vfbov - Vgx_eff);
+        f2 = f1 / sqrt(1.0 + f1*f1/NPhit2);
+        f2_etc = (f1/Accov - f2);
+        f3 = 2.0 * f2_etc / (1.0 + sqrt(1.0 + kpi2_4 * f2_etc));
+        x1_etc = f3/kov;
+        x2 = x1_etc*x1_etc + f2 + phiT;
+        psi_acc = phiT * ln(x2/phiT);
+        x1_etc = sqrt(1.0 + kpi2_4 * (f1/Accov - psi_acc));
+        Vov_val = 2.0 * (Vgx - vfbov - psisat - psi_acc) / (1.0 + x1_etc);
+    end
+endfunction // Vov_val
+
+
+analog function real Igov_val; // (6.69)..(6.72)
+    input Vgx, Vox, igov, binv, ChiBinv, BINV_div_CHIBINV;
+    real  Vgx, Vox, igov, binv, ChiBinv, BINV_div_CHIBINV;
+    real  x0, x1, Ginv, Gacc;
+    begin
+        x0 = Vox/ChiBinv;
+        if (x0 < 1.0) begin
+            x1 = sqrt(1.0 - x0);
+            Ginv = igov * exp( -BINV_div_CHIBINV * (x0*x0 - 3.0*x0 + 3.0) / (1.0 - x0*x1 + x1));
+        end else begin
+            Ginv = igov * exp( -binv/Vox);
+        end
+        if (x0 > -1.0) begin
+            x1 = sqrt(1.0 + x0);
+            Gacc = igov * exp( -BINV_div_CHIBINV * (x0*x0 + 3.0*x0 + 3.0) / (1.0 + x0*x1 + x1));
+        end else begin
+            Gacc = igov * exp( -binv/Vox);
+        end
+        Igov_val = Vox * (Ginv - Gacc) * Vgx;
+    end
+endfunction // Igov_val
+
+// geometry-scaled parameters
+real ko, phib, bet, thesr, theph, etamob, ther, thesat, theth, ssf, alp,
+sdibl, mo, mexp, a1, a2, a3, iginv, igacc, igov, agidl,
+cox, cgdo, cgso, nfa, nfb, nfc, etabet;
+// temperature-updated parameters
+real phiT, vfbT, phibT, betT, thesrT, thephT, etamobT, nuT, therT,
+thesatT, thethT, a1T, bgidlT, ntT;
+// internal parameters
+real PD, Vlimit, THER_eff, Acc_, NPhit, Accov, QMpsi, QMtox, ChiBinv, ChiBacc;
+// commonly-used combinations
+real Vlimit2, NPhit2, MPhit, KPINV_square4, BINV_div_CHIBINV, THESAT_square;
+real vds, Vds, Vgb, Vsb, Vgs, Vgd;
+// source-drain interchange
+integer interchange;
+// temporary variables from unrolled functions
+real x0, x1, pd1;
+// results of calculations
+real Vgb_eff, Vsb_t, psisat_0, Del_Vg, delacc, psisat_1, Vdsat, Vdsx, Vdb_t,
+psi_s_0, psi_s_L, psi_acc, delpsi_s, psi_av, Xi_ox, Xi, Vgt,
+Vox, Veff, Vav, G_mob, G_vsat, G_DelL, G_tot, Vinv_0, Vinv_L,
+Idb, Idrft, Idiff, Ids, Iavl, Vov_0, Vov_L, Igov_0, Igov_L,
+Igidl, Igisl, Igs, Igd, Igb, Isb, Cox_eff, Del_Vgt,
+Qd, Qs, Qb, Qg, Qov_0, Qov_L, Qdg, Qsg, Qbg;
+
+analog begin
+
+    begin : geometry_scaling
+        real Le, We, Le_inv, We_inv, lnLe, Le_inv2, prod_wele, pockeff;
+
+        Le = l + lvar - 2.0 * lap;
+        We = w + wvar - 2.0 * wot;
+        if (Le < 1.0e-9) begin
+            $strobe("Negative effective length = ", Le);
+            $finish;
+        end
+        if (We < 1.0e-9) begin
+            $strobe("Negative effective width = ", We);
+            $finish;
+        end
+        Le_inv = `LEN / Le;
+        We_inv = `WEN / We;
+        Le_inv2 = Le_inv*Le_inv;
+        lnLe = ln(Le_inv);
+        prod_wele = 1.0 / (We_inv * Le_inv);
+        // pockeff = G_P,E (5.10)
+        if (fbet1 == 0.0)
+            pockeff = 1.0;
+        else
+            pockeff = 1.0 + fbet1 * lp1/Le * (1.0 - exp(-Le/lp1));
+        if (fbet2 != 0.0)
+            pockeff = pockeff + fbet2 * lp2/Le * (1.0 - exp(-Le/lp2));
+        if (pockeff < 1.0E-15)
+            pockeff = 1.0E-15;
+
+        // Calculation of Threshold-Voltage Parameters
+        // (5.8)..(5.9)
+        ko = kor * (1.0 + Le_inv * slko + Le_inv2 * sl2ko)
+          * (1.0 + We_inv * swko);
+        phib = phibr * (1.0 + Le_inv * slphib + Le_inv2 * sl2phib)
+          * (1.0 + We_inv * swphib);
+
+        // Calculation of Mobility/Series-Resistance Parameters
+        // (5.11)..(5.16)
+        bet = betsq/pockeff * We/Le;
+        thesr = thesrr * (1.0 + We_inv * swthesr);
+        theph = thephr * (1.0 + We_inv * swtheph);
+        etamob = etamobr * (1.0 + We_inv * swetamob);
+        ther = therr * (1.0 + We_inv * swther) * Le_inv / pockeff;
+        thesat = thesatr * (1.0 + We_inv * swthesat)
+          * (1.0 + slthesat * (exp(lnLe*thesatexp) - 1.0));
+
+        // Calculation of Conductance Parameters
+        // (5.17)..(5.19)
+        theth = thethr * (1.0 + We_inv * swtheth) * exp(lnLe*thethexp);
+        ssf = ssfr * (1.0 + We_inv * swssf) * (1.0 + Le_inv * slssf);
+        alp = alpr * (1.0 + We_inv * swalp)
+          * (1.0 + slalp * (exp(lnLe*alpexp) - 1.0));
+
+        // Calculation of Sub-Threshold Parameters
+        // (5.20)..(5.21)
+        sdibl = sdiblo * exp(lnLe*sdiblexp);
+        mo = mor * exp(lnLe*moexp) + moo;
+
+        // Calculation of Smoothing Parameters
+        // (5.22)..(5.23)
+        mexp = 8.0 * (1.0e-5 - lmin)/(1.0e-5 - 4.0*lmin + 3.0e-5*lmin/Le);
+
+        // Calculation of Weak-Avalanche Parameters
+        // (5.24)..(5.26)
+        a1 = a1r * (1.0 + Le_inv * sla1) * (1.0 + We_inv * swa1);
+        a2 = a2r * (1.0 + Le_inv * sla2) * (1.0 + We_inv * swa2);
+        a3 = a3r * (1.0 + Le_inv * sla3) * (1.0 + We_inv * swa3);
+
+        // Calculation of Gate Current Parameters
+        // (5.27)..(5.29)
+        iginv = prod_wele * iginvr;
+        igacc = prod_wele * igaccr;
+        igov = igovr / We_inv;
+
+        // Calculation of Gate-Induced Drain Leakage Parameters
+        // (5.30)
+        agidl = agidlr / We_inv;
+
+        // Calculation of Charge Parameters
+        // (5.31)..(5.33)
+        cox = `PHY_EPSOX * We * Le / tox;
+        cgdo = col / We_inv;
+        cgso = col / We_inv;
+
+        // Calculation of Noise Parameters
+        // (5.34)..(5.36)
+        nfa = nfar / prod_wele;
+        nfb = nfbr / prod_wele;
+        nfc = nfcr / prod_wele;
+
+        // Calculation of Mobility/Series-Resistance
+        // Temperature-Scaling Coefficients
+        // (5.37)
+        etabet = etabetr + sletabet * Le_inv;
+
+    end
+
+    begin : temperature_adjustment
+        real Tkr, Tkd, delta_tk, ratio_tk, ratlog;
+        Tkr = tr + `P_CELSIUS0;
+        Tkd = $temperature + dta;
+        // Tkd = Tkd + V(t);
+        delta_tk = Tkd - Tkr;
+        ratio_tk = Tkd/Tkr;
+        ratlog = ln(ratio_tk);
+        phiT = $vt(Tkd);
+        vfbT = vfb + delta_tk*stvfb;
+        phibT = phib + delta_tk*stphib;
+        betT = bet * exp(-etabet * ratlog);
+        thesrT = thesr * exp(-etasr * ratlog);
+        thephT = theph * exp(etaph * ratlog);
+        etamobT = etamob * (1.0 + delta_tk*stetamob);
+        nuT = 1.0 + (nu-1.0)*exp(-nuexp * ratlog);
+        therT = ther * exp(-etar * ratlog);
+        thesatT = thesat * exp(-etasat * ratlog);
+        thethT = theth * exp(-etabet * ratlog);
+        a1T = a1 * (1.0 + delta_tk * sta1);
+        bgidlT = bgidl * (1.0 + delta_tk * stbgidl);
+        ntT = ratio_tk * nt;
+    end
+
+    begin // internal parameters
+        PD = 1.0 + ko*ko*kpinv*kpinv;
+        Vlimit = 4.0 * phiT;
+        Vlimit2 = Vlimit*Vlimit;
+        THER_eff = 0.5 * therT * (1.0 + ther1/(0.5+ther2));
+        Acc_ = 1.0/(1.0 + ko/sqrt(2.0*phiT));
+        NPhit = 2.6*2.6/ko;
+        Accov = 1.0/(1.0 + kov/sqrt(2.0*phiT));
+        QMpsi = `TYPE(`PHY_QMN,`PHY_QMP) * pow(`PHY_EPSOX/tox, 2.0/3.0);
+        QMtox = 2.0/5.0 * QMpsi;
+        ChiBinv = `TYPE(`PHY_CHIBN, `PHY_CHIBP);
+        ChiBacc = `PHY_CHIBN;
+        NPhit2 = NPhit * phiT*phiT;
+        MPhit = (1.0+mo)*phiT;
+        KPINV_square4 = 4.0 * kpinv * kpinv;
+        THESAT_square = thesatT * thesatT;
+        BINV_div_CHIBINV = binv / ChiBinv;
+    end
+
+    begin // evaluate
+
+        vds = type * V(d,s);
+        if (vds >= 0.0) begin
+            interchange = 0;
+            Vds = vds;
+            Vsb = type * V(s,b);
+            Vgs = type * V(g,s);
+            Vgd = type * V(g,d);
+        end else begin
+            interchange = 1;
+            Vds = -vds;
+            Vsb = type * V(d,b);
+            Vgs = type * V(g,d);
+            Vgd = type * V(g,s);
+        end
+        Vgb = type * V(g,b);
+
+        // Extended Current Equations
+
+        // (6.1)..(6.3)
+        Vgb_eff = hypf(Vgb - vfbT, `EPS1);
+        Vsb_t = hypf(Vsb + 0.9*phibT, `EPS2) + 0.1*phibT;
+        begin : psisat_0_val
+            real x2;
+            x2 = (sqrt(PD*Vgb_eff + ko*ko/4) - ko/2)/PD;
+            psisat_0 = x2*x2;
+        end
+
+        // Drain induced barrier lowering and Static Feedback
+        // (6.4)..(6.8)
+        begin : Del_Vg_val
+            real x0, Vds_eff, D_dibl, D_sf, Vds2;
+            Vds2 = Vds*Vds;
+            x0 = Vds2 + Vlimit2;
+            Vds_eff = Vds2*Vds2/(x0 *sqrt(x0));
+            D_dibl = sdibl * sqrt(Vsb_t);
+            D_sf = ssf * sqrt(hypf(psisat_0 - Vsb_t, `EPS3));
+            Del_Vg = (D_dibl + hypf(D_sf - D_dibl, ssf * `EPS4)) * Vds_eff;
+        end
+
+        Vgb_eff = hypf(Vgb + Del_Vg - vfbT, `EPS1);
+        delacc = phiT * (exp(-(Acc_*(Vgb_eff - `EPS1))/phiT) -1.0);
+        begin : psisat_1_val // (6.11)
+            real x2;
+            x2 = (sqrt(PD*(Vgb_eff+delacc) + ko*ko/4) - ko/2)/PD;
+            psisat_1 = x2*x2 - delacc;
+        end
+
+        // Drain Saturation Voltage
+        // (6.12)..(6.18)
+        begin : Vdsat_val
+            real Vdsat_long, Vdsat_short, Ts2, x1, delsat;
+            Vdsat_long = psisat_1 - Vsb_t;
+            if (type==`NMOS) begin
+                Ts2 = thesatT;
+            end else begin
+                Ts2 = thesatT * sqrt(1.0 / sqrt(1.0 + THESAT_square*Vdsat_long*Vdsat_long));
+            end
+            x1 = sqrt ( 2.0 / ( Vdsat_long * Vdsat_long + `EPS4 ) + Ts2 * Ts2 );
+            delsat = ( Ts2 - THER_eff) / ( x1 + THER_eff);
+            Vdsat_short = Vdsat_long * (1.0 - 0.9*delsat/(1.0 + sqrt(1.0 - delsat*delsat)));
+            Vdsat = Vlimit + hypf ( Vdsat_short - Vlimit, `EPS3);
+        end
+        Vdsx = Vds*Vdsat/pow((pow(Vds,2.0*mexp) + pow(Vdsat,2.0*mexp)),1.0/(2.0*mexp));
+        Vdb_t = hypf(Vdsx + Vsb + 0.9*phibT, `EPS2) + 0.1*phibT;
+
+        // Surface Potential
+        // (6.19)..(6.23)
+        psi_s_0 = psi_s_val(Vgb_eff, psisat_1, Vsb_t, delacc, NPhit2, phiT, KPINV_square4, ko, MPhit);
+        psi_s_L = psi_s_val(Vgb_eff, psisat_1, Vdb_t, delacc, NPhit2, phiT, KPINV_square4, ko, MPhit);
+
+        // Surface Potential in Accumulation
+        // (6.20)..(6.26)
+        begin : psi_acc_val
+            real f1, f2, f3;
+            f1 = Acc_ * (Vgb + Del_Vg - vfbT - Vgb_eff);
+            f2 = f1/sqrt(1.0 + f1*f1/NPhit2);
+            f3 = (f1/Acc_ - f2)/ko;
+            psi_acc = -phiT * ln((f3*f3 - f2 + phiT)/phiT);
+        end
+
+        // Auxiliary Variables
+        // (6.27)..(6.37)
+        delpsi_s = psi_s_L - psi_s_0;
+        psi_av = 0.5 * (psi_s_L + psi_s_0);
+        x0 = sqrt(hypf(psi_av + delacc, `EPS2));
+        x1 = sqrt(1.0 + KPINV_square4*(Vgb_eff - psi_av));
+        pd1 = 2.0  / (1.0 + x1);
+        Vgt = pd1 * (Vgb_eff - psi_av) - ko * x0;
+        Vox = pd1 * (Vgb + Del_Vg - vfbT - psi_av - psi_acc);
+        Veff = Vgt + etamobT*(Vox - Vgt);
+        Xi_ox = phiT / x1;
+        Xi = Xi_ox + 0.5 * phiT * ko / x0;
+
+
+        // Second-Order Effects
+
+        // Mobility Degradation
+        // (6.39)..(6.40)
+        begin : G_mob_val
+            real Veff1, Esr, Eph;
+            Veff1 = hypf(Veff, `EPS2);
+            Esr = pow(thesrT*Veff1, nuT);
+            Eph = pow(thephT*Veff1, nuT/3.0);
+            if (type==`NMOS)
+                G_mob = 1.0 + pow(Esr*Esr + Eph, 1.0/nuT);
+            else
+                G_mob = pow(1.0 + Esr + Eph, 1.0/nuT);
+        end
+
+        // Velocity Saturation
+        // (6.41)..(6.42)
+        begin : G_vsat_val
+            real x1, x1_etc, x2, x3;
+            x1_etc = sqrt(G_mob);
+            if (type==`NMOS) begin
+                x3 = 2.0 * thesatT * delpsi_s / x1_etc;
+            end else begin
+                x1 = thesatT*delpsi_s;
+                x2 = sqrt( sqrt( 1.0 + x1*x1));
+                x3 = 2.0 * thesatT * delpsi_s / (x2 * x1_etc);
+            end
+            x1 = sqrt(1.0 + x3*x3);
+            if (x3 < 1.0e-4) begin
+                x2 = 1.0 - x3*x3 / 6.0;
+            end else begin
+                x2 = ln(x3 + x1) / x3;
+            end
+            G_vsat = 0.5 * (x1 + x2) * G_mob;
+        end
+
+        // Channel Length Modulation
+        // (6.43)
+        x0 = Vds - Vdsx;
+        x1 = sqrt( x0*x0 + vp*vp );
+        G_DelL = hypf(1.0 - alp * ln((x0+x1)/vp), `EPS5);
+
+        // Series Resistance and Self-Heating
+        // (6.44)..(6.46)
+        begin : G_tot_val
+            real G_R, G_Th, Gtot, x1, x2, x3;
+            G_R = therT * (1.0 + ther1 / (ther2 + Vgt)) * Vgt;
+            G_Th = thethT * Vds * delpsi_s * Vgt;
+            Gtot = G_DelL * G_vsat + G_R;
+            x1 = G_R / (Gtot*Gtot*G_vsat);
+            x2 = G_vsat*G_vsat - G_mob*G_mob;
+            x3 = 0.5 + 0.5*sqrt(hypf(1.0 - 4.0 * x1 * x2, `EPS5));
+            G_tot = Gtot*x3 + G_Th;
+        end
+
+        // Inversion-Layer Charge
+        // (6.47)..(6.49)
+        Vinv_0 = Vinv_val(delacc, Vsb_t, psi_s_0, ko, phiT, MPhit);
+        Vinv_L = Vinv_val(delacc, Vdb_t, psi_s_L, ko, phiT, MPhit);
+
+        // Drain Current
+        // (6.51)..(6.56)
+        begin : Idrft_val
+            real x0, xL, G;
+            x0 = 2.0/phiT * (psisat_1 + phiT - Vsb_t);
+            xL = 2.0/phiT * (psisat_1 + phiT - Vdb_t);
+            if (x0 > 80 || xL > 80) begin
+                Idrft = betT * Vgt * delpsi_s;
+            end else begin
+                x1 = exp(x0) + exp(xL);
+                G = x1/(x1 + 1.0);
+                Idrft = betT * Vgt * delpsi_s * G;
+            end
+        end
+        Idiff = betT * phiT * (Vinv_0 - Vinv_L);
+        Ids = (Idrft + Idiff)/G_tot;
+
+        // Weak-Avalanche
+        // (6.57)
+        if (a1T == 0) begin
+            Iavl = 0;
+        end else begin : Iavl_val
+            real x;
+            x = Vds - a3 * Vdsat;
+            if (x <= -a2/`LN_MINDOUBLE) begin
+                Iavl = 0.0;
+            end else begin
+                Iavl = Ids * a1T * exp(-a2/x);
+            end
+        end
+
+        // Gate Current Equations
+
+        // Source/Drain Gate Overlap Current
+        // (6.59)..(6.72)
+        Vov_0 = Vov_val(Vgs, vfbov, phiT, Accov, kov, NPhit2, KPINV_square4);
+        Vov_L = Vov_val(Vgd, vfbov, phiT, Accov, kov, NPhit2, KPINV_square4);
+        if (igov==0) begin
+            Igov_0 = 0.0;
+            Igov_L = 0.0;
+        end else begin
+            Igov_0 = Igov_val(Vgs, Vov_0, igov, binv, ChiBinv, BINV_div_CHIBINV);
+            Igov_L = Igov_val(Vgd, Vov_L, igov, binv, ChiBinv, BINV_div_CHIBINV);
+        end
+
+        // Del_Vgt needed for charge, even if not for gate leakage
+        // (6.28)..(6.32), (6.38), (6.97)
+        begin : Vcalc_val
+            real V_0, V_L, pd_etc, pd;
+            pd_etc = sqrt(1.0 + KPINV_square4 * (Vgb_eff - psi_s_0));
+            pd = 2.0 * (Vgb_eff - psi_s_0)/(1.0 + pd_etc);
+            V_0 = hypf(pd - ko*sqrt(hypf(psi_s_0 + delacc, `EPS2)), `EPS5);
+            pd_etc = sqrt(1.0 + KPINV_square4 * (Vgb_eff - psi_s_L));
+            pd = 2.0 * (Vgb_eff - psi_s_L)/(1.0 + pd_etc);
+            V_L = hypf(pd - ko*sqrt(hypf(psi_s_L + delacc, `EPS2)), `EPS5);
+            Vav = 0.5 * (V_0 + V_L) + Xi;
+            Del_Vgt = 0.5 * (V_0 - V_L) / (1.0 + therT*Vav/G_tot);
+        end
+
+        // Intrinsic Gate Current
+        // (6.73)..(6.89)
+        if (iginv==0) begin
+            Igs = Igov_0;
+            Igd = Igov_L;
+        end else begin : Igc_val
+            real Vinvav, x0, x1, x2, x4, x5, Pgs, Xistar, Pgc, dVoxstar, CHIB_eff,
+            Ginv, Igcav, Igc, Binvstar;
+            Vinvav = 0.5 * (Vinv_0 + Vinv_L);
+            x0 = Vgt / 3.0 + Vox - Vgt;
+            x1 = x0*x0 + Vlimit2;
+            CHIB_eff = hypf( 0.3*ChiBinv - QMpsi * pow(x1, 1.0/3.0), `EPS5) + 0.7*ChiBinv;
+
+            x0 = Vox / CHIB_eff;
+            x1 = BINV_div_CHIBINV * sqrt(CHIB_eff/ChiBinv);
+
+            if (x0 < 1.0) begin
+                x2 = sqrt(1.0 - x0);
+                Ginv = iginv * exp( -x1 * (x0*x0 - 3.0*x0 + 3.0) / (1.0 - x0*x2 + x2));
+            end else begin
+                Ginv = iginv * exp(-x1/x0);
+            end
+
+            Binvstar = 0.375 * BINV_div_CHIBINV * BINV_div_CHIBINV / (x1 * ChiBinv) * Vox;
+
+            Igcav = G_DelL * (Vgs - 0.5*Vdsx) * Ginv;
+
+            Xistar = Xi / (Vav * phiT);
+            dVoxstar = Vox / sqrt(Vox*Vox + Vlimit2);
+
+            x4 = (Binvstar*Binvstar + 4.0*Binvstar*Xistar + 2.0*Binvstar*dVoxstar
+                  + 2.0*Xistar*Xistar + 4.0*Xistar*dVoxstar) / 24.0;
+            Pgc = (1.0 + x4 * delpsi_s*delpsi_s);
+            Igc = Igcav * Vinvav * Pgc;
+
+            x4 = ( Binvstar + dVoxstar ) * delpsi_s / 12.0;
+            x5 = Binvstar*Binvstar*(Binvstar+5.0*Xistar+3.0*dVoxstar) +
+                2.0*Xistar*Xistar*(Binvstar-Xistar+dVoxstar) +
+                10.0*Binvstar*Xistar*dVoxstar;
+            Pgs = x4 + x5 * delpsi_s * delpsi_s * delpsi_s / 480.0;
+            Igs = 0.5*Igc + Igcav * ( Pgs * Vinvav + x0 ) + Igov_0;
+            Igd = Igc - Igs + Igov_0 + Igov_L;
+        end
+
+        if (igacc==0) begin
+            Igb = 0;
+        end else begin : Igb_val
+            real x0, x1, Gacc, Vacc;
+            x0 = -Vox / ChiBacc;
+            if (x0 < 1.0) begin
+                x1 = sqrt(1.0 - x0);
+                Gacc = igacc * exp( -bacc/ChiBacc * (x0*x0 - 3.0*x0 + 3.0) / (1.0 - x0*x1 + x1) );
+            end else begin
+                Gacc = igacc * exp( bacc / Vox);
+            end
+            Vacc = Vox - hypf(Vox, `EPS5);
+            Igb = - Vgb * Vacc * Gacc;
+        end
+
+        // Gate-Induced Drain/Source Leakage Current
+        // (6.90)..(6.93)
+        if (agidl==0) begin
+            Igisl = 0.0;
+            Igidl = 0.0;
+        end else begin : Igidl_val
+            real Vx, Vtov_0, E_0, Vtov_L, E_L;
+            Vtov_0 = Vov_0 - hypf(Vov_0, `EPS5);
+            E_0 = sqrt (Vtov_0*Vtov_0 + cgidl*cgidl*Vsb*Vsb);
+            if (E_0 <= -bgidlT/`LN_MINDOUBLE)
+                Igisl = 0;
+            else
+                Igisl = Vsb * E_0 * E_0 * agidl * exp(-bgidlT/E_0);
+
+            Vx = Vsb + Vds;
+            Vtov_L = Vov_L - hypf(Vov_L, `EPS5);
+            E_L = sqrt (Vtov_L*Vtov_L + cgidl*cgidl*Vx*Vx);
+            if (E_L <= -bgidlT/`LN_MINDOUBLE)
+                Igidl = 0;
+            else
+                Igidl = Vx * E_L * E_L * agidl * exp(-bgidlT/E_L);
+        end
+
+
+        // Extended Charge Equations
+
+        // Bias-Dependent Overlap Capacitance
+        // (6.94)..(6.95)
+        Qov_0 = cgso * Vov_0;
+        Qov_L = cgdo * Vov_L;
+
+        // Intrinsic Charges
+        // (6.96)..(6.102)
+        begin : Cox_eff_val
+            real Veff2;
+            Veff2 = 1.0/(etamobT*etamobT) * Veff * Veff + 25.0*Vlimit2;
+            Cox_eff = cox / (1.0 + QMtox / pow(Veff2, 1.0/6.0));
+        end
+        begin : Qd_Qs_Qg_val
+            real x1, x2, Fj, Fj_square_div5;
+            Fj = Del_Vgt / Vav;
+            Fj_square_div5 = 0.2 * Fj * Fj;
+            x1 = Fj + Fj_square_div5 - 1.0;
+            x2 = Del_Vgt / 3.0;
+            Qd = -0.5 * Cox_eff * (Vav + x1*x2 - Xi);
+            x1 = Fj - Fj_square_div5 + 1.0;
+            Qs = -0.5 * Cox_eff * (Vav + x1*x2 - Xi);
+            x1 = Fj * Xi_ox / Xi;
+            Qg = Cox_eff * (Vox + x1*x2);
+        end
+        Qb = - (Qd + Qs + Qg);
+
+    end // evaluate
+
+    if (interchange==0) begin
+        I(d,s) <+ mult*type*Ids;
+        Idb = Iavl + Igidl;
+        Isb = Igisl;
+        I(d,b) <+ mult*type*Idb;
+        I(s,b) <+ mult*type*Isb;
+        I(g,d) <+ mult*type*Igd;
+        I(g,s) <+ mult*type*Igs;
+        I(g,b) <+ mult*type*Igb;
+        Qdg = mult*type*(Qd - Qov_L);
+        Qsg = mult*type*(Qs - Qov_0);
+        Qbg = mult*type*Qb;
+    end else begin
+        I(d,s) <+ -mult*type*Ids;
+        Idb = Igisl;
+        Isb = Iavl + Igidl;
+        I(d,b) <+ mult*type*Isb;
+        I(s,b) <+ mult*type*Idb;
+        I(g,d) <+ mult*type*Igs;
+        I(g,s) <+ mult*type*Igd;
+        I(g,b) <+ mult*type*Igb;
+        Qdg = mult*type*(Qs - Qov_L);
+        Qsg = mult*type*(Qd - Qov_0);
+        Qbg = mult*type*Qb;
+    end
+    I(d,g) <+ ddt(Qdg);
+    I(s,g) <+ ddt(Qsg);
+    I(b,g) <+ ddt(Qbg);
+
+    // Extended Noise Equations
+    // (6.103)..(6.113)
+    begin : thermal_noise
+        real x1, Tc_square, Vinv_av, del_Vinv, Rideal, Sth;
+        real rho, nf1, nf2, gm;
+
+        if (gatenoise == 0)
+            rho = 0.4;
+        else
+            rho = 0.0;
+        nf1 = 40.0/27.0;
+        nf2 = sqrt(nf1);
+
+        if (type==`NMOS) begin
+            Tc_square = THESAT_square;
+        end else begin
+            Tc_square = THESAT_square / sqrt(1.0 + THESAT_square * delpsi_s*delpsi_s);
+        end
+
+        Vinv_av =  0.5 * ( Vinv_0 + Vinv_L );
+        del_Vinv = Vinv_0 - Vinv_L;
+
+        Rideal = betT/G_tot * G_vsat*G_vsat
+                 *( Vinv_av + del_Vinv * del_Vinv / 12.0 / ( Vinv_av + Xi ) );
+
+        x1 = ( Rideal - Tc_square * Ids * delpsi_s )/( G_mob * G_mob );
+        if (x1 < 0.0)
+            x1 = 0.0;
+        Sth = x1 * ntT;
+
+        I(d,s) <+ white_noise(mult*Sth*(1.0-rho), "Sth");
+
+`ifdef __VAMS_COMPACT_MODELING__
+        gm = ddx(Ids, V(g));
+        I(noi_corr) <+ mult * V(noi_corr);
+        I(noi_filt) <+ mult * V(noi_filt) * (3.0*gm) * nf2;
+        I(noi_filt) <+ ddt(mult * cox * V(noi_filt));
+
+        if (gatenoise == 0) begin : gate_noise
+            real mig;
+
+            mig = ntT * (3.0 * gm) * nf1;
+
+            I(noi_corr) <+ white_noise(mult*rho, "Sigth");
+            I(noi_filt) <+ white_noise(mult*mig*(1.0-rho), "Sig");
+            I(noi_filt) <+ -mult * sqrt(mig) * V(noi_corr);
+        end
+
+        I(d,s) <+ mult * sqrt(Sth) * V(noi_corr);
+        I(g,s) <+ ddt(mult * cox * V(noi_filt));
+`else
+        if (gatenoise == 0) begin
+            if (analysis("noise")) begin
+                $strobe("Gatenoise=0 not supported without VAMS compact modeling extensions.");
+                $finish;
+            end
+        end
+`endif
+
+    end
+
+    begin : flicker
+        real x1, N0, NL, N_STAR, Ssi_C_1_part1, Ssi_C_1_part2, Ssi_C_1, Ssi_C_2, Sfl_C;
+        x1 = `PHY_EPSOX / (`P_Q * tox);
+        N0 = x1 * Vinv_0;
+        NL = x1 * Vinv_L;
+        N_STAR = x1 * Xi;
+        Ssi_C_1_part1 = `P_Q * phiT * phiT * tox * betT * Ids
+                        / ( `PHY_EPSOX * G_vsat * N_STAR );
+        Ssi_C_1_part2 = ( nfa - N_STAR * nfb + N_STAR * N_STAR * nfc )
+          * ln( (N0 + N_STAR) / (NL + N_STAR) )
+            + ( nfb - N_STAR * nfc ) * (N0 - NL)
+              + 0.5 * nfc * (N0 * N0 - NL * NL);
+        Ssi_C_1   = Ssi_C_1_part1 * Ssi_C_1_part2;
+        Ssi_C_2   = ( phiT * Ids * Ids ) * ( 1.0 - G_DelL ) *
+                    ( nfa + nfb * NL + nfc * NL * NL) / ( ( NL + N_STAR) * (NL + N_STAR) );
+        Sfl_C = Ssi_C_1 + Ssi_C_2;
+        if (Sfl_C < 0.0)
+            Sfl_C = 0.0;
+        I(d,s) <+ flicker_noise(mult*Sfl_C, 1, "Sfl");
+    end
+
+end
+endmodule

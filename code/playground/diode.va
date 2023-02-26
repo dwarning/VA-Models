@@ -1,0 +1,114 @@
+// Junction Diode Model
+//
+// Version 1c, 23 October 2006
+//
+// Marek Mierzwinski        marek_mierzwinski@tiburon-da.com
+// Tiburon Design Automation    www.tiburon-da.com
+//
+// Downloaded from The Designer's Guide (www.designers-guide.org).
+// Post any questions on www.designers-guide.org/Forum.
+
+//
+// Notes
+//  GMIN is not picked up from Options card
+//  bv is not adjusted to match ibv if I(bv) < > ibv
+//
+
+`include "constants.vams"
+`include "disciplines.vams"
+
+`define SPICE_GMIN 1.0e-12
+`define LARGE_REAL 3.40282e+38
+`define DEFAULT_TNOM 27
+
+module diode_va(anode,cathode);
+
+    inout anode, cathode;
+    electrical anode, cathode, internal;
+
+    parameter real af = 0.0 from (0:inf);
+    parameter real area = 1.0 from (0:inf);
+    parameter real bv = `LARGE_REAL from [0:inf);
+    //parameter real bvj = `LARGE_REAL from [0:inf);
+    parameter real cjo = 0.0 from [0:inf);
+    parameter real eg = 1.11 from (0:inf);
+    parameter real fc = 0.5 from [0:1];
+    parameter real ibv = 0.001 from [0:inf);
+    //parameter real ik = `LARGE_REAL from [0:inf);
+    //parameter real ikf = `LARGE_REAL from [0:inf);
+    parameter real is = 1e-14 from [0:inf);
+    parameter real kf = 0.0;
+    parameter real m = 0.5 from [0:1);
+    parameter real n = 1.0 from (0:inf);
+    parameter real rs = 0.0 from [0:inf);
+    parameter real tnom = `DEFAULT_TNOM from (-`P_CELSIUS0:inf);
+    parameter real tt = 0.0 from [0:inf);
+    parameter real vj = 1.0 exclude 0;
+    parameter real xti = 3.0 from [0:inf);
+
+    real Vd, Id, Qd, AbsId;
+    real f1, f2, f3, Fcp;
+    real Ibv_calc, Vth;
+    real Is_temp, Vth_nom, T_nom, T;
+
+    analog begin
+
+        Vth = $vt;
+        T = $temperature;
+
+        f1 = (vj/(1 - m))*(1 - pow((1 - fc), 1 - m));
+        f2 = pow((1 - fc), (1 + m));
+        f3 = 1 - fc * (1 + m);
+        Fcp = fc * vj;
+
+        if (ibv !=0)
+            Ibv_calc = ibv;
+        else
+            Ibv_calc = is * bv / Vth;
+
+        Vd = V(anode, internal);
+
+        // Temperature dependence
+        T_nom = tnom + `P_CELSIUS0;
+        Vth_nom = $vt(T_nom);
+        Is_temp = is * pow(T/T_nom, xti / n) * exp(eg / Vth_nom - eg / Vth);
+
+        // Intrinsic diode
+        if (Vd < 0) begin
+            if (Vd < -bv) // Past breakdown
+                Id = -area * Is_temp * (exp(-(bv + Vd) / Vth) + bv / Vth);
+            else if (Vd == -bv) // At breakdown
+                Id = -area * Ibv_calc;
+            else if (Vd <= -5 * n * Vth) // -bv < Vd < -5 nKT/q
+                Id = -area * Is_temp + Vd * `SPICE_GMIN;
+            else // -5 nKT/q <= Vd < 0
+                Id = area * Is_temp * (exp(Vd / Vth) - 1) + Vd * `SPICE_GMIN;
+        end
+        else // Fwd bias:
+            Id = area * Is_temp * (exp(Vd / (n * Vth)) - 1) + Vd * `SPICE_GMIN;
+
+        // Capacitance (junction and diffusion)
+        if (Vd <= Fcp)
+            Qd = tt * Id + area * cjo * vj
+                 * (1 - pow((1 - Vd / vj), (1 - m)))/(1 - m);
+        else
+            Qd = tt * Id + area * cjo
+                 * (f1 + (1 / f2) * (f3 * (Vd - Fcp) + (0.5 * m / vj)
+                 * (Vd * Vd - Fcp * Fcp)));
+
+        I(anode, internal) <+ Id;
+        V(internal, cathode) <+ I(internal, cathode) * (rs / area);
+        I(anode, internal) <+ ddt(Qd);
+
+        // Noise
+        V(internal, cathode) <+ white_noise(4 * `P_K * T * (rs / area),
+                                  "thermal");
+
+        I(anode, internal)   <+ white_noise(2 * `P_Q * Id, "thermal");
+        if (Id > 0)
+            AbsId = pow(Id, af);
+        else
+            AbsId = -pow(-Id, af);
+        I(anode, internal) <+ flicker_noise(kf * AbsId, 1.0, "flicker");
+    end
+endmodule

@@ -1,0 +1,292 @@
+// JFET (junction field-effect transistor) model
+//
+// Equations taken from Cadence's Affirma Spectre Circuit Simulator
+// Device Model Equations, Copyright 2002 Cadence Design Systems
+// Verilog-A translation by Geoffrey Coram, Analog Devices, Inc.
+//
+// Version 2, 29 June 2022
+//
+// Downloaded from The Designer's Guide (www.designers-guide.org).
+// Post any questions on www.designers-guide.org/Forum.
+
+`include "disciplines.vams"
+`include "constants.vams"
+
+`define OPP(nam, uni, des)  (* units=uni,    desc=des *)           real    nam;
+`define OPM(nam, uni, des)  (* units=uni,    desc=des, multiplicity="multiply" *)  real    nam;
+
+module jfetva(d,g,s);
+inout g,d,s;
+electrical g,d,s;
+electrical di, si;
+branch (d,di) br_rd;
+branch (s,si) br_rs;
+branch (di,si) br_ds;
+branch (g,si) br_gs;
+branch (g,di) br_gd;
+
+parameter integer njfet = 1 from [0:1];
+parameter integer pjfet = 0 from [0:1];
+parameter integer level = 1 from [1:4] exclude 3;
+
+// channel current parameters
+parameter real vto = -2;
+parameter real beta = 1.0e-4 from [0:inf);
+parameter real lambda = 0.0 from [0:inf);
+parameter real lambda1 = 0.0 from [0:inf);
+parameter real alpha = 2.0 from [0:inf);
+parameter real np = 2.0 from [0:inf);
+parameter real io = 0.0 from [0:inf);
+parameter real ns = 1.0 from (0:inf);
+
+// level==3 parameters (4-terminal device, not implemented here)
+//parameter real vtos = 1.2;
+//parameter real vtop = 0.6;
+//parameter real vtoe = 0.33;
+//parameter real vtoc = -3.3;
+//parameter real rb = 0.0 from [0:inf);
+//parameter real isb = 1.0e-14 from (0:inf);
+//parameter real nb = 1.0 from (0:inf);
+//parameter real cgbd = 0.0 from [0:inf);
+//parameter real cgbs = 0.0 from [0:inf);
+//parameter real mjb = 0.5 from (0:inf);
+//parameter real pbb = 1.0 from (0:inf);
+
+// extrinsic resistors
+parameter real rd = 0.0 from [0:inf);
+parameter real rs = 0.0 from [0:inf);
+
+// capacitance parameters
+parameter real tt = 0.0 from [0:inf);
+parameter real cgd = 0.0 from [0:inf);
+parameter real cgs = 0.0 from [0:inf);
+parameter real fc = 0.5 from [0:0.95];
+parameter real mj = 0.5 from (0:1.0);
+parameter real pb = 1.0 from (0:inf);
+
+// gate junction currents
+parameter real is = 1.0e-14 from (0:inf);
+parameter real n = 1.0 from (0:inf);
+
+// temperature parameters
+parameter real tnom=27.0 from [0:inf);
+parameter real dtemp=0.0;
+parameter real xti=3.0 from (0:inf);
+parameter real bto=0 from (-tnom-`P_CELSIUS0:inf);
+parameter real bte=0;
+parameter real tc1=0.0;
+parameter real tc2=0.0;
+
+// noise parameters
+parameter real kf = 0.0 from [0:inf);
+parameter real af = 1.0 from [0.1:inf);
+
+
+`OPP(vgs,     "V", "vgs")
+`OPP(vgd,     "V", "vgd")
+`OPP(vds,     "V", "vds")
+`OPP(vdsat,   "V", "vdsat")
+`OPM(igs,     "A", "igs")
+`OPM(igd,     "A", "igd")
+`OPM(id_chan, "A", "id_chan")
+`OPM(gm,      "S", "gm")
+`OPM(gds,     "S", "gds")
+`OPM(qgd,     "C", "qgd")
+`OPM(qgs,     "C", "qgs")
+`OPM(qd,      "C", "qd")
+`OPM(qs,      "C", "qs")
+
+analog function real spice_energygap;
+    input temp;
+    real temp;
+    spice_energygap = 1.16 - (7.02e-4*temp*temp)/(1108 + temp);
+endfunction
+
+
+analog begin : the_module
+
+    real type, mode;
+    real T, TnomK, Vt, Vtnom, delta_T, ratio_T, factor, eg, eg_tnom;
+    real pb_T, cgd_T, cgs_T, rd_T, rs_T, beta_T, is_T;
+    real f1, f2, f3, Fcp, qgd_diff, qgs_diff, qgd_dep, qgs_dep;
+    real v_gs, v_gd, v_ds, Vth, Vds, Vgst, Vdsat, Vdseff, Ids;
+
+
+    if (njfet == 1) begin
+        type = 1;
+        if (pjfet == 1) begin
+            $error("Error: device cannot be both an N-JFET and a P-JFET.");
+        end
+    end else if (pjfet == 1) begin
+        type = -1;
+    end else begin
+        type = 0;
+        $error("Error: device must be either an N-JFET or a P-JFET.");
+    end
+
+
+    // temperature equations
+
+    T = $temperature + dtemp;
+    TnomK = tnom + `P_CELSIUS0;
+    Vt = `P_K * T / `P_Q;
+    Vtnom = `P_K * TnomK / `P_Q;
+
+    ratio_T = T / TnomK;
+    delta_T = T - TnomK;
+
+    factor = 1.0 + delta_T * (tc1 + tc2 * delta_T);
+    if (factor < 0) begin
+        $error("Temperature-adjusted resistances are negative");
+        factor = 1.0;
+    end
+    rd_T = rd * factor;
+    rs_T = rs * factor;
+
+    eg = spice_energygap(T);
+    eg_tnom = spice_energygap(TnomK);
+
+    pb_T = pb*(ratio_T) - 3*Vt*ln(ratio_T) - eg_tnom*(ratio_T) + eg;
+
+    factor = (1.0 + mj*(0.0004*(delta_T) - pb_T/pb + 1.0 ));
+    if (factor < 0) begin
+        $error("Temperature-adjusted capacitances are negative");
+        factor = 1.0;
+    end
+    cgd_T = cgd*factor;
+    cgs_T = cgs*factor;
+
+    beta_T = beta*pow(T/(TnomK+bto), bte);
+
+    is_T = is*pow(ratio_T,xti)*exp(eg_tnom/Vtnom - eg/Vt);
+
+
+    vgs = V(br_gs);
+    vgd = V(br_gd);
+    vds = V(br_ds);
+    v_gs = type * vgs;
+    v_gd = type * vgd;
+    v_ds = type * vds;
+
+    Vth = vto;
+//    if (level == 3)
+//        Vth = vtos*pow(vtop-VBS, vtoe) + vtoc;
+
+
+    // resistors
+
+    V(br_rd) <+ I(br_rd)*rd_T;
+    V(br_rs) <+ I(br_rs)*rs_T;
+
+
+    // gate currents
+
+    igd = type*(is_T * (limexp(v_gd/(n*Vt)) - 1.0) + $simparam("gmin", 0)*v_gd);
+    igs = type*(is_T * (limexp(v_gs/(n*Vt)) - 1.0) + $simparam("gmin", 0)*v_gs);
+
+    I(br_gd) <+ igd;
+    I(br_gs) <+ igs;
+
+
+    // gate capacitances
+
+    qgd_diff = tt * igd;
+    qgs_diff = tt * igs;
+
+    f1 = pb_T/(1.0-mj) * (1.0 - pow((1.0-fc),1.0-mj) );
+    f2 = pow((1.0-fc), (1.0+mj));
+    f3 = 1.0 - fc * (1.0+mj);
+    Fcp = fc * pb_T;
+
+    if (v_gd <= Fcp)
+        qgd_dep = cgd_T * pb_T * (1.0-pow((1.0-v_gd/pb_T),(1.0-mj)))/(1.0-mj);
+    else
+        qgd_dep = cgd_T * (f1 + 1.0/f2 * (f3 * (v_gd - Fcp) + (0.5*mj/pb_T)
+                      * (v_gd * v_gd - Fcp * Fcp)));
+
+    if (v_gs <= Fcp)
+        qgs_dep = cgs_T * pb_T * (1.0-pow((1.0-v_gs/pb_T),(1.0-mj)))/(1.0-mj);
+    else
+        qgs_dep = cgs_T * (f1 + 1.0/f2 * (f3 * (v_gs - Fcp) + (0.5*mj/pb_T)
+                      * (v_gs * v_gs - Fcp * Fcp)));
+
+    qgd = qgd_diff + type*qgd_dep;
+    qgs = qgs_diff + type*qgs_dep;
+
+    I(br_gd) <+ ddt(qgd);
+    I(br_gs) <+ ddt(qgs);
+
+    qd = -qgd;
+    qs = -qgs;
+
+
+    // channel current
+
+    if (v_ds > 0) begin : forward_mode
+        mode = 1;
+        Vgst = v_gs - Vth;
+        Vds = v_ds;
+    end else begin : reverse_mode
+        mode = -1;
+        Vgst = v_gd - Vth;
+        Vds = -v_ds;
+    end
+    Vdsat = Vgst;
+    vdsat = Vdsat;
+
+    Ids = 0.0;
+    if (Vgst <= 0) begin : subthresh
+        real ilimit, iexp;
+        if (level == 1 || level == 4) begin
+            Ids = 0;
+        end else begin
+            ilimit = 2*beta_T*Vt*Vt;
+            iexp = io*exp(Vgst/(ns*Vt))*(1.0-exp(-Vds/Vt));
+            Ids = iexp*ilimit/(iexp+ilimit);
+        end
+    end else if (Vds <= Vgst) begin : triode
+        real lambda_factor;
+        lambda_factor = 1+lambda*(1+lambda1*Vgst)*Vds;
+        if (level == 1) begin
+            Ids = beta_T*(2*Vgst-Vds)*Vds*lambda_factor;
+        end else if (level == 2) begin
+            Ids = beta_T*pow(Vgst,np)*tanh(alpha*Vds/Vgst)*lambda_factor;
+//        end else if (level == 3) begin
+//            Ids = beta_T*(vto+vtop)/(Vth+vtop)*tanh(alpha*Vds/Vgst)*lambda_factor;
+        end else if (level == 4) begin
+            Ids = beta_T*(2*Vgst-Vds)*Vds;
+        end
+    end else begin : saturation
+        real lambda_factor, clm;
+        lambda_factor = 1.0+lambda*(1.0+lambda1*Vgst)*Vds;
+        if (level == 1) begin
+            Ids = beta_T*Vgst*Vgst*lambda_factor;
+        end else if (level == 2) begin
+            Ids = beta_T*pow(Vgst,np)*tanh(alpha*Vds/Vgst)*lambda_factor;
+//        end else if (level == 3) begin
+//            Ids = beta_T*(vto+vtop)/(Vth+vtop)*tanh(alpha*Vds/Vgst)*lambda_factor;
+        end else if (level == 4) begin
+            if (Vgst + vto <= 0)
+                clm = Vgst/vto;
+            else
+                clm = 1.0 + lambda1*(Vgst+vto);
+            Ids = beta_T*Vgst*Vgst*(1.0-lambda*(Vds-Vgst)*clm);
+        end
+    end
+
+    id_chan = type*mode*Ids;
+    I(br_ds) <+ id_chan;
+
+
+    // noise
+    gm = ddx(Ids, V(g));
+    gds = ddx(Ids, V(di));
+    Vdseff = max(Vds,Vdsat);
+    I(br_ds) <+ white_noise(8.0/3.0*`P_K*T*(gm+gds)*(1.5 - Vdseff/(2*Vdsat)), "THERMAL")
+              + flicker_noise(kf*pow(abs(Ids), af), 1.0, "FLICKER");
+
+    V(br_rd) <+ white_noise(4*`P_K*T*rd_T, "RD");
+    V(br_rs) <+ white_noise(4*`P_K*T*rs_T, "RS");
+
+end
+endmodule
