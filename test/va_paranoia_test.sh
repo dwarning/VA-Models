@@ -31,6 +31,7 @@ cd ../../test
 
 cd ../code/bsim6
 cp ringosc_17.sp         ringosc_17.spv
+sed -i 's/10us/1us/g'    ringosc_17.spv
 cp inverter_transient.sp inverter_transient.spv
 cp inv_dc.sp             inv_dc.spv
 cp id_pmos.sp            id_pmos.spv
@@ -56,6 +57,7 @@ cd ../../test
 
 cd ../code/bsimbulk
 cp ring_osc.sp             ring_osc.spv
+sed -i 's/10us/1us/g'      ring_osc.spv
 cp inv_tran.sp             inv_tran.spv
 cp inv_dc.sp               inv_dc.spv
 cp id_nmos.sp              id_nmos.spv
