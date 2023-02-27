@@ -7,3 +7,4 @@
 /code/osdilibs
 /code/osdilibs/*.*
 /test/*.vlog
+code/playground/*.osdi
