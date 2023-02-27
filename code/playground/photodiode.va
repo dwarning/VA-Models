@@ -78,10 +78,12 @@ analog begin
     end
     // Current contributions
     V1=V(b1);
-    I1=(V1 > con1) ? con2*(limexp(V1/(N*Vt_T2))-1.0)+GMIN*V1: 0;
+//    I1=(V1 > con1) ? con2*(limexp(V1/(N*Vt_T2))-1.0)+GMIN*V1: 0;
+    I1=(V1 > con1) ? con2*(exp(V1/(N*Vt_T2))-1.0)+GMIN*V1: 0;
     I2=(V1 <=  con1) ? -con2+GMIN*V1 :0;
     I3=(V1 == -Bv)?-Ibv: 0;
-    I4=(V1<-Bv)?-con2*(limexp(-(Bv+V1)/Vt_T2)-1.0+con6):0;
+//    I4=(V1<-Bv)?-con2*(limexp(-(Bv+V1)/Vt_T2)-1.0+con6):0;
+    I4=(V1<-Bv)?-con2*(exp(-(Bv+V1)/Vt_T2)-1.0+con6):0;
     Q1=(V1<con4)  ? Tt*I1 + con3*(Vj_T2/(1-M))*(1-pow((1-V1/Vj_T2),(1-M))):0;
     Q2=(V1>=con4) ? Tt*I1 + con3*(F1+(1/F2)*(F3*(V1-con5)+(M/(2.0*Vj_T2))*(V1*V1-con5*con5))):0;
     I5=V(Light)*Res;
