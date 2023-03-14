@@ -9,8 +9,9 @@ The models covering a wide range of devices :
 * **MOS** with different flavours like SOI, FinFET and bulk processes
 * **HV-MOS** like hisim_hv
 * **BJT** like HICUM, MEXTRAM and VBIC
-* **Passive devices** like diodes, varactors and non-linear resistors
 * **HEMT** like ASMHEMT, mvsg_cmc
+* **IGBT** the well known Hefner model in Verilog-A
+* **Passive devices** like diodes, varactors and non-linear resistors
 * **Sensors**
 
 All models are checked for syntax belong Verilog-AMS Language Reference Manual Version 2.4.0. https://accellera.org/downloads/standards/v-ams
