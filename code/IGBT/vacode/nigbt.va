@@ -1,0 +1,497 @@
+//
+// NIGBT Verilog-A model
+//
+// based upon Allen R. Hefner and Daniel M. Diebold's model for IGBTs
+//
+// Hefner, A.R. and Diebolt, D.M. An experimentally verified IGBT model implemented
+// in the Saber circuit simulator. PESC '91 Record 22nd Annual IEEE Power Electronics Specialists Conference
+// (24-27 June 1991): https://ieeexplore.ieee.org/document/162645
+//
+// Allen R. Hefner, Jr. A Dynamic Electro-Thermal Model for the IGBT, November 16, 1992
+//
+// Matlab implementation:
+// https://de.mathworks.com/help/sps/ref/spicenigbt.html
+//
+// This is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2, or (at your option)
+// any later version.
+//
+// Copyright (C) 2009 Stefan Jahn <stefan@lkcc.org>
+// Modified 2023 Dietmar Warning https://github.com/dwarning/VA-Models
+//
+
+`include "disciplines.vams"
+`include "constants.vams"
+
+`define __NGSPICE_COMPACT_MODELING__
+
+`define INITIAL_MODEL @(initial_step)
+
+// dielectric permittivity of silicon (F/cm)
+`define EPSSI          1.03594e-12
+
+// tiny conductance
+`ifdef __NGSPICE_COMPACT_MODELING__
+`define GMIN           $simparam("gmin", 1e-12)
+`else
+`define GMIN           1e-12
+`endif
+
+`define TINY           1e-20
+`define RTOLV          1.0e-5
+`define l_itmax        100
+
+`define IPRcz(nam,def,uni,        des) (* units=uni, type = "instance", desc=des *) parameter real    nam=def from[  0:inf);
+`define IPRoz(nam,def,uni,        des) (* units=uni, type = "instance", desc=des *) parameter real    nam=def from(  0:inf);
+`define MPRcz(nam,def,uni,        des) (* units=uni, desc=des *) parameter real    nam=def from[  0:inf);
+`define MPRoz(nam,def,uni,        des) (* units=uni, desc=des *) parameter real    nam=def from(  0:inf);
+`define MPRco(nam,def,uni,lwr,upr,des) (* units=uni, desc=des *) parameter real    nam=def from[lwr:upr);
+`define MPRoo(nam,def,uni,lwr,upr,des) (* units=uni, desc=des *) parameter real    nam=def from(lwr:upr);
+
+// Calculate emitter-base voltage as function from charge
+// INPUT:
+//  Qeb                     : emitter-base charge
+// IMPLICIT INPUT:
+//  A,L,Nb,Vbi,Qbi,vt       : model parameter
+//  WL,Tanh_WL2,Dc,Munc     : internal variables
+// OUTPUT:
+//  Vebq     : base-emitter voltage
+// Variables:
+//  Vebj  : emitter-base depletion voltage
+//  Vebd  : emitter-base diffusion voltage
+`define VEBQ(Qeb,Vebq) \
+    if (WL > 0) begin \
+        P0 = Qeb/(`P_Q*A*L*Tanh_WL2); \
+    end else begin \
+        P0 = 0; \
+    end \
+    Vebj = Vbi-(Qeb-Qbi)*(Qeb-Qbi)/(2*`P_Q*Nb*`EPSSI*A*A); \
+    Vebd1 = vt*ln((P0/Ni/Ni+1/Nb)*(Nb+P0)); \
+    T1 = P0/Ni/Ni+1/Nb; \
+    Vebd2 = Dc/Munc*ln((P0+Nb)/Nb); \
+    Vebd = Vebd1 - Vebd2; \
+    if (Qeb < 0) begin \
+        Vebq = Vebj; \
+    end else if (Qeb >= Qbi) begin \
+        Vebq = Vebd; \
+    end else begin \
+        if (Vebd < Vebj) begin \
+            Vebq = Vebd; \
+        end else begin \
+            Vebq = Vebj; \
+        end \
+    end
+
+// Calculate emitter-base voltage and derivative as function from charge
+// OUTPUT:
+//  Vebq     : base-emitter voltage
+//  Vebq_Qeb : base-emitter voltage differential to Qeb
+`define VEBQD(Qeb,Vebq,Vebq_Qeb) \
+    if (WL > 0) begin \
+        P0 = Qeb/(`P_Q*A*L*Tanh_WL2); \
+        P0_Qeb = 1/(A*L*`P_Q*Tanh_WL2); \
+    end else begin \
+        P0 = 0; \
+        P0_Qeb = 0; \
+    end \
+    Vebj = Vbi-(Qeb-Qbi)*(Qeb-Qbi)/(2*`P_Q*Nb*`EPSSI*A*A); \
+    Vebj_Qeb = -(Qeb-Qbi)/(A*A*`EPSSI*Nb*`P_Q); \
+    Vebd1 = vt*ln((P0/Ni/Ni+1/Nb)*(Nb+P0)); \
+    T1 = P0/Ni/Ni+1/Nb; \
+    Vebd1_Qeb = (((P0+Nb)/Ni/Ni+T1)*vt)/((P0+Nb)*(T1))*P0_Qeb; \
+    Vebd2 = Dc/Munc*ln((P0+Nb)/Nb); \
+    Vebd2_Qeb = Dc/Munc/A/L/`P_Q/Tanh_WL2/(P0+Nb); \
+    Vebd = Vebd1 - Vebd2; \
+    Vebd_Qeb = Vebd1_Qeb - Vebd2_Qeb; \
+    if (Qeb < 0) begin \
+        Vebq = Vebj; \
+        Vebq_Qeb = Vebj_Qeb; \
+    end else if (Qeb >= Qbi) begin \
+        Vebq = Vebd; \
+        Vebq_Qeb = Vebd_Qeb; \
+    end else begin \
+        if (Vebd < Vebj) begin \
+            Vebq = Vebd; \
+            Vebq_Qeb = Vebd_Qeb; \
+        end else begin \
+            Vebq = Vebj; \
+            Vebq_Qeb = Vebj_Qeb; \
+        end \
+    end
+
+// module implementation
+module nigbt (a, g, c);
+
+    inout a, g, c;
+    // external nodes
+    electrical a, g, c;
+    // internal nodes
+    electrical e, b;
+    // system variables
+    electrical var_Qeb, var_Mucinv, var_Nsat;//, var_dVecdt, var_dVdgdt;
+
+    // device parameters
+    `IPRoz( Agd  , 0.055  , "cm**2"  ,     "gate-drain overlap area") //5e-6 m**2
+    `IPRoz( Area , 0.1    , "cm**2"  ,     "area of the device")      //1e-5 m**2
+    `IPRcz( Kp   , 0.38   , "A/V**2",      "MOS transconductance")
+    `IPRoz( Tau  , 7.1e-6 , "s"     ,      "ambipolar recombination lifetime")
+    `IPRoz( Wb   , 9.3e-3 , "cm"     ,     "metallurgical base width")//9e-5 m
+
+    // model parameters
+    `MPRoz( BVf   , 1.0     , "",         "avalanche uniformity factor")
+    `MPRoz( BVn   , 4.0     , "",         "avalanche multiplication exponent")
+    `MPRcz( Cgs   , 0.62e-9 , "F",        "gate-source capacitance")  //1.24e-8 F/cm**2
+    `MPRcz( Coxd  , 1.75e-9 , "F",        "gate-drain oxide capacitance")//3.5e-8 F/cm**2
+    `MPRcz( Jsne  , 6.5e-13 , "A/cm**2",  "emitter saturation current density") //6.5e-13 A/cm**2
+    `MPRoz( Kf    , 1.0     , "",         "triode region factor")
+    `MPRoz( Mun   , 1500    , "cm**2/Vs", "electron mobility")
+    `MPRoz( Mup   , 450     , "cm**2/Vs", "hole mobility")
+    `MPRoz( Nb    , 2.0e14  , "1/cm**3",  "base doping")
+    `MPRcz( Theta , 0.02    , "1/V",      "transverse field factor")
+    `MPRcz( Vt    , 4.7     , "V",        "threshold voltage")
+    `MPRcz( Vtd   , 1.0e-3  , "V",        "gate-drain overlap depletion threshold")
+    `MPRco( Tnom  , 27.0    , "Celsius", -`P_CELSIUS0 , inf, "parameter measurement temperature")
+
+    // temperature parameters
+    `MPRoz( Tau1  , 1.5     , "",         "Tau temperature exponent")
+    `MPRoz( Isne1 , 0.5     , "",         "Jsne temperature exponent")
+    `MPRoo( Vt1   ,-0.9e-3  , "V/K", -inf, inf, "Vt temperature coefficient")
+    `MPRoz( Kp1   , 0.8     , "",         "Kp temperature exponent")
+
+    // local variables
+    real Imos, It, Icss, Imult, Igen, Ic, Ibss;
+    real Rb, B, Dp, L, W, M;
+    real Vds, Vgs, Vec, Veb, Vdg, Vgeff, Vbc, Vebj, Vebd, Vebq, Vae;
+    real Nsat, Nscl, Neff;
+    real Wbcj, Wgdj;
+    real Dc, Qeb, Qgs, Qgd, Qds, Qcer, Qmult, Qb, Qbi;
+    real Ccer, Cbcj, Cgdj, Cgd;
+    real Mucinv, Munc, Mupc, Mueff, BVcbo, P0, Deltap;
+    real WL, WL2, Tanh_WL2, A, Ads, Tj, To;
+    real Ni, Vpsat, Vnsat, Alpha1, Alpha2;
+    real TauT, IsneT, VtT, KpT;
+//    real dVecdt, dVdgdt;
+
+    // iteration (implicit) variables
+    real iQeb, iMucinv, iNsat;
+
+    real Vbi, vt;
+
+    real P0_Qeb, Vebj_Qeb, T1, Vebd1, Vebd1_Qeb, Vebd2, Vebd2_Qeb, Vebd_Qeb, Vebq_Qeb;
+    integer l_it;
+    real dV, d_Q, dstep;
+
+    integer ccsflg, sclflg;
+    //
+    analog begin
+        // equation initialization
+        `INITIAL_MODEL
+        begin
+
+            ccsflg = 1; // mobility due to carrier-carrier scattering flag on
+            sclflg = -1;// base-collector space charge due to velocity saturation flag off
+
+            Tj = $temperature;
+            vt = $vt(Tj);
+            To = Tnom+`P_CELSIUS0;
+            A = Area;
+            Ads = A-Agd;
+            B = Mun/Mup;   // ambipolar mobility ratio
+
+            Vbi = 0.6;
+////            Nh = 2.4e17;   // dopant density in HDB (1/cm**3)
+////            Nl = Nb;       // dopant density in LDB (1.5e14 1/cm**3)
+
+            Ni = 3.88e16*pow(Tj,1.5)/exp(7000.0/Tj);// intrinsic carrier concentration
+            Vnsat = 10.0e6*pow(300/Tj,0.87);        // electron saturation volicity
+            Vpsat = 8.37e6*pow(300/Tj,0.52);        // hole saturation volicity
+            Alpha1 = 1.04e21*pow(Tj/300,1.5);       // carrier carrier scattering parameter
+            Alpha2 = 7.45e13*pow(Tj/300,2.0);       // carrier carrier scattering parameter
+            // temperature dependent lifetime
+            TauT = Tau/pow(Tj/To,Tau1);
+            // temperature dependent saturation current
+            IsneT = Jsne*A * pow(Tj/To,Isne1)/exp(14000*(1/Tj-1/To));
+            // temperature dependent threshold voltage
+            VtT = Vt + Vt1*(Tj-To);
+            // temperature dependent MOS transconductance
+            KpT = Kp/pow(Tj/To,Kp1);
+            // diffusion coefficient for holes
+            Dp = Mup*vt;
+            // diffusion coefficient for electrons
+////            Dn = Mun*vt;
+
+        end
+
+//
+// model branch and node voltages
+//
+
+`ifdef __NGSPICE_COMPACT_MODELING__
+        Vdg = $limit(V(b,g), "fetlim", 1.0);
+        Vgs = $limit(V(g,c), "fetlim", 1.0);
+        Veb = $limit(V(e,b), "pnjlim", vt, 0.6);
+        Vec = $limit(V(e,c), "pnjlim", vt, 0.6);
+`else
+        Vdg = V(b,g);
+        Vgs = V(g,c);
+        Veb = V(e,b);
+        Vec = V(e,c);
+`endif
+        Vds = V(b,c);
+        Vae = V(a,e);
+//$strobe("Vdg %g Vgs %g Vds %g Veb %g Vae %g Vec %g", Vdg, Vgs, Vds, Veb, Vae, Vec);
+
+        Vbc = Vds;
+        Vgeff = Vgs-VtT;
+
+        // system variables
+        Qeb = V(var_Qeb);
+        Nsat= V(var_Nsat);
+        Mucinv = V(var_Mucinv);
+//        dVecdt = V(var_dVecdt);
+//        dVdgdt = V(var_dVdgdt);
+
+        // collector-base space charge concentration
+        Nscl = max(Nb + Nsat, 1e-3*Nb);
+
+        // gate-drain overlap depletion width
+        if (Vdg > -Vtd)
+            Wgdj = min(sqrt(2*`EPSSI*(Vdg+Vtd)/`P_Q/Nscl),Wb);
+        else
+            Wgdj = 0;
+
+        // drain-source depletion width
+////        if (Vds > -Vbi)
+////            Wdsj = min(sqrt(2*`EPSSI*(Vds+Vbi)/`P_Q/Nscl),Wb);
+////        else
+////            Wdsj = 0;
+
+        // base-collector depletion width
+        if (Vbc > -Vbi)
+            Wbcj = min(sqrt(2*`EPSSI*abs((Vbc+Vbi)/`P_Q/Nscl)),Wb);
+        else
+            Wbcj = sqrt(2*`EPSSI*abs((1e-3*Vbi)/`P_Q/Nscl)); //Orig: small width
+
+        // quasi-neutral base width
+        W = Wb - Wbcj;
+        if (W < 0.2*Wb)
+            W = 0.2 * Wb;
+
+        // gate-source capacitor charge
+        Qgs = Cgs * Vgs;
+
+        // drain-source capacitor charge
+        if (Vds >= -Vbi)
+            Qds = Ads*sqrt(2*`EPSSI*(Vds+Vbi)*`P_Q*Nscl);
+        else
+            Qds = sqrt(2*`EPSSI*(1e-3*Vbi)*`P_Q*Nscl); //Orig: small const. charge
+
+        // background mobile carrier base charge
+        Qb = `P_Q*A*W*Nscl;
+
+        // emitter-base junction built-in charge
+        Qbi = A*sqrt(2*`EPSSI*`P_Q*Nb*Vbi);
+
+        // base-collector depletion capacitance
+        Cbcj = A*`EPSSI/(Wbcj+`TINY);
+
+        // collector-emitter redistribution capacitance
+        if (Qeb >= 0)
+            Ccer = Cbcj*Qeb/Qb/3;
+        else
+            Ccer = 0;
+
+        // drain-source depletion capacitance
+////        Cdsj = Ads*`EPSSI/(Wdsj+`TINY);
+
+        // gate-drain overlap depletion capacitance
+        Cgdj = Agd*`EPSSI/(Wgdj+`TINY);
+
+        // gate-drain capacitance
+        if (Vdg <= -Vtd)
+            Cgd = Coxd;
+        else
+            Cgd = Coxd*Cgdj/(Coxd+Cgdj);
+
+        Munc = 1/(1/Mun+Mucinv);
+        Mupc = 1/(1/Mup+Mucinv);
+        if (Qeb > 0)
+            Mueff = Munc+Mupc*Qeb/(Qeb + Qb);
+        else
+            Mueff = Munc;
+
+        // carrier-carrier scattering diffusivity
+        Dc = 2*vt*Munc*Mupc/(Munc+Mupc);
+
+        // ambipolar diffusion length
+        L = sqrt(Dc*TauT);
+
+        // some arbitrary variables
+        WL = W/L;
+        WL2 = WL/2;
+        Tanh_WL2 = tanh(WL2);
+
+        // carrier concentration at emitter end of base
+        if (WL > 0)
+            P0 = abs(Qeb)/(`P_Q*A*L*Tanh_WL2);
+        else
+            P0 = 0;
+
+        // average carrier concentration in base
+        if (WL > 0)
+            Deltap = P0*sinh(WL2)/sinh(WL);
+        else
+            Deltap = 0;
+
+        if (WL > 0)
+        begin : doping
+            real Nl2, Plo2, Con2, Con3, Con4;
+
+            Nl2  = Nb*Nb;
+            Plo2 = P0*P0;
+            Con2 = 1/sinh(WL);
+            Con3 = Plo2*Con2*Con2;
+            Con4 = sqrt(Nl2+Con3)*Tanh_WL2 / (Nb+P0*Con2*Tanh_WL2);
+
+          // effective base doping concentration
+            Neff = WL2*sqrt(Nl2+Con3) / atanh(Con4);
+        end
+        else
+            Neff = 0;
+
+        // conductivity-modulated base resistance
+        if (Qeb <= 0)
+            Rb = W/(`P_Q*Mun*A*Nb);
+        else
+            Rb = W/(`P_Q*Mueff*A*Neff);
+
+        // Emitter-base capacitor voltage
+        `VEBQ(Qbi,Vebq)
+
+        // collector-base junction breakdown voltage
+        BVcbo = BVf*5.34e13*pow(Nscl,-0.75);
+
+        // avalanche multiplication factor
+        M = 1./(1-pow(0.99999999,BVn));
+        if (Vds/BVcbo < 0.99999999) M = 1./(1.-pow(Vds/BVcbo,BVn));
+        if (Vds < 0.) M=1.;
+
+        // anode current
+        if (Rb > 0)
+            It = Vae/Rb;
+        else
+            It = Vae/1e-6;
+
+        // steady-state collector current
+        if (Qeb >= 0)
+            Icss = (1/(1+B))*It + (B/(1+B)) * (4*Dp/(W*W))*Qeb;
+        else
+            Icss = 0;
+
+        // collector current
+        if (Qeb > 0)
+            Ic = Icss;// + Ccer*dVecdt; we have ddt(Qcer)
+        else
+            Ic = Icss;
+
+        // steady-state base current
+        if (Qeb >= 0)
+        begin
+            if (Qb > 0)
+                Ibss = Qeb/TauT + Qeb*Qeb/Qb/Qb * 4*Nscl*Nscl/Ni/Ni * IsneT;
+            else
+                Ibss = Qeb/TauT;
+        end
+        else
+            Ibss = 0;
+
+        // MOSFET channel current
+        if (Vgs < VtT)
+            Imos = 0;
+        else if (Vds > Vgeff/Kf)
+            Imos = KpT*Vgeff*Vgeff / 2/(1+Theta*Vgeff);
+        else
+            Imos = Kf*KpT*(Vgeff*Vds - Kf*Vds*Vds/2) / (1+Theta*Vgeff);
+
+        // collector-base thermally generated current
+        if (Vbc > 0)
+            Igen = `P_Q*Ni*A*sqrt(2*`EPSSI*Vbc/`P_Q/Nscl)/TauT;
+        else
+            Igen = 0;
+
+        // avalanche multiplication current
+        Imult = (M-1)*(Imos+Ic) + M*Igen;
+
+        Qgd = Cgd*Vdg;
+        Qcer = Ccer*Vec;
+        Qmult = (M-1)*Qcer;
+
+        // excess carrier charge in LDB as starting value
+        iQeb = `P_Q*A*W*P0/2;
+
+        l_it    = 0;
+        dV      = Vebq - Veb;
+        while (abs(dV) >= `RTOLV*abs(Vebq) && l_it <= `l_itmax) begin
+            `VEBQD(iQeb,Vebq,Vebq_Qeb)
+            dV = Vebq - Veb;
+            d_Q     = dV/Vebq_Qeb;
+            //Limit maximum change of Qeb
+            dstep    = abs(0.3*iQeb);
+            if (abs(d_Q) > dstep) begin
+                if (d_Q>=0) begin
+                    d_Q     = dstep;
+                end else begin
+                    d_Q     = -dstep;
+                end
+            end
+            iQeb    = iQeb - d_Q;
+            l_it    = l_it+1;
+        end //while
+//$strobe("iter %d Qeb %g iQeb %g", l_it, Qeb, iQeb);
+
+        // mobility due to carrier-carrier scattering
+        if (ccsflg > 0) begin
+            if (Deltap > 0) begin
+                iMucinv = Deltap * ln(1+Alpha2/pow(Deltap, 2.0/3.0))/Alpha1;
+            end else
+                iMucinv = 0;
+        end else
+            iMucinv = 0;
+
+        // base-collector space charge due to velocity saturation
+        if (sclflg > 0)
+            iNsat = Ic/(`P_Q*A*Vpsat)-Imos/(`P_Q*A*Vnsat);
+        else
+            iNsat = 0.0;
+//$strobe("Ic %g Vpsat %g Imos %g Vnsat %g", Ic, Vpsat, Imos, Vnsat);
+
+        //
+        // current contributions
+        //
+                                             //               | anode
+        I(g, c) <+ Vgs*`GMIN;                //               |
+        I(g, c) <+ ddt(Qgs);                 //              /
+        I(b, g) <+ Vdg*`GMIN;                //          b |/   |
+        I(b, g) <+ ddt(Qgd);                 //      |-----|    | It
+        I(b, c) <+ Imos + Imult + Vds*`GMIN; // gate||     |\   v
+        I(b, c) <+ ddt(Qds);                 //  ---||Imos   \
+        I(b, c) <+ ddt(Qmult);               //     ||_ |   e_|_
+        I(e, c) <+ Icss + Vec*`GMIN;         //        ||   /   \ |
+        I(e, c) <+ ddt(Qcer);                //        |v   \ – / | Icss
+        I(e, b) <+ Ibss + Veb*`GMIN;         //        |    / - \ v
+        I(e, b) <+ ddt(iQeb);                //        |    \___/
+        I(a, e) <+ It;                       //        |______| cathode
+                                             //               |
+        //
+        // system variables
+        //
+
+        I(var_Qeb)    <+ Qeb - iQeb;
+        I(var_Mucinv) <+ Mucinv - iMucinv;
+        I(var_Nsat)   <+ Nsat - iNsat;
+//        I(var_dVecdt) <+ dVecdt - ddt(Vec);
+//        I(var_dVdgdt) <+ dVdgdt - ddt(Vdg);
+
+    end
+endmodule
