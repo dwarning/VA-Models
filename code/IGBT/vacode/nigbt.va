@@ -53,7 +53,7 @@
 // INPUT:
 //  Qeb                     : emitter-base charge
 // IMPLICIT INPUT:
-//  A,L,Nb,Vbi,Qbi,vt       : model parameter
+//  Area,L,Nb,Vbi,Qbi,vt    : model parameter
 //  WL,Tanh_WL2,Dc,Munc     : internal variables
 // OUTPUT:
 //  Vebq     : base-emitter voltage
@@ -62,11 +62,11 @@
 //  Vebd  : emitter-base diffusion voltage
 `define VEBQ(Qeb,Vebq) \
     if (WL > 0) begin \
-        P0 = Qeb/(`P_Q*A*L*Tanh_WL2); \
+        P0 = Qeb/(`P_Q*Area_cm2*L*Tanh_WL2); \
     end else begin \
         P0 = 0; \
     end \
-    Vebj = Vbi-(Qeb-Qbi)*(Qeb-Qbi)/(2*`P_Q*Nb*`EPSSI*A*A); \
+    Vebj = Vbi-(Qeb-Qbi)*(Qeb-Qbi)/(2*`P_Q*Nb*`EPSSI*Area_cm2*Area_cm2); \
     Vebd1 = vt*ln((P0/Ni/Ni+1/Nb)*(Nb+P0)); \
     T1 = P0/Ni/Ni+1/Nb; \
     Vebd2 = Dc/Munc*ln((P0+Nb)/Nb); \
@@ -89,19 +89,19 @@
 //  Vebq_Qeb : base-emitter voltage differential to Qeb
 `define VEBQD(Qeb,Vebq,Vebq_Qeb) \
     if (WL > 0) begin \
-        P0 = Qeb/(`P_Q*A*L*Tanh_WL2); \
-        P0_Qeb = 1/(A*L*`P_Q*Tanh_WL2); \
+        P0 = Qeb/(`P_Q*Area_cm2*L*Tanh_WL2); \
+        P0_Qeb = 1/(Area_cm2*L*`P_Q*Tanh_WL2); \
     end else begin \
         P0 = 0; \
         P0_Qeb = 0; \
     end \
-    Vebj = Vbi-(Qeb-Qbi)*(Qeb-Qbi)/(2*`P_Q*Nb*`EPSSI*A*A); \
-    Vebj_Qeb = -(Qeb-Qbi)/(A*A*`EPSSI*Nb*`P_Q); \
+    Vebj = Vbi-(Qeb-Qbi)*(Qeb-Qbi)/(2*`P_Q*Nb*`EPSSI*Area_cm2*Area_cm2); \
+    Vebj_Qeb = -(Qeb-Qbi)/(Area_cm2*Area_cm2*`EPSSI*Nb*`P_Q); \
     Vebd1 = vt*ln((P0/Ni/Ni+1/Nb)*(Nb+P0)); \
     T1 = P0/Ni/Ni+1/Nb; \
     Vebd1_Qeb = (((P0+Nb)/Ni/Ni+T1)*vt)/((P0+Nb)*(T1))*P0_Qeb; \
     Vebd2 = Dc/Munc*ln((P0+Nb)/Nb); \
-    Vebd2_Qeb = Dc/Munc/A/L/`P_Q/Tanh_WL2/(P0+Nb); \
+    Vebd2_Qeb = Dc/Munc/Area_cm2/L/`P_Q/Tanh_WL2/(P0+Nb); \
     Vebd = Vebd1 - Vebd2; \
     Vebd_Qeb = Vebd1_Qeb - Vebd2_Qeb; \
     if (Qeb < 0) begin \
@@ -132,25 +132,25 @@ module nigbt (a, g, c);
     electrical var_Qeb, var_Mucinv, var_Nsat;//, var_dVecdt, var_dVdgdt;
 
     // device parameters
-    `IPRoz( Agd  , 0.055  , "cm**2"  ,     "gate-drain overlap area") //5e-6 m**2
-    `IPRoz( Area , 0.1    , "cm**2"  ,     "area of the device")      //1e-5 m**2
-    `IPRcz( Kp   , 0.38   , "A/V**2",      "MOS transconductance")
-    `IPRoz( Tau  , 7.1e-6 , "s"     ,      "ambipolar recombination lifetime")
-    `IPRoz( Wb   , 9.3e-3 , "cm"     ,     "metallurgical base width")//9e-5 m
+    `IPRoz( Agd  , 5e-6   , "m**2"   ,     "gate-drain overlap area")
+    `IPRoz( Area , 1e-5   , "m**2"   ,     "area of the device")
+    `IPRcz( Kp   , 0.38   , "A/V**2" ,     "MOS transconductance")
+    `IPRoz( Tau  , 7.1e-6 , "s"      ,     "ambipolar recombination lifetime")
+    `IPRoz( Wb   , 9e-5   , "m"      ,     "metallurgical base width")
 
     // model parameters
     `MPRoz( BVf   , 1.0     , "",         "avalanche uniformity factor")
     `MPRoz( BVn   , 4.0     , "",         "avalanche multiplication exponent")
-    `MPRcz( Cgs   , 0.62e-9 , "F",        "gate-source capacitance")  //1.24e-8 F/cm**2
-    `MPRcz( Coxd  , 1.75e-9 , "F",        "gate-drain oxide capacitance")//3.5e-8 F/cm**2
-    `MPRcz( Jsne  , 6.5e-13 , "A/cm**2",  "emitter saturation current density") //6.5e-13 A/cm**2
+    `MPRcz( Cgs   , 1.24e-8 , "F/cm**2",  "gate-source capacitance")
+    `MPRcz( Coxd  , 3.5e-8  , "F/cm**2",  "gate-drain oxide capacitance")
+    `MPRcz( Jsne  , 6.5e-13 , "A/cm**2",  "emitter saturation current density")
     `MPRoz( Kf    , 1.0     , "",         "triode region factor")
     `MPRoz( Mun   , 1500    , "cm**2/Vs", "electron mobility")
     `MPRoz( Mup   , 450     , "cm**2/Vs", "hole mobility")
     `MPRoz( Nb    , 2.0e14  , "1/cm**3",  "base doping")
     `MPRcz( Theta , 0.02    , "1/V",      "transverse field factor")
     `MPRcz( Vt    , 4.7     , "V",        "threshold voltage")
-    `MPRcz( Vtd   , 1.0e-3  , "V",        "gate-drain overlap depletion threshold")
+    `MPRoo( Vtd   , 1.0e-3  , "V", -inf, inf, "gate-drain overlap depletion threshold")
     `MPRco( Tnom  , 27.0    , "Celsius", -`P_CELSIUS0 , inf, "parameter measurement temperature")
 
     // temperature parameters
@@ -164,11 +164,11 @@ module nigbt (a, g, c);
     real Rb, B, Dp, L, W, M;
     real Vds, Vgs, Vec, Veb, Vdg, Vgeff, Vbc, Vebj, Vebd, Vebq, Vae;
     real Nsat, Nscl, Neff;
-    real Wbcj, Wgdj;
+    real Wbcj, Wgdj, Wdsj;
     real Dc, Qeb, Qgs, Qgd, Qds, Qcer, Qmult, Qb, Qbi;
     real Ccer, Cbcj, Cgdj, Cgd;
     real Mucinv, Munc, Mupc, Mueff, BVcbo, P0, Deltap;
-    real WL, WL2, Tanh_WL2, A, Ads, Tj, To;
+    real WL, WL2, Tanh_WL2, Ads, Tj, To;
     real Ni, Vpsat, Vnsat, Alpha1, Alpha2;
     real TauT, IsneT, VtT, KpT;
 //    real dVecdt, dVdgdt;
@@ -183,6 +183,7 @@ module nigbt (a, g, c);
     real dV, d_Q, dstep;
 
     integer ccsflg, sclflg;
+    real Area_cm2, Agd_cm2, Wb_cm;
     //
     analog begin
         // equation initialization
@@ -195,8 +196,10 @@ module nigbt (a, g, c);
             Tj = $temperature;
             vt = $vt(Tj);
             To = Tnom+`P_CELSIUS0;
-            A = Area;
-            Ads = A-Agd;
+            Area_cm2 = Area * 1e4;
+            Agd_cm2 = Agd * 1e4;
+            Wb_cm = Wb * 100;
+            Ads = Area_cm2-Agd_cm2;
             B = Mun/Mup;   // ambipolar mobility ratio
 
             Vbi = 0.6;
@@ -211,7 +214,7 @@ module nigbt (a, g, c);
             // temperature dependent lifetime
             TauT = Tau/pow(Tj/To,Tau1);
             // temperature dependent saturation current
-            IsneT = Jsne*A * pow(Tj/To,Isne1)/exp(14000*(1/Tj-1/To));
+            IsneT = Jsne*Area_cm2 * pow(Tj/To,Isne1)/exp(14000*(1/Tj-1/To));
             // temperature dependent threshold voltage
             VtT = Vt + Vt1*(Tj-To);
             // temperature dependent MOS transconductance
@@ -257,44 +260,41 @@ module nigbt (a, g, c);
 
         // gate-drain overlap depletion width
         if (Vdg > -Vtd)
-            Wgdj = min(sqrt(2*`EPSSI*(Vdg+Vtd)/`P_Q/Nscl),Wb);
+            Wgdj = min(sqrt(2*`EPSSI*(Vdg+Vtd)/`P_Q/Nscl),Wb_cm);
         else
             Wgdj = 0;
 
         // drain-source depletion width
-////        if (Vds > -Vbi)
-////            Wdsj = min(sqrt(2*`EPSSI*(Vds+Vbi)/`P_Q/Nscl),Wb);
-////        else
-////            Wdsj = 0;
+        if (Vds >= -Vbi)
+            Wdsj = min(sqrt(2*`EPSSI*(Vds+Vbi)/`P_Q/Nscl),Wb_cm);
+        else
+            Wdsj = sqrt(2*`EPSSI*abs((1e-3*Vbi)/`P_Q/Nscl)); //Orig: small width
 
         // base-collector depletion width
         if (Vbc > -Vbi)
-            Wbcj = min(sqrt(2*`EPSSI*abs((Vbc+Vbi)/`P_Q/Nscl)),Wb);
+            Wbcj = min(sqrt(2*`EPSSI*abs((Vbc+Vbi)/`P_Q/Nscl)),Wb_cm);
         else
             Wbcj = sqrt(2*`EPSSI*abs((1e-3*Vbi)/`P_Q/Nscl)); //Orig: small width
 
         // quasi-neutral base width
-        W = Wb - Wbcj;
-        if (W < 0.2*Wb)
-            W = 0.2 * Wb;
+        W = Wb_cm - Wbcj;
+        if (W < 0.2*Wb_cm)
+            W = 0.2 * Wb_cm;
 
         // gate-source capacitor charge
-        Qgs = Cgs * Vgs;
+        Qgs = Cgs*Area_cm2 * Vgs;
 
         // drain-source capacitor charge
-        if (Vds >= -Vbi)
-            Qds = Ads*sqrt(2*`EPSSI*(Vds+Vbi)*`P_Q*Nscl);
-        else
-            Qds = sqrt(2*`EPSSI*(1e-3*Vbi)*`P_Q*Nscl); //Orig: small const. charge
+        Qds = Ads*`P_Q*Nscl*Wdsj;
 
         // background mobile carrier base charge
-        Qb = `P_Q*A*W*Nscl;
+        Qb = Area_cm2*`P_Q*W*Nscl;
 
         // emitter-base junction built-in charge
-        Qbi = A*sqrt(2*`EPSSI*`P_Q*Nb*Vbi);
+        Qbi = Area_cm2*sqrt(2*`EPSSI*`P_Q*Nb*Vbi);
 
         // base-collector depletion capacitance
-        Cbcj = A*`EPSSI/(Wbcj+`TINY);
+        Cbcj = Area_cm2*`EPSSI/(Wbcj+`TINY);
 
         // collector-emitter redistribution capacitance
         if (Qeb >= 0)
@@ -306,13 +306,13 @@ module nigbt (a, g, c);
 ////        Cdsj = Ads*`EPSSI/(Wdsj+`TINY);
 
         // gate-drain overlap depletion capacitance
-        Cgdj = Agd*`EPSSI/(Wgdj+`TINY);
+        Cgdj = Agd_cm2*`EPSSI/(Wgdj+`TINY);
 
         // gate-drain capacitance
         if (Vdg <= -Vtd)
-            Cgd = Coxd;
+            Cgd = Coxd*Agd_cm2;
         else
-            Cgd = Coxd*Cgdj/(Coxd+Cgdj);
+            Cgd = Coxd*Agd_cm2*Cgdj/(Coxd*Agd_cm2+Cgdj);
 
         Munc = 1/(1/Mun+Mucinv);
         Mupc = 1/(1/Mup+Mucinv);
@@ -334,7 +334,7 @@ module nigbt (a, g, c);
 
         // carrier concentration at emitter end of base
         if (WL > 0)
-            P0 = abs(Qeb)/(`P_Q*A*L*Tanh_WL2);
+            P0 = abs(Qeb)/(`P_Q*Area_cm2*L*Tanh_WL2);
         else
             P0 = 0;
 
@@ -362,9 +362,9 @@ module nigbt (a, g, c);
 
         // conductivity-modulated base resistance
         if (Qeb <= 0)
-            Rb = W/(`P_Q*Mun*A*Nb);
+            Rb = W/(`P_Q*Mun*Area_cm2*Nb);
         else
-            Rb = W/(`P_Q*Mueff*A*Neff);
+            Rb = W/(`P_Q*Mueff*Area_cm2*Neff);
 
         // Emitter-base capacitor voltage
         `VEBQ(Qbi,Vebq)
@@ -416,7 +416,7 @@ module nigbt (a, g, c);
 
         // collector-base thermally generated current
         if (Vbc > 0)
-            Igen = `P_Q*Ni*A*sqrt(2*`EPSSI*Vbc/`P_Q/Nscl)/TauT;
+            Igen = `P_Q*Ni*Area_cm2*sqrt(2*`EPSSI*Vbc/`P_Q/Nscl)/TauT;
         else
             Igen = 0;
 
@@ -428,7 +428,7 @@ module nigbt (a, g, c);
         Qmult = (M-1)*Qcer;
 
         // excess carrier charge in LDB as starting value
-        iQeb = `P_Q*A*W*P0/2;
+        iQeb = `P_Q*Area_cm2*W*P0/2;
 
         l_it    = 0;
         dV      = Vebq - Veb;
@@ -461,7 +461,7 @@ module nigbt (a, g, c);
 
         // base-collector space charge due to velocity saturation
         if (sclflg > 0)
-            iNsat = Ic/(`P_Q*A*Vpsat)-Imos/(`P_Q*A*Vnsat);
+            iNsat = Ic/(`P_Q*Area_cm2*Vpsat)-Imos/(`P_Q*Area_cm2*Vnsat);
         else
             iNsat = 0.0;
 //$strobe("Ic %g Vpsat %g Imos %g Vnsat %g", Ic, Vpsat, Imos, Vnsat);
