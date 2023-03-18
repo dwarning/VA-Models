@@ -24,8 +24,6 @@
 `include "disciplines.vams"
 `include "constants.vams"
 
-`define __NGSPICE_COMPACT_MODELING__
-
 `define INITIAL_MODEL @(initial_step)
 
 // dielectric permittivity of silicon (F/cm)
