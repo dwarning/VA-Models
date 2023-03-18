@@ -1,0 +1,154 @@
+// ---------------------------------------------------------------- //
+// This template is a simple, basic diode model with reverse        //
+// recovery. This particular model represents a modernized version  //
+// of the basic diode model designed by Cliff L. Ma in 1991.        //
+// A description of this model can be found in the paper by P.O.    //
+// Lauritzen and C.L. Ma, "A simple diode model with reverse        //
+// recovery", IEEE Trans. Power Electronics, vol. 6, pp 188-191,    //
+// April 1991.                                                      //
+//                                                                  //
+// The standard SPICE model is used for capacitance.  A parasitic   //
+// series resistance Rs is also included.  High level injection     //
+// effects such as forward recovery and conductivity modulation     //
+// are omitted.                                                     //
+//                                                                  //
+// The model was modified April 23, 1999 by P.O. Lauritzen to       //
+// place in a more modern format.                                   //
+//                                                                  //
+//       Copyright (c) 1999 by P.O. Lauritzen                       //
+//       University of Washington, Seattle, WA, USA.                //
+//                                                                  //
+//       For comments or additional information on the model send   //
+//       e-mail to:                                                 //
+//       plauritz@ee.washington.edu                                 //
+//       FAX: (206) 543-3842 Attn: Prof. Peter Lauritzen            //
+//                                                                  //
+// ---------------------------------------------------------------- //
+//                                                                  //
+// The original MAST model translated to Verilog-A in June 2010     //
+// by Stanislav Banas, ON Semiconductor, Czech Republic             //
+//                                                                  //
+// New propoerties added to Verilog-A model                         //
+//  - more precise high injection modeling (parameter ik)           //
+//  - added temperature dependency (parameters tnom, xti, eg, trs)  //
+//  - added parallel conductance for better reverse bias            //
+//    convergency of low leakage simulation (parameter gmin)        //
+//  - breakdown modeling not contained due to convergency conflict  //
+//    with charge-based model in temperatures.                      //
+//                                                                  //
+// ---------------------------------------------------------------- //
+//                                                                  //
+// Stanislav Banas, March 2012:                                     //
+// definition of temperature dependent parameters moved from        //
+// initial step section to the main code, which corrected the       //
+// temperature sweep simulation results                             //
+// ---------------------------------------------------------------- //
+//                                                                  //
+// Stanislav Banas, June 2012:                                      //
+// removed section @(initial_step)                                  //
+// Corrected typo in f1 equation: m in exponent replaced by (1-m)   //
+// Parameter phi_temp moved above it's using in f1 and fcp          //
+// ---------------------------------------------------------------- //
+//                                                                  //
+// Stanislav Banas, December 2012:                                  //
+// Updated equation for is_temp and ni                              //
+// - temperature dependency                                         //
+// ---------------------------------------------------------------- //
+
+
+`include "disciplines.h"
+`include "constants.h"
+
+`define EXPL_THRESHOLD 80.0
+`define MAX_EXPL 5.540622384e+34
+`define MIN_EXPL 1.804851387e-35
+
+module diode_basic(anode,cathode);
+    inout anode,cathode;
+    electrical anode,cathode,qm;
+
+    // Clamped exponential function
+    analog function real lexp;
+        input x;
+        real x;
+        begin
+            if (x > `EXPL_THRESHOLD) begin
+                lexp = `MAX_EXPL * (1.0+(x)-`EXPL_THRESHOLD);
+            end else if (x < -`EXPL_THRESHOLD) begin
+                lexp = `MIN_EXPL;
+            end else begin
+                lexp = exp(x);
+            end
+        end
+    endfunction
+
+    parameter real area = 1 from (0:inf);
+    parameter real is=1e-14 from (0:inf);
+    parameter real n=1 from (0:inf);
+    parameter real cjo=0 from [0:inf);
+    parameter real m=0.5 from [0:1.0);
+    parameter real phi=0.7 exclude 0;
+    parameter real fc=0.5 from (0:1];
+    parameter real tt=1p from (0:inf);
+    parameter real tau=1p from [0:inf);
+    parameter real rs=0 from [0:inf);
+    parameter real ik=1 from (0:inf);
+    parameter real tnom=27 from (-273.15:inf);
+    parameter real xti=3 from (-inf:inf);
+    parameter real eg=1.11 from [0:inf);
+    parameter real trs=0 from (-inf:inf);
+    parameter real gmin=1e-12 from [0:1);
+
+    real Vd, Id, Qd;
+    real f1, f2, f3, fcp;
+    real kfwd;
+    real temp_ratio, delta_temp, eg_temp, is_temp, rs_temp, ni, phi_temp;
+    real Qe, Qm, Im;
+
+    analog
+    begin
+        //temperature dependency
+        temp_ratio=($temperature/(tnom+273.15));
+        delta_temp=($temperature-(tnom+273.15));
+        eg_temp=(eg-(7.02e-4*$temperature*$temperature)/($temperature+1108));
+        //is_temp=(is*pow(temp_ratio,xti)*limexp(eg_temp/$vt*(temp_ratio-1)));
+        is_temp=(is*pow(temp_ratio,xti)*lexp(1.602e-19/(2*1.38e-23)*(-eg_temp/$temperature+eg/(tnom+273.15))));
+        rs_temp=(rs*(1+trs*delta_temp));
+        //ni=1.45e10*pow(temp_ratio,1.5)*limexp(1.602e-19/(2*1.38e-23)*(-eg/$temperature+1.1151/(tnom+273.15)));
+        ni=1.45e10*pow(temp_ratio,1.5)*lexp(1.602e-19/(2*1.38e-23)*(-eg_temp/$temperature+eg/(tnom+273.15)));
+        phi_temp=phi*temp_ratio+2*$vt*ln(1.45e10/ni);
+
+        f1 = (phi_temp/(1 - m))*(1 - pow((1 - fc), (1-m)));
+        f2 = pow((1 - fc), (1 + m));
+        f3 = 1 - fc*(1 + m);
+        fcp = fc*phi_temp;
+
+
+        Vd = V(anode,cathode);
+        Id = I(anode,cathode);
+        Qm = V(qm);
+
+        //junction capacitance
+        if (Vd <= fcp)
+            Qd = area*cjo*phi_temp*(1-pow((1-Vd/phi_temp),(1- m)))/(1-m);
+        else
+            Qd = area*cjo*(f1 + (1/f2)*(f3*(Vd - fcp) +(0.5*m/phi_temp)*(Vd*Vd - fcp*fcp)));
+
+        //knee current
+        kfwd=(1/(1+sqrt((is_temp*(limexp((Vd - rs_temp/area*Id)/(n*$vt)-1)))/ik)));
+
+        //Calculation of charge at junction edge
+        Qe=tau*area*kfwd*is_temp*(limexp((Vd - rs_temp/area*Id)/(n*$vt)) - 1);
+
+        //Diffusion current
+        Im=(Qe-Qm)/tt;
+        V(qm) <+ tau*Im - ddt(tau*Qm);
+
+        //iteration of capacitance
+        I(anode,cathode) <+ Im+(ddt(Qd));
+        //parallel conductance
+        I(anode,cathode) <+ gmin*Vd;
+
+    end
+endmodule
+
