@@ -39,6 +39,8 @@ Furthermore, some Verilog-A language features are currently not supported by ope
 * Noise analysis (white_noise(), flicker_noise())
 * Laplace transform filters
 * Language constructs: $abstime(), @cross()
+* Indirect branch contribution
+* Paramset definition
 
 ### NGSPICE
 
@@ -61,12 +63,18 @@ cd code
 openvaf-compile-va.bat for MS Windows
 ```
 
+## Binary packages
+
+Released are pre-compiled models for linux (Ubuntu 22.04 checked) and Windows 10 (64bit) ready for usage with osdi configured ngspice version > 39.
+
 ## General Usage Instructions
 
-Copy the *.osdi* files from directory osdilibs to the place where the NGSPICE code models (*.cm*) are located, typically in lib/ngspice or similar.
-Other way (as shown in the example files) is the load command *pre_osdi ../osdilibs/bsimcmg.osdi* in the NGSPICE control section. 
-It is important that the *.model* card use the name of the Verilog-A module, e.g. in case of bsimcmg: *.model BSIMCMG_N bsimcmg_va*.
+Copy the *.osdi* files from directory osdilibs to the place where the NGSPICE code models (*.cm*) are located, e.g. */usr/local/share/ngspice/osdi (linux)*, *C:\Spice64\lib\ngspice (Windows)*.
 
+Other way (as shown in the example files) is the load command *pre_osdi ../osdilibs/bsimcmg.osdi* in the NGSPICE control section. 
+You can also extend the ngspice environment variable SPICE_LIB_DIR to your_path/code/osdilibs
+
+It is important that the *.model* card use the name of the Verilog-A module, e.g. in case of bsimcmg: *.model BSIMCMG_N bsimcmg_va*.
 
 Edit file 'spinit', typically found in share/ngspice/scripts: Comment out the line
 
