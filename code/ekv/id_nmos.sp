@@ -20,7 +20,6 @@ dc Vg 0 3.3 0.01 Vb 0 -2.0 -0.5
 plot -i(VD)
 dc Vd 0 3.3 0.01 Vg 0 3.3 0.3
 plot -i(VD)
-
 .endc
 
 .end

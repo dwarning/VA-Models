@@ -33,3 +33,5 @@ Vb B 0 0
     run  
     plot A B v(9) v(8)
 .endc
+
+.end

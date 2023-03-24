@@ -45,3 +45,5 @@ plot 180/PI*ph(out)
 tran 0.1us 10us
 plot v(in) v(20) v(out)
 .endc
+
+.end

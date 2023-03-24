@@ -38,3 +38,5 @@ vin in 0 pulse(0 1.8 1ns .1ns .1ns .8ns 5ns)
     run  
     plot in out
 .endc
+
+.end
