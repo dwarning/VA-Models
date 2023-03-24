@@ -9,7 +9,7 @@ V1 Anode1 0 PULSE(1.1 -3 4n 3n 3n 40n 80n)
 .control
 pre_osdi ../osdilibs/diode_cmc.osdi
 tran 100p 40n ;0 5p
-plot i(v1) v(anode)/10; @d1[id] @d1[vd] v(Anode)
+plot -i(v1) v(anode)/10; @d1[id] @d1[vd] v(Anode)
 *settype charge @d1[charge]
 *plot @d1[charge]
 *plot deriv(@d1[charge]) ylimit -1e-3 1e-3
