@@ -18,7 +18,7 @@
 // Natures and Disciplines
 //
 
-discipline \logic ; 
+discipline logic; 
   domain discrete;
 enddiscipline 
 
