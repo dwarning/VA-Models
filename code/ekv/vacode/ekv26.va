@@ -146,7 +146,7 @@ module ekv_va(d,g,s,b);
     real RSeff, RDeff;
     real yk, z0, zk;
     real epssil;
-    real ddt_QD, ddt_QS;
+    real Qbdx, Qbsx;
     //DIODES realted variables [AB: 040902]
     real as_i, ad_i, ps_i, pd_i, v_di_b, v_si_b;
     real temp_arg, tmp0;
@@ -672,18 +672,18 @@ module ekv_va(d,g,s,b);
             QI*GAMMAprime/(GAMMAprime+sqrt_PHI_VP2_2);
         QG = -QI -QB;
         I(ds) <+ TYPE * Mode * Id;          // wg 22/04/08 corrected for device TYPE
-        ddt_QD = ddt(QD);
-        ddt_QS = ddt(QS);
         if (Mode == `FWD) begin
-            I(db) <+ TYPE * ddt_QD;         // wg 22/04/08 corrected for device TYPE
-            I(sb) <+ TYPE * ddt_QS;
+            Qbdx = QD;
+            Qbsx = QS;
             I(db) <+ TYPE * Isub;
         end
         else begin
-            I(sb) <+ TYPE * ddt_QD;         // wg 22/04/08 corrected for device TYPE
-            I(db) <+ TYPE * ddt_QS;
+            Qbdx = QS;
+            Qbsx = QD;
             I(sb) <+ TYPE * Isub;
         end
+        I(db) <+ TYPE * ddt(Qbdx);          // wg 22/04/08 corrected for device TYPE
+        I(sb) <+ TYPE * ddt(Qbsx);
         I(gb) <+ TYPE * ddt(QG);            // wg 22/04/08 corrected for device TYPE
         if (Noise) begin : Noise_block      //AB: 040902 Noise ->  Noise_block
             real S_flicker, S_thermal;
