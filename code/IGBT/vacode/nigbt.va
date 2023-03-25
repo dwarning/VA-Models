@@ -241,7 +241,6 @@ module nigbt (a, g, c);
 `endif
         Vds = V(b,c);
         Vae = V(a,e);
-//$strobe("Vdg %g Vgs %g Vds %g Veb %g Vae %g Vec %g", Vdg, Vgs, Vds, Veb, Vae, Vec);
 
         Vbc = Vds;
         Vgeff = Vgs-VtT;
@@ -446,7 +445,6 @@ module nigbt (a, g, c);
             iQeb    = iQeb - d_Q;
             l_it    = l_it+1;
         end //while
-//$strobe("iter %d Qeb %g iQeb %g", l_it, Qeb, iQeb);
 
         // mobility due to carrier-carrier scattering
         if (ccsflg > 0) begin
@@ -462,7 +460,6 @@ module nigbt (a, g, c);
             iNsat = Ic/(`P_Q*Area_cm2*Vpsat)-Imos/(`P_Q*Area_cm2*Vnsat);
         else
             iNsat = 0.0;
-//$strobe("Ic %g Vpsat %g Imos %g Vnsat %g", Ic, Vpsat, Imos, Vnsat);
 
         //
         // current contributions
