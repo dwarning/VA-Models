@@ -129,6 +129,16 @@ module nigbt (a, g, c);
     // system variables
     electrical var_Qeb, var_Mucinv, var_Nsat;//, var_dVecdt, var_dVdgdt;
 
+    branch (g, c) b_gc;
+    branch (b, g) b_bg;
+    branch (b, c) b_bc;
+    branch (e, c) b_ec;
+    branch (e, b) b_eb;
+    branch (a, e) b_ae;
+    branch (var_Qeb) b_Qeb;
+    branch (var_Mucinv) b_Mucinv;
+    branch (var_Nsat) b_Nsat;
+
     // device parameters
     `IPRoz( Agd  , 5e-6   , "m**2"   ,     "gate-drain overlap area")
     `IPRoz( Area , 1e-5   , "m**2"   ,     "area of the device")
@@ -465,28 +475,28 @@ module nigbt (a, g, c);
         // current contributions
         //
                                              //               | anode
-        I(g, c) <+ Vgs*`GMIN;                //               |
-        I(g, c) <+ ddt(Qgs);                 //              /
-        I(b, g) <+ Vdg*`GMIN;                //          b |/   |
-        I(b, g) <+ ddt(Qgd);                 //      |-----|    | It
-        I(b, c) <+ Imos + Imult + Vds*`GMIN; // gate||     |\   v
-        I(b, c) <+ ddt(Qds);                 //  ---||Imos   \
-        I(b, c) <+ ddt(Qmult);               //     ||_ |   e_|_
-        I(e, c) <+ Icss + Vec*`GMIN;         //        ||   /   \ |
-        I(e, c) <+ ddt(Qcer);                //        |v   \ – / | Icss
-        I(e, b) <+ Ibss + Veb*`GMIN;         //        |    / - \ v
-        I(e, b) <+ ddt(iQeb);                //        |    \___/
-        I(a, e) <+ It;                       //        |______| cathode
+        I(b_gc) <+ Vgs*`GMIN;                //               |
+        I(b_gc) <+ ddt(Qgs);                 //              /
+        I(b_bg) <+ Vdg*`GMIN;                //          b |/   |
+        I(b_bg) <+ ddt(Qgd);                 //      |-----|    | It
+        I(b_bc) <+ Imos + Imult + Vds*`GMIN; // gate||     |\   v
+        I(b_bc) <+ ddt(Qds);                 //  ---||Imos   \
+        I(b_bc) <+ ddt(Qmult);               //     ||_ |   e_|_
+        I(b_ec) <+ Icss + Vec*`GMIN;         //        ||   /   \ |
+        I(b_ec) <+ ddt(Qcer);                //        |v   \ – / | Icss
+        I(b_eb) <+ Ibss + Veb*`GMIN;         //        |    / - \ v
+        I(b_eb) <+ ddt(iQeb);                //        |    \___/
+        I(b_ae) <+ It;                       //        |______| cathode
                                              //               |
         //
         // system variables
         //
 
-        I(var_Qeb)    <+ Qeb - iQeb;
-        I(var_Mucinv) <+ Mucinv - iMucinv;
-        I(var_Nsat)   <+ Nsat - iNsat;
-//        I(var_dVecdt) <+ dVecdt - ddt(Vec);
-//        I(var_dVdgdt) <+ dVdgdt - ddt(Vdg);
+        I(b_Qeb)    <+ Qeb - iQeb;
+        I(b_Mucinv) <+ Mucinv - iMucinv;
+        I(b_Nsat)   <+ Nsat - iNsat;
+//        I(b_dVecdt) <+ dVecdt - ddt(Vec);
+//        I(b_dVdgdt) <+ dVdgdt - ddt(Vdg);
 
     end
 endmodule
