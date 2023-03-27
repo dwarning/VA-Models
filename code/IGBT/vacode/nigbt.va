@@ -188,7 +188,7 @@ module nigbt (a, g, c);
 
     real P0_Qeb, Vebj_Qeb, T1, Vebd1, Vebd1_Qeb, Vebd2, Vebd2_Qeb, Vebd_Qeb, Vebq_Qeb;
     integer l_it;
-    real dV, d_Q, dstep;
+    real dV, d_Q, d_Q_max;
 
     integer ccsflg, sclflg;
     real Area_cm2, Agd_cm2, Wb_cm;
@@ -444,12 +444,12 @@ module nigbt (a, g, c);
             dV = Vebq - Veb;
             d_Q     = dV/Vebq_Qeb;
             //Limit maximum change of Qeb
-            dstep    = abs(0.3*iQeb);
-            if (abs(d_Q) > dstep) begin
+            d_Q_max    = abs(0.3*iQeb);
+            if (abs(d_Q) > d_Q_max) begin
                 if (d_Q>=0) begin
-                    d_Q     = dstep;
+                    d_Q     = d_Q_max;
                 end else begin
-                    d_Q     = -dstep;
+                    d_Q     = -d_Q_max;
                 end
             end
             iQeb    = iQeb - d_Q;
