@@ -176,7 +176,7 @@ module nigbt (a, g, c);
     real Dc, Qeb, Qgs, Qgd, Qds, Qcer, Qmult, Qb, Qbi;
     real Ccer, Cbcj, Cgdj, Cgd;
     real Mucinv, Munc, Mupc, Mueff, BVcbo, P0, Deltap;
-    real WL, WL2, Tanh_WL2, Ads, Tj, To;
+    real WL, WL2, Tanh_WL2, Ads;
     real Ni, Vpsat, Vnsat, Alpha1, Alpha2;
     real TauT, IsneT, VtT, KpT;
 //    real dVecdt, dVdgdt;
@@ -196,7 +196,8 @@ module nigbt (a, g, c);
     analog begin
         // equation initialization
         `INITIAL_MODEL
-        begin
+        begin : init
+            real Tj, To;
 
             ccsflg = 1; // mobility due to carrier-carrier scattering flag on
             sclflg = -1;// base-collector space charge due to velocity saturation flag off
