@@ -381,9 +381,9 @@ module nigbt (a, g, c);
         BVcbo = BVf*5.34e13*pow(Nscl,-0.75);
 
         // avalanche multiplication factor
-        M = 1./(1-pow(0.99999999,BVn));
-        if (Vds/BVcbo < 0.99999999) M = 1./(1.-pow(Vds/BVcbo,BVn));
-        if (Vds < 0.) M=1.;
+        M = 1.0/(1-pow(0.99999999,BVn));
+        if (Vds/BVcbo < 0.99999999) M = 1.0/(1.0-pow(Vds/BVcbo,BVn));
+        if (Vds < 0.0) M = 1.0;
 
         // anode current
         if (Rb > 0)
