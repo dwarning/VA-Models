@@ -40,9 +40,8 @@ module HBT_X(c,b,e,t);
 
     //internal nodes
     electrical ei, bi, bii, biii, ci, ex, exx, cx, nii, niix, niiy, niii, niiix, niiiy, \
-    niia, niib, niiia, niiib,  niv, nivx, nivy, niva, nivb,  gnd;
+    niia, niib, niiia, niiib,  niv, nivx, nivy, niva, nivb;
     thermal ti;
-    ground gnd;
 
     //model parameters
     //    parameter integer Mode = 1  from [0:4];             // Ignored
@@ -694,66 +693,66 @@ module HBT_X(c,b,e,t);
         // == Partly Correlated Cyclostationary Sources ==
         // Base-Emitter
         // correlated noise sources
-        I(niib,gnd)    <+ V(niib,gnd)  + ddt(V(niib,gnd)/(2.0*3.1415*Fb)) + white_noise(LFc* Area*Kb, "White noise base-emitter junction");
-        I(niiib,gnd)   <+ V(niiib,gnd) + flicker_noise(LFc* Area*Kfb, Ffeb, "Flicker noise base-emitter junction (a)");
-        I(nivb,gnd)    <+ V(nivb,gnd)  + flicker_noise(LFc* Area*Kfe , Ffee, "Hooge noise of emitter resistance");
+        I(niib)    <+ V(niib)  + ddt(V(niib)/(2.0*3.1415*Fb)) + white_noise(LFc* Area*Kb, "White noise base-emitter junction");
+        I(niiib)   <+ V(niiib) + flicker_noise(LFc* Area*Kfb, Ffeb, "Flicker noise base-emitter junction (a)");
+        I(nivb)    <+ V(nivb)  + flicker_noise(LFc* Area*Kfe , Ffee, "Hooge noise of emitter resistance");
 
         // Lorentz-spectrum part
-        I(nii,gnd)    <+ V(nii,gnd)  + ddt(V(nii,gnd)/(2.0*3.1415*Fb)) + white_noise( (1.0-LFc)*Area*Kb, "White noise");
-        I(niia,gnd)   <+ V(niia,gnd) + ddt(V(niia,gnd)/(2.0*3.1415*Fb)) + white_noise( (1.0-LFc)*Area*Kb, "White noise");
+        I(nii)    <+ V(nii)  + ddt(V(nii)/(2.0*3.1415*Fb)) + white_noise( (1.0-LFc)*Area*Kb, "White noise");
+        I(niia)   <+ V(niia) + ddt(V(niia)/(2.0*3.1415*Fb)) + white_noise( (1.0-LFc)*Area*Kb, "White noise");
 
         if (Fcorr==0) begin
-            I(niiy,gnd)   <+ Iniix;
-            V(niiy,gnd)   <+ I(niiy,gnd);
-            I(niix,gnd)   <+ 1e-9*V(niix,gnd); // we dont need this node now
+            I(niiy)   <+ Iniix;
+            V(niiy)   <+ I(niiy);
+            I(niix)   <+ 1e-9*V(niix); // we dont need this node now
         end
         else begin
             // low-pass -- high-pass
-            V(niiy,gnd)   <+ Iniix;
+            V(niiy)   <+ Iniix;
             I(niiy,niix)  <+ ddt(V(niiy,niix))/Fcorr;
-            I(niix,gnd)   <+ V(niix,gnd);
+            I(niix)   <+ V(niix);
         end
 
 
         // 1/f spectrum part
-        I(niii,gnd)   <+ V(niii,gnd) + flicker_noise((1.0-LFc)*Area*Kfb, Ffeb, "Flicker noise base-emitter junction (a)");
-        I(niiia,gnd)  <+ V(niiia,gnd) + flicker_noise((1.0-LFc)*Area*Kfb, Ffeb, "Flicker noise base-emitter junction (a)");
+        I(niii)   <+ V(niii) + flicker_noise((1.0-LFc)*Area*Kfb, Ffeb, "Flicker noise base-emitter junction (a)");
+        I(niiia)  <+ V(niiia) + flicker_noise((1.0-LFc)*Area*Kfb, Ffeb, "Flicker noise base-emitter junction (a)");
 
         if (Fcorr==0) begin
-            I(niiiy,gnd)    <+ Iniiix;
-            V(niiiy,gnd)    <+ I(niiiy,gnd);
-            I(niiix,gnd)    <+ 1e-9*V(niiix); // we dont need this node now
+            I(niiiy)    <+ Iniiix;
+            V(niiiy)    <+ I(niiiy);
+            I(niiix)    <+ 1e-9*V(niiix); // we dont need this node now
         end
         else begin
             // low-pass -- high-pass
-            V(niiiy,gnd)    <+ Iniiix;
+            V(niiiy)    <+ Iniiix;
             I(niiiy,niiix)  <+ ddt(V(niiiy,niiix))/Fcorr;
-            I(niiix,gnd)    <+ V(niiix);
+            I(niiix)    <+ V(niiix);
         end
 
 
         // Together
         if (Fcorr==0) begin
-            I(bii,ei) <+ (V(nii)+V(niia)+V(niib))*V(niiy,gnd) + (V(niii)+V(niiia)+V(niiib))*V(niiiy,gnd);
+            I(bii,ei) <+ (V(nii)+V(niia)+V(niib))*V(niiy) + (V(niii)+V(niiia)+V(niiib))*V(niiiy);
         end
         else begin
-            I(bii,ei) <+ (V(nii)+V(niib))*V(niix) + (V(niia)+V(niib))*V(niiy,niix) + (V(niii)+V(niiib))*V(niiix,gnd) + (V(niiia)+V(niiib))*V(niiiy,niiix);
+            I(bii,ei) <+ (V(nii)+V(niib))*V(niix) + (V(niia)+V(niib))*V(niiy,niix) + (V(niii)+V(niiib))*V(niiix) + (V(niiia)+V(niiib))*V(niiiy,niiix);
         end
 
         // Emitter
-        I(niv,gnd)    <+ V(niv,gnd)  + flicker_noise((1.0-LFc)*Area*Kfe , Ffee, "Hooge noise of emitter resistance");
-        I(niva,gnd)   <+ V(niva,gnd) + flicker_noise((1.0-LFc)*Area*Kfe , Ffee, "Hooge noise of emitter resistance");
+        I(niv)    <+ V(niv)  + flicker_noise((1.0-LFc)*Area*Kfe , Ffee, "Hooge noise of emitter resistance");
+        I(niva)   <+ V(niva) + flicker_noise((1.0-LFc)*Area*Kfe , Ffee, "Hooge noise of emitter resistance");
 
         if (Fcorr==0) begin
-            I(nivy,gnd)    <+ Inivx;
-            V(nivy,gnd)    <+ I(nivy,gnd);
-            I(nivx,gnd)    <+ 1e-9*V(nivx); // we dont need this node now
+            I(nivy)    <+ Inivx;
+            V(nivy)    <+ I(nivy);
+            I(nivx)    <+ 1e-9*V(nivx); // we dont need this node now
         end
         else begin
             // low-pass -- high-pass
-            V(nivy,gnd)    <+ Inivx;
+            V(nivy)    <+ Inivx;
             I(nivy,nivx)   <+ ddt(V(nivy,nivx))/Fcorr;
-            I(nivx,gnd)    <+ V(nivx);
+            I(nivx)    <+ V(nivx);
         end
 
         // Together
