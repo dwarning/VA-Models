@@ -6,6 +6,7 @@
 `include "disciplines.vams"
 `include "constants.vams"
 
+`define CONSTroot2 1.41421356237309504880
 //
 //  There are 8 separate versions of VBIC, defined as follows:
 //
@@ -109,18 +110,18 @@ module vbic_4T_et_cf(c,b,e,s,dt);
     parameter   real    CBEO    =   0.0     from[0.0:inf);
     parameter   real    CJE =   0.0     from[0.0:inf);
     parameter   real    PE  =   0.75    from(0.0:inf);
-    parameter   real    ME  =   0.33    from(0.0:1.0];
+    parameter   real    ME  =   0.33    from(0.0:1.0);
     parameter   real    AJE =  -0.5;
     parameter   real    CBCO    =   0.0     from[0.0:inf);
     parameter   real    CJC =   0.0     from[0.0:inf);
     parameter   real    QCO =   0.0     from[0.0:inf);
     parameter   real    CJEP    =   0.0     from[0.0:inf);
     parameter   real    PC  =   0.75    from(0.0:inf);
-    parameter   real    MC  =   0.33    from(0.0:1.0];
+    parameter   real    MC  =   0.33    from(0.0:1.0);
     parameter   real    AJC =  -0.5;
     parameter   real    CJCP    =   0.0     from[0.0:inf);
     parameter   real    PS  =   0.75    from(0.0:inf);
-    parameter   real    MS  =   0.33    from(0.0:1.0];
+    parameter   real    MS  =   0.33    from(0.0:1.0);
     parameter   real    AJS =  -0.5;
     parameter   real    IBEI    =   1.0e-18 from(0.0:inf);
     parameter   real    WBE =   1.0     from[0.0:1.0];
@@ -201,17 +202,17 @@ module vbic_4T_et_cf(c,b,e,s,dt);
     parameter   real    VREV    =   0.0;
 
 //
-    aliasparam  TREF = TNOM;
-//  parameter   alias   VO  V0
-//  parameter   alias   GAMM    GAMMA
-//  parameter   alias   CBEO    CBE0
-//  parameter   alias   CBCO    CBC0
-//  parameter   alias   CCSO    CCS0
-//  parameter   alias   QCO QC0
-//  parameter   alias   XVO XV0
-//  parameter   alias   DTEMP   DTMP
-//  parameter   alias   VERS    VERSION
-//  parameter   alias   VREV    REV REVISION
+    aliasparam  TREF  = TNOM;
+    aliasparam  V0    = VO;
+    aliasparam  GAMMA = GAMM;
+    aliasparam  CBE0  = CBEO;
+    aliasparam  CBC0  = CBCO;
+    aliasparam  CCS0  = CCSO;
+    aliasparam  QC0   = QCO;
+    aliasparam  XV0   = XVO;
+    aliasparam  DTMP  = DTEMP;
+    aliasparam  VERSION = VERS;
+//    aliasparam  VREV  = REV REVISION
 //
 
     real    ISatT,ISRRatT,IKFatT,IBEIatT,IBCIatT,ISPatT,IBENatT,IBCNatT;
@@ -221,9 +222,9 @@ module vbic_4T_et_cf(c,b,e,s,dt);
     real    CJEatT,CJCatT,CJEPatT,CJCPatT;
     real    NFatT,NRatT,AVC2atT,VBBEatT,NBBEatT,GAMMatT,VOatT,EBBEatT;
     real    Tdev,Tini,rT,dT;
-    real    IVEF,IVER,IIKF,IIKR,IIKP,IVO,IHRCF,IVTF,IITF,slTF,LEP,CEP;
+    real    IVEF,IVER,IIKF,IIKR,IIKP,IVO,IHRCF,IVTF,IITF,slTF;
 
-    real    Vtv,Vcbj,Ifi,Iri,Itzf,Ixzf,Itxf,Ixxf,Itzr,q1z,q1,q2,qb,Ifp,Irp,Iccp,q2p,qbp;
+    real    Vtv,Ifi,Iri,Itzf,Itzr,q1z,q1,q2,qb,Ifp,Irp,Iccp,q2p,qbp;
     real    Ibe,Ibex,Ibcj,Ibc,Ibep,Ibcp,Igc,avalf;
     real    Ircx,Irci,Irbx,Irbi,Ire,Irbp,Irs;
     real    Kbci,Kbcx,rKp1,Iohm,derf;
@@ -232,12 +233,13 @@ module vbic_4T_et_cf(c,b,e,s,dt);
     real    sgIf,rIf,mIf,tff;
     real    Qbe,Qbex,Qbc,Qbcx,Qbep,Qbcp,Qbeo,Qbco;
     real    Ith,Irth,Qcth;
-    real    Qcxf,Flxf;
 
     real    psiio,psiin,dv0,dvh,pwq,qlo;
     real    qhi,mv0,vl0,q0,dv,mv;
     real    vl,vn0,vnl0,qlo0,vn,vnl;
     real    sel,crt,cmx,cl,ql;
+
+    real    tVCrit, Vbei, Vbex, Vbci, Vbcx, Vbep;
 
     analog begin
 //
@@ -290,6 +292,7 @@ module vbic_4T_et_cf(c,b,e,s,dt);
         VOatT   =  VO*pow(rT,XVO);
         EBBEatT =  exp(-VBBEatT/(NBBEatT*Vtv));
 
+        tVCrit = $vt($temperature)*ln($vt($temperature)/(`CONSTroot2*IS));
 //
 //      Parameter mappings
 //
@@ -309,15 +312,29 @@ module vbic_4T_et_cf(c,b,e,s,dt);
 //      Electrical branch constituent relations
 //
 
+`ifdef __NGSPICE_COMPACT_MODELING__
+        Vbei     =  $limit(V(bi,ei), "pnjlim", Vtv, tVCrit);
+        Vbex     =  $limit(V(bx,ei), "pnjlim", Vtv, tVCrit);
+        Vbci     =  $limit(V(bi,ci), "pnjlim", Vtv, tVCrit);
+        Vbcx     =  $limit(V(bi,cx), "pnjlim", Vtv, tVCrit);
+        Vbep     =  $limit(V(bx,bp), "pnjlim", Vtv, tVCrit);
+`else
+        Vbei     =  V(bi,ei);
+        Vbex     =  V(bx,ei);
+        Vbci     =  V(bi,ci);
+        Vbcx     =  V(bi,cx);
+        Vbep     =  V(bx,bp);
+`endif
+
         dv0 = -PEatT*FC;
         if (AJE<=0.0) begin
-            dvh = V(bei)+dv0;
+            dvh = Vbei+dv0;
             if (dvh>0.0) begin
                 pwq = pow((1.0-FC),(-1.0-ME));
                 qlo = PEatT*(1.0-pwq*(1.0-FC)*(1.0-FC))/(1.0-ME);
                 qhi = dvh*(1.0-FC+0.5*ME*dvh/PEatT)*pwq;
             end else begin
-                qlo = PEatT*(1.0-pow((1.0-V(bei)/PEatT),(1.0-ME)))/(1.0-ME);
+                qlo = PEatT*(1.0-pow((1.0-Vbei/PEatT),(1.0-ME)))/(1.0-ME);
                 qhi = 0.0;
             end
             qdbe = qlo+qhi;
@@ -325,21 +342,21 @@ module vbic_4T_et_cf(c,b,e,s,dt);
             mv0 = sqrt(dv0*dv0+4*AJE*AJE);
             vl0 = -0.5*(dv0+mv0);
             q0 = -PEatT*pow((1.0-vl0/PEatT),(1.0-ME))/(1.0-ME);
-            dv = V(bei)+dv0;
+            dv = Vbei+dv0;
             mv = sqrt(dv*dv+4*AJE*AJE);
             vl = 0.5*(dv-mv)-dv0;
             qlo = -PEatT*pow((1.0-vl/PEatT),(1.0-ME))/(1.0-ME);
-            qdbe = qlo+pow((1.0-FC),(-ME))*(V(bei)-vl+vl0)-q0;
+            qdbe = qlo+pow((1.0-FC),(-ME))*(Vbei-vl+vl0)-q0;
         end
         dv0 = -PEatT*FC;
         if (AJE<=0.0) begin
-            dvh = V(bex)+dv0;
+            dvh = Vbex+dv0;
             if (dvh>0.0) begin
                 pwq = pow((1.0-FC),(-1.0-ME));
                 qlo = PEatT*(1.0-pwq*(1.0-FC)*(1.0-FC))/(1.0-ME);
                 qhi = dvh*(1.0-FC+0.5*ME*dvh/PEatT)*pwq;
             end else begin
-                qlo = PEatT*(1.0-pow((1.0-V(bex)/PEatT),(1.0-ME)))/(1.0-ME);
+                qlo = PEatT*(1.0-pow((1.0-Vbex/PEatT),(1.0-ME)))/(1.0-ME);
                 qhi = 0.0;
             end
             qdbex = qlo+qhi;
@@ -347,24 +364,24 @@ module vbic_4T_et_cf(c,b,e,s,dt);
             mv0 = sqrt(dv0*dv0+4*AJE*AJE);
             vl0 = -0.5*(dv0+mv0);
             q0 = -PEatT*pow((1.0-vl0/PEatT),(1.0-ME))/(1.0-ME);
-            dv = V(bex)+dv0;
+            dv = Vbex+dv0;
             mv = sqrt(dv*dv+4*AJE*AJE);
             vl = 0.5*(dv-mv)-dv0;
             qlo = -PEatT*pow((1.0-vl/PEatT),(1.0-ME))/(1.0-ME);
-            qdbex = qlo+pow((1.0-FC),(-ME))*(V(bex)-vl+vl0)-q0;
+            qdbex = qlo+pow((1.0-FC),(-ME))*(Vbex-vl+vl0)-q0;
         end
         dv0 = -PCatT*FC;
         if (AJC<=0.0) begin
-            dvh = V(bci)+dv0;
+            dvh = Vbci+dv0;
             if (dvh>0.0) begin
                 pwq = pow((1.0-FC),(-1.0-MC));
                 qlo = PCatT*(1.0-pwq*(1.0-FC)*(1.0-FC))/(1.0-MC);
                 qhi = dvh*(1.0-FC+0.5*MC*dvh/PCatT)*pwq;
             end else begin
-                if ((VRT>0.0)&&(V(bci)<-VRT)) begin
-                    qlo = PCatT*(1.0-pow((1.0+VRT/PCatT),(1.0-MC))*(1.0-((1.0-MC)*(V(bci)+VRT))/(PCatT+VRT)))/(1.0-MC);
+                if ((VRT>0.0)&&(Vbci<-VRT)) begin
+                    qlo = PCatT*(1.0-pow((1.0+VRT/PCatT),(1.0-MC))*(1.0-((1.0-MC)*(Vbci+VRT))/(PCatT+VRT)))/(1.0-MC);
                 end else begin
-                    qlo = PCatT*(1.0-pow((1.0-V(bci)/PCatT),(1.0-MC)))/(1.0-MC);
+                    qlo = PCatT*(1.0-pow((1.0-Vbci/PCatT),(1.0-MC)))/(1.0-MC);
                 end
                 qhi = 0.0;
             end
@@ -375,7 +392,7 @@ module vbic_4T_et_cf(c,b,e,s,dt);
                 vnl0 = 2.0*vn0/(sqrt((vn0-1.0)*(vn0-1)+4*AJC*AJC)+sqrt((vn0+1.0)*(vn0+1)+4*ART*ART));
                 vl0 = 0.5*(vnl0*(VRT-dv0)-VRT-dv0);
                 qlo0 = PCatT*(1.0-pow((1.0-vl0/PCatT),(1.0-MC)))/(1.0-MC);
-                vn = (2*V(bci)+VRT+dv0)/(VRT-dv0);
+                vn = (2*Vbci+VRT+dv0)/(VRT-dv0);
                 vnl = 2.0*vn/(sqrt((vn-1.0)*(vn-1)+4*AJC*AJC)+sqrt((vn+1.0)*(vn+1)+4*ART*ART));
                 vl = 0.5*(vnl*(VRT-dv0)-VRT-dv0);
                 qlo = PCatT*(1.0-pow((1.0-vl/PCatT),(1.0-MC)))/(1.0-MC);
@@ -383,31 +400,31 @@ module vbic_4T_et_cf(c,b,e,s,dt);
                 crt = pow((1.0+VRT/PCatT),(-MC));
                 cmx = pow((1.0+dv0/PCatT),(-MC));
                 cl = (1.0-sel)*crt+sel*cmx;
-                ql = (V(bci)-vl+vl0)*cl;
+                ql = (Vbci-vl+vl0)*cl;
                 qdbc = ql+qlo-qlo0;
             end else begin
                 mv0 = sqrt(dv0*dv0+4*AJC*AJC);
                 vl0 = -0.5*(dv0+mv0);
                 q0 = -PCatT*pow((1.0-vl0/PCatT),(1.0-MC))/(1.0-MC);
-                dv = V(bci)+dv0;
+                dv = Vbci+dv0;
                 mv = sqrt(dv*dv+4*AJC*AJC);
                 vl = 0.5*(dv-mv)-dv0;
                 qlo = -PCatT*pow((1.0-vl/PCatT),(1.0-MC))/(1.0-MC);
-                qdbc = qlo+pow((1.0-FC),(-MC))*(V(bci)-vl+vl0)-q0;
+                qdbc = qlo+pow((1.0-FC),(-MC))*(Vbci-vl+vl0)-q0;
             end
         end
         dv0 = -PCatT*FC;
         if (AJC<=0.0) begin
-            dvh = V(bep)+dv0;
+            dvh = Vbep+dv0;
             if (dvh>0.0) begin
                 pwq = pow((1.0-FC),(-1.0-MC));
                 qlo = PCatT*(1.0-pwq*(1.0-FC)*(1.0-FC))/(1.0-MC);
                 qhi = dvh*(1.0-FC+0.5*MC*dvh/PCatT)*pwq;
             end else begin
-                if ((VRT>0.0)&&(V(bep)<-VRT)) begin
-                    qlo = PCatT*(1.0-pow((1.0+VRT/PCatT),(1.0-MC))*(1.0-((1.0-MC)*(V(bep)+VRT))/(PCatT+VRT)))/(1.0-MC);
+                if ((VRT>0.0)&&(Vbep<-VRT)) begin
+                    qlo = PCatT*(1.0-pow((1.0+VRT/PCatT),(1.0-MC))*(1.0-((1.0-MC)*(Vbep+VRT))/(PCatT+VRT)))/(1.0-MC);
                 end else begin
-                    qlo = PCatT*(1.0-pow((1.0-V(bep)/PCatT),(1.0-MC)))/(1.0-MC);
+                    qlo = PCatT*(1.0-pow((1.0-Vbep/PCatT),(1.0-MC)))/(1.0-MC);
                 end
                 qhi = 0.0;
             end
@@ -418,7 +435,7 @@ module vbic_4T_et_cf(c,b,e,s,dt);
                 vnl0 = 2.0*vn0/(sqrt((vn0-1.0)*(vn0-1)+4*AJC*AJC)+sqrt((vn0+1.0)*(vn0+1)+4*ART*ART));
                 vl0 = 0.5*(vnl0*(VRT-dv0)-VRT-dv0);
                 qlo0 = PCatT*(1.0-pow((1.0-vl0/PCatT),(1.0-MC)))/(1.0-MC);
-                vn = (2*V(bep)+VRT+dv0)/(VRT-dv0);
+                vn = (2*Vbep+VRT+dv0)/(VRT-dv0);
                 vnl = 2.0*vn/(sqrt((vn-1.0)*(vn-1)+4*AJC*AJC)+sqrt((vn+1.0)*(vn+1)+4*ART*ART));
                 vl = 0.5*(vnl*(VRT-dv0)-VRT-dv0);
                 qlo = PCatT*(1.0-pow((1.0-vl/PCatT),(1.0-MC)))/(1.0-MC);
@@ -426,17 +443,17 @@ module vbic_4T_et_cf(c,b,e,s,dt);
                 crt = pow((1.0+VRT/PCatT),(-MC));
                 cmx = pow((1.0+dv0/PCatT),(-MC));
                 cl = (1.0-sel)*crt+sel*cmx;
-                ql = (V(bep)-vl+vl0)*cl;
+                ql = (Vbep-vl+vl0)*cl;
                 qdbep = ql+qlo-qlo0;
             end else begin
                 mv0 = sqrt(dv0*dv0+4*AJC*AJC);
                 vl0 = -0.5*(dv0+mv0);
                 q0 = -PCatT*pow((1.0-vl0/PCatT),(1.0-MC))/(1.0-MC);
-                dv = V(bep)+dv0;
+                dv = Vbep+dv0;
                 mv = sqrt(dv*dv+4*AJC*AJC);
                 vl = 0.5*(dv-mv)-dv0;
                 qlo = -PCatT*pow((1.0-vl/PCatT),(1.0-MC))/(1.0-MC);
-                qdbep = qlo+pow((1.0-FC),(-MC))*(V(bep)-vl+vl0)-q0;
+                qdbep = qlo+pow((1.0-FC),(-MC))*(Vbep-vl+vl0)-q0;
             end
         end
         if (CJCP>0.0) begin
@@ -465,10 +482,10 @@ module vbic_4T_et_cf(c,b,e,s,dt);
         end else begin
             qdbcp   =  0;
         end
-        argi    =  V(bei)/(NFatT*Vtv);
+        argi    =  Vbei/(NFatT*Vtv);
         expi    =  limexp(argi);
         Ifi =  ISatT*(expi-1.0);
-        argi    =  V(bci)/(NRatT*Vtv);
+        argi    =  Vbci/(NRatT*Vtv);
         expi    =  limexp(argi);
         Iri =  ISatT*ISRRatT*(expi-1.0);
         q1z =  1.0+qdbe*IVER+qdbc*IVEF;
@@ -482,9 +499,9 @@ module vbic_4T_et_cf(c,b,e,s,dt);
         Itzr    =  Iri/qb;
         Itzf    =  Ifi/qb;
         if (ISP>0.0) begin
-            argi    =  V(bep)/(NFP*Vtv);
+            argi    =  Vbep/(NFP*Vtv);
             expi    =  limexp(argi);
-            argx    =  V(bci)/(NFP*Vtv);
+            argx    =  Vbci/(NFP*Vtv);
             expx    =  limexp(argx);
             Ifp =  ISPatT*(WSP*expi+(1.0-WSP)*expx-1.0);
             q2p =  Ifp*IIKP;
@@ -500,12 +517,12 @@ module vbic_4T_et_cf(c,b,e,s,dt);
         end
 
         if (WBE==1.0) begin
-            argi    =  V(bei)/(NEI*Vtv);
+            argi    =  Vbei/(NEI*Vtv);
             expi    =  limexp(argi);
-            argn    =  V(bei)/(NEN*Vtv);
+            argn    =  Vbei/(NEN*Vtv);
             expn    =  limexp(argn);
             if (VBBE>0.0) begin
-                argx    =  (-VBBEatT-V(bei))/(NBBEatT*Vtv);
+                argx    =  (-VBBEatT-Vbei)/(NBBEatT*Vtv);
                 expx    =  limexp(argx);
                 Ibe =  IBEIatT*(expi-1.0)+IBENatT*(expn-1.0)-IBBE*(expx-EBBEatT);
             end else begin
@@ -514,57 +531,57 @@ module vbic_4T_et_cf(c,b,e,s,dt);
             Ibex    =  0.0;
         end else if (WBE==0.0) begin
             Ibe =  0.0;
-            argi    =  V(bex)/(NEI*Vtv);
+            argi    =  Vbex/(NEI*Vtv);
             expi    =  limexp(argi);
-            argn    =  V(bex)/(NEN*Vtv);
+            argn    =  Vbex/(NEN*Vtv);
             expn    =  limexp(argn);
             if (VBBE>0.0) begin
-                argx    =  (-VBBEatT-V(bex))/(NBBEatT*Vtv);
+                argx    =  (-VBBEatT-Vbex)/(NBBEatT*Vtv);
                 expx    =  limexp(argx);
                 Ibex    =  IBEIatT*(expi-1.0)+IBENatT*(expn-1.0)-IBBE*(expx-EBBEatT);
             end else begin
                 Ibex    =  IBEIatT*(expi-1.0)+IBENatT*(expn-1.0);
             end
         end else begin
-            argi    =  V(bei)/(NEI*Vtv);
+            argi    =  Vbei/(NEI*Vtv);
             expi    =  limexp(argi);
-            argn    =  V(bei)/(NEN*Vtv);
+            argn    =  Vbei/(NEN*Vtv);
             expn    =  limexp(argn);
             if (VBBE>0.0) begin
-                argx    =  (-VBBEatT-V(bei))/(NBBEatT*Vtv);
+                argx    =  (-VBBEatT-Vbei)/(NBBEatT*Vtv);
                 expx    =  limexp(argx);
                 Ibe =  WBE*(IBEIatT*(expi-1.0)+IBENatT*(expn-1.0)-IBBE*(expx-EBBEatT));
             end else begin
                 Ibe =  WBE*(IBEIatT*(expi-1.0)+IBENatT*(expn-1.0));
             end
-            argi    =  V(bex)/(NEI*Vtv);
+            argi    =  Vbex/(NEI*Vtv);
             expi    =  limexp(argi);
-            argn    =  V(bex)/(NEN*Vtv);
+            argn    =  Vbex/(NEN*Vtv);
             expn    =  limexp(argn);
             if (VBBE>0.0) begin
-                argx    =  (-VBBEatT-V(bex))/(NBBEatT*Vtv);
+                argx    =  (-VBBEatT-Vbex)/(NBBEatT*Vtv);
                 expx    =  limexp(argx);
                 Ibex    =  (1.0-WBE)*(IBEIatT*(expi-1.0)+IBENatT*(expn-1.0)-IBBE*(expx-EBBEatT));
             end else begin
                 Ibex    =  (1.0-WBE)*(IBEIatT*(expi-1.0)+IBENatT*(expn-1.0));
             end
         end
-        argi    =  V(bci)/(NCI*Vtv);
+        argi    =  Vbci/(NCI*Vtv);
         expi    =  limexp(argi);
-        argn    =  V(bci)/(NCN*Vtv);
+        argn    =  Vbci/(NCN*Vtv);
         expn    =  limexp(argn);
         Ibcj    =  IBCIatT*(expi-1.0)+IBCNatT*(expn-1.0);
         if ((IBEIP>0.0)||(IBENP>0.0)) begin
-            argi    =  V(bep)/(NCI*Vtv);
+            argi    =  Vbep/(NCI*Vtv);
             expi    =  limexp(argi);
-            argn    =  V(bep)/(NCN*Vtv);
+            argn    =  Vbep/(NCN*Vtv);
             expn    =  limexp(argn);
             Ibep    =  IBEIPatT*(expi-1.0)+IBENPatT*(expn-1.0);
         end else begin
             Ibep    =  0.0;
         end
         if (AVC1>0.0) begin
-            vl = 0.5*(sqrt((PCatT-V(bci))*(PCatT-V(bci))+0.01)+(PCatT-V(bci)));
+            vl = 0.5*(sqrt((PCatT-Vbci)*(PCatT-Vbci)+0.01)+(PCatT-Vbci));
             avalf = AVC1*vl*limexp(-AVC2atT*pow(vl,(MC-1.0)));
             Igc =  (Itzf-Itzr-Ibcj)*avalf;
         end else begin
@@ -577,9 +594,9 @@ module vbic_4T_et_cf(c,b,e,s,dt);
         end else begin
             Ircx    =  0.0;
         end
-        argi    =  V(bci)/Vtv;
+        argi    =  Vbci/Vtv;
         expi    =  limexp(argi);
-        argx    =  V(bcx)/Vtv;
+        argx    =  Vbcx/Vtv;
         expx    =  limexp(argx);
         Kbci    =  sqrt(1.0+GAMMatT*expi);
         Kbcx    =  sqrt(1.0+GAMMatT*expx);
@@ -629,7 +646,7 @@ module vbic_4T_et_cf(c,b,e,s,dt);
         sgIf    =  Ifi>0.0?1.0:0.0;
         rIf =  Ifi*sgIf*IITF;
         mIf =  rIf/(rIf+1.0);
-        tff =  TF*(1.0+QTF*q1)*(1.0+XTF*limexp(V(bci)*IVTF/1.44)*(slTF+mIf*mIf)*sgIf);
+        tff =  TF*(1.0+QTF*q1)*(1.0+XTF*limexp(Vbci*IVTF/1.44)*(slTF+mIf*mIf)*sgIf);
         Qbe =  CJEatT*qdbe*WBE+tff*Ifi/qb;
         Qbex    =  CJEatT*qdbex*(1.0-WBE);
         Qbc =  CJCatT*qdbc+TR*Iri+QCO*Kbci;
@@ -639,7 +656,7 @@ module vbic_4T_et_cf(c,b,e,s,dt);
         Qbeo    =  V(be)*CBEO;
         Qbco    =  V(bc)*CBCO;
 
-        Ith = -(Ibe*V(bei)+Ibc*V(bci)+(Itzf-Itzr)*V(cei)+Ibex*V(bex)+Ibep*V(bep)+Irs*V(rs)+Ibcp*V(bcp)+Iccp*V(cep)+Ircx*V(rcx)+Irci*V(rci)+Irbx*V(rbx)+Irbi*V(rbi)+Ire*V(re)+Irbp*V(rbp));
+        Ith = -(Ibe*Vbei+Ibc*Vbci+(Itzf-Itzr)*V(cei)+Ibex*Vbex+Ibep*Vbep+Irs*V(rs)+Ibcp*V(bcp)+Iccp*V(cep)+Ircx*V(rcx)+Irci*V(rci)+Irbx*V(rbx)+Irbi*V(rbi)+Ire*V(re)+Irbp*V(rbp));
         if (RTH>0.0) begin
             Irth    =  V(rth)/RTH;
         end else begin
