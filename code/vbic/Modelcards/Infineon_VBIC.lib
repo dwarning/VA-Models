@@ -192,7 +192,7 @@ Rps 44 33 0.102733
 *
 *
 * without access to the external thermal node
-Q1 11 22 33 44 M_BFQ790
+NQ1 11 22 33 44 M_BFQ790
 *
 * with access to the thermal node
 * Q1 11 22 33 44 55 M_BFQ790
