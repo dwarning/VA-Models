@@ -7,7 +7,7 @@
 
 begin  // Currents and charges
     // Nodal biases
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
     if (TYPE == 1) begin
         Vb2c1 = $limit(V(b2, c1), "pnjlim", $vt, tVCrit);
         Vb2c2 = $limit(V(b2, c2), "pnjlim", $vt, tVCrit);

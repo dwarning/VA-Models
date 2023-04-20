@@ -652,7 +652,7 @@ analog begin : analogBlock
         //  (as they depend on self-heating they need to be in the evaluateStatic
         //  and not the initializeInstance block)
         //
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
             dt_et    = $limit(Temp(b_rth),"limitlog",100);
 `else
             dt_et    =  Temp(b_rth);
@@ -748,7 +748,7 @@ analog begin : analogBlock
         //  Branch voltages
         //
 
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
         if (type == `NPN) begin
             Vbei     =  $limit(V(bi,ei), "pnjlim", vtv, tVCrit);
             Vbex     =  $limit(V(bx,ei), "pnjlim", vtv, tVCrit);

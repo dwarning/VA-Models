@@ -1242,7 +1242,7 @@ analog begin
 
     end     //of Model_initialization
 
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
     if (type == 1) begin
         Vbiei = $limit(V(bi,ei), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis_t)));
         Vbici = $limit(V(bi,ci), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)));

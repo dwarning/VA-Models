@@ -173,7 +173,7 @@ IZEB_TM = IZEB_T * MULT ;
 
 // end Zener tunneling parameters
 
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
     tVCrit = Vt*ln(Vt/(`CONSTroot2*IS_TM));
 `endif
 

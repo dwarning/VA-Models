@@ -30,7 +30,7 @@
 `define EPSSI          1.03594e-12
 
 // tiny conductance
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
 `define GMIN           $simparam("gmin", 1e-12)
 `else
 `define GMIN           1e-12
@@ -239,7 +239,7 @@ module nigbt (a, g, c);
 // model branch and node voltages
 //
 
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
         Vdg = $limit(V(b,g), "fetlim", 1.0);
         Vgs = $limit(V(g,c), "fetlim", 1.0);
         Veb = $limit(V(e,b), "pnjlim", vt, 0.6);

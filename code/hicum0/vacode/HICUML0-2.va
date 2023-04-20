@@ -684,7 +684,7 @@ module hic0_full (c,b,e,s,tnode);
 
         // assign voltages with regard to transistor type
 
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
         if (type == 1) begin
             Vbiei = $limit(V(bi,ei), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*is_t)));
             Vbici = $limit(V(bi,ci), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*is_t)));

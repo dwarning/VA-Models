@@ -312,7 +312,7 @@ module vbic_4T_et_cf(c,b,e,s,dt);
 //      Electrical branch constituent relations
 //
 
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
         Vbei     =  $limit(V(bi,ei), "pnjlim", Vtv, tVCrit);
         Vbex     =  $limit(V(bx,ei), "pnjlim", Vtv, tVCrit);
         Vbci     =  $limit(V(bi,ci), "pnjlim", Vtv, tVCrit);

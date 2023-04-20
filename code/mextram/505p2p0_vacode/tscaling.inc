@@ -7,7 +7,7 @@
 
 // The excess transistor temperature due to the self-heating
 `ifdef SELFHEATING
-    `ifdef __NGSPICE_COMPACT_MODELING__
+    `ifdef __NGSPICE__
         Tki = $limit(Temp(dt), "limitlog", 100.0);
         Vdt = Tki;
     `else
@@ -141,7 +141,7 @@ ibis_t = ibis * exp(lntN * (4.0 - ae + dais) / nbis) * exp(-vge * VdtINV / nbis)
 ibfs_t = ibfs * exp(lntN * (6.0 - 2.0 * mlfs)) * exp(-vgj * VdtINV / mlfs);
 isibrel_t = isibrel * exp(lntN * (4.0 / nfibrel)) * exp(-vgj * VdtINV / nfibrel);
 
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
     tVCrit = Vt*ln(Vt/(`CONSTroot2*is_t));
 `endif
 

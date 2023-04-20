@@ -16,7 +16,7 @@ real Vt, Vtr, VtINV, VtrINV, VdtINV;
 real Vdt;
 real dT;
 
-`ifdef __NGSPICE_COMPACT_MODELING__
+`ifdef __NGSPICE__
     real tVCrit;
 `endif
 
