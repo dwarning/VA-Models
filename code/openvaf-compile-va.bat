@@ -7,6 +7,7 @@ MD osdilibs
 CD osdilibs
 
 openvaf.exe -D__NGSPICE__ -o asmhemt.osdi ../ASMHEMT/vacode/asmhemt.va
+openvaf.exe -D__NGSPICE__ -o bsim4.osdi ../bsim4/vacode/bsim4.va
 openvaf.exe -D__NGSPICE__ -o BSIM6.1.1.osdi ../bsim6/vacode/BSIM6.1.1.va
 openvaf.exe -D__NGSPICE__ -o bsimbulk106.osdi ../bsimbulk/vacode/bsimbulk106.va
 openvaf.exe -D__NGSPICE__ -o bsimbulk107.osdi ../bsimbulk/vacode/bsimbulk107.va

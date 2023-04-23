@@ -1,0 +1,18 @@
+Repair bug for wrong wk2 init caused total wrong bulk control
+
+Rename instance parameter min to minsd to avoid to conflict with va builtin function min()
+
+Change model parameter to instance parameter
+
+Use simulator provided gmin 
+
+Remove the ADMS/Xyce specific workaround for non-ability node collapsing
+
+Remove obsolete variables left over by the assumed C code transformation.
+Remaining unused variables are for noise model which is deactivated.
+
+Whenever the provided examples showing reasonable results compared to build-in model
+the va-code looks more as experimental and uses unusual parameter initialization.
+
+Origin of the model version 4.8.0:
+https://github.com/cogenda/VA-BSIM48
