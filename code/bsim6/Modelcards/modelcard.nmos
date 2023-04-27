@@ -1,11 +1,9 @@
 *modelcard for BSIM6_BD
 
-.model nmos bsim6
+.model nmos bsim6_va
 +LLONG =2E-06
 +WWIDE =1E-05
 +TYPE =1
-+GEOMOD =0
-+RGEOMOD =0
 +COVMOD =1
 +RDSMOD =0
 +XL =-1.7E-08
@@ -207,10 +205,3 @@
 +DVTP5=0
 +VSATL=1350
 +VSATLEXP=0.00033
-+sca= 0               
-+scb= 0               
-+scc= 0               
-+sc= 0      
-
-			
-
