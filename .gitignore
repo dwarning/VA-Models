@@ -4,6 +4,8 @@
 #
 # (compile "git ls-files -i --exclude-standard")
 
+/code/admslibs
+/code/admslibs/*.*
 /code/osdilibs
 /code/osdilibs/*.*
 /test/*.vlog
