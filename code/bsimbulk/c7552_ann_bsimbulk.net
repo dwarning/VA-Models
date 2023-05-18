@@ -89230,7 +89230,7 @@ save V(g7529_1) V(g7509_0) V(g7484_1) V(g7477_1) V(g7460_0) V(g7503_1) V(g7522_0
 
 option noinit nolegend
 inventory
-tran 1ps 1ns 0 20p uic
+tran 1ps 15ns 0 20p uic
 rusage all
 set nolegend
 plot allv
