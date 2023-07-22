@@ -12353,8 +12353,14 @@ module bsim4va(d, g, s, b);
                 gdpr = gdpr / (1.0 + npart_theta * npart_theta * gdpr / IdovVds);
         end
 
-        I(di, d) <+ white_noise(4 * `P_K * T * gdpr, "Rd");
-        I(si, s) <+ white_noise(4 * `P_K * T * gspr, "Rs");
+        if (BSIM4rdsMod) begin
+            I(di, d) <+ white_noise(4 * `P_K * T * gdpr, "Rd");
+            I(si, s) <+ white_noise(4 * `P_K * T * gspr, "Rs");
+        end
+        else begin
+            V(s,si) <+ 0.0;
+            V(d,di) <+ 0.0;
+        end
 
         if ((BSIM4rgateMod == 1) || (BSIM4rgateMod == 2))
             I(gi, g) <+ white_noise(4 * `P_K * T * BSIM4grgeltd, "Rg");
