@@ -12363,9 +12363,9 @@ module bsim4va(d, g, s, b);
         I(br_i_s_si) <+ white_noise(4 * `P_K * T * gspr, "Rs");
 
         if ((BSIM4rgateMod == 1) || (BSIM4rgateMod == 2))
-            I(gi, g) <+ white_noise(4 * `P_K * T * BSIM4grgeltd, "Rg");
+            V(gi, g) <+ white_noise(4 * `P_K * T / BSIM4grgeltd, "Rg");
         else if (BSIM4rgateMod == 3)
-            I(gm, g) <+ white_noise(4 * `P_K * T * BSIM4grgeltd, "Rg");
+            V(gm, g) <+ white_noise(4 * `P_K * T / BSIM4grgeltd, "Rg");
 
         if (BSIM4rbodyMod) begin
             V(bi, sbulk) <+ white_noise(4 * `P_K * T * BSIM4rbps, "Rbulk");
