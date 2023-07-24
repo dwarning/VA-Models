@@ -27,6 +27,9 @@ HSPICE -- J-2014.09-SP2-1 for testing
 
 Note:
 BSIM4.8 was originally released as C code, but this verilogA code is downloaded from https://github.com/cogenda/VA-BSIM48
+
+License:
+Attribution-NonCommercial 4.0 International (CC-BY-NC 4.0)
 */
 
 /**********
