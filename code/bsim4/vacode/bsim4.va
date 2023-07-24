@@ -475,6 +475,9 @@ module bsim4va(d, g, s, b);
     inout      d, g, s, b;
     electrical d, g, s, b,di, si,gi, gm,bi,sbulk,dbulk;
 
+    branch (d,di) br_v_d_di, br_i_d_di;
+    branch (s,si) br_v_s_si, br_i_s_si;
+
     // The parameter "type" should be set for N/P-MOSFET
     // based on modelcard type (but can be overridden by netlist).
     parameter integer verbose = `INT_NOT_GIVEN;  // debug flag to print DBG msg
@@ -12224,12 +12227,12 @@ module bsim4va(d, g, s, b);
                 $strobe("In rdsmod=1 Issi=%g\n", Issi);
                 $strobe("In rdsmod Iddi=%g\n", Iddi);
             end
-            I(s,si) <+ Issi;
-            I(d,di) <+ Iddi;
+            I(br_i_s_si) <+ Issi;
+            I(br_i_d_di) <+ Iddi;
         end
         else begin
-            V(s,si) <+ 0.0;
-            V(d,di) <+ 0.0;
+            V(br_v_s_si) <+ 0.0;
+            V(br_v_d_di) <+ 0.0;
         end
 
         case (BSIM4rgateMod)
@@ -12353,8 +12356,8 @@ module bsim4va(d, g, s, b);
                 gdpr = gdpr / (1.0 + npart_theta * npart_theta * gdpr / IdovVds);
         end
 
-        I(di, d) <+ white_noise(4 * `P_K * T * gdpr, "Rd");
-        I(si, s) <+ white_noise(4 * `P_K * T * gspr, "Rs");
+        I(br_i_d_di) <+ white_noise(4 * `P_K * T * gdpr, "Rd");
+        I(br_i_s_si) <+ white_noise(4 * `P_K * T * gspr, "Rs");
 
         if ((BSIM4rgateMod == 1) || (BSIM4rgateMod == 2))
             I(gi, g) <+ white_noise(4 * `P_K * T * BSIM4grgeltd, "Rg");
