@@ -70,7 +70,7 @@ Attribution-NonCommercial 4.0 International (CC-BY-NC 4.0)
 
 // For now, set NOISE to 0 to disable noise.
 `define NOISE 1
-`define NOISE_DERIVATIVES 1
+//`define NOISE_DERIVATIVES 1
 `define KboQ `P_K / `P_Q
 `define NMOS 1
 `define PMOS -1
