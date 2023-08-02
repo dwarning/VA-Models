@@ -9,7 +9,7 @@ vs s  0 dc=0.0
 vb b  0 dc=0.0
 
 * --- Transistor ---
-NM1 d g s b p1 W = 10e-6 L = 10e-6 nf=1
+NM1 d g s b p1 W = 10e-6 L = 1e-6 nf=1
 
 * --- DC Analysis ---
 .control

@@ -1,3 +1,5 @@
+General update in parameter handling inline with common Verilog-A compact model code of practice.
+
 Repair bug for wrong wk2 init caused total wrong bulk control
 
 Rename instance parameter min to minsd to avoid to conflict with va builtin function min()

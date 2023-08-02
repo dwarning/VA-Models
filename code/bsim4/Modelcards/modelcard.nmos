@@ -23,7 +23,6 @@
 +permod  = 1       acnqsmod= 0       trnqsmod= 0        tempmod = 0
 +mtrlmod = 1       cvchargemod = 0   mtrlcompatmod = 1
 +gidlmod = 0       wpemod = 0
-+rgeomod = 1
 
 +eot     = 1.8e-009     vddeot = 1.5           ados    = 1.1          bdos    = 1.0
 +tnom    = 25           toxe    = 1.8e-009     toxp    = 10e-010      toxm    = 1.8e-009
