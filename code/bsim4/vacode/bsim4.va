@@ -7442,7 +7442,7 @@ module bsim4va(d, g, s, b);
             $strobe("Vdseff=%g\n", Vdseff);
 
         /* Velocity Overshoot */
-        if (($param_given(lambda)) && (lambda > 0.0) ) begin
+        if (($param_given(lambda)) && (BSIM4lambda > 0.0) ) begin
             T1 = Leff * ueff;
             T2 = BSIM4lambda / T1;
             T3 = -T2 / T1 * Leff;
@@ -7977,7 +7977,7 @@ module bsim4va(d, g, s, b);
 
         /* Source End Velocity Limit  */
         // VA: Needs better FPE protection...
-        if (($param_given(vtl)) && (vtl > 0.0)) begin
+        if (($param_given(vtl)) && (BSIM4vtl > 0.0)) begin
             T12 = 1.0 / Leff / CoxeffWovL;
             T11 = T12 / Vgsteff;
             vs = cdrain * T11;
