@@ -9508,30 +9508,30 @@ module bsim4va(d, g, s, b);
                 V(gm,gi) <+ 0.0;
             end
             1: begin // Constant resistance
-                V(g,gm)  <+ I(g,gm) / BSIM4grgeltd;
+                I(g,gm)  <+ V(g,gm) * BSIM4grgeltd;
                 V(gm,gi) <+ 0.0;
             end
             2: begin // Variable resistance
                 V(g,gm)   <+ 0.0;
-                V(gm,gi)  <+ I(gm,gi) / (BSIM4gcrg + BSIM4grgeltd);
+                I(gm,gi)  <+ V(gm,gi) * (BSIM4gcrg + BSIM4grgeltd);
             end
             3: begin // 2 internal gate nodes, TODO check `gcgmgmb needs?
                 if (verbose == 1) begin
                     $strobe("BSIM4grgeltd=%g\n",BSIM4grgeltd);
                     $strobe("BSIM4gcrg=%g\n",BSIM4gcrg);
                 end
-                V(g,gm)  <+ I(g,gm)  / BSIM4grgeltd;
-                V(gm,gi) <+ I(gm,gi) / BSIM4gcrg;
+                I(g,gm)  <+ V(g,gm)  * BSIM4grgeltd;
+                I(gm,gi) <+ V(gm,gi) * BSIM4gcrg;
             end
         endcase // case(BSIM4rgateMod)
 
         if (BSIM4rbodyMod) begin
             //using I(a,b)<+... instead of V(a,b)<+.. for node collapse condition, or else Xyce fail
-            V(sbulk,bi) <+ I(sbulk,bi) / BSIM4grbps;
-            V(sbulk,b)  <+ I(sbulk,b)  / BSIM4grbsb;
-            V(b,bi)     <+ I(b,bi)     / BSIM4grbpb;
-            V(b,dbulk)  <+ I(b,dbulk)  / BSIM4grbdb;
-            V(bi,dbulk) <+ I(bi,dbulk) / BSIM4grbpd;
+            I(sbulk,bi) <+ V(sbulk,bi) * BSIM4grbps;
+            I(sbulk,b)  <+ V(sbulk,b)  * BSIM4grbsb;
+            I(b,bi)     <+ V(b,bi)     * BSIM4grbpb;
+            I(b,dbulk)  <+ V(b,dbulk)  * BSIM4grbdb;
+            I(bi,dbulk) <+ V(bi,dbulk) * BSIM4grbpd;
         end
         else begin
             V(sbulk,b)  <+ 0.0;
@@ -9628,16 +9628,16 @@ module bsim4va(d, g, s, b);
         I(br_i_s_si) <+ white_noise(4 * `P_K * T * gspr, "Rs");
 
         if ((BSIM4rgateMod == 1) || (BSIM4rgateMod == 2))
-            V(gi, g) <+ white_noise(4 * `P_K * T / BSIM4grgeltd, "Rg");
+            I(gi, g) <+ white_noise(4 * `P_K * T * BSIM4grgeltd, "Rg");
         else if (BSIM4rgateMod == 3)
-            V(gm, g) <+ white_noise(4 * `P_K * T / BSIM4grgeltd, "Rg");
+            I(gm, g) <+ white_noise(4 * `P_K * T * BSIM4grgeltd, "Rg");
 
         if (BSIM4rbodyMod) begin
-            V(bi, sbulk) <+ white_noise(4 * `P_K * T * BSIM4rbps, "Rbulk");
-            V(bi, dbulk) <+ white_noise(4 * `P_K * T * BSIM4rbpd, "Rbulk");
-            V(bi, b)     <+ white_noise(4 * `P_K * T * BSIM4rbpb, "Rbulk");
-            V(b, sbulk)  <+ white_noise(4 * `P_K * T * BSIM4rbsb, "Rbulk");
-            V(b, dbulk)  <+ white_noise(4 * `P_K * T * BSIM4rbdb, "Rbulk");
+            I(bi, sbulk) <+ white_noise(4 * `P_K * T / BSIM4rbps, "Rbulk");
+            I(bi, dbulk) <+ white_noise(4 * `P_K * T / BSIM4rbpd, "Rbulk");
+            I(bi, b)     <+ white_noise(4 * `P_K * T / BSIM4rbpb, "Rbulk");
+            I(b, sbulk)  <+ white_noise(4 * `P_K * T / BSIM4rbsb, "Rbulk");
+            I(b, dbulk)  <+ white_noise(4 * `P_K * T / BSIM4rbdb, "Rbulk");
         end
 
         case (BSIM4tnoiMod)
