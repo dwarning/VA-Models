@@ -181,8 +181,7 @@
                     Rend = Rsh * Weffcj / (3.0 * nuEnd * (DMCG + DMCI)); \
             end \
             default: begin \
-                `STROBE2("Warning: (instance %M) Specified RGEO = %d not matched (BSIM6RdsEndIso), \
-                Rend is set to zero.", rgeo); \
+                `STROBE2("Warning: (instance %M) Specified RGEO = %d not matched (BSIM6RdsEndIso), Rend is set to zero.", rgeo); \
                 Rend = 0.0; \
             end \
         endcase \
@@ -204,8 +203,7 @@
                     Rend = Rsh * Weffcj / (3.0 * nuEnd * (DMCG + DMCI)); \
             end \
             default: begin \
-                `STROBE2("Warning: (instance %M) Specified RGEO=%d not matched (BSIM6RdsEndIso \
-                type 2), Rend is set to zero.", rgeo); \
+                `STROBE2("Warning: (instance %M) Specified RGEO=%d not matched (BSIM6RdsEndIso type 2), Rend is set to zero.", rgeo); \
                 Rend = 0.0; \
             end \
         endcase \
@@ -231,8 +229,7 @@
                         Rend = Rsh * Weffcj / (6.0 * nuEnd * DMCG); \
                 end \
                 default: begin \
-                    `STROBE2("Warning: (instance %M) Specified RGEO = %d not matched (BSIM6RdsEndSha), \
-                    Rend is set to zero.", rgeo); \
+                    `STROBE2("Warning: (instance %M) Specified RGEO = %d not matched (BSIM6RdsEndSha), Rend is set to zero.", rgeo); \
                     Rend = 0.0; \
                 end \
             endcase \
@@ -254,8 +251,7 @@
                         Rend = Rsh * Weffcj / (6.0 * nuEnd * DMCG); \
                 end \
                 default: begin \
-                    `STROBE2("Warning: (instance %M) Specified RGEO=%d not matched (BSIM6RdsEndSha \
-                    type 2), Rend is set to zero.", rgeo); \
+                    `STROBE2("Warning: (instance %M) Specified RGEO=%d not matched (BSIM6RdsEndSha type 2), Rend is set to zero.", rgeo); \
                     Rend = 0.0; \
                 end \
             endcase \
@@ -377,8 +373,7 @@
                 end \
             end \
             default: begin \
-                `STROBE2("Warning: (instance %M) Specified RGEO=%d not matched (BSIM6RdseffGeo \
-                ), Rint is set to zero.", rgeo); \
+                `STROBE2("Warning: (instance %M) Specified RGEO=%d not matched (BSIM6RdseffGeo), Rint is set to zero.", rgeo); \
                 Rint = 0.0; \
             end \
         endcase \
@@ -480,8 +475,7 @@
                 Ad = ADiso + (nf - 1.0) * ADsha; \
             end \
             default: begin \
-                `STROBE2("Warning: (instance %M) Specified GEO=%d not matched (BSIM6RdseffGeo \
-                ), PS,PD,AS,AD set to zero.", geo); \
+                `STROBE2("Warning: (instance %M) Specified GEO=%d not matched (BSIM6RdseffGeo), PS,PD,AS,AD set to zero.", geo); \
                 Ps = 0; \
                 Pd = 0; \
                 As = 0; \
@@ -2424,10 +2418,10 @@ analog begin
         `ifdef __RDSMOD__
         end
     `else
-            //Warning Message For RDSMOD
-            if (RDSMOD != 2)
-                $strobe("[BSIM6] Although the model selector RDSMOD is set to %d, the external source/drain resistance model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __RDSMOD__\" in the beginning of the Verilog-A code.", RDSMOD);
-        `endif
+        //Warning Message For RDSMOD
+        if (RDSMOD != 2)
+            $strobe("[BSIM6] Although the model selector RDSMOD is set to %d, the external source/drain resistance model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __RDSMOD__\" in the beginning of the Verilog-A code.", RDSMOD);
+    `endif
 
         // Parameter Checking
 
@@ -4033,9 +4027,9 @@ analog begin
             I(N2)   <+  V(N2);
             I(NR)   <+  V(NR);
         `else
-                    if (TNOIMOD != 0)
-                        $strobe("[BSIM6] Although the model selector TNOIMOD is set to 1, the correlated thermal noise model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __TNOISW__\" in the beginning of the Verilog-A code.");
-                `endif
+            if (TNOIMOD != 0)
+                $strobe("[BSIM6] Although the model selector TNOIMOD is set to 1, the correlated thermal noise model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __TNOISW__\" in the beginning of the Verilog-A code.");
+        `endif
 
                 // Gate current shot noise
                 if (IGCMOD != 0) begin
