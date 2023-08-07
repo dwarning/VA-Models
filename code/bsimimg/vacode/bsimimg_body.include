@@ -1,27 +1,28 @@
 // ****************************************************************************
-// *  BSIM-IMG 102.9.4 released by Girish Pahwa on 09/24/2020                 *
+// *  BSIM-IMG 102.9.6 released on 08/24/2022                                 *
 // *  BSIM Independent Multi-Gate Model (Verilog-A)                           *
 // ****************************************************************************
 
 // ****************************************************************************
-// *  Copyright (c) 2020 University of California                             *
+// *  Copyright © 2022 University of California                               *
 // *                                                                          *
 // *  Project director: Prof. Chenming Hu                                     *
 // *                                                                          *
-// *  Current developers: Girish Pahwa (Postdoc, UC Berkeley)                 *
-// *                      Avirup Dasgupta (Postdoc, UC Berkeley)              *
-// *                      Ming-Yen Kao (Ph.D., UC Berkeley)                   *
+// *  Current developers: Girish Pahwa (Assistant Researcher, UC Berkeley)    *
+// *                      Dinesh Rajasekharan (Postdoc, UC Berkeley)          *
+// *                      Chetan Kumar Dabhi (Postdoc, UC Berkeley)           *
+// *                      Chien-Ting Tung (Ph.D., UC Berkeley)                *
 // ****************************************************************************
 
 /*
 Licensed under Educational Community License, Version 2.0 (the "License"); you may
-not use this file except in compliance with the License. You may obtain a copy of the license at
+not use this file except in compliance with the License and in compliance with US export control laws. You may obtain a copy of the license at
 http://opensource.org/licenses/ECL-2.0
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations
 under the License.
 
-BSIM-IMG model is supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
+BSIM-IMG model is partially supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
 standard can be found at: http://www.si2.org/cmc
 */
 
@@ -113,6 +114,8 @@ endfunction
 `IPRnb( DTEMP          ,0.0            ,"Celsius"                               ,"Variability in Device Temperature" )
 `IPRnb( DELVTRAND      ,0.0            ,"V"                                     ,"Variability in Vth" )
 `IPRoz( U0MULT         ,1.0            ,""                                      ,"Variability in carrier mobility" )
+`IPRoz( IDS0MULT       ,1.0            ,""                                      ,"Variability in drain current and source/drain resistance for local layout effects")
+`IPIcc( IDS0MULTMOD    ,0              ,""            ,0           ,2           ,"0: Multiply IDS0MULT with core current, 1: Multiply IDS0MULT with core current and divide S/D resistances by IDS0MULT, 2: Same as IDS0MULTMOD=1, except that scaling by IDS0MULT is not considered in self-heating power computation")
 
 // **********************
 // *  Model Parameters  *
@@ -126,6 +129,7 @@ endfunction
 `MPIcc( IGFLAG         ,0              ,""            ,0           ,1           ,"Enable version 102.9.1 Igate model: 0 = OFF(backward compatible with version 102.8.0), 1 = ON" )
 `MPIcc( IGBMOD         ,0              ,""            ,0           ,1           ,"0: Turn off Igb" )
 `MPIcc( SHMOD          ,0              ,""            ,0           ,1           ,"0: No self-heating" )
+`MPIcc( CRYOMOD        ,0              ,""            ,0           ,2           ,"0: Turn off cryogenic temperature model; 1: Turn on cryogenic temperature model; 2: Turn on cryogenic model and merge smoothly to CRYOMOD=0 for T > 210 K")
 `MPIcc( RGATEMOD       ,0              ,""            ,0           ,1           ,"Gate resistance model selector" )
 `MPIcc( NQSMOD         ,0              ,""            ,0           ,1           ,"0: Turn off NQS model, 1: NQS gate resistance (with gi node)" )
 `MPIcc( NFMOD          ,0              ,""            ,0           ,1           ,"0: W taken as total width like BSIM4, 1: W taken as single finger width  " )
@@ -133,25 +137,25 @@ endfunction
 `MPIcc( CONVMOD        ,1              ,""            ,0           ,1           ,"Enable bug fixes related to non-convergence issues in version 102.9.2: 0 = OFF, 1 = ON")
 `MPRnb( XW             ,0.0            ,"m"                                     ,"W offset for channel width due to mask/etch effect" )
 `MPRnb( LINT           ,0.0            ,"m"                                     ,"Delta L for IV" )
-`MPRnb( LL             ,0.0            ,"m^(1+LLN)"                             ,"" )
-`MPRnb( LW             ,0.0            ,"m^(1+LWN)"                             ,"" )
-`MPRnb( LWL            ,0.0            ,"m^(LWN+LLN+1)"                         ,"" )
-`MPRnb( LLN            ,1.0            ,""                                      ,"" )
-`MPRnb( LWN            ,1.0            ,""                                      ,"" )
+`MPRnb( LL             ,0.0            ,"m^(1+LLN)"                             ,"Length reduction parameter (dopant diffusion effect)" )
+`MPRnb( LW             ,0.0            ,"m^(1+LWN)"                             ,"Length scaling parameter" )
+`MPRnb( LWL            ,0.0            ,"m^(LWN+LLN+1)"                         ,"Length scaling parameter" )
+`MPRnb( LLN            ,1.0            ,""                                      ,"Length reduction parameter (dopant diffusion effect)" )
+`MPRnb( LWN            ,1.0            ,""                                      ,"Length scaling parameter" )
 `MPRnb( WINT           ,0.0            ,"m"                                     ,"Delta W for IV" )
-`MPRnb( WL             ,0.0            ,"m^(1+WLN)"                             ,"" )
-`MPRnb( WW             ,0.0            ,"m^(1+WWN)"                             ,"" )
-`MPRnb( WWL            ,0.0            ,"m^(WLN+WWN+1)"                         ,"" )
-`MPRnb( WLN            ,1.0            ,""                                      ,"" )
-`MPRnb( WWN            ,1.0            ,""                                      ,"" )
+`MPRnb( WL             ,0.0            ,"m^(1+WLN)"                             ,"Width reduction parameter (dopant diffusion effect)" )
+`MPRnb( WW             ,0.0            ,"m^(1+WWN)"                             ,"Width scaling parameter" )
+`MPRnb( WWL            ,0.0            ,"m^(WLN+WWN+1)"                         ,"Width scaling parameter" )
+`MPRnb( WLN            ,1.0            ,""                                      ,"Width reduction parameter (dopant diffusion effect)" )
+`MPRnb( WWN            ,1.0            ,""                                      ,"Width scaling parameter" )
 `MPRnb( DLC            ,0.0            ,"m"                                     ,"Delta L for CV" )
-`MPRnb( LLC            ,0.0            ,"m"                                     ,"" )
-`MPRnb( LWC            ,0.0            ,"m"                                     ,"" )
-`MPRnb( LWLC           ,0.0            ,"m"                                     ,"" )
+`MPRnb( LLC            ,0.0            ,"m"                                     ,"Length scaling parameter" )
+`MPRnb( LWC            ,0.0            ,"m"                                     ,"Length scaling parameter" )
+`MPRnb( LWLC           ,0.0            ,"m"                                     ,"Length scaling parameter" )
 `MPRnb( DWC            ,0.0            ,"m"                                     ,"Delta W for CV" )
-`MPRnb( WLC            ,0.0            ,"m"                                     ,"" )
-`MPRnb( WWC            ,0.0            ,"m"                                     ,"" )
-`MPRnb( WWLC           ,0.0            ,"m"                                     ,"" )
+`MPRnb( WLC            ,0.0            ,"m"                                     ,"Width scaling parameter" )
+`MPRnb( WWC            ,0.0            ,"m"                                     ,"Width scaling parameter" )
+`MPRnb( WWLC           ,0.0            ,"m"                                     ,"Width scaling parameter" )
 `MPRco( EOT1           ,1.0e-9         ,"m"           ,0.1e-9      ,inf         ,"Equivalent front gate dielectric thickness relative to SiO2" )
 `MPRco( EOT2           ,10e-9          ,"m"           ,0.1e-9      ,inf         ,"Equivalent back  gate dielectric thickness relative to SiO2" )
 `MPRco( EOT1P          ,EOT1           ,"m"           ,0.1e-9      ,inf         ,"Equivalent physical front gate dielectric thickness relative to SiO2" )
@@ -214,93 +218,109 @@ endfunction
 
 // Velocity Saturation Model
 `MPRnb( VSAT           ,85000          ,"m/s"                                   ,"Saturation Velocity" )
-`MPRnb( AVSAT          ,0.0            ,"m/s"                                   ,"" )
-`MPRex( BVSAT          ,100.0e-9       ,"m"           ,0.0                      ,"" )
+`MPRnb( AVSAT          ,0.0            ,"m/s"                                   ,"Saturation velocity term in the saturation region for short channel devices" )
+`MPRex( BVSAT          ,100.0e-9       ,"m"           ,0.0                      ,"Saturation velocity coefficient in the saturation region for short channel devices" )
 `MPRnb( VSAT1          ,VSAT           ,"m/s"                                   ,"Velocity Saturation parameter" )
-`MPRnb( AVSAT1         ,AVSAT          ,"m/s"                                   ,"" )
-`MPRex( BVSAT1         ,BVSAT          ,"m"           ,0.0                      ,"" )
+`MPRnb( AVSAT1         ,AVSAT          ,"m/s"                                   ,"Saturation velocity term in the linear region for short channel devices" )
+`MPRex( BVSAT1         ,BVSAT          ,"m"           ,0.0                      ,"Saturation velocity coefficient in the linear region for short channel devices" )
 `MPRnb( VSATCV         ,VSAT           ,"m/s"                                   ,"Velocity Saturation parameter for CV" )
-`MPRnb( AVSATCV        ,AVSAT          ,"m/s"                                   ,"" )
-`MPRex( BVSATCV        ,BVSAT          ,"m"           ,0.0                      ,"" )
-`MPRoz( DELTAVSAT      ,1.0            ,"m/s"                                   ,"Velocity saturation parameter" )
+`MPRnb( AVSATCV        ,AVSAT          ,"m/s"                                   ,"Saturation velocity term in the saturation region for short channel C-V" )
+`MPRex( BVSATCV        ,BVSAT          ,"m"           ,0.0                      ,"Saturation velocity coefficient in the saturation region for short channel C-V" )
+`MPRcz( DELTAVSAT      ,1.0            ,"m/s"                                   ,"Velocity saturation parameter" )
 `MPRnb( KSATIV         ,1.0            ,""                                      ,"Parameter for strong inversion regime for long channel Vdsat" )
 `MPRnb( KSUBIV         ,1.0            ,""                                      ,"Parameter for weak inversion regime for long channel Vdsat" )
 `MPRnb( MEXP           ,4.0            ,""                                      ,"Smoothing function factor for Vdsat" )
-`MPRnb( AMEXP          ,0.0            ,""                                      ,"" )
-`MPRnb( BMEXP          ,1.0            ,""                                      ,"" )
+`MPRnb( AMEXP          ,0.0            ,""                                      ,"Smoothing function factor for Vdsat in short channel devices" )
+`MPRnb( BMEXP          ,1.0            ,""                                      ,"Smoothing function coefficient for Vdsat in short channel devices" )
 `MPRnb( PTWG           ,0.0            ,"V^-2"                                  ,"Correction factor for velocity saturation" )
-`MPRnb( APTWG          ,0.0            ,"V^-2"                                  ,"" )
-`MPRex( BPTWG          ,100.0e-9       ,"m"           ,0.0                      ,"" )
-`MPRnb( AT             ,-1.56e-3       ,""                                      ,"Saturation Velocity Temperature Coefficient" )
-`MPRnb( ATL            ,0.0            ,""                                      ,"Length scaling for AT" )
-`MPRnb( TMEXP          ,0.0            ,""                                      ,"" )
-`MPRnb( PTWGT          ,0.004          ,""                                      ,"" )
-`MPRnb( PTWGB          ,0.0            ,"V^-3"                                  ,"" )
-`MPRnb( PTWGB2         ,0.0            ,"V^-3"                                  ,"" )
-`MPRnb( APTWGB         ,0.0            ,"V^-3"                                  ,"" )
-`MPRex( BPTWGB         ,100.0e-9       ,"m"           ,0.0                      ,"" )
-`MPRnb( APTWGB2        ,0.0            ,"V^-3"                                  ,"" )
-`MPRex( BPTWGB2        ,100.0e-9       ,"m"           ,0.0                      ,"" )
-`MPRnb( VSATB          ,0.0            ,"V^-1"                                  ,"" )
-`MPRnb( ATB            ,0.0            ,""                                      ,"Back bias sensitivity parameter for saturation velocity temperature coefficient" )
-`MPRnb( ATBL           ,0.0            ,""                                      ,"Length scaling for ATB" )
-`MPRnb( AVSATB         ,0.0            ,"V^-1"                                  ,"" )
-`MPRex( BVSATB         ,100.0e-9       ,"m"           ,0.0                      ,"" )
+`MPRnb( APTWG          ,0.0            ,"V^-2"                                  ,"Correction factor for velocity saturation in short channel devices" )
+`MPRex( BPTWG          ,100.0e-9       ,"m"           ,0.0                      ,"Coefficient for correction factor for velocity saturation in short channel devices" )
+`MPRnb( AT             ,-1.56e-3       ,"/K"                                    ,"Saturation Velocity Temperature Coefficient" )
+`MPRnb( AT2            ,2.0e-6         ,"/K^2"                                  ,"CRYOMOD != 0 saturation velocity temperature coefficient")
+`MPRnb( ATL            ,0.0            ,"m"                                     ,"Length scaling for AT" )
+`MPRnb( TMEXP          ,0.0            ,""                                      ,"Temperature coefficient for smoothing function factor for Vdsat" )
+`MPRnb( TMEXP2         ,-4.0e-6        ,"/K^2"                                  ,"CRYOMOD != 0 temperature coefficient for Vdseff smoothing" )
+`MPRnb( KSATIVT1       ,-2.0e-4        ,"/K"                                    ,"CRYOMOD != 0 temperature coefficient for KSATIV")
+`MPRnb( KSATIVT2       ,-2.0e-7        ,"/K^2"                                  ,"CRYOMOD != 0 temperature coefficient for KSATIV")
+`MPRnb( PTWGT          ,0.004          ,"/K"                                    ,"PTWG temperature coefficient" )
+`MPRnb( PTWGB          ,0.0            ,"V^-3"                                  ,"Parameter for back gate bias sensitivity" )
+`MPRnb( PTWGB2         ,0.0            ,"V^-3"                                  ,"Parameter for back gate bias sensitivity" )
+`MPRnb( APTWGB         ,0.0            ,"V^-3"                                  ,"Parameter for back gate bias sensitivity for short channel devices" )
+`MPRex( BPTWGB         ,100.0e-9       ,"m"           ,0.0                      ,"Parameter for back gate bias sensitivity for short channel devices" )
+`MPRnb( APTWGB2        ,0.0            ,"V^-3"                                  ,"Parameter for back gate bias sensitivity for short channel devices" )
+`MPRex( BPTWGB2        ,100.0e-9       ,"m"           ,0.0                      ,"Parameter for back gate bias sensitivity for short channel devices" )
+`MPRnb( VSATB          ,0.0            ,"V^-1"                                  ,"Saturation velocity parameter for back gate bias dependence on mobility at high Vds" )
+`MPRnb( ATB            ,0.0            ,"/K"                                    ,"Back bias sensitivity parameter for saturation velocity temperature coefficient" )
+`MPRnb( ATBL           ,0.0            ,"m"                                     ,"Length scaling for ATB" )
+`MPRnb( AVSATB         ,0.0            ,"V^-1"                                  ,"Saturation velocity parameter for back gate bias dependence on mobility at high Vds for short channel devices" )
+`MPRex( BVSATB         ,100.0e-9       ,"m"           ,0.0                      ,"Saturation velocity parameter for back gate bias dependence on mobility at high Vds for short channel devices" )
 `MPRco( DVSATCLAMP     ,0.01           ,"m"           ,0.01        ,inf         ,"Minimum clamp on Dvsat" )
 
 // Mobility Model
 `MPRex( U0             ,0.03           ,"m^2/(V*s)"   ,0.0                      ,"Low Field Mobility" )
-`MPRnb( ETAMOB         ,2.0            ,""                                      ,"" )
-`MPRnb( UP             ,0.0            ,"(um)^LPA"                              ,"" )
-`MPRnb( LPA            ,1.0            ,""                                      ,"" )
-`MPRnb( UA             ,0.3            ,"(MV/cm)^(-EU)"                         ,"" )
-`MPRnb( AUA            ,0.0            ,"(MV/cm)^(-EU)"                         ,"" )
-`MPRex( BUA            ,100.0e-9       ,"m"           ,0.0                      ,"" )
-`MPRnb( EU             ,2.5            ,"cm/MV"                                 ,"" )
-`MPRnb( AEU            ,0.0            ,"cm/MV"                                 ,"" )
-`MPRex( BEU            ,100.0e-9       ,"m"           ,0.0                      ,"" )
-`MPRnb( UC             ,0.0            ,"(1/V)*(MV/cm)^(-EU)"                   ,"" )
-`MPRnb( AUC            ,0.0            ,"(1/V)*(MV/cm)^(-EU)"                   ,"" )
-`MPRex( BUC            ,100.0e-9       ,"m"           ,0.0                      ,"" )
-`MPRnb( UD             ,0.0            ,""                                      ,"" )
-`MPRnb( AUD            ,0.0            ,""                                      ,"" )
-`MPRex( BUD            ,50.0e-9        ,"m"           ,0.0                      ,"" )
-`MPRnb( UDB            ,0.0            ,"V^-1"                                  ,"" )
-`MPRnb( AUDB           ,0.0            ,"V^-1"                                  ,"" )
-`MPRex( BUDB           ,50.0e-9        ,"m"           ,0.0                      ,"" )
+`MPRnb( ETAMOB         ,2.0            ,""                                      ,"Effective field parameter" )
+`MPRnb( UP             ,0.0            ,"(um)^LPA"                              ,"Mobility L coefficient" )
+`MPRnb( LPA            ,1.0            ,""                                      ,"Mobility L power coefficient" )
+`MPRnb( UA             ,0.3            ,"(MV/cm)^(-EU)"                         ,"Phonon / surface roughness scattering" )
+`MPRnb( AUA            ,0.0            ,"(MV/cm)^(-EU)"                         ,"Phonon / surface roughness scattering for short channel devices" )
+`MPRex( BUA            ,100.0e-9       ,"m"           ,0.0                      ,"Phonon / surface roughness scattering for short channel devices" )
+`MPRnb( EU             ,2.5            ,"cm/MV"                                 ,"Phonon / surface roughness scattering" )
+`MPRnb( AEU            ,0.0            ,"cm/MV"                                 ,"Phonon / surface roughness scattering for short channel devices" )
+`MPRex( BEU            ,100.0e-9       ,"m"           ,0.0                      ,"Phonon / surface roughness scattering for short channel devices" )
+`MPRnb( UC             ,0.0            ,"(1/V)*(MV/cm)^(-EU)"                   ,"Parameter for back gate bias dependence on mobility at low Vds" )
+`MPRnb( AUC            ,0.0            ,"(1/V)*(MV/cm)^(-EU)"                   ,"Parameter for back gate bias dependence on mobility at low Vds for short channel devices" )
+`MPRex( BUC            ,100.0e-9       ,"m"           ,0.0                      ,"Parameter for back gate bias dependence on mobility at low Vds for short channel devices" )
+`MPRnb( UD             ,0.0            ,""                                      ,"Columbic scattering (experimental)" )
+`MPRnb( AUD            ,0.0            ,""                                      ,"Columbic scattering (experimental) for short channel devices" )
+`MPRex( BUD            ,50.0e-9        ,"m"           ,0.0                      ,"Columbic scattering (experimental) for short channel devices" )
+`MPRnb( UDB            ,0.0            ,"V^-1"                                  ,"Back bias sensitivity on Columbic scattering (experimental)" )
+`MPRnb( AUDB           ,0.0            ,"V^-1"                                  ,"Back bias sensitivity on Columbic scattering (experimental) for short channel devices" )
+`MPRex( BUDB           ,50.0e-9        ,"m"           ,0.0                      ,"Back bias sensitivity on Columbic scattering (experimental) for short channel devices" )
 `MPRco( DMOBCLAMP      ,0.01           ,"m"           ,0.01        ,inf         ,"Minimum clamp on Dmob" )
-`MPRnb( UCS            ,1.0            ,""                                      ,"" )
-`MPRnb( UTE            ,0.0            ,""                                      ,"" )
-`MPRnb( UTL            ,-1.5e-3        ,""                                      ,"" )
-`MPRnb( UA1            ,1.032e-3       ,""                                      ,"" )
-`MPRnb( UC1            ,0.0            ,""                                      ,"" )
-`MPRnb( UD1            ,0.0            ,""                                      ,"" )
-`MPRnb( UCSTE          ,-4.775e-3      ,""                                      ,"" )
+`MPRnb( UCS            ,1.0            ,""                                      ,"Columbic scattering (experimental)" )
+`MPRnb( UDS            ,2.0e-5         ,""                                      ,"CRYOMOD != 0 weight factor correction for source side inversion charge density in Coulomb scattering model")
+`MPRnb( UDD            ,-2.0e-5        ,""                                      ,"CRYOMOD != 0 weight factor correction for drain side inversion charge density in Coulomb scattering model")
+`MPRnb( UTE            ,0.0            ,""                                      ,"Mobility temperature coefficient" )
+`MPRnb( UTE1           ,-0.4           ,""                                      ,"CRYOMOD != 0 temperature coefficient for U0")
+`MPRnb( UTL            ,-1.5e-3        ,""                                      ,"Mobility temperature coefficient" )
+`MPRnb( UA1            ,1.032e-3       ,""                                      ,"Mobility temperature coefficient for UA" )
+`MPRnb( UA2            ,-0.04          ,""                                      ,"CRYOMOD != 0 mobility temperature coefficient for UA")
+`MPRnb( UC1            ,0.0            ,""                                      ,"Mobility temperature coefficient for UC" )
+`MPRnb( EU1            ,-2.0e-4        ,""                                      ,"CRYOMOD != 0 mobility temperature coefficient for EU")
+`MPRnb( UD1            ,0.0            ,""                                      ,"Mobility temperature coefficient" )
+`MPRnb( UD2            ,-0.04          ,""                                      ,"CRYOMOD != 0 mobility temperature coefficient for UD")
+`MPRnb( UCSTE          ,-4.775e-3      ,""                                      ,"Mobility temperature coefficient" )
+`MPRnb( UCSTE1         ,-0.04          ,""                                      ,"CRYOMOD != 0 mobility temperature coefficient for UCS")
+`MPRnb( UDS1           ,-10.0          ,""                                      ,"CRYOMOD != 0 temperature coefficient for UDS")
+`MPRnb( UDD1           ,-10.0          ,""                                      ,"CRYOMOD != 0 temperature coefficient for UDD")
 `MPRcc( CHARGEWF       ,0.0            ,""            ,-1.0        ,1.0         ,"Average Channel Charge Weighting Factor, +1 :source-side, 0: middle, -1: drain-side" )
 
 // Access Resistance Model
 `MPRcz( RDSWMIN        ,0.0            ,"ohm*um^WR"                             ,"RDSMOD = 0 S/D extension resistance per unit width at high Vgs" )
 `MPRcz( RDSW           ,100.0          ,"ohm*um^WR"                             ,"RDSMOD = 0 zero bias S/D extension resistance per unit width" )
-`MPRnb( ARDSW          ,0.0            ,"ohm*um^WR"                             ,"" )
-`MPRex( BRDSW          ,100.0e-9       ,"m"           ,0.0                      ,"" )
+`MPRnb( ARDSW          ,0.0            ,"ohm*um^WR"                             ,"RDSMOD = 0 zero bias S/D extension resistance per unit width for short channel devices" )
+`MPRex( BRDSW          ,100.0e-9       ,"m"           ,0.0                      ,"RDSMOD = 0 zero bias S/D extension resistance per unit width for short channel devices" )
 `MPRcz( RSWMIN         ,0.0            ,"ohm*um^WR"                             ,"RDSMOD = 1 source extension resistance per unit width at high Vgs" )
 `MPRcz( RSW            ,50.0           ,"ohm*um^WR"                             ,"RDSMOD = 1 zero bias source extension resistance per unit width" )
-`MPRnb( ARSW           ,0.0            ,"ohm*um^W"                              ,"Pre-exponential coefficient for RSW" )
+`MPRnb( ARSW           ,0.0            ,"ohm*um^WR"                              ,"Pre-exponential coefficient for RSW" )
 `MPRex( BRSW           ,100.0e-9       ,"m"           ,0.0                      ,"Exponential coefficient for RSW" )
 `MPRcz( RDWMIN         ,RSWMIN         ,"ohm*um^WR"                             ,"RDSMOD = 1 drain extension resistance per unit width at high Vgs" )
 `MPRcz( RDW            ,RSW            ,"ohm*um^WR"                             ,"RDSMOD = 1 zero bias drain extension resistance per unit width" )
-`MPRnb( ARDW           ,ARSW           ,"ohm*um^WR"                             ,"" )
-`MPRex( BRDW           ,BRSW           ,"m"           ,0.0                      ,"" )
+`MPRnb( ARDW           ,ARSW           ,"ohm*um^WR"                             ,"RDSMOD = 1 zero bias drain extension resistance per unit width for short channel devices" )
+`MPRex( BRDW           ,BRSW           ,"m"           ,0.0                      ,"RDSMOD = 1 zero bias drain extension resistance per unit width for short channel devices" )
 `MPRnb( PRWG           ,0              ,"V^-1"                                  ,"Gate bias dependence of source/drain extension resistance" )
-`MPRnb( PRWB           ,0              ,"V^-1"                                  ,"" )
+`MPRnb( PRWB           ,0              ,"V^-1"                                  ,"Back gate bias dependence of source/drain extension resistance" )
 `MPRnb( WR             ,1.0            ,"V^-1"                                  ,"W dependence parameter of S/D extension resistance" )
 `MPRnb( PRT            ,0.001          ,"K^-1"                                  ,"Series Resistance Temperature coefficient" )
+`MPRnb( PRT1           ,4.0e-4         ,"K^-1"                                  ,"CRYOMOD != 0 series resistance temperature coefficient at low temperatures")
+`MPRnb(TR0             ,170.0          ,"K"                                     ,"CRYOMOD != 0 corner temperature in dual-slope temperature model of series resistance")
+`MPRcz(SPRT            ,1.0e-2         ,""                                      ,"CRYOMOD != 0 parameter for corner temperature smoothing in dual-slope temperature model of series resistance")
 `MPRcz( RSC            ,0              ,"ohm"                                   ,"Source contact resistance" )
 `MPRcz( RDC            ,RSC            ,"ohm"                                   ,"Drain contact resistance" )
 `MPRnb( TRS            ,0              ,"K^-1"                                  ,"TEMP Dependence of Source contact resistance" )
 `MPRnb( TRD            ,TRS            ,"K^-1"                                  ,"TEMP Dependence of Drain contact resistance" )
 // Minimum resistance value
-`MPRoz( minr          ,$simparam("minr", 1.0e-3) ,"ohm"                         ,"minr is the value below which the simulator expects elimination of source/drain resistance and it will improve simulation efficiency without significantly altering the results.")
+`MPRcz( minr          ,$simparam("minr", 1.0e-3) ,"ohm"                         ,"minr is the value below which the simulator expects elimination of source/drain resistance and it will improve simulation efficiency without significantly altering the results.")
 
 // DIBL Model
 `MPRnb( PDIBL1         ,1.30           ,""                                      ,"DIBL Output Conductance parameter" )
@@ -310,10 +330,11 @@ endfunction
 
 // Channel Length Modulation Effect
 `MPRnb( PCLM           ,0.013          ,""                                      ,"Channel Length Modulation (CLM) parameter" )
-`MPRnb( APCLM          ,0.0            ,""                                      ,"" )
-`MPRex( BPCLM          ,100.0e-9       ,"m"           ,0.0                      ,"" )
+`MPRnb( APCLM          ,0.0            ,""                                      ,"Channel Length Modulation (CLM) parameter for short channel devices" )
+`MPRex( BPCLM          ,100.0e-9       ,"m"           ,0.0                      ,"Channel Length Modulation (CLM) parameter for short channel devices" )
 `MPRnb( PCLMG          ,0.0            ,""                                      ,"Gate bias dependent parameter for channel Length Modulation (CLM)" )
 `MPRnb( PCLMCV         ,0.013          ,""                                      ,"Channel Length Modulation (CLM) parameter for C-V" )
+`MPRnb( PCLMT          ,-2.0e-5        ,"/K"                                    ,"CRYOMOD != 0 temperature coefficient for PCLM")
 
 // Geometry dependent Source/Drain Resistance RGEOMOD=0
 `MPRcz( RSHS           ,0.0            ,"ohm"                                   ,"Source-side sheet resistance" )
@@ -410,7 +431,7 @@ endfunction
 `MPRnb( NOIB           ,3.125e24       ,"(eV^-1)*(s^(1-EF))*(m^-1)"             ,"Flicker noise parameter" )
 `MPRnb( NOIC           ,8.75e7         ,"(eV^-1)*(s^(1-EF))*(m)"                ,"Flicker noise parameter" )
 `MPRnb( LINTNOI        ,0.0            ,"m"                                     ,"Lint offset for flicker noise calculation" )
-`MPRnb( NOIA2          ,NOIA           ,"eV^-1* s^1-EF *m^-3"                   ,"Noise parameter for FNMOD=1" )
+`MPRnb( NOIA2          ,NOIA           ,"(eV^-1)*(s^(1-EF))*(m^-3)"             ,"Noise parameter for FNMOD=1" )
 `MPRnb( SMOOTH         ,2              ,""                                      ,"Smoothing Parameter" )
 `MPRnb( MPOWER         ,1.2            ,""                                      ,"Sub-threshold to strong inversion transition slope Parameter" )
 `MPRoz( QSREF          ,50.0e-3        ,"C*m^-2"                                ,"Charge at threshold condition" )
@@ -418,8 +439,20 @@ endfunction
 // Thermal Noise
 `MPRcz( NTNOI          ,1.0            ,""                                      ,"Thermal noise parameter" )
 
+// Correlated thermal noise
+`MPIcc( TNOIMOD        ,0              ,""            ,0           ,1           ,"0: Charge-based, 1: Correlated thermal noise model")
+`MPRcz( RNOIA          ,0.5774         ,""                                      ,"Empirical parameter for Sid level")
+`MPRnb( TNOIA          ,0.0            ,"/m"                                    ,"Empirical parameter for Leff trend of Sid")
+`MPRcz( RNOIB          ,0.3652         ,""                                      ,"Empirical parameter for Sig level")
+`MPRnb( TNOIB          ,0.0            ,"/m"                                    ,"Empirical parameter for Leff trend of Sig")
+`MPRcz( RNOIC          ,0.3953         ,""                                      ,"Empirical parameter for correlation coefficient")
+`MPRnb( TNOIC          ,0.0            ,"/m"                                    ,"Empirical parameter for Leff trend of correlation coefficient")
+`MPRcz( RNOIK          ,0.0            ,""                                      ,"Empirical parameter for Sid level at low Ids")
+`MPRnb( TNOIK          ,0.0            ,"/m"                                    ,"Empirical parameter for Leff trend of Sid at low Ids")
+`MPRcz( TNOIK2         ,0.1            ,""                                      ,"Empirical parameter for sensitivity of RNOIK")
+
 // Temperature Effects
-`MPRco( TNOM           ,27.0           ,"Celsius"     ,-273.15     ,inf         ,"Temperature at which the model is extracted" )
+`MPRoo( TNOM           ,27.0           ,"Celsius"     ,-273.15     ,inf         ,"Temperature at which the model is extracted" )
 `MPRnb( TMAXC          ,400.0          ,"Celsius"                               ,"Maximum Device Temperature" )
 `MPRnb( TBGASUB        ,7.02e-4        ,"eV/K"                                  ,"Bandgap Temperature Coefficient" )
 `MPRnb( TBGBSUB        ,1108.0         ,"K"                                     ,"Bandgap Temperature Coefficient" )
@@ -427,11 +460,19 @@ endfunction
 `MPRnb( KT1L           ,0.0            ,"V*m"                                   ,"Vth Temperature L Coefficient" )
 `MPRnb( KT2            ,0.0            ,""                                      ,"Vth Temperature Vbg Coefficient" )
 `MPRnb( KT2L           ,0.0            ,"m"                                     ,"Vbg Temperature L Coefficient" )
+`MPRnb( KT11           ,0.01           ,"V"                                     ,"CRYOMOD != 0 Vth temperature coefficient")
+`MPRnb( KT12           ,0.1            ,"/K"                                    ,"CRYOMOD != 0 Vth temperature coefficient")
+`MPRnb( TVTH           ,50.0           ,"K"                                     ,"CRYOMOD != 0 transition temperature for Vth temperature model")
 `MPRnb( IIT            ,-0.5           ,""                                      ,"Impact Ionization Temperature Dependence" )
 `MPRnb( TGIDL          ,-0.003         ,"K^-1"                                  ,"GIDL Temperature Dependence" )
 `MPRnb( TGISL          ,TGIDL          ,"K^-1"                                  ,"GISL Temperature Dependence" )
 `MPRnb( IGT            ,2.5            ,""                                      ,"Gate Current Temperature Dependence" )
 `MPRnb( TETA0          ,0.0            ,"K^-1"                                  ,"Temperature Dependence for DIBL effects" )
+`MPRnb( TLOW           ,50.0           ,"K"                                     ,"CRYOMOD != 0 transition temperature of subthreshold swing at low temperature" )
+`MPRnb( DTLOW          ,1.0            ,"K"                                     ,"CRYOMOD != 0 smoothing parameter for TLOW" )
+`MPRnb( TLOW1          ,0.0            ,"K"                                     ,"CRYOMOD != 0 transition temperature of subthreshold swing at low temperatures" )
+`MPRnb( DTLOW1         ,0.0            ,"K"                                     ,"CRYOMOD != 0 smoothing parameter for TLOW1" )
+`MPRnb( KLOW1          ,0.0            ,""                                      ,"CRYOMOD != 0 magnitude of slope of effective temperature vs temperature below TLOW1" )
 
 // Self Heating
 `MPRcz( RTH0           ,0.01           ,"ohm*m*K/W"                             ,"Thermal resistance" )
@@ -446,6 +487,23 @@ endfunction
 // For NQSMOD = 1, Set XRCRG1 = 0 to turn off NQS gate resistance
 `MPRnb( XRCRG1     ,12.0           ,""                                      ,"Parameter for Rg in NQSMOD = 1" )
 `MPRnb( XRCRG2     ,1.0            ,""                                      ,"Parameter for Rg in NQSMOD = 1" )
+
+// Reliability Effects
+`MPRnb( DELHCI     ,0.0            ,""                                      ,"HCI degradation parameter. 0: turns off HCI aging model" )
+`MPRnb( HCIDB0     ,0.0            ,""                                      ,"HCI parameter for Vdbg dependence" )
+`MPRnb( HCIDB1     ,0.0            ,"V^-1"                                  ,"HCI parameter for Vdbg dependence" )
+`MPRnb( HCIU0      ,0.0            ,"m^2/(Vs)"                              ,"HCI aging parameter for U0" )
+`MPRnb( HCIDU0     ,0.0            ,"m^2/(Vs)"                              ,"HCI aging parameter for U0" )
+`MPRnb( HCIUD      ,0.0            ,""                                      ,"HCI aging parameter for UD" )
+`MPRnb( HCIDUD     ,0.0            ,""                                      ,"HCI aging parameter for UD" )
+`MPRnb( HCIUCS     ,0.0            ,""                                      ,"HCI aging parameter for UCS" )
+`MPRnb( HCIDUCS    ,0.0            ,""                                      ,"HCI aging parameter for UCS" )
+`MPRnb( HCIVSAT    ,0.0            ,"m/s"                                   ,"HCI aging parameter for VSAT" )
+`MPRnb( HCIDVSAT   ,0.0            ,"m/s"                                   ,"HCI aging parameter for VSAT" )
+`MPRnb( HCICIT     ,0.0            ,"F/m^2"                                 ,"HCI aging parameter for CIT" )
+`MPRnb( HCIDCIT    ,0.0            ,"F/m^2"                                 ,"HCI aging parameter for CIT" )
+`MPRnb( HCIVTH     ,0.0            ,"V"                                     ,"HCI aging parameter for threshold voltage" )
+`MPRnb( HCIDVTH    ,0.0            ,"V"                                     ,"HCI aging parameter for threshold voltage" )
 
 // Binning Parameters
 `include "bsimimg_binning.include"
@@ -462,7 +520,7 @@ real vgs_noswap, vds_noswap, vgd_noswap, vbgs_noswap, vbgd_noswap;
 real T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11;
 real qia, qia2, qba, dqi;
 real phib, phisub, deltaphi1, deltaphi2;
-real Eg, Vtm;
+real Eg, Vtm, Vtmeff;
 real beta;
 real wf, wr;
 real Nc;
@@ -487,8 +545,8 @@ real Theta_DITS, DVTP0_i, DVTP1_i;
 real Mnud;
 
 // Temperature Effects
-real Tnom, TRatio, delTemp, delTemp0;
-real PhiRef, PhiSD, ni;
+real Tnom, TRatio, Tlow, delTemp, delTemp0, DevTemp0, DevTemplow0, DevTemplow1, DevTempeff, DevTemp1, delTemp1, delTRatio1;
+real PhiRef, PhiSD, ni, niln;
 real dvth_temp, dvth_temp0;
 real BETA0_t, BGIDL_t, BGISL_t, igtemp, ETA0_t;
 
@@ -498,7 +556,7 @@ real BETA0_t, BGIDL_t, BGISL_t, igtemp, ETA0_t;
 real qis, qid, qbs, Dmobs, Vdseff;
 
 real eta_mu, eta_mu_cv, Eeffm, Eeffm_cv, Dmob, Dmob_cv, u0, ueff;
-real UA_t, UC_t, UCS_t, UD_t, U0_t, Eeffs, EeffFactor;
+real UA_t, UC_t, UCS_t, UD_t, U0_t, Eeffs, EeffFactor, UDS_t, UDSeff_t, UDD_t, UDDeff_t, UA_tl, UA_th, wl, wh, EU_t;
 real Dr, WeffWRFactor;
 real RSourceGeo, RDrainGeo;
 real RDSWMIN_i, RDWMIN_i, RSWMIN_i;
@@ -506,17 +564,19 @@ real UDB_i;
 
 
 real Rdrain, Rsource;
-real gspr, gdpr;
+real gspr, gdpr, gspr_sh, gdpr_sh, ids0mult_r_factor;
 
 
-real rdstemp, Rdsi, Rdss, RSC0, RDC0, RSC0_t, RDC0_t;
+real rdstemp, rdstemp0, rdstemp1, Rdsi, Rdss, RSC0, RDC0, RSC0_t, RDC0_t;
 real DIBLfactor, PVAGfactor, diffVds, VaDIBL, Vgst2Vtm, Moc, Mclm, MclmCV;
-real Dvsat, Vdsat, inv_MEXP;
+real Dvsat, Vdsat, inv_MEXP, Lterm, Lterm0;
 real VSAT_t, VSATB_t, VSAT1_t, VSATCV_t, MEXP_t, Esat, EsatL, EsatCV, EsatCVL, Esat1, Esat1L;
 real K0_t, K0SI_t;
 real WVCox, Ta, Tb, Tc;
 real Xsat;
 real PTWG_t;
+real KSATIV_t;
+real PCLM_t;
 
 // Gate Current
 real Vaux_Igbinv, igbinv, igsd_mult, igsd_mult0, igbs, igbd;
@@ -531,7 +591,7 @@ real Iii;
 
 // IV Variables
 integer devsign, welsign;
-real ids, ids0, ids0_ov_dqi;
+real ids, ids0, ids0_ov_dqi, ids_sh;
 
 // CV Variables
 real qs, qd, qd1, qd2, qfg, qbg;
@@ -558,9 +618,20 @@ real qinv;
 real Gtnoi, sid;
 real Nt;
 
+// Correlated thermal noise
+real noiBeta, noiTheta, noiCorr, noiLowId, noiEta, noiWI, noiGd0, Dvsat3;
+real T5_2, T5_3, T5_4, T7_2, T7_3, T7_4, T7_5;
+real etaiv0, ids0_ov_dqi0, Rdsi0, Eeffm0;
+real Mnud0, Mob0, Dmob0, Dvsat0, Dr0;
+real gamma1, gamma2, gamma;
+real delta1, delta2, delta3, delta;
+real epsilon1, epsilon2, epsilon;
+real ctnoi, sigrat;
+real q0, rc;
+
 // Self Heating
 real gth, cth;
-real DevTemp, TMAXK, DevTemp0;
+real DevTemp, TMAXK;
 
 // Gate resistances
 
@@ -571,6 +642,8 @@ real Grgeltd;
 real gcrg, XRCRG1_i, XRCRG2_i;
 real IdsovVds;
 
+// Aging effects
+real dvth_hci, exp_hci;
 
 // Binning
 real Inv_L, Inv_W, Inv_WL;
@@ -587,8 +660,8 @@ real DVT0_i, DVT1_i, PHIN_i;
 real ETA0_i, ETA1_i, ETAB_i, DSUB_i, K1RSCE_i, LPE0_i;
 real K0_i, K01_i, K0SI_i, K0SI1_i, MEXP_i;
 real PTWG_i, PTWGB_i, PTWGB2_i, PTWGT_i;
-real U0_i, UA_i, UC_i, UD_i, UCS_i, EU_i, UTL_i, UTE_i, UA1_i, UD1_i, UCSTE_i, ETAMOB_i;
-real AT_i, ATB_i, PRT_i, IIT_i, TGIDL_i, TGISL_i, IGT_i;
+real U0_i, UA_i, UC_i, UD_i, UCS_i, EU_i, UDS_i, UDS1_i, UDD_i, UDD1_i, EU1_i, UTL_i, UTE_i, UTE1_i, UA1_i, UA2_i, UD1_i, UD2_i, UCSTE_i, UCSTE1_i, ETAMOB_i;
+real AT_i, ATB_i, PRT_i, PRT1_i, TR0_i, SPRT_i, IIT_i, TGIDL_i, TGISL_i, IGT_i;
 real PCLM_i, PCLMCV_i, DROUT_i, PDIBL1_i, PDIBL2_i, PVAG_i,  ALPHA0_i, ALPHA1_i, BETA0_i;
 real AIGC_i, BIGC_i, CIGC_i, PIGCD_i, DIGC_i;
 real AGISL_i, BGISL_i, EGISL_i, PGISL_i, AGIDL_i, BGIDL_i, EGIDL_i, PGIDL_i;
@@ -661,6 +734,7 @@ real A0, k1, qth, qsq1, qsqrt1, qcoth1, Vfb, Vthop;
 `OPM( CBGSI,       "F",                  "Intrinsic BG-to-S capacitance" )
 `OPM( CBGDI,       "F",                  "Intrinsic BG-to-D capacitance" )
 `OPM( CBGBGI,      "F",                  "Intrinsic back-gate capacitance" )
+`OPM( PDISS,       "A*V",                "Device Power")
 `OPP( VTH,         "V",                  "Threshold voltage" )
 `OPP( T_TOTAL_K,   "Kelvin",             "Device temperature in Kelvin" )
 `OPP( T_TOTAL_C,   "Celsius",            "Device temperature in Celsius" )
@@ -684,13 +758,34 @@ analog begin
     gdpr    = 0.0;
     gcrg    = 0.0;
     Grgeltd = 0.0;
+    Dr0 = 0.0;
+    DevTemplow0 = 0.0;
+    DevTemplow1 = 0.0;
+    DevTempeff = 0.0;
+    DevTemp1 = 0.0;
+    delTemp1 = 0.0;
+    delTRatio1 = 0.0;
+    Tlow = TLOW;
+    Vtmeff = 0.0;
+    niln = 0.0;
+    UDS_t = 0.0;
+    UDSeff_t = 0.0;
+    UDD_t = 0.0;
+    UDDeff_t = 0.0;
+    UA_tl = 0.0;
+    UA_th = 0.0;
+    wl = 0.0;
+    wh = 0.0;
+    KSATIV_t = 0.0;
+    PCLM_t = 0.0;
+    rdstemp0 = 0.0;
+    rdstemp1 = 0.0;
 
     if ($port_connected(t) == 1) begin
         if (SHMOD == 0 || RTH0 == 0.0) begin
             $strobe("The optional 5th terminal is present but not active because SHMOD = 0 or RTH0 = 0.0");
         end
     end
-
 
     if (TYPE == `ntype) begin
         devsign = 1;
@@ -851,15 +946,27 @@ analog begin
     UD_i       = UD + LUD * Inv_L + WUD * Inv_W + PUD * Inv_WL;
     UCS_i      = UCS + LUCS * Inv_L + WUCS * Inv_W + PUCS * Inv_WL;
     EU_i       = EU + LEU * Inv_L + WEU * Inv_W + PEU * Inv_WL;
+    EU1_i      = EU1 + LEU1 * Inv_L + WEU1 * Inv_W + PEU1 * Inv_WL;
+    UDS_i      = UDS + LUDS * Inv_L + WUDS * Inv_W + PUDS * Inv_WL;
+    UDS1_i     = UDS1 + LUDS1 * Inv_L + WUDS1 * Inv_W + PUDS1 * Inv_WL;
+    UDD_i      = UDD + LUDD * Inv_L + WUDD * Inv_W + PUDD * Inv_WL;
+    UDD1_i     = UDD1 + LUDD1 * Inv_L + WUDD1 * Inv_W + PUDD1 * Inv_WL;
     UTL_i      = UTL + LUTL * Inv_L + WUTL * Inv_W + PUTL * Inv_WL;
     UTE_i      = UTE + LUTE * Inv_L + WUTE * Inv_W + PUTE * Inv_WL;
+    UTE1_i     = UTE1 + LUTE1 * Inv_L + WUTE1 * Inv_W + PUTE1 * Inv_WL;
     UA1_i      = UA1 + LUA1 * Inv_L + WUA1 * Inv_W + PUA1 * Inv_WL;
+    UA2_i      = UA2 + LUA2 * Inv_L + WUA2 * Inv_W + PUA2 * Inv_WL;
     UD1_i      = UD1 + LUD1 * Inv_L + WUD1 * Inv_W + PUD1 * Inv_WL;
+    UD2_i      = UD2 + LUD2 * Inv_L + WUD2 * Inv_W + PUD2 * Inv_WL;
     UCSTE_i    = UCSTE + LUCSTE * Inv_L + WUCSTE * Inv_W + PUCSTE * Inv_WL;
+    UCSTE1_i   = UCSTE1 + LUCSTE1 * Inv_L + WUCSTE1 * Inv_W + PUCSTE1 * Inv_WL;
     ETAMOB_i   = ETAMOB + LETAMOB * Inv_L + WETAMOB * Inv_W + PETAMOB * Inv_WL;
     AT_i       = AT + LAT * Inv_L + WAT * Inv_W + PAT * Inv_WL;
     ATB_i      = ATB + LATB * Inv_L + WATB * Inv_W + PATB * Inv_WL;
     PRT_i      = PRT + LPRT * Inv_L + WPRT * Inv_W + PPRT * Inv_WL;
+    PRT1_i     = PRT1 + LPRT1 * Inv_L + WPRT1 * Inv_W + PPRT1 * Inv_WL;
+    TR0_i      = TR0 + LTR0 * Inv_L + WTR0 * Inv_W + PTR0 * Inv_WL;
+    SPRT_i     = SPRT + LSPRT * Inv_L + WSPRT * Inv_W + PSPRT * Inv_WL;
     IIT_i      = IIT + LIIT * Inv_L + WIIT * Inv_W + PIIT * Inv_WL;
     TGIDL_i    = TGIDL + LTGIDL * Inv_L + WTGIDL * Inv_W + PTGIDL * Inv_WL;
     TGISL_i    = TGISL + LTGISL * Inv_L + WTGISL * Inv_W + PTGISL * Inv_WL;
@@ -982,6 +1089,43 @@ analog begin
     DVTP0_i = DVTP0 + ADVTP0 * lexp(-Leff / BDVTP0);
     DVTP1_i = DVTP1 + ADVTP1 * lexp(-Leff / BDVTP1);
 
+    // Load Terminal Voltages
+    vgs_noswap  = devsign * V(gi, si);
+    vds_noswap  = devsign * V(di, si);
+    vgd_noswap  = devsign * V(gi, di);
+    vbgs_noswap = devsign * V(bg, si);
+    vbgd_noswap = devsign * V(bg, di);
+    vgbg        = devsign * V(gi, bg);
+
+    // Source-drain Interchange
+    sigvds = 1.0;
+
+    if (vds_noswap < 0.0) begin
+        sigvds = -1.0;
+        vfgs   = vgd_noswap;
+        vds    = -vds_noswap;
+        vbgs   = vbgd_noswap;
+        vbgd   = vbgs_noswap;
+    end else begin
+        vfgs   = vgs_noswap;
+        vds    = vds_noswap;
+        vbgs   = vbgs_noswap;
+        vbgd   = vbgd_noswap;
+    end
+
+    // Aging Effects
+    if (DELHCI != 0.0) begin
+        exp_hci = lexp(-HCIDB1 * devsign * (V(d, s) - V(bg, s)) + HCIDB0);
+        UD_i     = UD_i + DELHCI * (HCIUD + HCIDUD * exp_hci);
+        U0_i     = U0_i + DELHCI * (HCIU0 + HCIDU0 * exp_hci);
+        VSAT_i   = VSAT_i + DELHCI * (HCIVSAT + HCIDVSAT * exp_hci);
+        CIT_i    = CIT_i + DELHCI * (HCICIT + HCIDCIT * exp_hci);
+        UCS_i    = UCS_i + DELHCI * (HCIUCS + HCIDUCS * exp_hci);
+        dvth_hci = DELHCI * (HCIVTH + HCIDVTH * exp_hci);
+    end else begin
+        dvth_hci = 0.0;
+    end
+
     // ************************
     // *  Parameter Checking  *
     // ************************
@@ -1027,11 +1171,6 @@ analog begin
 
         RDSWMIN_i = RDSWMIN;
 
-        if (RDSWMIN_i < 0.0) begin
-            $strobe("Warning: RDSWMIN = %e is negative. Set to zero", RDSWMIN_i);
-            RDSWMIN_i = 0.0;
-        end
-
         if (RDSW_i < 0.0) begin
             $strobe("Warning: RDSW_i = %e is negative. Set to zero", RDSW_i);
             RDSW_i = 0.0;
@@ -1039,22 +1178,12 @@ analog begin
 
         RSWMIN_i = RSWMIN;
 
-        if (RSWMIN_i < 0.0) begin
-            $strobe("Warning: RSWMIN = %e is negative. Set to zero", RSWMIN_i);
-            RSWMIN_i = 0.0;
-        end
-
         if (RSW_i < 0.0) begin
             $strobe("Warning: RSW_i = %e is negative. Set to zero", RSW_i);
             RSW_i = 0.0;
         end
 
         RDWMIN_i = RDWMIN;
-
-        if (RDWMIN_i < 0.0) begin
-            $strobe("Warning: RDWMIN = %e is negative. Set to zero", RDWMIN_i);
-            RDWMIN_i = 0.0;
-        end
 
         if (RDW_i < 0.0) begin
             $strobe("Warning: RDW_i = %e is negative. Set to zero", RDW_i);
@@ -1103,10 +1232,10 @@ analog begin
     cdbox = max(cdbox, 0.01e-18);
 
     // Mobility Degradation
-    eta_mu    = 0.5 * ETAMOB_i;
-    eta_mu_cv = 0.5;
-
-    if (TYPE != `ntype) begin
+    if (TYPE == `ntype) begin
+        eta_mu    = 0.5 * ETAMOB_i;
+        eta_mu_cv = 0.5;
+    end else begin
         eta_mu    = 1.0 / 3.0 * ETAMOB_i;
         eta_mu_cv = 1.0 / 3.0;
     end
@@ -1124,8 +1253,8 @@ analog begin
 
     // Self-heating Model
     if ((SHMOD != 0) && (RTH0 > 0.0)) begin
-        gth = (WTH0 + Weff * NF) / RTH0;
-        cth = CTH0 * (WTH0 + Weff * NF);
+        gth = (WTH0 + Weff) * NF / RTH0;
+        cth = CTH0 * (WTH0 + Weff) * NF;
     end else begin
         // set gth to some value to prevent a singular G matrix
         gth = 1.0;
@@ -1163,40 +1292,14 @@ analog begin
         end
     end
 
-    if (RDSMOD == 1) begin
-
-        if (RSWMIN_i <= 0.0) begin
-            RSWMIN_i = 0.0;
-        end
-
-        if (RDWMIN_i <= 0.0) begin
-            RDWMIN_i = 0.0;
-        end
-
-        if (RSW_i <= 0.0) begin
-            RSW_i = 0.0;
-        end
-
-        if (RDW_i <= 0.0) begin
-            RDW_i = 0.0;
-        end
-
-    end else begin
-
-        if (RDSWMIN_i <= 0.0) begin
-            RDSWMIN_i = 0.0;
-        end
-
-        if (RDSW_i <= 0.0) begin
-            RDSW_i = 0.0;
-        end
-
-    end
-
     // Tnom
-    if (TNOM <= 0.0) begin
-        $strobe("Warning: TNOM = %e is not positive. Set to 300.15 K.", TNOM);
-        Tnom = `REFTEMP;
+    if (CRYOMOD == 0) begin
+        if (TNOM <= 0.0) begin
+            $strobe("Warning: TNOM = %e is less than 0 C. Set to %f C.", TNOM, `REFTEMP - `P_CELSIUS0);
+            Tnom = `REFTEMP;
+        end else begin
+            Tnom = TNOM + `P_CELSIUS0;
+        end
     end else begin
         Tnom = TNOM + `P_CELSIUS0;
     end
@@ -1261,15 +1364,66 @@ analog begin
         delTemp = DevTemp - Tnom;
         delTemp0 = DevTemp0 - Tnom;   // Self-Heating induced temperature not included for bias-indpendent resistances in RDSMOD=0
 
+        if (CRYOMOD != 0) begin
+            // Effective temperature for core model charge calculation at low temperatures
+            DevTemplow0 = smoothminx(DevTemp, Tlow, DTLOW);
+            DevTemplow1 = smoothminx((-KLOW1 * (DevTemp - TLOW1)), 0.0, DTLOW1);
+            if (CRYOMOD == 1) begin
+                T1 = smoothminx(Tnom, Tlow, DTLOW);
+                T2 = smoothminx((-KLOW1 * (Tnom - TLOW1)), 0.0, DTLOW1);
+                if (Tnom > Tlow) begin
+                    T3 = DevTemplow0 + DevTemplow1 - T1 - T2 + Tnom;
+                end else begin
+                    T3 = DevTemplow0 + DevTemplow1 - T1 - T2 + Tlow;
+                end
+                DevTempeff = smoothminx(DevTemp, T3, 0.2);
+            end else begin
+                if (Tlow > 210) begin
+                    $strobe("Warning: TLOW = %e is greater than 210 K. Set to 210 K", TLOW);
+                    Tlow = 210;
+                end
+                wh = 0.5 + 0.5 * tanh(0.5 * (DevTemp - 210));
+                wl = 1.0 - wh;
+                if (Tnom > 210) begin
+                    T1 = smoothminx(210, Tlow, DTLOW);
+                    T2 = smoothminx((-KLOW1 * (210 - TLOW1)), 0.0, DTLOW1);
+                    T3 = DevTemplow0 + DevTemplow1 - T1 - T2 + 210;
+                    DevTempeff = smoothminx(DevTemp, T3, 0.2);
+                end else begin
+                    T1 = smoothminx(Tnom, Tlow, DTLOW);
+                    T2 = smoothminx((-KLOW1 * (Tnom - TLOW1)), 0.0, DTLOW1);
+                    if (Tnom > Tlow) begin
+                        T3 = DevTemplow0 + DevTemplow1 - T1 - T2 + Tnom;
+                    end else begin
+                        T3 = DevTemplow0 + DevTemplow1 - T1 - T2 + Tlow;
+                    end
+                    T4 = smoothminx(DevTemp, T3, 0.2);
+                    DevTempeff = wl * T4 + wh * DevTemp;
+                end
+                DevTemp1 = minx(DevTemp, 210, 0.2);
+                delTemp1 = DevTemp1 - minx(Tnom, 210, 0.2);
+                delTRatio1 = (DevTemp1 - 210) / Tnom;
+            end
+        end
+
         // Temperature Dependent Physical Quantities
         Vtm    = `KboQ * DevTemp;
         Eg     = BG0SUB - TBGASUB * DevTemp * DevTemp / (DevTemp + TBGBSUB);
         T1     = (DevTemp / 300.15) * sqrt(DevTemp / 300.15);
         ni     = NI0SUB * T1 * lexp(BG0SUB / (2.0 * `KboQ * 300.15) - Eg / (2.0 * Vtm));
-        Nc     = NC0SUB * T1;
-        vbi    = Vtm * lln(NSD_i * NBODY_i / (ni * ni));
-        phib   = Vtm * lln(NBODY_i / ni);
-        phisub = (0.5 * Eg - hypsmooth(0.5 * Eg - Vtm * lln(NBG / ni), 1.0e-4));
+        if (CRYOMOD == 0) begin
+            Nc     = NC0SUB * T1;
+            vbi    = Vtm * lln(NSD_i * NBODY_i / (ni * ni));
+            phib   = Vtm * lln(NBODY_i / ni);
+            phisub = (0.5 * Eg - hypsmooth(0.5 * Eg - Vtm * lln(NBG / ni), 1.0e-4));
+        end else begin
+            niln   = lln(NI0SUB * T1) + BG0SUB / (2.0 * `KboQ * 300.15) - Eg / (2.0 * Vtm);
+            Nc     = NC0SUB * (DevTempeff / 300.15) * sqrt(DevTempeff / 300.15);
+            vbi    = Vtm * (lln(NSD_i * NBODY_i) - 2.0 * niln);
+            phib   = Vtm * (lln(NBODY_i) - niln);
+            phisub = (0.5 * Eg - hypsmooth(0.5 * Eg - Vtm * (lln(NBG) - niln), 1.0e-4));
+            Vtmeff = `KboQ * DevTempeff;
+        end
 
         // Front- and Back-Gate Workfunctions
         if (NBG != 0.0 && !$param_given(PHIG2)) begin
@@ -1284,17 +1438,66 @@ analog begin
         deltaphi1 = devsign * (PHIG1_i - PhiRef);
         deltaphi2 = devsign * (PHIG2_i - PhiRef);
 
-        PhiSD    = EASUB + Eg / 2.0 - devsign * min(Eg / 2.0, Vtm * lln(NSD_i / ni));
+        if (CRYOMOD == 0) begin
+            PhiSD = EASUB + Eg / 2.0 - devsign * min(Eg / 2.0, Vtm * lln(NSD_i / ni));
+        end else begin
+            PhiSD = EASUB + Eg / 2.0 - devsign * min(Eg / 2.0, Vtm * (lln(NSD_i) - niln));
+        end
         vfbsd    = devsign * (PHIG1_i - PhiSD);
         vfbsd_bg = devsign * (PHIG2_i - PhiSD);
 
         // Temperature Effects
-        U0_t  = U0_i * pow(TRatio, UTE_i) * (1.0 + hypsmooth(0.9 + UTL_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
-        u0    = U0_t;
+        if (CRYOMOD == 0) begin
+            U0_t  = U0_i * pow(TRatio, UTE_i) * (1.0 + hypsmooth(0.9 + UTL_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            u0    = U0_t;
+            UA_t  = UA_i * hypsmooth(1.0 + UA1_i * delTemp - 1.0e-6, 1.0e-3);
+            UD_t  = UD_i * pow(TRatio, UD1_i);
+            UCS_t = UCS_i * pow(TRatio, UCSTE_i);
+            EU_t  = EU_i;
+        end else if (CRYOMOD == 1) begin
+            U0_t  = U0_i * pow(TRatio, UTE_i + UTE1_i * TRatio) * (1.0 + hypsmooth(0.9 + UTL_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            u0    = U0_t;
+            UA_t  = UA_i * pow(TRatio, UA1_i + UA2_i * TRatio);
+            UD_t  = UD_i * pow(TRatio, UD1_i + UD2_i * TRatio);
+            UCS_t = UCS_i * pow(TRatio, UCSTE_i + UCSTE1_i * TRatio);
+            UDS_t = UDS_i * (lexp(UDS1_i * (TRatio - 1.0)) - 1);
+            UDD_t = UDD_i * (lexp(UDD1_i * (TRatio - 1.0)) - 1);
+            UDSeff_t = 0.5 + UDS_t;
+            UDDeff_t = 0.5 + UDD_t;
+            EU_t  = EU_i * hypsmooth((1.0 + EU1_i * delTemp - 1.0e-6), 1.0e-3);
+        end else begin
+            U0_t  = U0_i * pow(TRatio, UTE_i + UTE1_i * delTRatio1) * (1.0 + hypsmooth(0.9 + UTL_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            u0    = U0_t;
+            if (Tnom > 210) begin
+                T2 = 210 * (UA1_i / (1.0 + UA1_i * (210 - Tnom)) - UA2_i * (lln(210 / Tnom) + 1) / Tnom);
+                T1 = UA_i * (1.0 + UA1_i * (210 - Tnom)) / pow(210 / Tnom, T2 + UA2_i * (210 / Tnom));
+                UA_tl = T1 * pow(TRatio, T2 + UA2_i * TRatio);
+                UA_th = UA_i * (1.0 + UA1_i * delTemp);
+            end else begin
+                T2 = UA_i * pow(210 / Tnom, UA1_i + UA2_i * (210 / Tnom)) * (UA1_i / 210 + UA2_i * (lln(210 / Tnom) + 1) / Tnom);
+                T1 = UA_i * pow(210 / Tnom, UA1_i + UA2_i * (210 / Tnom)) - T2 * (210 - Tnom);
+                UA_tl = UA_i * pow(TRatio, UA1_i + UA2_i * TRatio);
+                UA_th = T1 + T2 * delTemp;
+            end
+            T0 = wl * UA_tl + wh * UA_th;
+            UA_t = hypsmooth(T0, 1.0e-6);
+            UD_t  = UD_i * pow(TRatio, UD1_i + UD2_i * delTRatio1);
+            UCS_t = UCS_i * pow(TRatio, UCSTE_i + UCSTE1_i * delTRatio1);
+            if (abs(UDS1_i * (Tnom - 210) / Tnom) < 1e-6) begin
+                UDS_t = UDS_i * (lexp(UDS1_i * delTRatio1) - 1);
+            end else begin
+                UDS_t = UDS_i * (lexp(UDS1_i * delTRatio1) - 1) / abs(lexp(UDS1_i * (Tnom - 210) / Tnom) - 1);
+            end
+            if (abs(UDD1_i * (Tnom - 210) / Tnom) < 1e-6) begin
+                UDD_t = UDD_i * (lexp(UDD1_i * delTRatio1) - 1);
+            end else begin
+                UDD_t = UDD_i * (lexp(UDD1_i * delTRatio1) - 1) / abs(lexp(UDD1_i * (Tnom - 210) / Tnom) - 1);
+            end
+            UDSeff_t = 0.5 + UDS_t;
+            UDDeff_t = 0.5 + UDD_t;
+            EU_t  = EU_i * hypsmooth((1.0 + EU1_i * delTemp1 - 1.0e-6), 1.0e-3);
+        end
         UC_t  = UC_i * hypsmooth(1.0 + UC1 * delTemp - 1.0e-6, 1.0e-3);
-        UA_t  = UA_i * hypsmooth(1.0 + UA1_i * delTemp - 1.0e-6, 1.0e-3);
-        UD_t  = UD_i * pow(TRatio, UD1_i);
-        UCS_t = UCS_i * pow(TRatio, UCSTE_i);
 
         // SWITCH is added for backward compatibility of v102.9.3beta1 with standard v102.9.2
         if (CONVMOD == 0) begin
@@ -1302,18 +1505,112 @@ analog begin
         end else begin
             if (RDSMOD == 0) begin
                 //bias-independent resistances are Ambient Temperature dependent
-                rdstemp = smoothminx(1.0 + PRT_i * delTemp0 - 1.0E-6, 1.0E-3, 0.01);
                 RSC0 = RSC * smoothminx(1.0 + TRS * delTemp0 - 1.0E-6, 1.0E-3, 0.01);
                 RDC0 = RDC * smoothminx(1.0 + TRD * delTemp0 - 1.0E-6, 1.0E-3, 0.01);
                 RSC0_t = RSC0;
                 RDC0_t = RDC0;
+                T0 = DevTemp0;
+                T1 = delTemp0;
             end else begin
-                rdstemp  = smoothminx(1.0 + PRT_i * delTemp - 1.0e-6, 1.0e-3, 0.01);
                 RSC0 = RSC * smoothminx(1.0 + TRS * delTemp0 - 1.0E-6, 1.0E-3, 0.01);
                 RDC0 = RDC * smoothminx(1.0 + TRD * delTemp0 - 1.0E-6, 1.0E-3, 0.01);
                 RSC0_t = RSC * smoothminx(1.0 + TRS * delTemp - 1.0E-6, 1.0E-3, 0.01);
                 RDC0_t = RDC * smoothminx(1.0 + TRD * delTemp - 1.0E-6, 1.0E-3, 0.01);
+                T0 = DevTemp;
+                T1 = delTemp;
             end
+            if (CRYOMOD == 0 || PRT_i == PRT1_i) begin
+                T2 = 1.0 + PRT_i * T1;
+            end else if (CRYOMOD == 1) begin
+                if (TR0_i < Tnom) begin
+                    rdstemp0 = 1 + PRT_i * T1;
+                    rdstemp1 = 1 + PRT1_i * (T0 - TR0_i) + PRT_i * (TR0_i - Tnom);
+                    T3 = (PRT_i - PRT1_i) * (TR0_i - Tnom);
+                    if (PRT1_i < PRT_i) begin
+                        T2 = smoothminx(rdstemp0, rdstemp1, SPRT_i) - smoothminx(T3, 0, SPRT_i);
+                    end else begin
+                        T2 = minx(rdstemp0, rdstemp1, SPRT_i) - minx(T3, 0, SPRT_i);
+                    end
+                end else begin
+                    rdstemp1 = 1 + PRT1_i * (T0 - Tnom);
+                    rdstemp0 = 1 + PRT_i * (T0 - TR0_i) + PRT1_i * (TR0_i - Tnom);
+                    T3 = (PRT1_i - PRT_i) * (TR0_i - Tnom);
+                    if (PRT1_i < PRT_i) begin
+                        T2 = smoothminx(rdstemp1, rdstemp0, SPRT_i) - smoothminx(T3, 0, SPRT_i);
+                    end else begin
+                        T2 = minx(rdstemp1, rdstemp0, SPRT_i) - minx(T3, 0, SPRT_i);
+                    end
+                end
+            end else begin
+                if (TR0_i < 210) begin
+                    if (Tnom > 210) begin
+                        rdstemp0 = 1 + PRT_i * T1;
+                        rdstemp1 = 1 + PRT1_i * (T0 - TR0_i) + PRT_i * (TR0_i - Tnom);
+                        T3 = 1 + PRT_i * (210 - Tnom);
+                        T4 = 1 + PRT1_i * (210 - TR0_i) + PRT_i * (TR0_i - Tnom);
+                        if (PRT1_i < PRT_i) begin
+                            T5 = smoothminx(rdstemp0, rdstemp1, SPRT_i) - smoothminx(T3, T4, SPRT_i) + T3;
+                            T2 = smoothminx(T5, rdstemp0, 1.0e-3);
+                        end else begin
+                            T5 = minx(rdstemp0, rdstemp1, SPRT_i) - minx(T3, T4, SPRT_i) + T3;
+                            T2 = minx(T5, rdstemp0, 1.0e-3);
+                        end
+                    end else if (Tnom > TR0_i) begin
+                        rdstemp0 = 1 + PRT_i * T1;
+                        rdstemp1 = 1 + PRT1_i * (T0 - TR0_i) + PRT_i * (TR0_i - Tnom);
+                        T3 = (PRT_i - PRT1_i) * (TR0_i - Tnom);
+                        T4 = 1 + PRT_i * (210 - Tnom);
+                        T5 = 1 + PRT1_i * (210 - TR0_i) + PRT_i * (TR0_i - Tnom);
+                        if (PRT1_i < PRT_i) begin
+                            T6 = smoothminx(rdstemp0, rdstemp1, SPRT_i) - smoothminx(T3, 0, SPRT_i);
+                            T7 = smoothminx(T4, T5, SPRT_i) - smoothminx(T3, 0, SPRT_i);
+                            T8 = T7 + PRT_i * (T0 - 210);
+                            T2 = smoothminx(T6, T8, 1.0e-3);
+                        end else begin
+                            T6 = minx(rdstemp0, rdstemp1, SPRT_i) - minx(T3, 0, SPRT_i);
+                            T7 = minx(T4, T5, SPRT_i) - minx(T3, 0, SPRT_i);
+                            T8 = T7 + PRT_i * (T0 - 210);
+                            T2 = minx(T6, T8, 1.0e-3);
+                        end
+                    end else begin
+                        rdstemp1 = 1 + PRT1_i * T1;
+                        rdstemp0 = 1 + PRT_i * (T0 - TR0_i) + PRT1_i * (TR0_i - Tnom);
+                        T3 = (PRT1_i - PRT_i) * (TR0_i - Tnom);
+                        T4 = 1 + PRT1_i * (210 - Tnom);
+                        T5 = 1 + PRT_i * (210 - TR0_i) + PRT1_i * (TR0_i - Tnom);
+                        if (PRT1_i < PRT_i) begin
+                            T6 = smoothminx(rdstemp0, rdstemp1, SPRT_i) - smoothminx(T3, 0, SPRT_i);
+                            T7 = smoothminx(T4, T5, SPRT_i) - smoothminx(T3, 0, SPRT_i);
+                            T8 = T7 + PRT_i * (T0 - 210);
+                            T2 = smoothminx(T6, T8, 1.0e-3);
+                        end else begin
+                            T6 = minx(rdstemp0, rdstemp1, SPRT_i) - minx(T3, 0, SPRT_i);
+                            T7 = minx(T4, T5, SPRT_i) - minx(T3, 0, SPRT_i);
+                            T8 = T7 + PRT_i * (T0 - 210);
+                            T2 = minx(T6, T8, 1.0e-3);
+                        end
+                    end
+                end else begin
+                    if (Tnom > 210) begin
+                        rdstemp0 = 1 + PRT_i * T1;
+                        rdstemp1 = 1 + PRT1_i * (T0 - 210) + PRT_i * (210 - Tnom);
+                        if (PRT1_i < PRT_i) begin
+                            T2 = smoothminx(rdstemp0, rdstemp1, 1.0e-2);
+                        end else begin
+                            T2 = minx(rdstemp0, rdstemp1, 1.0e-2);
+                        end
+                    end else begin
+                        rdstemp1 = 1 + PRT1_i * T1;
+                        rdstemp0 = 1 + PRT_i * (T0 - 210) + PRT1_i * (210 - Tnom);
+                        if (PRT1_i < PRT_i) begin
+                            T2 = smoothminx(rdstemp0, rdstemp1, 1.0e-2);
+                        end else begin
+                            T2 = minx(rdstemp0, rdstemp1, 1.0e-2);
+                        end
+                    end
+                end
+            end
+            rdstemp = smoothminx((T2 - 1.0E-6), 1.0E-3, 0.01);
         end
 
         if (CONVMOD != 0) begin
@@ -1349,21 +1646,40 @@ analog begin
         end
 
         AT_i    = AT_i * (1.0 +  Inv_L * ATL);
-        VSAT_t  = VSAT_i * (1.0 + hypsmooth(0.9 - AT_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+        if (CRYOMOD == 0) begin
+            VSAT_t = VSAT_i * (1.0 + hypsmooth(0.9 - AT_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            VSAT1_t = VSAT1_i * (1.0 + hypsmooth(0.9 - AT_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            VSATCV_t = VSATCV_i * (1.0 + hypsmooth(0.9 - AT_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            MEXP_t = hypsmooth(MEXP_i * (1.0 + TMEXP * delTemp) - 2.0, 1.0e-3) + 2.0;
+            dvth_temp0 = (KT1 + KT1L / Leff) * (TRatio - 1.0);
+        end else if (CRYOMOD == 1) begin
+            VSAT_t = VSAT_i * (1.0 + hypsmooth((0.9 - AT_i * delTemp + AT2 * delTemp * delTemp), 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            VSAT1_t = VSAT1_i * (1.0 + hypsmooth((0.9 - AT_i * delTemp + AT2 * delTemp * delTemp), 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            VSATCV_t = VSATCV_i * (1.0 + hypsmooth((0.9 - AT_i * delTemp + AT2 * delTemp * delTemp), 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            MEXP_t = hypsmooth((MEXP_i * (1.0 + TMEXP * delTemp + TMEXP2 * delTemp * delTemp) - 2.0), 1.0e-3) + 2.0;
+            KSATIV_t = KSATIV_i * hypsmooth((1.0 + KSATIVT1 * delTemp + KSATIVT2 * delTemp * delTemp - 1.0e-6), 1.0e-3);
+            PCLM_t = PCLM_i * hypsmooth((1.0 + PCLMT * delTemp - 1.0e-6), 1.0e-3);
+            dvth_temp0 = (KT1 + KT1L / Leff) * (TRatio - 1.0) + KT11 / (1 + lexp(KT12 * (DevTemp - TVTH))) - KT11 / (1 + lexp(KT12 * (Tnom - TVTH)));
+        end else begin
+            VSAT_t = VSAT_i * (1.0 + hypsmooth((0.9 - AT_i * delTemp + AT2 * delTemp1 * delTemp1), 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            VSAT1_t = VSAT1_i * (1.0 + hypsmooth((0.9 - AT_i * delTemp + AT2 * delTemp1 * delTemp1), 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            VSATCV_t = VSATCV_i * (1.0 + hypsmooth((0.9 - AT_i * delTemp + AT2 * delTemp1 * delTemp1), 1.0e-3) - hypsmooth(0.9, 1.0e-3));
+            MEXP_t = hypsmooth((MEXP_i * (1.0 + TMEXP * delTemp + TMEXP2 * delTemp1 * delTemp1) - 2.0), 1.0e-3) + 2.0;
+            KSATIV_t = KSATIV_i * hypsmooth((1.0 + KSATIVT1 * delTemp1 + KSATIVT2 * delTemp1 * delTemp1 - 1.0e-6), 1.0e-3);
+            PCLM_t = PCLM_i * hypsmooth((1.0 + PCLMT * delTemp1 - 1.0e-6), 1.0e-3);
+            T1 = minx(Tnom, 210, 0.2);
+            dvth_temp0 = (KT1 + KT1L / Leff) * (TRatio - 1.0) + KT11 / (1 + lexp(KT12 * (DevTemp1 - TVTH))) - KT11 / (1 + lexp(KT12 * (T1 - TVTH)));
+        end
 
         if (VSAT_t < 1000) begin
             $strobe("Warning: VSAT(%f) = %e is less than 1K, setting it to 1K.", DevTemp, VSAT_t);
             VSAT_t = 1000;
         end
 
-        VSAT1_t = VSAT1_i * (1.0 + hypsmooth(0.9 - AT_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
-
         if (VSAT1_t < 1000) begin
             $strobe("Warning: VSAT1(%f) = %e is less than 1K, setting it to 1K.", DevTemp, VSAT1_t);
             VSAT1_t = 1000;
         end
-
-        VSATCV_t = VSATCV_i * (1.0 + hypsmooth(0.9 - AT_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
 
         if (VSATCV_t < 1000) begin
             $strobe("Warning: VSATCV(%f) = %e is less than 1K, setting it to 1K.", DevTemp, VSATCV_t);
@@ -1373,11 +1689,9 @@ analog begin
         ETA0_t     = ETA0_i * (1.0 + hypmax(TETA0 * delTemp, -0.9, 1.0e-4));
         ATB_i      = ATB_i *(1.0 + Inv_L * ATBL);
         VSATB_t    = VSATB_i * (1.0 + hypsmooth(0.9 - ATB_i * delTemp, 1.0e-3) - hypsmooth(0.9, 1.0e-3));
-        MEXP_t     = hypsmooth(MEXP_i * (1.0 + TMEXP * delTemp) - 2.0, 1.0e-3) + 2.0;
         K0_t       = K0_i + K01_i * delTemp;
         K0SI_t     = K0SI_i + hypmax(K0SI1_i * delTemp, -K0SI_i, 1.0e-6);
         PTWG_t     = PTWG_i * hypsmooth(1.0 - PTWGT_i * delTemp - 1.0e-6, 1.0e-3);
-        dvth_temp0 = (KT1 + KT1L / Leff) * (TRatio - 1.0);
         BETA0_t    = BETA0_i * pow(TRatio, IIT_i);
         BGIDL_t    = BGIDL_i * hypsmooth(1.0 + TGIDL_i * delTemp - 1.0e-6, 1.0e-3);
         BGISL_t    = BGISL_i * hypsmooth(1.0 + TGISL_i * delTemp - 1.0e-6, 1.0e-3);
@@ -1388,31 +1702,6 @@ analog begin
     // *********************************
     // *  Bias Dependent Calculations  *
     // *********************************
-
-    // Load Terminal Voltages
-    vgs_noswap  = devsign * V(gi, si);
-    vds_noswap  = devsign * V(di, si);
-    vgd_noswap  = devsign * V(gi, di);
-    vbgs_noswap = devsign * V(bg, si);
-    vbgd_noswap = devsign * V(bg, di);
-    vgbg        = devsign * V(gi, bg);
-
-    // Source-drain Interchange
-    sigvds = 1.0;
-
-    if (vds_noswap < 0.0) begin
-        sigvds = -1.0;
-        vfgs   = vgd_noswap;
-        vds    = -vds_noswap;
-        vbgs   = vbgd_noswap;
-        vbgd   = vbgs_noswap;
-    end else begin
-        vfgs   = vgs_noswap;
-        vds    = vds_noswap;
-        vbgs   = vbgs_noswap;
-        vbgd   = vbgd_noswap;
-    end
-
 
     vgd_ov_noswap = devsign * V(ge, di);
     vgs_ov_noswap = devsign * V(ge, si);
@@ -1523,7 +1812,11 @@ analog begin
     T1          = csi * cox2 / (csi + cox2);
     T2          = (CDSCD_i + CBGCBGD * vbgxpos) * vdsx;
     T3          = CBGCBG0 * vbgx + CBGCBG0P * vbgx * vbgx + Theta_SCE * (CDSC_i + CBGCBG_i * vbgx + CBGCBGP * vbgx * vbgx + T2);
-    nVtm        = Vtm * (cox1 + T1 + CIT_i + T3) / (cox1 + T1);
+    if (CRYOMOD == 0) begin
+        nVtm        = Vtm * (cox1 + T1 + CIT_i + T3) / (cox1 + T1);
+    end else begin
+        nVtm        = Vtmeff * (cox1 + T1 + CIT_i + T3) / (cox1 + T1);
+    end
 
     // Threshold voltage shift because of body doping; Consistent with Noguchi et al., EDL 2001
     dvth_nbody  = `q * NBODY_i * TSI / cox1 * (1.0 - 0.5 * TSI / (TSI + epsratio * EOT2));
@@ -1531,7 +1824,7 @@ analog begin
     dvth_temp   = dvth_temp0 + T0 * (TRatio - 1.0);
     vgfb2eff    = minx((vgfb1 - 0.2), -1.2 - symmetry_factor,  1.0e-1);
     dvth_vbg    = gamma0 * kvbg * (vgfb2 - (devsign * welsign * bpfactor * vsubdep) - vgfb2eff);
-    dvth_all    = dvth_vtroll + dvth_dibl + dvth_rsce + dvth_dsc + dvth_nbody + dvth_temp + dvth_vbg;
+    dvth_all    = dvth_vtroll + dvth_dibl + dvth_rsce + dvth_dsc + dvth_nbody + dvth_temp + dvth_vbg + dvth_hci;
     vgfb1eff    = vgfb1 - dvth_all + DELVTRAND;
 
     // Threshold voltage operating point
@@ -1543,7 +1836,7 @@ analog begin
     qcoth1 = (1.0 - qsqrt1 / 8.0) / (0.5 - qsqrt1 / 24.0);
     T1     = (1.0 + lln(k1 * k1 * qth * qth + k1 * qth * qcoth1) - lln(A0)) * Vtm;
     Vfb    = PHIG1_i - (EASUB + Eg / 2.0);
-    Vthop  = Vfb + devsign * (T1 + dvth_all + DELVTRAND);
+    Vthop  = Vfb + devsign * (T1 + dvth_all - DELVTRAND);
 
     // *******************************************
     // *  Common Surface Potential Calculations  *
@@ -1571,7 +1864,7 @@ analog begin
         real T2, T3;
         qb0   = 1.0e-2 / cox1;
         T2    = pow(0.5 * (1.0 + abs(qis / qb0)), UCS_t);
-        T3    = (UA_t + vbgs * UC_t) * pow(abs(Eeffs), EU_i) + UD_t / T2;
+        T3 = (UA_t + vbgs * UC_t) * pow(abs(Eeffs), EU_t) + UD_t / T2;
         Dmobs = 1.0 + T3;
         Dmobs = smoothminx(Dmobs, 1.0, DMOBCLAMP);
         Dmobs = Dmobs / U0MULT;
@@ -1598,17 +1891,21 @@ analog begin
 
     Esat  = 2.0 * VSAT_t / u0 * Dmobs;
     EsatL = Esat * Leff;
-    T6    = KSATIV_i * (qis + 2.0 * Vtm * KSUBIV_i);
-
-    if (Rdss == 0.0) begin
-        Vdsat = EsatL * T6 / (EsatL + T6);
+    if (CRYOMOD == 0) begin
+        T6 = KSATIV_i * (qis + 2.0 * Vtm * KSUBIV_i);
     end else begin
+        T6 = KSATIV_t * (qis + 2.0 * Vtmeff * KSUBIV_i);
+    end
+
+    if (Rdss > 0.0) begin
         WVCox = Weff * VSAT_t * cox1;
         T0    = WVCox * Rdss;
         Ta    = 2.0 * T0;
         Tb    = T6 + EsatL + 3.0 * T6 * T0;
         Tc    = T6 * (EsatL + 2.0 * T6 * T0);
         Vdsat = (Tb - sqrt(Tb * Tb - 2.0 * Ta * Tc)) / Ta;
+    end else begin
+        Vdsat = EsatL * T6 / (EsatL + T6);
     end
 
     Vdsat  = hypsmooth(Vdsat - 1.0e-3, 1.0e-5) + 1.0e-3;
@@ -1659,8 +1956,13 @@ analog begin
 
     begin: average_mobility_calc
         real T2, T3;
-        T2   = pow(0.5 * (1.0 + abs(qia / qb0)), UCS_t);
-        T3   = (UA_t + vbgx * UC_t) * pow(abs(Eeffm), EU_i) + (UD_t + vbgx * UDB_i) / T2;
+        if (CRYOMOD == 0) begin
+            T2 = pow(0.5 * (1.0 + abs(qia / qb0)), UCS_t);
+        end else begin
+            T2 = pow(0.5 * (1.0 + abs((UDSeff_t * qis + UDDeff_t * qid) / qb0)), UCS_t);
+        end
+        T3 = (UA_t + vbgx * UC_t) * pow(abs(Eeffm), EU_t) + (UD_t + vbgx * UDB_i) / T2;
+
         Dmob = 1.0 + T3;
         Dmob = smoothminx(Dmob, 1.0, DMOBCLAMP);
         Dmob = Dmob / U0MULT;
@@ -1669,7 +1971,8 @@ analog begin
 
     // Mobility Degradation for C-V
     Eeffm_cv = EeffFactor * (qba + eta_mu_cv * qia);
-    T3       = UA_t * pow(abs(Eeffm_cv), EU_i);
+    T3 = UA_t * pow(abs(Eeffm_cv), EU_t);
+
     Dmob_cv  = 1.0 + T3;
     Dmob_cv  = smoothminx(Dmob_cv, 1.0, DMOBCLAMP);
     Dmob_cv  = Dmob_cv / U0MULT;
@@ -1696,7 +1999,11 @@ analog begin
     end
 
     diffVds  = vds - Vdseff;
-    Vgst2Vtm = qia + 2.0 * Vtm;
+    if (CRYOMOD == 0) begin
+        Vgst2Vtm = qia + 2.0 * Vtm;
+    end else begin
+        Vgst2Vtm = qia + 2.0 * Vtmeff;
+    end
 
     if (DIBLfactor > 0.0) begin
         T1     = Vgst2Vtm;
@@ -1710,9 +2017,17 @@ analog begin
     if (PCLM_i > 0.0) begin
 
         if (PCLMG < 0.0) begin
-            T1 = 1.0 / (1.0 / PCLM_i - PCLMG * qia);
+            if (CRYOMOD == 0) begin
+                T1 = 1.0 / (1.0 / PCLM_i - PCLMG * qia);
+            end else begin
+                T1 = 1.0 / (1.0 / PCLM_t - PCLMG * qia);
+            end
         end else begin
-            T1 = PCLM_i * (1.0 + PCLMG * qia);
+            if (CRYOMOD == 0) begin
+                T1 = PCLM_i * (1.0 + PCLMG * qia);
+            end else begin
+                T1 = PCLM_t * (1.0 + PCLMG * qia);
+            end
         end
 
         Mclm = 1.0 + T1 * lln(1.0 + (vds - Vdseff) / T1 / (Vdsat + EsatL));
@@ -1735,8 +2050,13 @@ analog begin
     Mnud = lexp(-T1);
 
     // I-V Equation
-    ids0        = 0.5 * (qis + qid) * (phifd - phifs) + (qis - qid) * Vtm;
-    ids0_ov_dqi = 0.5 * (qis + qid) + Vtm;
+    if (CRYOMOD == 0) begin
+        ids0        = 0.5 * (qis + qid) * (phifd - phifs) + (qis - qid) * Vtm;
+        ids0_ov_dqi = 0.5 * (qis + qid) + Vtm;
+    end else begin
+        ids0        = 0.5 * (qis + qid) * (phifd - phifs) + (qis - qid) * Vtmeff;
+        ids0_ov_dqi = 0.5 * (qis + qid) + Vtmeff;
+    end
 
     // S/D series resistance
     begin: rdsblock
@@ -1774,27 +2094,23 @@ analog begin
                 Rdrain  = rdstemp * (RDrainGeo + (RDWMIN_i + RDW_i * T0) * WeffWRFactor) + RDC0_t;
             end
         end else begin
-            // RDSMOD = 0: Bias-dependent S/D resistances are internal and bias-independent S/D resistances are external
             T4      = 1.0 + PRWG_i * qia;
             T1      = 1.0 / T4;
             T1      = T1 - 0.5 * (vbgd + vbgs) * PRWB_i;
             T0      = 0.5 * (T1 + sqrt(T1 * T1 + 0.01));
-            Rdsi    = rdstemp * (RDSWMIN_i + RDSW_i * T0) * WeffWRFactor;
-            Dr      = 1.0 + NF * beta * ids0_ov_dqi / (Dmob * Dvsat) * Rdsi;
-            // SWITCH is added for backward compatibility of v102.9.3beta1 with standard v102.9.2
-            if (CONVMOD==0) begin
-                Rdrain  = RDrainGeo;
-                Rsource = RSourceGeo;
+            if (RDSMOD == 0) begin
+                // RDSMOD = 0: Bias-dependent S/D resistances are internal and bias-independent S/D resistances are external
+                Rdsi    = rdstemp * (RDSWMIN_i + RDSW_i * T0) * WeffWRFactor;
+                // SWITCH is added for backward compatibility of v102.9.3beta1 with standard v102.9.2
+                if (CONVMOD==0) begin
+                    Rdrain  = RDrainGeo;
+                    Rsource = RSourceGeo;
+                end else begin
+                    Rdrain  = rdstemp * RDrainGeo  + RDC0_t;
+                    Rsource = rdstemp * RSourceGeo + RSC0_t;
+                end
             end else begin
-                Rdrain  = rdstemp * RDrainGeo  + RDC0_t;
-                Rsource = rdstemp * RSourceGeo + RSC0_t;
-            end
-            // RDSMOD = 2: Both bias-dependent and independent of S/D resistances are internal
-            if (RDSMOD == 2) begin
-                T4      = 1.0 + PRWG_i * qia;
-                T1      = 1.0 / T4;
-                T1      = T1 - 0.5 * (vbgd + vbgs) * PRWB_i;
-                T0      = 0.5 * (T1 + sqrt(T1 * T1 + 0.01));
+                // RDSMOD = 2: Both bias-dependent and independent of S/D resistances are internal
                 // SWITCH is added for backward compatibility of v102.9.3beta1 with standard v102.9.2
                 if (CONVMOD==0) begin
                     Rdsi    = rdstemp * (RSourceGeo + RDrainGeo + RDSWMIN_i + RDSW_i * T0) * WeffWRFactor;
@@ -1805,15 +2121,20 @@ analog begin
                     Rdrain  = 0;
                     Rsource = 0;
                 end
-                Dr = 1.0 + NF * beta * ids0_ov_dqi / (Dmob * Dvsat) * Rdsi;
             end
+            Dr      = 1.0 + NF * beta * ids0_ov_dqi / (Dmob * Dvsat) * Rdsi;
         end
 
     end
 
     ids = beta * ids0 * Moc * Mnud / (Dmob * Dvsat * Dr);
-    ids = NF * ids;
+    ids = NF * ids * IDS0MULT;
 
+    if (IDS0MULTMOD != 0) begin
+        ids0mult_r_factor = IDS0MULT;
+    end else begin
+        ids0mult_r_factor = 1;
+    end
 
     // C-V Equation
     T0  = cox2 / cox1 * csi / (cox2 + csi);
@@ -2130,14 +2451,124 @@ analog begin
     qfgs_parasitic = NF * qfgs_parasitic;
     qfgd_parasitic = NF * qfgd_parasitic;
 
-    // Thermal noise
-    // Charge-based model (BSIM4: TNOIMOD = 0)
-    qinv  = -(qsi + qdi);
-    T0    = ueff * qinv;
-    T1    = T0 * Rdsi + Leff * Leff;
-    Gtnoi = (T0 / T1) * NTNOI;
-    Nt    = 4.0 * Vtm * `q;
-    sid   = Nt * Gtnoi;
+    rc = 2.0 * cox1 / csi;
+    q0 = 10.0 * nVtm / rc + 2.0 * qbs;
+
+    ctnoi = 1;
+    sid = 1;
+    sigrat = 1;
+    Nt = 4.0 * Vtm * `q;
+    case (TNOIMOD)
+        // Charge-based thermal noise model, Ref: BSIM4
+        0: begin
+            qinv  = abs(qsi + qdi);
+            T0    = ueff * qinv;
+            T1    = T0 * Rdsi + Leff * Leff;
+            Gtnoi = (T0 / T1) * NTNOI;
+            sid   = Nt * Gtnoi;
+        end
+        // Correlated thermal noise model, Ref: Chap. 6 of Darsen Lu's Ph.D. thesis
+        1: begin
+            T0 = qia / EsatL;
+            T0 = T0 * T0;
+            // Empirical parameters for short-channel excess noise
+            noiBeta  = RNOIA * (1.0 + T0 * TNOIA * Leff);
+            noiTheta = RNOIB * (1.0 + T0 * TNOIB * Leff);
+            noiCorr  = RNOIC * (1.0 + T0 * TNOIC * Leff);
+            noiLowId = RNOIK * (1.0 + T0 * TNOIK * Leff);
+            // T1, T2, T3 are all 1.0 by default
+            T1 = 3.0 * noiBeta * noiBeta;
+            T2 = 7.5 * noiTheta * noiTheta;
+            T3 = 2.5298 * noiCorr;
+            // Theoretical equations
+            noiEta = (qid / qis) * (1.0 - Vdseff / Vdsat);
+            Dvsat3 = Dvsat * Dvsat * Dvsat;
+            noiWI  = q0 / (q0 + qia);
+            // Mnud at Vds = 0
+
+            T4    = K0_t / (max(0.0, K0SI_t) * qis + 2.0 * nVtm);
+            Mnud0 = lexp(-T4);
+            Mob0  = 1.0;
+            // Dmob at Vds = 0
+            Eeffm0 = EeffFactor * (qba + eta_mu * qis);
+            T4 = pow(0.5 * (1.0 + abs(qis / qb0)), UCS_t);
+            T5 = UA_t * pow(abs(Eeffm0), EU_t) + UD_t / T4;
+            Dmob0 = 1.0 + T5;
+            Dmob0 = smoothminx(Dmob0, 1.0, DMOBCLAMP);
+            Dmob0 = Dmob0 / U0MULT;
+            // Dvsat at Vds = 0
+            Dvsat0 = 1.0 + 0.25 * DVSATCLAMP;
+            // ids0_ov_dqi at Vds = 0
+            etaiv0 = q0 / (q0 + qis);
+            T4 = (2.0 - etaiv0) * nVtm;
+            ids0_ov_dqi0 = qis + T4;
+            // Dr at Vds = 0
+            case (RDSMOD)
+                0: begin
+                    T4 = 1.0 + PRWG_i * qis;
+                    T5 = 1.0 / T4;
+                    T5 = T5 - 0.5 * (vbgd + vbgs) * PRWB_i;
+                    T6 = 0.5 * (T5 + sqrt(T5 * T5 + 0.01));
+                    Rdsi0 = rdstemp * (RDSWMIN_i + RDSW_i * T6) * WeffWRFactor;
+                    Dr0 = 1.0 + NF * beta * ids0_ov_dqi0 / (Dmob0 * Dvsat0) * Rdsi0;
+                end
+                1: begin
+                    Dr0 = 1.0;
+                end
+                2: begin
+                    T4 = 1.0 + PRWG_i * qis;
+                    T5 = 1.0 / T4;
+                    T5 = T5 - 0.5 * (vbgd + vbgs) * PRWB_i;
+                    T6 = 0.5 * (T5 + sqrt(T5 * T5 + 0.01));
+                    Rdsi0 = rdstemp * ((RDSWMIN_i + RDSW_i * T6) * WeffWRFactor + RSourceGeo + RDrainGeo) + RDC0_t + RSC0_t;
+                    Dr0 = 1.0 + NF * beta * ids0_ov_dqi0 / (Dmob0 * Dvsat0) * Rdsi0;
+                end
+            endcase
+            // Gds at Vds = 0, Moc will always be 1.0 at Vds = 0
+            noiGd0 = NF * beta * qis * Mnud0 * Mob0 / (Dmob0 * Dvsat0 * Dr0);
+            T4 = 1.0 + noiEta;
+            T5 = 1.0 - noiEta;
+            T6 = (2.0 * noiWI) / qis * nVtm;
+            T7 = T4 + T6;
+            T5_2 = T5 * T5;
+            T5_3 = T5_2 * T5;
+            T5_4 = T5_3 * T5;
+            T7_2 = T7 * T7;
+            T7_3 = T7_2 * T7;
+            T7_4 = T7_3 * T7;
+            T7_5 = T7_4 * T7;
+            // Theoretical Sid for long-channel devices
+            gamma1 = 0.5 * T4;
+            gamma2 = T5_2 / (6.0 * T7);
+            gamma = (Moc / Dvsat) * (gamma1 + gamma2);
+            // Theoretical Sig for long-channel devices
+            delta1 = T4 / T7_2;
+            delta2 = (6.0 * T4 + T6) * T5_2 / (15.0 * T7_4);
+            delta3 = T5_4 / (9.0 * T7_5);
+            delta = (Moc / 6.0) * Dvsat3 * (delta1 - delta2 + delta3);
+            // Theoretical correlated noise between Sid and Sig for long-channel devices
+            epsilon1 = T5 / T7;
+            epsilon2 = T5_3 / (3.0 * T7_3);
+            epsilon = (Moc / 6.0) * Dvsat * (epsilon1 - epsilon2);
+            // Empirical tuning of correlation coefficient between Sid and Sig by T3
+            // ctnoi = 1: fully correlated; ctnoi = 0: uncorrelated
+            ctnoi = T3 * epsilon / sqrt(gamma * delta);
+            if (ctnoi > 1.0) begin
+                ctnoi = 1.0;
+            end else if (ctnoi < 0.0) begin
+                ctnoi = 0.0;
+            end
+            // Empirical tuning of Sid, T1: saturation region, T8: subthreshold and linear region
+            T8 = 1.0 + noiLowId * noiLowId / (TNOIK2 + qia) * (Vdseff / Vdsat);
+            gamma = (Moc / Dvsat) * (T8 * gamma1 + T1 * gamma2);
+            // Sid level
+            sid = Nt * gamma * noiGd0;
+            // Empirical tuning of Sig by T2, RNOIB = 0 turns Sig off
+            delta = (Moc / 6.0) * Dvsat3 * T2 * (delta1 - delta2 + delta3);
+            // Sig ratio to Sid
+            sigrat = sqrt(delta / gamma) * NF * coxeff * WeffCV * LeffCV / noiGd0;
+        end
+    endcase
 
     // NQS gate resistance Ref: BSIM4
 
@@ -2160,20 +2591,40 @@ analog begin
 
     if (sigvds > 0.0) begin
         I(di, si) <+ devsign * ids + ($simparam("gmin", 0) * V(di, si));
-        I(di, si) <+ devsign * (igidl + Iii);
-        I(si, di) <+ devsign * igisl;
-        I(gi, si) <+ devsign * (igcs + igs);
-        I(gi, di) <+ devsign * (igcd + igd);
+        if (IDS0MULTMOD != 0) begin
+            I(di, si) <+ devsign * (IDS0MULT * igidl + Iii);
+            I(si, di) <+ devsign * IDS0MULT * igisl;
+            I(gi, si) <+ devsign * IDS0MULT * (igcs + igs);
+            I(gi, di) <+ devsign * IDS0MULT * (igcd + igd);
+        end else begin
+            I(di, si) <+ devsign * (igidl + Iii);
+            I(si, di) <+ devsign * igisl;
+            I(gi, si) <+ devsign * (igcs + igs);
+            I(gi, di) <+ devsign * (igcd + igd);
+        end
     end else begin
         I(si, di) <+ devsign * ids + ($simparam("gmin", 0) * V(si, di));
-        I(si, di) <+ devsign * (igidl + Iii);
-        I(di, si) <+ devsign * igisl;
-        I(gi, di) <+ devsign * (igcs + igs);
-        I(gi, si) <+ devsign * (igcd + igd);
+        if (IDS0MULTMOD != 0) begin
+            I(si, di) <+ devsign * (IDS0MULT * igidl + Iii);
+            I(di, si) <+ devsign * IDS0MULT * igisl;
+            I(gi, di) <+ devsign * IDS0MULT * (igcs + igs);
+            I(gi, si) <+ devsign * IDS0MULT * (igcd + igd);
+        end else begin
+            I(si, di) <+ devsign * (igidl + Iii);
+            I(di, si) <+ devsign * igisl;
+            I(gi, di) <+ devsign * (igcs + igs);
+            I(gi, si) <+ devsign * (igcd + igd);
+        end
     end
 
-    I(gi, si)  <+ devsign * igbs;
-    I(gi, di)  <+ devsign * igbd;
+    if (IDS0MULTMOD != 0) begin
+        I(gi, si)  <+ devsign * IDS0MULT * igbs;
+        I(gi, di)  <+ devsign * IDS0MULT * igbd;
+    end else begin
+        I(gi, si)  <+ devsign * igbs;
+        I(gi, di)  <+ devsign * igbd;
+    end
+
     I(di, si)  <+ devsign * ddt(qdi);
     I(gi, si)  <+ ddt(qfgi);
     I(bg, si)  <+ devsign * ddt(qbgi);
@@ -2183,16 +2634,16 @@ analog begin
     I(si, bg)  <+ ddt(Qsbg) * devsign;
     I(di, bg)  <+ ddt(Qdbg) * devsign;
 
-    if (RDSMOD != 2 && (CONVMOD == 0 || RDrainGeo > 0 || RDC0 > 0)) begin
-        gdpr = 1.0 / Rdrain;
+    if (RDSMOD != 2 && (CONVMOD == 0 || RDrainGeo > 0 || RDC0 > 0 || (RDSMOD == 1 && (RDW_i > 0 || RDWMIN_i > 0)))) begin
+        gdpr = ids0mult_r_factor / Rdrain;
         I(d, di) <+ V(d, di) * gdpr;
         I(d, di) <+ white_noise(Nt * gdpr, "Rd");
     end else begin
         V(d, di) <+ 0.0;
     end
 
-    if (RDSMOD != 2 && (CONVMOD == 0 || RSourceGeo > 0 || RSC0 > 0)) begin
-        gspr = 1.0 / Rsource;
+    if (RDSMOD != 2 && (CONVMOD == 0 || RSourceGeo > 0 || RSC0 > 0 || (RDSMOD == 1 && (RSW_i > 0 || RSWMIN_i > 0)))) begin
+        gspr = ids0mult_r_factor / Rsource;
         I(s, si) <+ V(s, si) * gspr;
         I(s, si) <+ white_noise(Nt * gspr, "Rs");
     end else begin
@@ -2221,9 +2672,20 @@ analog begin
     // Flicker Noise
     I(di,si) <+ flicker_noise(sigvds * FNPowerAt1Hz, EF, "flicker");
 
-    // Channel thermal noise and induced gate noise stamping
-    // Implementation of correlated noise follows C. C. McAndrew, WCM 2005
-    I(di, si) <+ white_noise(sid, "Id");
+    // Channel thermal noise and induced gate noise stamping (TNOIMOD from BSIM-CMG)
+    if (TNOIMOD == 0) begin
+        I(di, si) <+ white_noise(sid, "Id");
+        V(n) <+ 0.0;
+    end else begin
+        // Additional node for correlated noise
+        I(n) <+ V(n);
+        I(n) <+ white_noise(sid, "corl");
+        I(di, si) <+ white_noise(sid * (1.0 - ctnoi * ctnoi), "Id");
+        I(di, si) <+ ctnoi * V(n);
+        // Correlated Sig noise to S/D through capacitive coupling
+        I(gi, si) <+ ddt(0.7071 * sigrat * V(n));
+        I(gi, di) <+ ddt(0.7071 * sigrat * V(n));
+    end
 
     // Gate current shot noise
     if (IGCMOD != 0) begin
@@ -2241,23 +2703,19 @@ analog begin
         I(gi, di) <+ white_noise(2.0 * `q * abs(igbd), "Igb");
     end
 
+    if (IDS0MULTMOD == 2) begin
+        gdpr_sh = gdpr / IDS0MULT;
+        gspr_sh = gspr / IDS0MULT;
+        ids_sh  = (ids + Iii)/ IDS0MULT;
+    end else begin
+        gdpr_sh = gdpr;
+        gspr_sh = gspr;
+        ids_sh  = ids + Iii;
+    end
+
     // Self-heating
     if (SHMOD != 0 && RTH0 > 0.0) begin
-        if (RDSMOD != 2) begin
-            if (CONVMOD == 0) begin
-                Pwr(ith_branch) <+ -(devsign * sigvds * V(di, si) * ids + V(d, di) * V(d, di) * gdpr + V(s, si) * V(s, si) * gspr);
-            end else begin
-                if (RDrainGeo > 0.0 || RDC0 > 0.0) begin
-                    Pwr(ith_branch) <+ -V(d, di) * V(d, di) * gdpr;
-                end
-                if (RSourceGeo > 0.0 || RSC0 > 0.0) begin
-                    Pwr(ith_branch) <+ -V(s, si) * V(s, si) * gspr;
-                end
-                Pwr(ith_branch) <+ -(devsign * sigvds * V(di, si) * ids);
-            end
-        end else begin
-            Pwr(ith_branch) <+ -(devsign * sigvds * V(di, si) * ids);
-        end
+        Pwr(ith_branch) <+ -(devsign * sigvds * V(di, si) * ids_sh + V(d, di) * V(d, di) * gdpr_sh + V(s, si) * V(s, si) * gspr_sh);
         Pwr(rth_branch) <+ Temp(rth_branch) * gth;
         Pwr(rth_branch) <+ ddt(Temp(rth_branch) * cth);
     end else begin
@@ -2268,7 +2726,9 @@ analog begin
     IDS = devsign * sigvds * ids;
 
     // Drain-source saturation voltage
-    VDSSAT = Vdsat;
+    Lterm0 = 0.15 * (Lnew - 10e-9) / 10e-9 + 1.12;
+    Lterm  = Lterm0 / pow(1 + pow(Lterm0 / 1.45, 3), 0.33);
+    VDSSAT = devsign * Vdsat * Lterm / pow(1 + pow(Vdsat / 0.5, 1.8), 1 / 1.8);
 
     // Threshold voltage
     VTH = Vthop;
@@ -2314,8 +2774,8 @@ analog begin
         ID = IDS - devsign * (igd + igcd + igbd) + devsign * (Iii + igidl - igisl);
         IS = -IDS - devsign * (igs + igcs + igbs) + devsign* (igisl - igidl);
     end else begin
-        ID = -IDS - devsign * (igs + igcs + igbd) + devsign * (igisl - igidl);
-        IS = IDS - devsign * (igd + igcd + igbs) + devsign * (Iii + igidl - igisl);
+        ID = IDS - devsign * (igs + igcs + igbd) + devsign * (igisl - igidl);
+        IS = -IDS - devsign * (igd + igcd + igbs) + devsign * (Iii + igidl - igisl);
     end
 
     // Total Gate Current
@@ -2390,5 +2850,8 @@ analog begin
     T_TOTAL_K  = DevTemp;
     T_TOTAL_C  = DevTemp - `P_CELSIUS0;
     T_DELTA_SH = Temp(t);
+
+    //Power dissipation
+    PDISS = devsign * sigvds * V(di, si) * (ids + Iii) + V(d, di) * V(d, di) * gdpr + V(s, si) * V(s, si) * gspr;
 
 end

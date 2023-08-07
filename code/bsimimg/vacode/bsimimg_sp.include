@@ -1,27 +1,28 @@
 // ****************************************************************************
-// *  BSIM-IMG 102.9.4 released by Girish Pahwa on 09/24/2020                 *
+// *  BSIM-IMG 102.9.6 released on 08/24/2022                                 *
 // *  BSIM Independent Multi-Gate Model (Verilog-A)                           *
 // ****************************************************************************
 
 // ****************************************************************************
-// *  Copyright (c) 2020 University of California                             *
+// *  Copyright © 2022 University of California                               *
 // *                                                                          *
 // *  Project director: Prof. Chenming Hu                                     *
 // *                                                                          *
-// *  Current developers: Girish Pahwa (Postdoc, UC Berkeley)                 *
-// *                      Avirup Dasgupta (Postdoc, UC Berkeley)              *
-// *                      Ming-Yen Kao (Ph.D., UC Berkeley)                   *
+// *  Current developers: Girish Pahwa (Assistant Researcher, UC Berkeley)    *
+// *                      Dinesh Rajasekharan (Postdoc, UC Berkeley)          *
+// *                      Chetan Kumar Dabhi (Postdoc, UC Berkeley)           *
+// *                      Chien-Ting Tung (Ph.D., UC Berkeley)                *
 // ****************************************************************************
 
 /*
 Licensed under Educational Community License, Version 2.0 (the "License"); you may
-not use this file except in compliance with the License. You may obtain a copy of the license at
+not use this file except in compliance with the License and in compliance with US export control laws. You may obtain a copy of the license at
 http://opensource.org/licenses/ECL-2.0
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations
 under the License.
 
-BSIM-IMG model is supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
+BSIM-IMG model is partially supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
 standard can be found at: http://www.si2.org/cmc
 */
 
@@ -80,23 +81,41 @@ standard can be found at: http://www.si2.org/cmc
         veff  = vgfb1eff / nVtm; \
         f     = vch * invnVtm; \
         flag_loop  = 0; \
-        max_itr_NR = 4; \
         N_err      = 1e-9; \
         GZP1       = GZP; \
         \
-        for (j = 0; j <= max_itr_NR && flag_loop == 0; j = j + 1) begin \
-            T0   = (veff - GZP) / gsp; \
-            T1   = sqrt(b2sp) * (spb - GZP); \
-            x1   = lexp(GZP - f); \
-            fg0  = T0 * T0 - T1 * T1 - x1; \
-            dfg0 = (-2.0 / gsp) * T0 + 2.0 * sqrt(b2sp) * T1 - x1; \
-            dfg2 = (2.0 / (gsp * gsp)) - 2.0 * b2sp - 0.1 * x1; \
-            GZP1 = GZP - 2.0 * fg0 * dfg0 / (2.0 * dfg0 * dfg0 - fg0 * dfg2); \
-            \
-            if (abs(GZP - GZP1) <= N_err) begin \
-                flag_loop = 1; \
-            end else begin \
-                GZP = GZP1; \
+        if (CRYOMOD == 0) begin \
+            max_itr_NR = 4; \
+            for (j = 0; j <= max_itr_NR && flag_loop == 0; j = j + 1) begin \
+                T0   = (veff - GZP) / gsp; \
+                T1   = sqrt(b2sp) * (spb - GZP); \
+                x1   = lexp(GZP - f); \
+                fg0  = T0 * T0 - T1 * T1 - x1; \
+                dfg0 = (-2.0 / gsp) * T0 + 2.0 * sqrt(b2sp) * T1 - x1; \
+                dfg2 = (2.0 / (gsp * gsp)) - 2.0 * b2sp - 0.1 * x1; \
+                GZP1 = GZP - 2.0 * fg0 * dfg0 / (2.0 * dfg0 * dfg0 - fg0 * dfg2); \
+                \
+                if (abs(GZP - GZP1) <= N_err) begin \
+                    flag_loop = 1; \
+                end else begin \
+                    GZP = GZP1; \
+                end \
+            end \
+        end else begin \
+            max_itr_NR = 9; \
+            for (j = 0; j <= max_itr_NR && flag_loop == 0; j = j + 1) begin \
+                T0   = (veff - GZP) / gsp; \
+                T1   = sqrt(b2sp) * (spb - GZP); \
+                x1   = lexp(GZP - f); \
+                fg0  = T0 * T0 - T1 * T1 - x1; \
+                dfg0 = (-2.0 / gsp) * T0 + 2.0 * sqrt(b2sp) * T1 - x1; \
+                GZP1 = GZP - fg0 / dfg0; \
+                \
+                if (abs(GZP - GZP1) <= N_err) begin \
+                    flag_loop = 1; \
+                end else begin \
+                    GZP = GZP1; \
+                end \
             end \
         end \
         \
@@ -111,7 +130,13 @@ standard can be found at: http://www.si2.org/cmc
             es2  = (phif1 - phib1) / TSI; \
             eb   = es2; \
             T0   = 0.5 * (phif2 - phib2) + 0.5 * sqrt((phif2 - phib2) * (phif2 - phib2) + 0.000004); \
-            qtot = (2.0 * `q * Nc / (es1 + es2)) * nVtm * lexp(phib2 - f) * (lexp(T0) - 1.0); \
+            \
+            if (CRYOMOD == 0) begin \
+                qtot = (2.0 * `q * Nc / (es1 + es2)) * nVtm * lexp(phib2 - f) * (lexp(T0) - 1.0); \
+            end else begin \
+                qtot = (2.0 * `q * Nc / (es1 + es2)) * nVtm * (lexp(phib2 - f + T0) - lexp(phib2 - f)); \
+            end \
+            \
         end else begin \
             /* CHARGE CALCULATION AS IN 101.0 (DARSEN'S MODEL)*/ \
             phis1    = phif1; \

@@ -1,10 +1,7 @@
-The BSIM-IMG standard has been supported by the members of Silicon Integration Initiative's Compact Model Coalition. 
+The BSIM-IMG standard has been partially supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this standard can be found at:http://www.si2.org
 
-CMC Release Date: September 24, 2020
-Public Release Date: March 24, 2022
-
-A link to the most recent version of this standard can be found at:
-http://www.si2.org/cmc 
+CMC Release Date: August 24, 2022
+Public Release Date: July 01, 2023
 
 
 

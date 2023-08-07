@@ -1,27 +1,28 @@
 // ****************************************************************************
-// *  BSIM-IMG 102.9.4 released by Girish Pahwa on 09/24/2020                 *
+// *  BSIM-IMG 102.9.6 released on 08/24/2022                                 *
 // *  BSIM Independent Multi-Gate Model (Verilog-A)                           *
 // ****************************************************************************
 
 // ****************************************************************************
-// *  Copyright (c) 2020 University of California                             *
+// *  Copyright © 2022 University of California                               *
 // *                                                                          *
 // *  Project director: Prof. Chenming Hu                                     *
 // *                                                                          *
-// *  Current developers: Girish Pahwa (Postdoc, UC Berkeley)                 *
-// *                      Avirup Dasgupta (Postdoc, UC Berkeley)              *
-// *                      Ming-Yen Kao (Ph.D., UC Berkeley)                   *
+// *  Current developers: Girish Pahwa (Assistant Researcher, UC Berkeley)    *
+// *                      Dinesh Rajasekharan (Postdoc, UC Berkeley)          *
+// *                      Chetan Kumar Dabhi (Postdoc, UC Berkeley)           *
+// *                      Chien-Ting Tung (Ph.D., UC Berkeley)                *
 // ****************************************************************************
 
 /*
 Licensed under Educational Community License, Version 2.0 (the "License"); you may
-not use this file except in compliance with the License. You may obtain a copy of the license at
+not use this file except in compliance with the License and in compliance with US export control laws. You may obtain a copy of the license at
 http://opensource.org/licenses/ECL-2.0
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations
 under the License.
 
-BSIM-IMG model is supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
+BSIM-IMG model is partially supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
 standard can be found at: http://www.si2.org/cmc
 */
 
@@ -247,6 +248,22 @@ standard can be found at: http://www.si2.org/cmc
 `MPRnb( WUCS,           0.0,            "m",                            "W-term of UCS" )
 `MPRnb( PUCS,           0.0,            "m^2",                          "P-term of UCS" )
 
+`MPRnb( LUDS           ,0.0             ,"m",                           "L-term of UDS")
+`MPRnb( WUDS           ,0.0             ,"m",                           "W-term of UDS")
+`MPRnb( PUDS           ,0.0             ,"m^2",                         "P-term of UDS")
+
+`MPRnb( LUDS1          ,0.0             ,"m",                           "L-term of UDS1")
+`MPRnb( WUDS1          ,0.0             ,"m",                           "W-term of UDS1")
+`MPRnb( PUDS1          ,0.0             ,"m^2",                         "P-term of UDS1")
+
+`MPRnb( LUDD           ,0.0             ,"m",                           "L-term of UDD")
+`MPRnb( WUDD           ,0.0             ,"m",                           "W-term of UDD")
+`MPRnb( PUDD           ,0.0             ,"m^2",                         "P-term of UDD")
+
+`MPRnb( LUDD1          ,0.0             ,"m",                           "L-term of UDD1")
+`MPRnb( WUDD1          ,0.0             ,"m",                           "W-term of UDD1")
+`MPRnb( PUDD1          ,0.0             ,"m^2",                         "P-term of UDD1")
+
 `MPRnb( LEU,            0.0,            "m^2/MV",                       "L-term of EU" )
 `MPRnb( WEU,            0.0,            "m^2/MV",                       "W-term of EU" )
 `MPRnb( PEU,            0.0,            "m^3/MV",                       "P-term of EU" )
@@ -259,21 +276,41 @@ standard can be found at: http://www.si2.org/cmc
 `MPRnb( WUTE,           0.0,            "m",                            "W-term of UTE" )
 `MPRnb( PUTE,           0.0,            "m^2",                          "P-term of UTE" )
 
+`MPRnb( LUTE1,          0.0,            "m",                            "L-term of UTE1" )
+`MPRnb( WUTE1,          0.0,            "m",                            "W-term of UTE1" )
+`MPRnb( PUTE1,          0.0,            "m^2",                          "P-term of UTE1" )
+
 `MPRnb( LUA1,           0.0,            "m",                            "L-term of UA1" )
 `MPRnb( WUA1,           0.0,            "m",                            "W-term of UA1" )
 `MPRnb( PUA1,           0.0,            "m^2",                          "P-term of UA1" )
+
+`MPRnb( LUA2,           0.0,            "m",                            "L-term of UA2" )
+`MPRnb( WUA2,           0.0,            "m",                            "W-term of UA2" )
+`MPRnb( PUA2,           0.0,            "m^2",                          "P-term of UA2" )
 
 `MPRnb( LUD1,           0.0,            "m",                            "L-term of UD1" )
 `MPRnb( WUD1,           0.0,            "m",                            "W-term of UD1" )
 `MPRnb( PUD1,           0.0,            "m^2",                          "P-term of UD1" )
 
+`MPRnb( LUD2,           0.0,            "m",                            "L-term of UD2" )
+`MPRnb( WUD2,           0.0,            "m",                            "W-term of UD2" )
+`MPRnb( PUD2,           0.0,            "m^2",                          "P-term of UD2" )
+
 `MPRnb( LUCSTE,         0.0,            "m",                            "L-term of UCSTE" )
 `MPRnb( WUCSTE,         0.0,            "m",                            "W-term of UCSTE" )
 `MPRnb( PUCSTE,         0.0,            "m^2",                          "P-term of UCSTE" )
 
+`MPRnb( LUCSTE1,        0.0,            "m",                            "L-term of UCSTE1" )
+`MPRnb( WUCSTE1,        0.0,            "m",                            "W-term of UCSTE1" )
+`MPRnb( PUCSTE1,        0.0,            "m^2",                          "P-term of UCSTE1" )
+
 `MPRnb( LETAMOB,        0.0,            "",                             "L-term of ETAMOB" )
 `MPRnb( WETAMOB,        0.0,            "",                             "W-term of ETAMOB" )
 `MPRnb( PETAMOB,        0.0,            "",                             "P-term of ETAMOB" )
+
+`MPRnb( LEU1,           0.0,            "m^2/MV",                       "L-term of EU1" )
+`MPRnb( WEU1,           0.0,            "m^2/MV",                       "W-term of EU1" )
+`MPRnb( PEU1,           0.0,            "m^3/MV",                       "P-term of EU1" )
 
 `MPRnb( LAT,            0.0,            "m/K",                          "L-term of AT" )
 `MPRnb( WAT,            0.0,            "m/K",                          "W-term of AT" )
@@ -286,6 +323,18 @@ standard can be found at: http://www.si2.org/cmc
 `MPRnb( LPRT,           0.0,            "m/K",                          "L-term of PRT" )
 `MPRnb( WPRT,           0.0,            "m/K",                          "W-term of PRT" )
 `MPRnb( PPRT,           0.0,            "(m^2)/K",                      "P-term of PRT" )
+
+`MPRnb( LPRT1,          0.0,            "m/K",                          "L-term of PRT1" )
+`MPRnb( WPRT1,          0.0,            "m/K",                          "W-term of PRT1" )
+`MPRnb( PPRT1,          0.0,            "(m^2)/K",                      "P-term of PRT1" )
+
+`MPRnb( LTR0,          0.0,            "m*K",                          "L-term of TR0" )
+`MPRnb( WTR0,          0.0,            "m*K",                          "W-term of TR0" )
+`MPRnb( PTR0,          0.0,            "(m^2)*K",                      "P-term of TR0" )
+
+`MPRnb( LSPRT,          0.0,            "m/K",                          "L-term of SPRT" )
+`MPRnb( WSPRT,          0.0,            "m/K",                          "W-term of SPRT" )
+`MPRnb( PSPRT,          0.0,            "(m^2)/K",                      "P-term of SPRT" )
 
 `MPRnb( LIIT,           0.0,            "m",                            "L-term of IIT" )
 `MPRnb( WIIT,           0.0,            "m",                            "W-term of IIT" )
@@ -429,7 +478,7 @@ standard can be found at: http://www.si2.org/cmc
 
 `MPRnb( LCIGD,          LCIGS,          "m/V",                          "L-term of CIGD" )
 `MPRnb( WCIGD,          WCIGS,          "m/V",                          "W-term of CIGD" )
-`MPRnb( PCIGD,          PCIGS,          "m/V",                          "P-term of CIGD" )
+`MPRnb( PCIGD,          PCIGS,          "(m^2)/V",                      "P-term of CIGD" )
 
 `MPRnb( LDIGS,          0.0,            "m/V",                          "L-term of DIGS" )
 `MPRnb( WDIGS,          0.0,            "m/V",                          "W-term of DIGS" )

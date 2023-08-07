@@ -1,27 +1,28 @@
 // ****************************************************************************
-// *  BSIM-IMG 102.9.4 released by Girish Pahwa on 08/24/2020                 *
+// *  BSIM-IMG 102.9.6 released on 08/24/2022                                 *
 // *  BSIM Independent Multi-Gate Model (Verilog-A)                           *
 // ****************************************************************************
 
 // ****************************************************************************
-// *  Copyright (c) 2020 University of California                             *
+// *  Copyright © 2022 University of California                               *
 // *                                                                          *
 // *  Project director: Prof. Chenming Hu                                     *
 // *                                                                          *
-// *  Current developers: Girish Pahwa (Postdoc, UC Berkeley)                 *
-// *                      Avirup Dasgupta (Postdoc, UC Berkeley)              *
-// *                      Ming-Yen Kao (Ph.D., UC Berkeley)                   *
+// *  Current developers: Girish Pahwa (Assistant Researcher, UC Berkeley)    *
+// *                      Dinesh Rajasekharan (Postdoc, UC Berkeley)          *
+// *                      Chetan Kumar Dabhi (Postdoc, UC Berkeley)           *
+// *                      Chien-Ting Tung (Ph.D., UC Berkeley)                *
 // ****************************************************************************
 
 /*
 Licensed under Educational Community License, Version 2.0 (the "License"); you may
-not use this file except in compliance with the License. You may obtain a copy of the license at
+not use this file except in compliance with the License and in compliance with US export control laws. You may obtain a copy of the license at
 http://opensource.org/licenses/ECL-2.0
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations
 under the License.
 
-BSIM-IMG model is supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
+BSIM-IMG model is partially supported by the members of Silicon Integration Initiative's Compact Model Coalition. A link to the most recent version of this
 standard can be found at: http://www.si2.org/cmc
 */
 
@@ -55,7 +56,7 @@ standard can be found at: http://www.si2.org/cmc
 
 module bsimimg(d, fg, s, bg, t);
     inout d, fg, s, bg, t;
-    electrical d, fg, s, bg, di, si, gi, ge;
+    electrical d, fg, s, bg, di, si, gi, ge, n;
     thermal t;
     branch (t) rth_branch;
     branch (t) ith_branch;
