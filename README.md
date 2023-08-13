@@ -18,7 +18,7 @@ All models are checked for syntax belong Verilog-AMS Language Reference Manual V
 The models are modified mostly for convergence improvements. Equations are untouched.
 So few parameter limits are changed to prevent division by zero and especially bipolar models lacks suitable limit function to prevent divergence in Newton-Raphson iteration process. Changes are noticed in Changelog.
 
-At the moment this code modifications are adapted to NGSPICE and Xyce simulators. But in future the code can adapted to the requirements and restrictions of other simulators e.g. QUCS etc.
+At the moment this code modifications are adapted to NGSPICE and Xyce simulators. But in future the code can adapted to the requirements and restrictions of other simulators e.g. Qucs etc.
 
 Any code directory has a set of test cases to show main functionality and performance of the models. Contributions for more practical use cases are welcome.
 
@@ -30,7 +30,7 @@ The usage of the model code is mainly dependent from two projects: OpenVAF, NGSP
 
 OpenVAF can be build as a standalone CLI program that can compile Verilog-A files to shared objects that comply with the simulator independent OSDI interface.
 
-Detailed documentation, examples and precompiled binaries of all release are **available on the [website](https://openvaf.semimod.de)**. To test the latest development version you can download nightly version of OpenVAF for linux [here](https://openva.fra1.cdn.digitaloceanspaces.com/openvaf_devel_linux_amd64.tar.gz).
+Detailed documentation, examples and precompiled binaries of all release are available on the **[website](https://openvaf.semimod.de)**. To test the latest development version you can download nightly version of OpenVAF for linux [here](https://openva.fra1.cdn.digitaloceanspaces.com/openvaf_devel_linux_amd64.tar.gz).
 
 OpenVAF has been tested with NGSPICE version 39. It can already support a large variety of compact models.
 
@@ -44,13 +44,14 @@ Furthermore, some Verilog-A language features are currently not supported by ope
 
 ### NGSPICE
 
-**NGSPICE [website](https://ngspice.sourceforge.io/)** is a open source simulator for electronic circuit simulation. Source code, examples and precompiled binaries of all release are **available on the [website](https://sourceforge.net/projects/ngspice/)**.
+**NGSPICE [website](https://ngspice.sourceforge.io/)** is a open source simulator for electronic circuit simulation. Source code, examples and precompiled binaries of all release are available on the **[website](https://sourceforge.net/projects/ngspice/)**.
 
 NGSPICE is stable and in an regulary update process.
 
 ### Xyce
 
-**Xyce [website](https://xyce.sandia.gov/)** is a open source simulator for electronic circuit simulation. Source code, documentation and precompiled binaries of all release are **available on the [website](https://xyce.sandia.gov/sign-in/)**
+**Xyce [website](https://xyce.sandia.gov/)** is a open source simulator for electronic circuit simulation. Source code, documentation and precompiled binaries of all release are available on the **[website](https://xyce.sandia.gov/sign-in/)**.
+
 Xyce is stable and in an regulary update process. Xyce/ADMS is supporting small signal noise analysis.
 
 ## How to build the models
@@ -73,9 +74,9 @@ openvaf-compile-va.bat for MS Windows
 ### Xyce
 
 Xyce must be installed and their executables in the PATH. Another prerequisite is the availability of ADMS. ADMS source code may be downloaded 
-from the Qucs/ADMS GitHub **project [website](https://github.com/Qucs/ADMS)** .
+from the Qucs/ADMS GitHub project **[website](https://github.com/Qucs/ADMS)** .
 
-A user guide for Verilog-A models under Xyce can be found **under [website](https://xyce.sandia.gov/documentation-tutorials/xyce-adms-users-guide/)** .
+A user guide for Verilog-A models for Xyce can be found under the **[website](https://xyce.sandia.gov/documentation-tutorials/xyce-adms-users-guide/)** .
 
 Linux:
 ``` shell

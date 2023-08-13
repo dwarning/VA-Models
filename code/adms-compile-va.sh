@@ -18,8 +18,8 @@ rm *.la *.log
 rmdir --ignore-fail-on-non-empty .libs
 cd ../..
 cd ./bsimbulk/vacode
-#buildxyceplugin ../bsimbulk/vacode/bsimbulk106.va .
-buildxyceplugin bsimbulk107.va ../../admslibs
+#buildxyceplugin bsimbulk106.va ../../admslibs
+buildxyceplugin bsimbulk107.va 
 rm *.la *.log
 rmdir --ignore-fail-on-non-empty .libs
 cd ../..
@@ -28,8 +28,12 @@ buildxyceplugin bsimcmg.va ../../admslibs
 rm *.la *.log
 rmdir --ignore-fail-on-non-empty .libs
 cd ../..
-#buildxyceplugin ../bsimimg/vacode/bsimimg.va .
-#buildxyceplugin ../bsimsoi/vacode/bsimsoi.va .
+#buildxyceplugin bsimimg.va ../../admslibs
+cd ./bsimsoi/vacode
+buildxyceplugin bsimsoi.va ../../admslibs
+rm *.la *.log
+rmdir --ignore-fail-on-non-empty .libs
+cd ../..
 cd ./diode_cmc/vacode
 buildxyceplugin diode_cmc.va ../../admslibs
 rm *.la *.log
