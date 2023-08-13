@@ -11,8 +11,8 @@ code/osdilibs/*.*
 test/*.vlog
 code/playground/*.osdi
 code/*/*/.libs
-code/*/*.prn
 code/*/*.dat
+code/*/*.*.prn
 code/*/*.*.mt0
 code/*/*.*.res
 code/*/*/*.log
