@@ -27,7 +27,7 @@
 
 *  EKV v2.6 NMOS
 *---------------
-.MODEL NCH EKV_VA
+.MODEL NCH EKV26_VA
 *+ LEVEL  = 44
 *** Setup Parameters
 *+ UPDATE = 2.6
@@ -93,7 +93,7 @@
 
 *  EKV v2.6 PMOS
 *---------------
-.MODEL PCH EKV_VA
+.MODEL PCH EKV26_VA
 *+ LEVEL  = 44
 *** Setup Parameters
 *+ UPDATE = 2.6

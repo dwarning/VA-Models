@@ -44,6 +44,12 @@
 `include "constants.vams"
 `include "disciplines.vams"
 
+`ifdef insideADMS
+    `define INITIAL_INSTANCE @(initial_instance)
+`else
+    `define INITIAL_INSTANCE
+`endif
+
 /**************************************************************/
 /* SHMOD is a model parameter                                 */
 /*   SHMOD = 1 : Self-heating turned on                       */
@@ -52,7 +58,7 @@
 /* RDSMOD is a model parameter                                */
 /*   RDSMOD = 1 : External source/drain resistance model      */
 /*   RDSMOD = 0 : Internal source/drain resistance model      */
-/*     RDSMOD = 2 : Internal Bias Dependent and Bias Independent part of source/drain resistance */
+/*   RDSMOD = 2 : Internal Bias Dependent and Bias Independent part of source/drain resistance */
 /*                                                            */
 /* NQSMOD is a model parameter                                */
 /*   NQSMOD = 1 : NQS Resistance / gi node turned on          */
@@ -80,7 +86,11 @@
 `include "bsimcmg_cfringe.include"
 
 
-module bsimcmg(d, g, s, e, t);
+`ifdef __XYCE__
+    module bsimcmg_va(d, g, s, e, t);
+`else
+    module bsimcmg(d, g, s, e, t);
+`endif
     inout      g, d, s, e, t;
     electrical g, d, s, e;
     electrical si, di;

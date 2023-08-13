@@ -105,7 +105,11 @@ gpiz   = - ddx(Ib1, V(c1));  // Early effect on recombination base current
 
 gmux   =  ddx( Iavl, V(e1)); // Early effect on avalanche current limiting
 gmuy   =  ddx( Iavl, V(c2)); // Conductance of avalanche current
-gmuz   =  - ddx(- Iavl, V(c1));   // Conductance of avalanche current
+`ifndef insideADMS
+    gmuz   =  - ddx(- Iavl, V(c1));   // Conductance of avalanche current
+`else
+    gmuz   =  0.0;                    // <--- adms can't mapply-unary
+`endif
 
 // Conductance extrinsic b-c current :
 gmuex  =   ddx(Iex+Ib3, V(b1))

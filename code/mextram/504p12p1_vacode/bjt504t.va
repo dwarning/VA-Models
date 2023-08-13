@@ -7,7 +7,7 @@
 `define  SELFHEATING
 `define  SUBSTRATE
 
-module bjt504tva (c, b, e, s, dt);
+module bjt504t_va (c, b, e, s, dt);
 
 // External ports
     inout c, b, e, s, dt;

@@ -15,8 +15,7 @@
 *xmain d g s b bsim4_va type=1 l=l w=w nf=nf rgeomod=rgeomod geomod=geomod verbose=verbose
 *+ad=ad pd=pd as=as ps=ps sa=sa sb=sb sd=sd min=min
 
-.model n1 bsim4va type=1 level = 54
-*.model n1 nmos level = 54
+.model n1 bsim4va type=1
 +version = 4.80    binunit = 1       paramchk= 1        mobmod  = 0
 +capmod  = 1       igcmod  = 1       igbmod  = 1        geomod  = 1
 +diomod  = 1       rdsmod  = 0       rbodymod= 0        rgatemod= 1

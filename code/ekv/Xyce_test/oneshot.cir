@@ -1,0 +1,36 @@
+** One-Shot Trigger (Tran): by Weidong Liu 5/16/2000.
+
+yekv26_va md1 4 in Vdd Vdd  pch W=3.6u L=1.2u ad=4e-12 as=4e-12
+yekv26_va md2 4 in 0 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+c4 4 0 30f
+yekv26_va md3 A 4 Vdd Vdd  pch W=3.6u L=1.2u ad=4e-12 as=4e-12
+yekv26_va md4 A 4 0 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+ca A 0 30f
+
+yekv26_va m1 Anot A Vdd Vdd  pch W=3.6u L=1.2u ad=4e-12 as=4e-12
+yekv26_va m2 Anot A 0 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+
+yekv26_va m3 Bnot in Vdd Vdd  pch W=3.6u L=1.2u ad=4e-12 as=4e-12
+yekv26_va m4 Bnot in 0 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+
+yekv26_va m5 AorBnot 0 Vdd Vdd pch W=1.8u L=3.6u ad=2e-12 as=2e-12
+yekv26_va m6 AorBnot in 1 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+yekv26_va m7 1 Anot 0 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+
+yekv26_va m8 Lnot 0 Vdd Vdd pch W=1.8u L=3.6u ad=4e-12 as=4e-12
+yekv26_va m9 Lnot Bnot 2 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+yekv26_va m10 2 A 0 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+
+yekv26_va m11 out 0 Vdd Vdd pch W=3.6u L=3.6u ad=4e-12 as=4e-12
+yekv26_va m12 out AorBnot 3 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+yekv26_va m13 3 Lnot 0 0 nch W=1.8u L=1.2u ad=2e-12 as=2e-12
+
+Vcc Vdd 0 1.8
+vin in 0 pulse(0 1.8 1ns .1ns .1ns .8ns 5ns)
+
+.tran .1ns 10ns
+.include ../Modelcards/ekv26_0u5.par
+
+.print tran v(in) v(out)
+
+.end

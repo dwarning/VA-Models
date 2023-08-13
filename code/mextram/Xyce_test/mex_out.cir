@@ -1,0 +1,25 @@
+MEXTRAM Output Test Ic=f(Vc,Ib)
+
+IB 0 B 10u
+VC C 0 2.0
+VS S 0 0.0
+
+*.model BJTRF1 bjt504_va
+*Ybjt504_va q1 C B 0 S BJTRF1
+
+*.model BJTRF1 bjt504t_va
+*Ybjt504t_va q1 C B 0 S dt BJTRF1
+
+*.model BJTRF1 bjt505_va
+*Ybjt505_va q1 C B 0 S BJTRF1
+
+.model BJTRF1 bjt505t_va
+Ybjt505t_va q1 C B 0 S dt BJTRF1
+
+RT dt 0 100
+
+.step ib 20u 100u 20u
+.dc vc 0 5.0 0.05
+.print dc format=gnuplot v(C) i(vc) v(dt)
+
+.end

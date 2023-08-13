@@ -2,5 +2,7 @@ Use alternative ngspice specific limit function pnjlim for inner base-emitter an
 
 Use disciplines.vams
 
+ADMS/XYCE: ommit gmuz op calculation (opinfo.inc:180) because ddx expression (-Iavl) of type mapply_unary can't handled
+
 Origin of the model version 505.2:
 https://www.eng.auburn.edu/~niuguof/mextram/

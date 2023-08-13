@@ -10,6 +10,9 @@
     `ifdef __NGSPICE__
         Tki = $limit(Temp(dt), "limitlog", 100.0);
         Vdt = Tki;
+    `elsif __XYCE__
+        Tki = $limit(Temp(dt), "limRTH");
+        Vdt = Tki;
     `else
         Tki = Temp(dt);
         // *** Convergence related smoothing ***
@@ -141,9 +144,7 @@ ibis_t = ibis * exp(lntN * (4.0 - ae + dais) / nbis) * exp(-vge * VdtINV / nbis)
 ibfs_t = ibfs * exp(lntN * (6.0 - 2.0 * mlfs)) * exp(-vgj * VdtINV / mlfs);
 isibrel_t = isibrel * exp(lntN * (4.0 / nfibrel)) * exp(-vgj * VdtINV / nfibrel);
 
-`ifdef __NGSPICE__
-    tVCrit = Vt*ln(Vt/(`CONSTroot2*is_t));
-`endif
+tVCrit = Vt*ln(Vt/(`CONSTroot2*is_t));
 
 // begin  RvdT, November 2008, MXT504.8_alpha
 // T-scaling BE tunneling:

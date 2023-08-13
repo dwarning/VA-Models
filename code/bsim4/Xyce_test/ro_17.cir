@@ -1,0 +1,50 @@
+*****************==== 17-Stage CMOS RO ====*******************
+***********Benchmarking Implementation of BSIM4.8.0
+.include "../Modelcards/modelcard.nmos"
+.include "../Modelcards/modelcard.pmos"
+
+vdd 1 0 pulse(0 1.8 0p 200p 100p 100n 200n)
+
+Ybsim4va mp1 3 2 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u
++ minsd=0 nf=2 SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn1 3 2 0 0 n1 l=0.18u w=5u
++ minsd=0 nf=1 SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp2 4 3 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn2 4 3 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp3 5 4 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn3 5 4 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp4 6 5 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn4 6 5 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp5 7 6 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn5 7 6 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp6 8 7 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn6 8 7 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp7 9 8 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn7 9 8 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp8 10 9 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn8 10 9 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp9 11 10 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn9 11 10 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp10 12 11 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u SA=2u SB=8u NF=3 SD=0.2u  
+Ybsim4va mn10 12 11 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+
+Ybsim4va mp11 13 12 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u SA=2u SB=8u NF=3 SD=0.2u  
+Ybsim4va mn11 13 12 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp12 14 13 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u SA=2u SB=8u NF=3 SD=0.2u  
+Ybsim4va mn12 14 13 0 0 n1 l=0.18u w=5u ad=5p SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp13 15 14 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn13 15 14 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp14 16 15 1 1 p1 l=0.18u w=10u ad=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn14 16 15 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp15 17 16 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn15 17 16 0 0 n1 l=0.18u w=5u ad=5p as=5p ps=6u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp16 18 17 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u  SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn16 18 17 0 0 n1 l=0.18u w=5u pd=6u as=5p ps=6u SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mp17 2  18 1 1 p1 l=0.18u w=10u ad=5p pd=11u as=5p ps=11u SA=2u SB=8u NF=3 SD=0.2u 
+Ybsim4va mn17 2  18 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u SA=2u SB=8u NF=3 SD=0.2u 
+c1 18 0 .1p
+
+.tran .1ns 10ns
+.print tran v(2) v(5)
+
+.end

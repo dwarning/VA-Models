@@ -1,3 +1,10 @@
+Changes for ADMS/Xyce:
+Rename module to bsim6_va - not to come in conflict with Xyce build-in code
+Use @(initial_instance) to separate bias-dependent variables
+Take over local_scX variable init for WPE=0
+Separate static and dynamic contributions
+Use limited XGL because instance parameter L can't use for upper limit
+
 Restrict parameters to prevent division by 0
 
 Prevent division by 0 for parameters: MJS, MJD, MJSWS, MJSWD, MJSWGS, MJSWGD and NDR

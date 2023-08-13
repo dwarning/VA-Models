@@ -1,3 +1,8 @@
+Changes for ADMS/Xyce:
+Rename module to bjt504_va - not to come in conflict with Xyce build-in code
+Xyce specific limiting functions
+Remove gmuz value in opinfo.inc, because adms can't use unary access function for ddx()
+
 Use alternative ngspice specific limit function pnjlim for inner base-emitter and base-collector junctions
 
 Use disciplines.vams

@@ -1,6 +1,14 @@
+General update in parameter handling inline with common Verilog-A compact model code of practice.
+
 Change contributions to flow.
 
-General update in parameter handling inline with common Verilog-A compact model code of practice.
+Remove potential contribution branches for non-XYCE simulators
+
+XYCE allow only current contribution for white_noise function
+
+Use named branches for RD / RS branch for separate potential / flow contribution
+
+For ADMS/Xyce use @(initial_instance) instead of @(initial_step)
 
 Repair bug for wrong wk2 init caused total wrong bulk control
 

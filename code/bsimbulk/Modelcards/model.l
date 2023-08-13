@@ -1,9 +1,6 @@
-* model parameters fron BSIMBULK 106.2
-.model BSIMBULK_osdi_N bsimbulk
+.model nmos bsimbulk
 *+level=77
 +TYPE = 1
-+GEOMOD = 0
-+RGEOMOD = 0
 +COVMOD = 1
 +RDSMOD = 0
 +GIDLMOD = 1
@@ -207,18 +204,10 @@
 +DVTP5 = 0
 +VSATL = 1350
 +VSATLEXP = 0.00033
-+SCA = 0
-+SCB = 0
-+SCC = 0
-+SC = 0
 
-.model BSIMBULK_osdi_P bsimbulk
+.model pmos bsimbulk
 *+level=77
 +TYPE = -1
-+GEOMOD = 0
-+RGEOMOD = 0
-+RGATEMOD = 0
-+RBODYMOD = 0
 +IGCMOD = 0
 +IGBMOD = 0
 +COVMOD = 1
@@ -346,15 +335,9 @@
 +DMCI = 0
 +DMDG = 0
 +DMCGT = 0
-+XGW = 0
 +XGL = 0
 +GBMIN = 1e-12
 +RSHG = 0.1
-+RBPB = 50
-+RBPD = 50
-+RBPS = 50
-+RBDB = 50
-+RBSB = 50
 +RBPS0 = 50
 +RBPSL = 0
 +RBPSW = 0
@@ -383,7 +366,6 @@
 +RBSDBYNF = 0
 +XRCRG1 = 12
 +XRCRG2 = 1
-+NGCON = 1
 +NDEP = 8.062e23
 +NDEPL1 = 1.2139
 +NDEPLEXP1 = 1.9088
@@ -399,7 +381,6 @@
 +EPSRSUB = 11.9
 +XJ = 1.5e-7
 +VFB = -1.2108
-+VFBSDOFF = 0
 +NSD = 1e26
 +DVTP0 = 1.8335e-7
 +DVTP1 = 220.59
@@ -603,19 +584,12 @@
 +UCSTE = -0.004775
 +PRT = 0
 +AT = -0.00156
-+SCA = 0
-+SCB = 0
-+SCC = 0
-+SC = 0
 +KU0WE = 0
 +KVTH0WE = 0
 +K2WE = 0
 +WEB = 0
 +WEC = 0
 +SCREF = 1e-6
-+SA = 0
-+SB = 0
-+SD = 0
 +SAREF = 1e-6
 +SBREF = 1e-6
 +WLOD = 0

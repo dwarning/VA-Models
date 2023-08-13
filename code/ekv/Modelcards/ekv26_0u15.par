@@ -11,8 +11,9 @@
 *** Level=EKV in Spectre
 *** Lmin=0.15u Wmin=1.05u (If Scale=0.15u then Lmin=1 and Wmin=7)
 *—————
-.MODEL nmos nmos
-+ LEVEL=44
+.MODEL nmos EKV26_VA
+*+ LEVEL=44
++ TYPE = 1
 *** Setup Parameters
 + UPDATE=2.6
 *** Process Related Model Parameters
@@ -45,8 +46,9 @@
 *** Level=EKV in Spectre
 *** Lmin=0.15u Wmin=1.05u (If Scale=0.15u then Lmin=1 and Wmin=7)
 *—————
-.MODEL pmos pmos
-+ LEVEL = 44
+.MODEL pmos EKV26_VA
+*+ LEVEL = 44
++ TYPE = -1
 *** Setup Parameters
 + UPDATE = 2.6
 *** Process Related Model Parameters

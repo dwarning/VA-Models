@@ -140,7 +140,11 @@ endfunction
 `IPRcz( CDSP           ,0.0            ,"F"           ,"Constant drain-to-source fringe capacitance (all CGEOMOD)" )
 `IPRcz( NRS            ,0.0            ,""            ,"Number of source diffusion squares" )
 `IPRcz( NRD            ,0.0            ,""            ,"Number of source diffusion squares" )
+`ifdef insideADMS
+`IPRoz( LRSD           ,1.0e-9         ,"m"           ,"Length of the source/drain" )
+`else
 `IPRoz( LRSD           ,L              ,"m"           ,"Length of the source/drain" )
+`endif
 `IPRoz( NFINNOM        ,1.0            ,""            ,"Nominal number of fins per finger" )
 
 // Variability Handles
@@ -188,7 +192,7 @@ endfunction
 `MPRnb( DELTAW         ,0.0            ,"m"           ,"Change of effective width due to shape of fin/cylinder" )
 `MPRcz( FECHCV         ,1.0            ,""            ,"CV end-channel factor for different orientation/shape" )
 `MPRnb( DELTAWCV       ,0.0            ,"m"           ,"CV change of effective width due to shape of fin/cylinder" )
-`MPRnb( NBODY          ,1.0e22         ,"/m^3"        ,"Channel (body) doping" )
+`MPRoo( NBODY          ,1.0e22         ,"/m^3",0.0,inf,"Channel (body) doping" )
 `MPRnb( NBODYN1        ,0.0            ,""            ,"NFIN dependence of channel (body) doping" )
 `MPRex( NBODYN2        ,1.0e5          ,""            ,0.0         ,"NFIN dependence of channel (body) doping" )
 `MPRcc( NSD            ,2.0e26         ,"/m^3"        ,2.0e25      ,1.0e27      ,"Source/drain active doping concentration" )
@@ -208,10 +212,10 @@ endfunction
 
 // Short Channel Effects
 `MPRnb( CIT            ,0.0            ,"F/m^2"       ,"Parameter for interface trap" )
-`MPRnb( CITR           ,CIT            ,""            ,"Parameter for interface trap in reverse mode for asymmetric model" )
+`MPRnb( CITR           ,CIT            ,"F/m^2"       ,"Parameter for interface trap in reverse mode for asymmetric model" )
 `MPRnb( CDSC           ,7.0e-3         ,"F/m^2"       ,"Coupling capacitance between S/D and channel" )
 `MPRnb( CDSCN1         ,0.0            ,""            ,"NFIN dependence of CDSC" )
-`MPRnb( CDSCN2         ,1.0e5          ,""            ,"NFIN dependence of CDSC" )
+`MPRoo( CDSCN2         ,1.0e5          ,"" ,0.0 ,inf  ,"NFIN dependence of CDSC" )
 `MPRnb( CDSCD          ,7.0e-3         ,"F/m^2"       ,"Drain-bias sensitivity of CDSC" )
 `MPRnb( CDSCDN1        ,0.0            ,""            ,"NFIN dependence of CDSCD" )
 `MPRex( CDSCDN2        ,1.0e5          ,""            ,0.0         ,"NFIN dependence of CDSCD" )
@@ -240,7 +244,7 @@ endfunction
 `MPRnb( K1RSCE         ,0.0            ,"/V^(0.5)"    ,"K1 for reverse short channel effect calculation" )
 `MPRnb( LPE0           ,5.0e-9         ,"m"           ,"Equivalent length of pocket region at zero bias" )
 `MPRnb( DVTSHIFT       ,0.0            ,"V"           ,"Vth shift handle" )
-`MPRnb( DVTSHIFTR      ,DVTSHIFT       ,""            ,"Vth shift handle for asymmetric mode" )
+`MPRnb( DVTSHIFTR      ,DVTSHIFT       ,"V"           ,"Vth shift handle for asymmetric mode" )
 `MPRnb( THETASCE       ,0.0            ,""            ,"Vth roll-off length dependence. If defined by user, it will overwrite Theta_SCE in the code")
 `MPRnb( THETADIBL      ,0.0            ,""            ,"DIBL length dependence. If defined by user, will overwrite Theta_DIBL in the code" )
 `MPRnb( THETASW        ,0.0            ,""            ,"Subthreshold swing length dependence. If defined by user, it will overwrite Theta_SW in the code" )
@@ -252,7 +256,7 @@ endfunction
 `MPRnb( K0SI           ,1.0            ,""            ,"Correction factor for strong inversion used in Mnud. After binning it should be within (0:inf)" )
 `MPRnb( K0SI1          ,0.0            ,"/K"          ,"Temperature dependence of K0SI" )
 `MPRnb( K2SI           ,K0SI           ,""            ,"Correction factor for strong inversion used in Mob" )
-`MPRnb( K2SI1          ,K0SI1          ,""            ,"Temperature dependence of K2SI" )
+`MPRnb( K2SI1          ,K0SI1          ,"/K"          ,"Temperature dependence of K2SI" )
 `MPRnb( K0SISAT        ,0.0            ,""            ,"Correction factor for strong inversion used in Mnud" )
 `MPRnb( K0SISAT1       ,0.0            ,""            ,"Temperature dependence of K0SISAT" )
 `MPRnb( K2SISAT        ,K0SISAT        ,""            ,"Correction factor for strong inversion used in Mob" )
@@ -320,7 +324,7 @@ endfunction
 `MPRnb( APTWG          ,0.0            ,""            ,"Pre-exponential coefficient for PTWG" )
 `MPRex( BPTWG          ,1.0e-7         ,""            ,0.0         ,"Exponential coefficient for PTWG" )
 `MPRnb( AT             ,-1.56e-3       ,"/K"          ,"Saturation velocity temperature coefficient" )
-`MPRnb( ATR            ,AT             ,""            ,"Reverse-mode saturation velocity temperature coefficient" )
+`MPRnb( ATR            ,AT             ,"/K"          ,"Reverse-mode saturation velocity temperature coefficient" )
 `MPRnb( ATCV           ,AT             ,"/K"          ,"Saturation velocity temperature coefficient for CV" )
 `MPRnb( TMEXP          ,0.0            ,"/K"          ,"Temperature coefficient for Vdseff smoothing" )
 `MPRnb( TMEXPR         ,TMEXP          ,"/K"          ,"Reverse-mode temperature coefficient for Vdseff smoothing" )
@@ -346,7 +350,7 @@ endfunction
 `MPRex( BUA            ,1.0e-7         ,""            ,0.0         ,"Exponential coefficient for UA" )
 `MPRex( BUAR           ,BUA            ,""            ,0.0         ,"Reverse-mode exponential coefficient for UAR" )
 `MPRnb( UC             ,0.0            ,"(1e-6*cm/MV^2)^EU"        ,"Body effect for mobility degradation parameter - BULKMOD=1 or 2" )
-`MPRnb( UCR            ,UC             ,""            ,"Reverse-mode body effect for mobility degradation parameter - BULKMOD=1 or 2" )
+`MPRnb( UCR            ,UC             ,"(1e-6*cm/MV^2)^EU"        ,"Reverse-mode body effect for mobility degradation parameter - BULKMOD=1 or 2" )
 `MPRnb( EU             ,2.5            ,"cm/MV"       ,"Phonon/surface roughness scattering parameter" )
 `MPRnb( EUR            ,EU             ,"cm/MV"       ,"Reverse-mode phonon/surface roughness scattering parameter" )
 `MPRnb( AEU            ,0.0            ,""            ,"Pre-exponential coefficient for EU" )
@@ -439,9 +443,18 @@ endfunction
 `MPRcc( RHOC           ,1.0e-12        ,"ohm*(m^2)"   ,1.0e-18     ,1.0e-9      ,"Contact resistivity at the silicon/silicide interface" )
 `MPRoz( RHORSD         ,1.0            ,"ohm*(m)"     ,"Average resistivity of silicon in the raised source/drain region" )
 `MPRcc( CRATIO         ,0.5            ,""            ,0.0         ,1.0         ,"Ratio of the corner area filled with silicon to the total corner area" )
+`ifdef insideADMS
+`MPRoo( DELTAPRSD      ,0.0            ,"m"           ,-1e-9     ,inf         ,"Change in silicon/silicide interface length due to non-rectangular epi" )
+`else
 `MPRoo( DELTAPRSD      ,0.0            ,"m"           ,-FPITCH     ,inf         ,"Change in silicon/silicide interface length due to non-rectangular epi" )
+`endif
 `MPIcc( SDTERM         ,0              ,""            ,0           ,1           ,"Indicator of whether the source/drain are terminated with silicide" )
-`MPRnb( LSP            ,(0.2*(L + XL)) ,"m"           ,"Thickness of the gate sidewall spacer" )
+`ifdef insideADMS
+`MPRoo( LSP            ,(0.2*(1e-9 + XL)) ,"m", 0.0, inf ,"Thickness of the gate sidewall spacer" )
+`else
+`MPRoo( LSP            ,(0.2*(L + XL)) ,"m", 0.0, inf ,"Thickness of the gate sidewall spacer" )
+`endif
+
 `MPRco( EPSRSP         ,3.9            ,""            ,1.0         ,inf         ,"Relative dielectric constant of the spacer" )
 `MPRoz( TGATE          ,3.0e-8         ,"m"           ,"Gate height on top of the hard mask" )
 `MPRcz( TMASK          ,3.0e-8         ,"m"           ,"Height of hard mask on top of the fin" )
@@ -490,7 +503,7 @@ endfunction
 `MPRnb( VFBSD          ,0.0            ,"V"           ,"Flatband voltage for S/D region" )
 `MPRnb( VFBSDCV        ,VFBSD          ,"V"           ,"Flatband voltage for S/D region for C-V calculations" )
 `MPRoz( TOXREF         ,1.2e-9         ,"m"           ,"Target tox value" )
-`MPRnb( TOXG           ,TOXP           ,"m"           ,"Oxide thickness for gate current model" )
+`MPRoo( TOXG           ,TOXP           ,"m", 0.0, inf,"Oxide thickness for gate current model" )
 `MPRnb( NTOX           ,1.0            ,""            ,"Exponent for Tox ratio" )
 `MPRnb( POXEDGE        ,1.0            ,""            ,"Factor for the gate edge Tox" )
 
@@ -570,12 +583,12 @@ endfunction
 `MPRnb( PBSWD          ,PBSWS          ,"V"           ,"Built-in potential for Drain-side sidewall junction capacitance" )
 `MPRnb( PBSWGS         ,PBSWS          ,"V"           ,"Built-in potential for Source-side gate sidewall junction capacitance" )
 `MPRnb( PBSWGD         ,PBSWGS         ,"V"           ,"Built-in potential for Drain-side gate sidewall junction capacitance" )
-`MPRnb( MJS            ,0.5            ,""            ,"Source bottom junction capacitance grading coefficient" )
-`MPRnb( MJD            ,MJS            ,""            ,"Drain bottom junction capacitance grading coefficient" )
-`MPRnb( MJSWS          ,0.33           ,""            ,"Source sidewall junction capacitance grading coefficient" )
-`MPRnb( MJSWD          ,MJSWS          ,""            ,"Drain sidewall junction capacitance grading coefficient" )
-`MPRnb( MJSWGS         ,MJSWS          ,""            ,"Source-side gate sidewall junction capacitance grading coefficient" )
-`MPRnb( MJSWGD         ,MJSWGS         ,""            ,"Drain-side gate sidewall junction capacitance grading coefficient" )
+`MPRoo( MJS            ,0.5            ,"", 0.0, 1.0  ,"Source bottom junction capacitance grading coefficient")
+`MPRoo( MJD            ,MJS            ,"", 0.0, 1.0  ,"Drain bottom junction capacitance grading coefficient")
+`MPRoo( MJSWS          ,0.33           ,"", 0.0, 1.0  ,"Source sidewall junction capacitance grading coefficient")
+`MPRoo( MJSWD          ,MJSWS          ,"", 0.0, 1.0  ,"Drain sidewall junction capacitance grading coefficient")
+`MPRoo( MJSWGS         ,MJSWS          ,"", 0.0, 1.0  ,"Source-side gate sidewall junction capacitance grading coefficient")
+`MPRoo( MJSWGD         ,MJSWGS         ,"", 0.0, 1.0  ,"Drain-side gate sidewall junction capacitance grading coefficient")
 
 // Second Junction for Two-Step Junction Capacitance
 `MPRcz( SJS            ,0.0            ,""            ,"Constant for source-side two-step second junction" )
@@ -584,12 +597,12 @@ endfunction
 `MPRcz( SJSWD          ,SJSWS          ,""            ,"Constant for drain-side sidewall two-step second junction" )
 `MPRcz( SJSWGS         ,0.0            ,""            ,"Constant for source-side gate sidewall two-step second junction" )
 `MPRcz( SJSWGD         ,SJSWGS         ,""            ,"Constant for source-side gate sidewall two-step second junction" )
-`MPRnb( MJS2           ,1.25e-1        ,""            ,"Source bottom two-step second junction capacitance grading coefficient" )
-`MPRnb( MJD2           ,MJS2           ,""            ,"Drain bottom two-step second junction capacitance grading coefficient" )
-`MPRnb( MJSWS2         ,8.3e-2         ,""            ,"Source sidewall two-step second junction capacitance grading coefficient" )
-`MPRnb( MJSWD2         ,MJSWS2         ,""            ,"Drain sidewall two-step second junction capacitance grading coefficient" )
-`MPRnb( MJSWGS2        ,MJSWS2         ,""            ,"Source-side gate sidewall two-step second junction capacitance grading coefficient" )
-`MPRnb( MJSWGD2        ,MJSWGS2        ,""            ,"Drain-side gate sidewall two-step second junction capacitance grading coefficient" )
+`MPRoo( MJS2           ,1.25e-1        ,"", 0.0, 1.0  ,"Source bottom two-step second junction capacitance grading coefficient" )
+`MPRoo( MJD2           ,MJS2           ,"", 0.0, 1.0  ,"Drain bottom two-step second junction capacitance grading coefficient" )
+`MPRoo( MJSWS2         ,8.3e-2         ,"", 0.0, 1.0  ,"Source sidewall two-step second junction capacitance grading coefficient" )
+`MPRoo( MJSWD2         ,MJSWS2         ,"", 0.0, 1.0  ,"Drain sidewall two-step second junction capacitance grading coefficient" )
+`MPRoo( MJSWGS2        ,MJSWS2         ,"", 0.0, 1.0  ,"Source-side gate sidewall two-step second junction capacitance grading coefficient" )
+`MPRoo( MJSWGD2        ,MJSWGS2        ,"", 0.0, 1.0  ,"Drain-side gate sidewall two-step second junction capacitance grading coefficient" )
 
 // Junction Current
 `MPRnb( JSS            ,1.0e-4         ,"A/m^2"       ,"Bottom source junction reverse saturation current density" )
@@ -616,7 +629,7 @@ endfunction
 `MPRnb( JTSSWD         ,JTSSWS         ,"A/m"         ,"Unit length trap-assisted saturation current for sidewall drain junction" )
 `MPRnb( JTSSWGS        ,0.0            ,"A/m"         ,"Unit length trap-assisted saturation current for gate-edge sidewall source junction" )
 `MPRnb( JTSSWGD        ,JTSSWGS        ,"A/m"         ,"Unit length trap-assisted saturation current for gate-edge sidewall drain junction" )
-`MPRnb( JTWEFF         ,0.0            ,"m"           ,"Trap-assisted tunneling current width dependence" )
+`MPRoo( JTWEFF         ,0.0            ,"m" ,0.0 ,inf ,"Trap-assisted tunneling current width dependence" )
 `MPRnb( NJTS           ,2.0e1          ,""            ,"Non-ideality factor for JTSS" )
 `MPRnb( NJTSD          ,NJTS           ,""            ,"Non-ideality factor for JTSD" )
 `MPRnb( NJTSSW         ,2.0e1          ,""            ,"Non-ideality factor for JTSSWS" )
@@ -1054,6 +1067,7 @@ analog begin
     // ************************************************
     // *      Geometry dependent calculations         *
     // ************************************************
+    `INITIAL_INSTANCE
     begin : CMGBiasIndepCalc
 
         // Variable Initialization to Prevent Hidden States
@@ -3844,7 +3858,7 @@ analog begin
             I(di,si) <+ ctnoi * V(N) * sf * SCALEN ;
             if (gamma > 0 && delta > 0) begin
                 I(N) <+ V(N) * sf * SCALEN;
-                I(N) <+ white_noise(sid/(sf*sf*SCALEN*SCALEN));
+                I(N) <+ white_noise(sid/(sf*sf*SCALEN*SCALEN), "channel thermal noise");
             end else begin
                 I(N) <+ V(N) ;
             end

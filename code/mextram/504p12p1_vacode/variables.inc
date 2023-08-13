@@ -15,9 +15,7 @@ real Tk, Trk, tN, Tamb;
 real Vt, Vtr, VtINV, VtrINV, VdtINV;
 real Vdt;
 
-`ifdef __NGSPICE__
 real tVCrit;
-`endif
 
 real UdeT, VDE_T, UdcT, VDC_T;
 real CJE_T, CJC_T, XP_T;

@@ -27,6 +27,15 @@ begin  // Currents and charges
         Vsc1 = $limit(V(c1, s), "pnjlim", $vt, tVCrit);
 `endif
     end
+`elsif __XYCE__
+    Vb2c1 = $limit(V(b2, c1), "typedpnjlim_new", $vt, tVCrit, TYPE);
+    Vb2c2 = $limit(V(b2, c2), "typedpnjlim_new", $vt, tVCrit, TYPE);
+    Vb2e1 = $limit(V(b2, e1), "typedpnjlim_new", $vt, tVCrit, TYPE);
+    Vb1e1 = $limit(V(b1, e1), "typedpnjlim_new", $vt, tVCrit, TYPE);
+    Vb1b2 = $limit(V(b1, b2), "typedpnjlim_new", $vt, tVCrit, TYPE);
+`ifdef SUBSTRATE
+    Vsc1 = $limit(V(s,  c1), "typedpnjlim_new", $vt, tVCrit, TYPE);
+`endif
 `else
     Vb2c1 = TYPE * V(b2, c1);
     Vb2c2 = TYPE * V(b2, c2);

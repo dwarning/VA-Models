@@ -47,6 +47,12 @@
 `include "constants.vams"
 `include "disciplines.vams"
 
+`ifdef insideADMS
+    `define INITIAL_INSTANCE @(initial_instance)
+`else
+    `define INITIAL_INSTANCE
+`endif
+
 // Disable strobe for improved performance speed
 //`define DISABLE_STROBE    //To Use DISABLE_STROBE, Activate it here. Used Only at GEOMOD and RGEOMOD
 `ifdef DISABLE_STROBE
@@ -570,12 +576,18 @@
 
 //`define __THERMAL_NODE__
 `ifdef __THERMAL_NODE__
-
-    module bsim6(d, g, s, b, t);
+    `ifdef __XYCE__
+        module bsim6_va(d, g, s, b, t);
+    `else
+        module bsim6(d, g, s, b, t);
+    `endif
     inout      d, g, s, b, t;
 `else
-
-    module bsim6(d, g, s, b);
+    `ifdef __XYCE__
+        module bsim6_va(d, g, s, b);
+    `else
+        module bsim6(d, g, s, b);
+    `endif
     inout      d, g, s, b;
 `endif
 electrical d, g, s, b;
@@ -1420,7 +1432,12 @@ endfunction
 `MPRnb( DMCGT          ,0.0            ,"m"                                     ,"Dist of Mid-Contact to Gate edge in Test" )
 
 `ifdef __RGATEMOD__
-    `MPRoo( XGL            ,0.0            ,"m"           ,-inf        ,L*LMLT+XL   ,"Variation in Ldrawn" )
+    `ifdef insideADMS
+        //Workaround for ADMS - can't use instance parameter L for model parameter XGL limit
+        `MPRoo( XGL            ,0.0            ,"m"           ,-inf        ,inf     ,"Variation in Ldrawn" )
+    `else
+        `MPRoo( XGL            ,0.0            ,"m"           ,-inf        ,L*LMLT+XL   ,"Variation in Ldrawn" )
+    `endif
     `MPRcz( RSHG           ,0.1            ,"ohm"                                   ,"Gate sheet resistance" )
 `endif
 
@@ -1898,6 +1915,10 @@ real Rint, Rend;
 //VTH variables
 real q_vth, psip_th;
 
+`ifdef insideADMS
+    //Workaround for ADMS - can't use instance parameter L for model parameter XGL limit
+    real XGL_lim;
+`endif
 
 // Self Heating
 `ifdef __SHMOD__
@@ -1988,730 +2009,740 @@ real q_vth, psip_th;
 `endif
 
 analog begin
-    // Variable initialization to prevent hidden states
-    CDSCDR_i = 0; ETA0R_i   = 0; ETA0R_t = 0; L_LLN1  = 0; L_WLN1  = 0;
-    PCLMR_i  = 0; PDIBLCR_i = 0; PSATR_i = 0; PTWGR_i = 0; PTWGR_t = 0;
-    U0R_i    = 0; U0R_t     = 0; UAR_i   = 0; UAR_t   = 0; UCR_i   = 0; UCR_t   = 0;
-    UCSR_i   = 0; UCSR_t    = 0; UDR_i   = 0; UDR_t   = 0; UD_a    = 0; VSATR_i = 0;
-    VSATR_t  = 0; W_LWN1    = 0; W_WWN1  = 0;
 
-    // Bias independent calculations
-    if ( TYPE == `ntype ) devsign = 1;
-    else devsign = -1;
+    `INITIAL_INSTANCE
+    begin : initializeInstance
 
-    // Constants
-    //ni        = NI0SUB;
-    epssi   = EPSRSUB * `EPS0;
-    epsox   = EPSROX * `EPS0;
-    Cox     = EPSROX * `EPS0 / TOXE;
-    epsratio = EPSRSUB / EPSROX;
+        // Variable initialization to prevent hidden states
+        CDSCDR_i = 0; ETA0R_i   = 0; ETA0R_t = 0; L_LLN1  = 0; L_WLN1  = 0;
+        PCLMR_i  = 0; PDIBLCR_i = 0; PSATR_i = 0; PTWGR_i = 0; PTWGR_t = 0;
+        U0R_i    = 0; U0R_t     = 0; UAR_i   = 0; UAR_t   = 0; UCR_i   = 0; UCR_t   = 0;
+        UCSR_i   = 0; UCSR_t    = 0; UDR_i   = 0; UDR_t   = 0; UD_a    = 0; VSATR_i = 0;
+        VSATR_t  = 0; W_LWN1    = 0; W_WWN1  = 0;
 
-    //Physical Oxide Thickness
-    if (!$param_given(TOXP))
-        BSIM6TOXP = (TOXE*EPSROX/3.9) - DTOX; // valid for any dielectric
-    else
-        BSIM6TOXP = TOXP;
+        // Bias independent calculations
+        if ( TYPE == `ntype ) devsign = 1;
+        else devsign = -1;
 
-    L_mult = L*LMLT ;
-    W_mult = W*WMLT ;
+        // Constants
+        //ni        = NI0SUB;
+        epssi   = EPSRSUB * `EPS0;
+        epsox   = EPSROX * `EPS0;
+        Cox     = EPSROX * `EPS0 / TOXE;
+        epsratio = EPSRSUB / EPSROX;
 
-    Lnew = L_mult + XL;
-    if (Lnew <= 0) begin
-        $strobe("Fatal: Ldrawn*LMLT+XL = %e for  %M is non-positive", Lnew);
-        $finish(0);
-    end
-    W_by_NF = W_mult/NF ;
-    Wnew    = W_by_NF +XW;
-    if (Wnew <= 0) begin
-        $strobe("Fatal: W/NF*WMLT+XW = %e for  %M is non-positive", Wnew);
-        $finish(0);
-    end
-    // Binning
+        //Physical Oxide Thickness
+        if (!$param_given(TOXP))
+            BSIM6TOXP = (TOXE*EPSROX/3.9) - DTOX; // valid for any dielectric
+        else
+            BSIM6TOXP = TOXP;
 
-    //Leff and Weff for IV
-    L_LLN       = pow(Lnew, -LLN);
-    W_LWN       = pow(Wnew, -LWN);
-    LW_LLN_LWN  = L_LLN*W_LWN;
-    dLIV        = LINT + LL * L_LLN + LW * W_LWN + LWL * LW_LLN_LWN;
-    L_WLN       = pow(Lnew, -WLN);
-    W_WWN       = pow(Wnew, -WWN);
-    LW_WLN_WWN  = L_WLN*W_WWN;
-    dWIV        = WINT + WL * L_WLN + WW * W_WWN + WWL * LW_WLN_WWN;
-    Leff        = Lnew - 2.0*dLIV;
-    if (Leff <= 0) begin
-        $strobe("Fatal: Effective channel length = %e for  %M is non-positive", Leff);
-        $finish(0);
-    end else if (Leff<=1.0e-9)
-        $strobe("Warning: Effective channel length = %e for  %M is <= 1.0e-9. Recommended Leff >= 1e-8", Leff);
+        L_mult = L*LMLT ;
+        W_mult = W*WMLT ;
 
-    Weff        = Wnew - 2.0*dWIV;
-    if (Weff <= 0) begin
-        $strobe("Fatal: Effective channel Width = %e for  %M is non-positive", Weff);
-        $finish(0);
-    end else if (Weff<=1.0e-9)
-        $strobe("Warning: Effective channel width = %e for  %M is <= 1.0e-9. Recommended Weff >= 1e-8", Leff);
-
-    //Leff and Weff for CV
-    dLCV        = DLC + LLC * L_LLN + LWC * W_LWN + LWLC * LW_LLN_LWN;
-    dWCV        = DWC + WLC * L_WLN + WWC * W_WWN + WWLC * LW_WLN_WWN;
-    Lact        = Lnew - 2.0*dLCV;
-    if (Lact <= 0) begin
-        $strobe("Fatal: Effective channel length for CV = %e for  %M is non-positive", Lact);
-        $finish(0);
-    end else if (Lact<=1.0e-9)
-        $strobe("Warning: Effective channel length for CV = %e for  %M is <= 1.0e-9. Recommended Leff >= 1e-8", Leff);
-
-    Wact        = Wnew - 2.0*dWCV;
-    if (Wact <= 0) begin
-        $strobe("Fatal: Effective channel width for CV = %e for  %M is non-positive", Wact);
-        $finish(0);
-    end else if (Wact<=1.0e-9)
-        $strobe("Warning: Effective channel width for CV = %e for  %M is <= 1.0e-9. Recommended Weff >= 1e-8", Leff);
-
-
-    //Weffcj for Diode, GIDL etc.
-    dWJ     = DWJ + WLC / pow(Lnew,WLN) + WWC / pow(Wnew,WWN) + WWLC / pow(Lnew,WLN) / pow(Wnew,WWN);
-    Weffcj      = Wnew - 2.0*dWJ;
-    if (Weffcj <= 0) begin
-        $strobe("Fatal: Effective channel width for S/D junctions = %e for  %M is non-positive", Weffcj);
-        $finish(0);
-    end
-
-    Inv_L       = 1.0e-6 / Leff;
-    Inv_W       = 1.0e-6 / Weff;
-    Inv_Lact    = 1.0e-6 / Lact;
-    Inv_Wact    = 1.0e-6 / Wact;
-    Inv_Llong   = 1.0e-6 / LLONG;
-    Inv_Wwide   = 1.0e-6 / WWIDE;
-    Inv_WL      = Inv_L * Inv_W;
-
-    // Effective Length and Width for Binning
-    L_LLN1      = L_LLN;
-    L_WLN1      = L_WLN;
-    if (DLBIN != 0) begin
-        if (DLBIN<=-Lnew) begin
-            $strobe("Fatal: DLBIN for  %M = %e is <= -Ldrawn*LMLT", DLBIN);
+        Lnew = L_mult + XL;
+        if (Lnew <= 0) begin
+            $strobe("Fatal: Ldrawn*LMLT+XL = %e for  %M is non-positive", Lnew);
             $finish(0);
-        end else begin
-            L_LLN1      = pow(Lnew+DLBIN, -LLN);
-            L_WLN1      = pow(Lnew+DLBIN, -WLN);
         end
-    end
-
-    W_LWN1      = W_LWN;
-    W_WWN1      = W_WWN;
-    if (DWBIN != 0) begin
-        if (DWBIN<=-Wnew) begin
-            $strobe("Fatal: DWBIN for  %M = %e is <= -Wdrawn*WMLT", DWBIN);
+        W_by_NF = W_mult/NF ;
+        Wnew    = W_by_NF +XW;
+        if (Wnew <= 0) begin
+            $strobe("Fatal: W/NF*WMLT+XW = %e for  %M is non-positive", Wnew);
             $finish(0);
-        end else begin
-            W_LWN1      = pow(Wnew+DWBIN, -LWN);
-            W_WWN1      = pow(Wnew+DWBIN, -WWN);
         end
-    end
+        // Binning
 
-    LW_LLN_LWN1 = L_LLN1*W_LWN1;
-    dLB     = LINT + LL * L_LLN1 + LW * W_LWN1 + LWL * LW_LLN_LWN1;
-    LW_WLN_WWN1 = L_WLN1*W_WWN1;
-    dWB         = WINT + WL * L_WLN1 + WW * W_WWN1 + WWL * LW_WLN_WWN1;
+        //Leff and Weff for IV
+        L_LLN       = pow(Lnew, -LLN);
+        W_LWN       = pow(Wnew, -LWN);
+        LW_LLN_LWN  = L_LLN*W_LWN;
+        dLIV        = LINT + LL * L_LLN + LW * W_LWN + LWL * LW_LLN_LWN;
+        L_WLN       = pow(Lnew, -WLN);
+        W_WWN       = pow(Wnew, -WWN);
+        LW_WLN_WWN  = L_WLN*W_WWN;
+        dWIV        = WINT + WL * L_WLN + WW * W_WWN + WWL * LW_WLN_WWN;
+        Leff        = Lnew - 2.0*dLIV;
+        if (Leff <= 0) begin
+            $strobe("Fatal: Effective channel length = %e for  %M is non-positive", Leff);
+            $finish(0);
+        end else if (Leff<=1.0e-9)
+            $strobe("Warning: Effective channel length = %e for  %M is <= 1.0e-9. Recommended Leff >= 1e-8", Leff);
 
-    Leff1       = Lnew - 2.0*dLB + DLBIN;
-    if (Leff1 <= 0) begin
-        $strobe("Fatal: Effective channel length for binning = %e for  %M is non-positive", Leff1);
-        $finish(0);
-    end
-    Weff1       = Wnew - 2.0*dWB + DWBIN;
-    if (Weff1 <= 0) begin
-        $strobe("Fatal: Effective channel width for binning = %e for  %M is non-positive", Weff1);
-        $finish(0);
-    end
+        Weff        = Wnew - 2.0*dWIV;
+        if (Weff <= 0) begin
+            $strobe("Fatal: Effective channel Width = %e for  %M is non-positive", Weff);
+            $finish(0);
+        end else if (Weff<=1.0e-9)
+            $strobe("Warning: Effective channel width = %e for  %M is <= 1.0e-9. Recommended Weff >= 1e-8", Leff);
 
-    if (BINUNIT==1) begin
-        BIN_L       = 1.0e-6 / Leff1;
-        BIN_W       = 1.0e-6 / Weff1;
-    end else begin
-        BIN_L       = 1.0 / Leff1;
-        BIN_W       = 1.0 / Weff1;
-    end
+        //Leff and Weff for CV
+        dLCV        = DLC + LLC * L_LLN + LWC * W_LWN + LWLC * LW_LLN_LWN;
+        dWCV        = DWC + WLC * L_WLN + WWC * W_WWN + WWLC * LW_WLN_WWN;
+        Lact        = Lnew - 2.0*dLCV;
+        if (Lact <= 0) begin
+            $strobe("Fatal: Effective channel length for CV = %e for  %M is non-positive", Lact);
+            $finish(0);
+        end else if (Lact<=1.0e-9)
+            $strobe("Warning: Effective channel length for CV = %e for  %M is <= 1.0e-9. Recommended Leff >= 1e-8", Leff);
 
-    BIN_WL      = BIN_L * BIN_W;
+        Wact        = Wnew - 2.0*dWCV;
+        if (Wact <= 0) begin
+            $strobe("Fatal: Effective channel width for CV = %e for  %M is non-positive", Wact);
+            $finish(0);
+        end else if (Wact<=1.0e-9)
+            $strobe("Warning: Effective channel width for CV = %e for  %M is <= 1.0e-9. Recommended Weff >= 1e-8", Leff);
 
-    VFB_i       = VFB       + BIN_L * LVFB      + BIN_W * WVFB      + BIN_WL * PVFB ;
-    VFBCV_i     = VFBCV     + BIN_L * LVFBCV    + BIN_W * WVFBCV    + BIN_WL * PVFBCV ;
-    NSD_i       = NSD       + BIN_L * LNSD      + BIN_W * WNSD      + BIN_WL * PNSD ;
-    NDEP_i      = NDEP      + BIN_L * LNDEP     + BIN_W * WNDEP     + BIN_WL * PNDEP ;
-    NDEPCV_i    = NDEPCV    + BIN_L * LNDEPCV   + BIN_W * WNDEPCV   + BIN_WL * PNDEPCV ;
-    NGATE_i     = NGATE     + BIN_L * LNGATE    + BIN_W * WNGATE    + BIN_WL * PNGATE;
-    CIT_i       = CIT       + BIN_L * LCIT      + BIN_W * WCIT      + BIN_WL * PCIT ;
-    NFACTOR_i   = NFACTOR   + BIN_L * LNFACTOR  + BIN_W * WNFACTOR  + BIN_WL * PNFACTOR ;
-    CDSCD_i     = CDSCD     + BIN_L * LCDSCD    + BIN_W * WCDSCD    + BIN_WL * PCDSCD ;
-    CDSCB_i     = CDSCB     + BIN_L * LCDSCB    + BIN_W * WCDSCB    + BIN_WL * PCDSCB ;
-    DVTP0_i     = DVTP0     + BIN_L * LDVTP0    + BIN_W * WDVTP0    + BIN_WL * PDVTP0 ;
-    DVTP1_i     = DVTP1     + BIN_L * LDVTP1    + BIN_W * WDVTP1    + BIN_WL * PDVTP1 ;
-    DVTP2_i     = DVTP2     + BIN_L * LDVTP2    + BIN_W * WDVTP2    + BIN_WL * PDVTP2 ;
-    DVTP3_i     = DVTP3     + BIN_L * LDVTP3    + BIN_W * WDVTP3    + BIN_WL * PDVTP3 ;
-    DVTP4_i     = DVTP4     + BIN_L * LDVTP4    + BIN_W * WDVTP4    + BIN_WL * PDVTP4 ;
-    DVTP5_i     = DVTP5     + BIN_L * LDVTP5    + BIN_W * WDVTP5    + BIN_WL * PDVTP5 ;
-    K2_i        = K2        + BIN_L * LK2       + BIN_W * WK2       + BIN_WL * PK2 ;
-    K1_i        = K1        + BIN_L * LK1       + BIN_W * WK1       + BIN_WL * PK1 ;
-    XJ_i        = XJ        + BIN_L * LXJ       + BIN_W * WXJ       + BIN_WL * PXJ ;
-    PHIN_i      = PHIN      + BIN_L * LPHIN     + BIN_W * WPHIN     + BIN_WL * PPHIN ;
-    ETA0_i      = ETA0      + BIN_L * LETA0     + BIN_W * WETA0     + BIN_WL * PETA0 ;
 
-    ETAB_i      = ETAB      + BIN_L * LETAB     + BIN_W * WETAB     + BIN_WL * PETAB ;
-    DELTA_i     = DELTA     + BIN_L * LDELTA    + BIN_W * WDELTA    + BIN_WL * PDELTA ;
-    U0_i        = U0        + BIN_L * LU0       + BIN_W * WU0       + BIN_WL * PU0 ;
-    UA_i        = UA        + BIN_L * LUA       + BIN_W * WUA       + BIN_WL * PUA ;
-    UD_i        = UD        + BIN_L * LUD       + BIN_W * WUD       + BIN_WL * PUD ;
-    EU_i        = EU        + BIN_L * LEU       + BIN_W * WEU       + BIN_WL * PEU;
-    UCS_i       = UCS       + BIN_L * LUCS      + BIN_W * WUCS      + BIN_WL * PUCS;
-    UC_i        = UC        + BIN_L * LUC       + BIN_W * WUC       + BIN_WL * PUC;
-    PCLM_i      = PCLM      + BIN_L * LPCLM     + BIN_W * WPCLM     + BIN_WL * PPCLM ;
-    PCLMCV_i    = PCLMCV    + BIN_L * LPCLMCV   + BIN_W * WPCLMCV   + BIN_WL * PPCLMCV ;
-
-    RSW_i       = RSW       + BIN_L * LRSW      + BIN_W * WRSW      + BIN_WL * PRSW ;
-    RDW_i       = RDW       + BIN_L * LRDW      + BIN_W * WRDW      + BIN_WL * PRDW ;
-    PRWG_i      = PRWG      + BIN_L * LPRWG     + BIN_W * WPRWG     + BIN_WL * PPRWG ;
-    PRWB_i      = PRWB      + BIN_L * LPRWB     + BIN_W * WPRWB     + BIN_WL * PPRWB ;
-    WR_i        = WR        + BIN_L * LWR       + BIN_W * WWR       + BIN_WL * PWR ;
-    RSWMIN_i    = RSWMIN    + BIN_L * LRSWMIN   + BIN_W * WRSWMIN   + BIN_WL * PRSWMIN ;
-    RDWMIN_i    = RDWMIN    + BIN_L * LRDWMIN   + BIN_W * WRDWMIN   + BIN_WL * PRDWMIN ;
-    RDSW_i      = RDSW      + BIN_L * LRDSW     + BIN_W * WRDSW     + BIN_WL * PRDSW ;
-    RDSWMIN_i   = RDSWMIN   + BIN_L * LRDSWMIN  + BIN_W * WRDSWMIN  + BIN_WL * PRDSWMIN ;
-
-    PTWG_i      = PTWG      + BIN_L * LPTWG     + BIN_W * WPTWG     + BIN_WL * PPTWG ;
-    PDIBLC_i    = PDIBLC    + BIN_L * LPDIBLC   + BIN_W * WPDIBLC   + BIN_WL * PPDIBLC ;
-    PDIBLCB_i   = PDIBLCB   + BIN_L * LPDIBLCB  + BIN_W * WPDIBLCB  + BIN_WL * PPDIBLCB ;
-    PSCBE1_i    = PSCBE1    + BIN_L * LPSCBE1   + BIN_W * WPSCBE1   + BIN_WL * PPSCBE1 ;
-    PSCBE2_i    = PSCBE2    + BIN_L * LPSCBE2   + BIN_W * WPSCBE2   + BIN_WL * PPSCBE2 ;
-    PDITS_i     = PDITS     + BIN_L * LPDITS    + BIN_W * WPDITS    + BIN_WL * PPDITS ;
-    PDITSD_i    = PDITSD    + BIN_L * LPDITSD   + BIN_W * WPDITSD   + BIN_WL * PPDITSD ;
-    FPROUT_i    = FPROUT    + BIN_L * LFPROUT   + BIN_W * WFPROUT   + BIN_WL * PFPROUT ;
-    PVAG_i      = PVAG      + BIN_L * LPVAG     + BIN_W * WPVAG     + BIN_WL * PPVAG ;
-    VSAT_i      = VSAT      + BIN_L * LVSAT     + BIN_W * WVSAT     + BIN_WL * PVSAT ;
-    PSAT_i      = PSAT      + BIN_L * LPSAT     + BIN_W * WPSAT     + BIN_WL * PPSAT ;
-    VSATCV_i    = VSATCV    + BIN_L * LVSATCV   + BIN_W * WVSATCV   + BIN_WL * PVSATCV ;
-    CF_i        = CF        + BIN_L * LCF       + BIN_W * WCF       + BIN_WL * PCF ;
-    CGSL_i      = CGSL      + BIN_L * LCGSL     + BIN_W * WCGSL     + BIN_WL * PCGSL  ;
-    CGDL_i      = CGDL      + BIN_L * LCGDL     + BIN_W * WCGDL     + BIN_WL * PCGDL ;
-    CKAPPAS_i   = CKAPPAS   + BIN_L * LCKAPPAS  + BIN_W * WCKAPPAS  + BIN_WL * PCKAPPAS ;
-    CKAPPAD_i   = CKAPPAD   + BIN_L * LCKAPPAD  + BIN_W * WCKAPPAD  + BIN_WL * PCKAPPAD ;
-
-    ALPHA0_i    = ALPHA0    + BIN_L * LALPHA0   + BIN_W * WALPHA0   + BIN_WL * PALPHA0;
-    BETA0_i     = BETA0     + BIN_L * LBETA0    + BIN_W * WBETA0    + BIN_WL * PBETA0;
-
-    KVTH0WE_i   = KVTH0WE   + BIN_L * LKVTH0WE  + BIN_W * WKVTH0WE  + BIN_WL * PKVTH0WE;
-    K2WE_i      = K2WE      + BIN_L * LK2WE     + BIN_W * WK2WE     + BIN_WL * PK2WE;
-    KU0WE_i     = KU0WE     + BIN_L * LKU0WE    + BIN_W * WKU0WE    + BIN_WL * PKU0WE;
-
-    AGIDL_i     = AGIDL     + BIN_L * LAGIDL    + BIN_W  * WAGIDL   + BIN_WL * PAGIDL;
-    BGIDL_i     = BGIDL     + BIN_L * LBGIDL    + BIN_W  * WBGIDL   + BIN_WL * PBGIDL;
-    CGIDL_i     = CGIDL     + BIN_L * LCGIDL    + BIN_W  * WCGIDL   + BIN_WL * PCGIDL;
-    EGIDL_i     = EGIDL     + BIN_L * LEGIDL    + BIN_W  * WEGIDL   + BIN_WL * PEGIDL;
-    AGISL_i     = AGISL     + BIN_L * LAGISL    + BIN_W  * WAGISL   + BIN_WL * PAGISL;
-    BGISL_i     = BGISL     + BIN_L * LBGISL    + BIN_W  * WBGISL   + BIN_WL * PBGISL;
-    CGISL_i     = CGISL     + BIN_L * LCGISL    + BIN_W  * WCGISL   + BIN_WL * PCGISL;
-    EGISL_i     = EGISL     + BIN_L * LEGISL    + BIN_W  * WEGISL   + BIN_WL * PEGISL;
-
-    UTE_i       = UTE       + BIN_L * LUTE      + BIN_W  * WUTE     + BIN_WL * PUTE;
-    UA1_i       = UA1       + BIN_L * LUA1      + BIN_W  * WUA1     + BIN_WL * PUA1;
-    UC1_i       = UC1       + BIN_L * LUC1      + BIN_W  * WUC1     + BIN_WL * PUC1;
-    UD1_i       = UD1       + BIN_L * LUD1      + BIN_W  * WUD1     + BIN_WL * PUD1;
-    UCSTE_i     = UCSTE     + BIN_L * LUCSTE    + BIN_W  * WUCSTE   + BIN_WL * PUCSTE;
-    PRT_i       = PRT       + BIN_L * LPRT      + BIN_W  * WPRT     + BIN_WL * PPRT;
-    AT_i        = AT        + BIN_L * LAT       + BIN_W  * WAT      + BIN_WL * PAT;
-    PTWGT_i     = PTWGT     + BIN_L * LPTWGT    + BIN_W  * WPTWGT   + BIN_WL * PPTWGT;
-    IIT_i       = IIT       + BIN_L * LIIT      + BIN_W  * WIIT     + BIN_WL * PIIT;
-    TGIDL_i     = TGIDL     + BIN_L * LTGIDL    + BIN_W  * WTGIDL   + BIN_WL * PTGIDL;
-    IGT_i       = IGT       + BIN_L * LIGT      + BIN_W  * WIGT     + BIN_WL * PIGT;
-
-    AIGBINV_i   = AIGBINV   + BIN_L * LAIGBINV  + BIN_W * WAIGBINV  + BIN_WL * PAIGBINV;
-    BIGBINV_i   = BIGBINV   + BIN_L * LBIGBINV  + BIN_W * WBIGBINV  + BIN_WL * PBIGBINV;
-    CIGBINV_i   = CIGBINV   + BIN_L * LCIGBINV  + BIN_W * WCIGBINV  + BIN_WL * PCIGBINV;
-    EIGBINV_i   = EIGBINV   + BIN_L * LEIGBINV  + BIN_W * WEIGBINV  + BIN_WL * PEIGBINV;
-    NIGBINV_i   = NIGBINV   + BIN_L * LNIGBINV  + BIN_W * WNIGBINV  + BIN_WL * PNIGBINV;
-    AIGBACC_i   = AIGBACC   + BIN_L * LAIGBACC  + BIN_W * WAIGBACC  + BIN_WL * PAIGBACC;
-    BIGBACC_i   = BIGBACC   + BIN_L * LBIGBACC  + BIN_W * WBIGBACC  + BIN_WL * PBIGBACC;
-    CIGBACC_i   = CIGBACC   + BIN_L * LCIGBACC  + BIN_W * WCIGBACC  + BIN_WL * PCIGBACC;
-    NIGBACC_i   = NIGBACC   + BIN_L * LNIGBACC  + BIN_W * WNIGBACC  + BIN_WL * PNIGBACC;
-    AIGC_i      = AIGC      + BIN_L * LAIGC     + BIN_W * WAIGC     + BIN_WL * PAIGC;
-    BIGC_i      = BIGC      + BIN_L * LBIGC     + BIN_W * WBIGC     + BIN_WL * PBIGC;
-    CIGC_i      = CIGC      + BIN_L * LCIGC     + BIN_W * WCIGC     + BIN_WL * PCIGC;
-    AIGS_i      = AIGS      + BIN_L * LAIGS     + BIN_W * WAIGS     + BIN_WL * PAIGS;
-    BIGS_i      = BIGS      + BIN_L * LBIGS     + BIN_W * WBIGS     + BIN_WL * PBIGS;
-    CIGS_i      = CIGS      + BIN_L * LCIGS     + BIN_W * WCIGS     + BIN_WL * PCIGS;
-    AIGD_i      = AIGD      + BIN_L * LAIGD     + BIN_W * WAIGD     + BIN_WL * PAIGD;
-    BIGD_i      = BIGD      + BIN_L * LBIGD     + BIN_W * WBIGD     + BIN_WL * PBIGD;
-    CIGD_i      = CIGD      + BIN_L * LCIGD     + BIN_W * WCIGD     + BIN_WL * PCIGD;
-    POXEDGE_i   = POXEDGE   + BIN_L * LPOXEDGE  + BIN_W * WPOXEDGE  + BIN_WL * PPOXEDGE;
-    DLCIG_i     = DLCIG     + BIN_L * LDLCIG    + BIN_W * WDLCIG    + BIN_WL * PDLCIG;
-    DLCIGD_i    = DLCIGD    + BIN_L * LDLCIGD   + BIN_W * WDLCIGD   + BIN_WL * PDLCIGD;
-    NTOX_i      = NTOX      + BIN_L * LNTOX     + BIN_W * WNTOX     + BIN_WL * PNTOX;
-
-    KT1_i       = KT1       + BIN_L * LKT1      + BIN_W * WKT1      + BIN_WL * PKT1;
-    KT2_i       = KT2       + BIN_L * LKT2      + BIN_W * WKT2      + BIN_WL * PKT2;
-    PSATB_i     = PSATB     + BIN_L * LPSATB    + BIN_W * WPSATB    + BIN_WL * PPSATB;
-
-    A1_i        = A1        + BIN_L * LA1       + BIN_W * WA1       + BIN_WL * PA1;
-    A11_i       = A11       + BIN_L * LA11      + BIN_W * WA11      + BIN_WL * PA11;
-    A2_i        = A2        + BIN_L * LA2       + BIN_W * WA2       + BIN_WL * PA2;
-    A21_i       = A21       + BIN_L * LA21      + BIN_W * WA21      + BIN_WL * PA21;
-
-    if (ASYMMOD != 0) begin
-        CDSCDR_i    = CDSCDR    + BIN_L * LCDSCDR   + BIN_W * WCDSCDR   + BIN_WL * PCDSCDR ;
-        ETA0R_i     = ETA0R     + BIN_L * LETA0R    + BIN_W * WETA0R    + BIN_WL * PETA0R ;
-        U0R_i       = U0R       + BIN_L * LU0R      + BIN_W * WU0R      + BIN_WL * PU0R ;
-        UAR_i       = UAR       + BIN_L * LUAR      + BIN_W * WUAR      + BIN_WL * PUAR ;
-        UDR_i       = UDR       + BIN_L * LUDR      + BIN_W * WUDR      + BIN_WL * PUDR ;
-        UCSR_i      = UCSR      + BIN_L * LUCSR     + BIN_W * WUCSR     + BIN_WL * PUCSR;
-        UCR_i       = UCR       + BIN_L * LUCR      + BIN_W * WUCR      + BIN_WL * PUCR;
-        PCLMR_i     = PCLMR     + BIN_L * LPCLMR    + BIN_W * WPCLMR    + BIN_WL * PPCLMR ;
-        PDIBLCR_i   = PDIBLCR   + BIN_L * LPDIBLCR      + BIN_W * WPDIBLCR      + BIN_WL * PPDIBLCR ;
-        VSATR_i     = VSATR     + BIN_L * LVSATR    + BIN_W * WVSATR    + BIN_WL * PVSATR ;
-        PSATR_i     = PSATR     + BIN_L * LPSATR    + BIN_W * WPSATR    + BIN_WL * PPSATR ;
-        PTWGR_i     = PTWGR     + BIN_L * LPTWGR    + BIN_W * WPTWGR    + BIN_WL * PPTWGR ;
-    end
-
-    // Geometrical scaling
-    T0 = NDEPL1 * max( pow(Inv_L, NDEPLEXP1) - pow(Inv_Llong, NDEPLEXP1), 0) + NDEPL2 * max( pow(Inv_L, NDEPLEXP2) - pow(Inv_Llong, NDEPLEXP2), 0);
-    T1 = NDEPW * max( pow(Inv_W, NDEPWEXP) - pow(Inv_Wwide, NDEPWEXP), 0) + NDEPWL * pow(Inv_W * Inv_L, NDEPWLEXP);
-    NDEP_i = NDEP_i * (1.0 + T0 + T1);
-
-    T0 = NFACTORL * max( pow(Inv_L, NFACTORLEXP) - pow(Inv_Llong, NFACTORLEXP), 0);
-    T1 = NFACTORW * max( pow(Inv_W, NFACTORWEXP) - pow(Inv_Wwide, NFACTORWEXP), 0) + NFACTORWL * pow(Inv_WL, NFACTORWLEXP);
-    NFACTOR_i = NFACTOR_i * (1.0 + T0 + T1);
-
-    T0 = (1.0 + CDSCDL * max( pow(Inv_L, CDSCDLEXP) - pow(Inv_Llong, CDSCDLEXP), 0) );
-    CDSCD_i = CDSCD_i * T0;
-    if (ASYMMOD != 0)
-        CDSCDR_i = CDSCDR_i * T0;
-    CDSCB_i = CDSCB_i * (1.0 + CDSCBL * max( pow(Inv_L, CDSCBLEXP) - pow(Inv_Llong, CDSCBLEXP), 0) );
-    U0_i = MULU0 * U0_i;
-
-    if (MOBSCALE != 1) begin
-        if (U0LEXP > 0) begin
-            U0_i = U0_i * (1.0 - U0L * max( pow(Inv_L, U0LEXP) - pow(Inv_Llong, U0LEXP), 0));
-            if (ASYMMOD != 0)
-                U0R_i = U0R_i * (1.0 - U0L * max( pow(Inv_L, U0LEXP) - pow(Inv_Llong, U0LEXP), 0));
-        end else begin
-            U0_i = U0_i * (1.0 - U0L);
-            if (ASYMMOD != 0)
-                U0R_i = U0R_i * (1.0 - U0L);
+        //Weffcj for Diode, GIDL etc.
+        dWJ     = DWJ + WLC / pow(Lnew,WLN) + WWC / pow(Wnew,WWN) + WWLC / pow(Lnew,WLN) / pow(Wnew,WWN);
+        Weffcj      = Wnew - 2.0*dWJ;
+        if (Weffcj <= 0) begin
+            $strobe("Fatal: Effective channel width for S/D junctions = %e for  %M is non-positive", Weffcj);
+            $finish(0);
         end
-    end else begin
-        U0_i = U0_i * (1.0 - (UP1 * exp(-Leff / LP1)) - (UP2 * exp(-Leff / LP2)));
+
+        Inv_L       = 1.0e-6 / Leff;
+        Inv_W       = 1.0e-6 / Weff;
+        Inv_Lact    = 1.0e-6 / Lact;
+        Inv_Wact    = 1.0e-6 / Wact;
+        Inv_Llong   = 1.0e-6 / LLONG;
+        Inv_Wwide   = 1.0e-6 / WWIDE;
+        Inv_WL      = Inv_L * Inv_W;
+
+        // Effective Length and Width for Binning
+        L_LLN1      = L_LLN;
+        L_WLN1      = L_WLN;
+        if (DLBIN != 0) begin
+            if (DLBIN<=-Lnew) begin
+                $strobe("Fatal: DLBIN for  %M = %e is <= -Ldrawn*LMLT", DLBIN);
+                $finish(0);
+            end else begin
+                L_LLN1      = pow(Lnew+DLBIN, -LLN);
+                L_WLN1      = pow(Lnew+DLBIN, -WLN);
+            end
+        end
+
+        W_LWN1      = W_LWN;
+        W_WWN1      = W_WWN;
+        if (DWBIN != 0) begin
+            if (DWBIN<=-Wnew) begin
+                $strobe("Fatal: DWBIN for  %M = %e is <= -Wdrawn*WMLT", DWBIN);
+                $finish(0);
+            end else begin
+                W_LWN1      = pow(Wnew+DWBIN, -LWN);
+                W_WWN1      = pow(Wnew+DWBIN, -WWN);
+            end
+        end
+
+        LW_LLN_LWN1 = L_LLN1*W_LWN1;
+        dLB     = LINT + LL * L_LLN1 + LW * W_LWN1 + LWL * LW_LLN_LWN1;
+        LW_WLN_WWN1 = L_WLN1*W_WWN1;
+        dWB         = WINT + WL * L_WLN1 + WW * W_WWN1 + WWL * LW_WLN_WWN1;
+
+        Leff1       = Lnew - 2.0*dLB + DLBIN;
+        if (Leff1 <= 0) begin
+            $strobe("Fatal: Effective channel length for binning = %e for  %M is non-positive", Leff1);
+            $finish(0);
+        end
+        Weff1       = Wnew - 2.0*dWB + DWBIN;
+        if (Weff1 <= 0) begin
+            $strobe("Fatal: Effective channel width for binning = %e for  %M is non-positive", Weff1);
+            $finish(0);
+        end
+
+        if (BINUNIT==1) begin
+            BIN_L       = 1.0e-6 / Leff1;
+            BIN_W       = 1.0e-6 / Weff1;
+        end else begin
+            BIN_L       = 1.0 / Leff1;
+            BIN_W       = 1.0 / Weff1;
+        end
+
+        BIN_WL      = BIN_L * BIN_W;
+
+        VFB_i       = VFB       + BIN_L * LVFB      + BIN_W * WVFB      + BIN_WL * PVFB ;
+        VFBCV_i     = VFBCV     + BIN_L * LVFBCV    + BIN_W * WVFBCV    + BIN_WL * PVFBCV ;
+        NSD_i       = NSD       + BIN_L * LNSD      + BIN_W * WNSD      + BIN_WL * PNSD ;
+        NDEP_i      = NDEP      + BIN_L * LNDEP     + BIN_W * WNDEP     + BIN_WL * PNDEP ;
+        NDEPCV_i    = NDEPCV    + BIN_L * LNDEPCV   + BIN_W * WNDEPCV   + BIN_WL * PNDEPCV ;
+        NGATE_i     = NGATE     + BIN_L * LNGATE    + BIN_W * WNGATE    + BIN_WL * PNGATE;
+        CIT_i       = CIT       + BIN_L * LCIT      + BIN_W * WCIT      + BIN_WL * PCIT ;
+        NFACTOR_i   = NFACTOR   + BIN_L * LNFACTOR  + BIN_W * WNFACTOR  + BIN_WL * PNFACTOR ;
+        CDSCD_i     = CDSCD     + BIN_L * LCDSCD    + BIN_W * WCDSCD    + BIN_WL * PCDSCD ;
+        CDSCB_i     = CDSCB     + BIN_L * LCDSCB    + BIN_W * WCDSCB    + BIN_WL * PCDSCB ;
+        DVTP0_i     = DVTP0     + BIN_L * LDVTP0    + BIN_W * WDVTP0    + BIN_WL * PDVTP0 ;
+        DVTP1_i     = DVTP1     + BIN_L * LDVTP1    + BIN_W * WDVTP1    + BIN_WL * PDVTP1 ;
+        DVTP2_i     = DVTP2     + BIN_L * LDVTP2    + BIN_W * WDVTP2    + BIN_WL * PDVTP2 ;
+        DVTP3_i     = DVTP3     + BIN_L * LDVTP3    + BIN_W * WDVTP3    + BIN_WL * PDVTP3 ;
+        DVTP4_i     = DVTP4     + BIN_L * LDVTP4    + BIN_W * WDVTP4    + BIN_WL * PDVTP4 ;
+        DVTP5_i     = DVTP5     + BIN_L * LDVTP5    + BIN_W * WDVTP5    + BIN_WL * PDVTP5 ;
+        K2_i        = K2        + BIN_L * LK2       + BIN_W * WK2       + BIN_WL * PK2 ;
+        K1_i        = K1        + BIN_L * LK1       + BIN_W * WK1       + BIN_WL * PK1 ;
+        XJ_i        = XJ        + BIN_L * LXJ       + BIN_W * WXJ       + BIN_WL * PXJ ;
+        PHIN_i      = PHIN      + BIN_L * LPHIN     + BIN_W * WPHIN     + BIN_WL * PPHIN ;
+        ETA0_i      = ETA0      + BIN_L * LETA0     + BIN_W * WETA0     + BIN_WL * PETA0 ;
+
+        ETAB_i      = ETAB      + BIN_L * LETAB     + BIN_W * WETAB     + BIN_WL * PETAB ;
+        DELTA_i     = DELTA     + BIN_L * LDELTA    + BIN_W * WDELTA    + BIN_WL * PDELTA ;
+        U0_i        = U0        + BIN_L * LU0       + BIN_W * WU0       + BIN_WL * PU0 ;
+        UA_i        = UA        + BIN_L * LUA       + BIN_W * WUA       + BIN_WL * PUA ;
+        UD_i        = UD        + BIN_L * LUD       + BIN_W * WUD       + BIN_WL * PUD ;
+        EU_i        = EU        + BIN_L * LEU       + BIN_W * WEU       + BIN_WL * PEU;
+        UCS_i       = UCS       + BIN_L * LUCS      + BIN_W * WUCS      + BIN_WL * PUCS;
+        UC_i        = UC        + BIN_L * LUC       + BIN_W * WUC       + BIN_WL * PUC;
+        PCLM_i      = PCLM      + BIN_L * LPCLM     + BIN_W * WPCLM     + BIN_WL * PPCLM ;
+        PCLMCV_i    = PCLMCV    + BIN_L * LPCLMCV   + BIN_W * WPCLMCV   + BIN_WL * PPCLMCV ;
+
+        RSW_i       = RSW       + BIN_L * LRSW      + BIN_W * WRSW      + BIN_WL * PRSW ;
+        RDW_i       = RDW       + BIN_L * LRDW      + BIN_W * WRDW      + BIN_WL * PRDW ;
+        PRWG_i      = PRWG      + BIN_L * LPRWG     + BIN_W * WPRWG     + BIN_WL * PPRWG ;
+        PRWB_i      = PRWB      + BIN_L * LPRWB     + BIN_W * WPRWB     + BIN_WL * PPRWB ;
+        WR_i        = WR        + BIN_L * LWR       + BIN_W * WWR       + BIN_WL * PWR ;
+        RSWMIN_i    = RSWMIN    + BIN_L * LRSWMIN   + BIN_W * WRSWMIN   + BIN_WL * PRSWMIN ;
+        RDWMIN_i    = RDWMIN    + BIN_L * LRDWMIN   + BIN_W * WRDWMIN   + BIN_WL * PRDWMIN ;
+        RDSW_i      = RDSW      + BIN_L * LRDSW     + BIN_W * WRDSW     + BIN_WL * PRDSW ;
+        RDSWMIN_i   = RDSWMIN   + BIN_L * LRDSWMIN  + BIN_W * WRDSWMIN  + BIN_WL * PRDSWMIN ;
+
+        PTWG_i      = PTWG      + BIN_L * LPTWG     + BIN_W * WPTWG     + BIN_WL * PPTWG ;
+        PDIBLC_i    = PDIBLC    + BIN_L * LPDIBLC   + BIN_W * WPDIBLC   + BIN_WL * PPDIBLC ;
+        PDIBLCB_i   = PDIBLCB   + BIN_L * LPDIBLCB  + BIN_W * WPDIBLCB  + BIN_WL * PPDIBLCB ;
+        PSCBE1_i    = PSCBE1    + BIN_L * LPSCBE1   + BIN_W * WPSCBE1   + BIN_WL * PPSCBE1 ;
+        PSCBE2_i    = PSCBE2    + BIN_L * LPSCBE2   + BIN_W * WPSCBE2   + BIN_WL * PPSCBE2 ;
+        PDITS_i     = PDITS     + BIN_L * LPDITS    + BIN_W * WPDITS    + BIN_WL * PPDITS ;
+        PDITSD_i    = PDITSD    + BIN_L * LPDITSD   + BIN_W * WPDITSD   + BIN_WL * PPDITSD ;
+        FPROUT_i    = FPROUT    + BIN_L * LFPROUT   + BIN_W * WFPROUT   + BIN_WL * PFPROUT ;
+        PVAG_i      = PVAG      + BIN_L * LPVAG     + BIN_W * WPVAG     + BIN_WL * PPVAG ;
+        VSAT_i      = VSAT      + BIN_L * LVSAT     + BIN_W * WVSAT     + BIN_WL * PVSAT ;
+        PSAT_i      = PSAT      + BIN_L * LPSAT     + BIN_W * WPSAT     + BIN_WL * PPSAT ;
+        VSATCV_i    = VSATCV    + BIN_L * LVSATCV   + BIN_W * WVSATCV   + BIN_WL * PVSATCV ;
+        CF_i        = CF        + BIN_L * LCF       + BIN_W * WCF       + BIN_WL * PCF ;
+        CGSL_i      = CGSL      + BIN_L * LCGSL     + BIN_W * WCGSL     + BIN_WL * PCGSL  ;
+        CGDL_i      = CGDL      + BIN_L * LCGDL     + BIN_W * WCGDL     + BIN_WL * PCGDL ;
+        CKAPPAS_i   = CKAPPAS   + BIN_L * LCKAPPAS  + BIN_W * WCKAPPAS  + BIN_WL * PCKAPPAS ;
+        CKAPPAD_i   = CKAPPAD   + BIN_L * LCKAPPAD  + BIN_W * WCKAPPAD  + BIN_WL * PCKAPPAD ;
+
+        ALPHA0_i    = ALPHA0    + BIN_L * LALPHA0   + BIN_W * WALPHA0   + BIN_WL * PALPHA0;
+        BETA0_i     = BETA0     + BIN_L * LBETA0    + BIN_W * WBETA0    + BIN_WL * PBETA0;
+
+        KVTH0WE_i   = KVTH0WE   + BIN_L * LKVTH0WE  + BIN_W * WKVTH0WE  + BIN_WL * PKVTH0WE;
+        K2WE_i      = K2WE      + BIN_L * LK2WE     + BIN_W * WK2WE     + BIN_WL * PK2WE;
+        KU0WE_i     = KU0WE     + BIN_L * LKU0WE    + BIN_W * WKU0WE    + BIN_WL * PKU0WE;
+
+        AGIDL_i     = AGIDL     + BIN_L * LAGIDL    + BIN_W  * WAGIDL   + BIN_WL * PAGIDL;
+        BGIDL_i     = BGIDL     + BIN_L * LBGIDL    + BIN_W  * WBGIDL   + BIN_WL * PBGIDL;
+        CGIDL_i     = CGIDL     + BIN_L * LCGIDL    + BIN_W  * WCGIDL   + BIN_WL * PCGIDL;
+        EGIDL_i     = EGIDL     + BIN_L * LEGIDL    + BIN_W  * WEGIDL   + BIN_WL * PEGIDL;
+        AGISL_i     = AGISL     + BIN_L * LAGISL    + BIN_W  * WAGISL   + BIN_WL * PAGISL;
+        BGISL_i     = BGISL     + BIN_L * LBGISL    + BIN_W  * WBGISL   + BIN_WL * PBGISL;
+        CGISL_i     = CGISL     + BIN_L * LCGISL    + BIN_W  * WCGISL   + BIN_WL * PCGISL;
+        EGISL_i     = EGISL     + BIN_L * LEGISL    + BIN_W  * WEGISL   + BIN_WL * PEGISL;
+
+        UTE_i       = UTE       + BIN_L * LUTE      + BIN_W  * WUTE     + BIN_WL * PUTE;
+        UA1_i       = UA1       + BIN_L * LUA1      + BIN_W  * WUA1     + BIN_WL * PUA1;
+        UC1_i       = UC1       + BIN_L * LUC1      + BIN_W  * WUC1     + BIN_WL * PUC1;
+        UD1_i       = UD1       + BIN_L * LUD1      + BIN_W  * WUD1     + BIN_WL * PUD1;
+        UCSTE_i     = UCSTE     + BIN_L * LUCSTE    + BIN_W  * WUCSTE   + BIN_WL * PUCSTE;
+        PRT_i       = PRT       + BIN_L * LPRT      + BIN_W  * WPRT     + BIN_WL * PPRT;
+        AT_i        = AT        + BIN_L * LAT       + BIN_W  * WAT      + BIN_WL * PAT;
+        PTWGT_i     = PTWGT     + BIN_L * LPTWGT    + BIN_W  * WPTWGT   + BIN_WL * PPTWGT;
+        IIT_i       = IIT       + BIN_L * LIIT      + BIN_W  * WIIT     + BIN_WL * PIIT;
+        TGIDL_i     = TGIDL     + BIN_L * LTGIDL    + BIN_W  * WTGIDL   + BIN_WL * PTGIDL;
+        IGT_i       = IGT       + BIN_L * LIGT      + BIN_W  * WIGT     + BIN_WL * PIGT;
+
+        AIGBINV_i   = AIGBINV   + BIN_L * LAIGBINV  + BIN_W * WAIGBINV  + BIN_WL * PAIGBINV;
+        BIGBINV_i   = BIGBINV   + BIN_L * LBIGBINV  + BIN_W * WBIGBINV  + BIN_WL * PBIGBINV;
+        CIGBINV_i   = CIGBINV   + BIN_L * LCIGBINV  + BIN_W * WCIGBINV  + BIN_WL * PCIGBINV;
+        EIGBINV_i   = EIGBINV   + BIN_L * LEIGBINV  + BIN_W * WEIGBINV  + BIN_WL * PEIGBINV;
+        NIGBINV_i   = NIGBINV   + BIN_L * LNIGBINV  + BIN_W * WNIGBINV  + BIN_WL * PNIGBINV;
+        AIGBACC_i   = AIGBACC   + BIN_L * LAIGBACC  + BIN_W * WAIGBACC  + BIN_WL * PAIGBACC;
+        BIGBACC_i   = BIGBACC   + BIN_L * LBIGBACC  + BIN_W * WBIGBACC  + BIN_WL * PBIGBACC;
+        CIGBACC_i   = CIGBACC   + BIN_L * LCIGBACC  + BIN_W * WCIGBACC  + BIN_WL * PCIGBACC;
+        NIGBACC_i   = NIGBACC   + BIN_L * LNIGBACC  + BIN_W * WNIGBACC  + BIN_WL * PNIGBACC;
+        AIGC_i      = AIGC      + BIN_L * LAIGC     + BIN_W * WAIGC     + BIN_WL * PAIGC;
+        BIGC_i      = BIGC      + BIN_L * LBIGC     + BIN_W * WBIGC     + BIN_WL * PBIGC;
+        CIGC_i      = CIGC      + BIN_L * LCIGC     + BIN_W * WCIGC     + BIN_WL * PCIGC;
+        AIGS_i      = AIGS      + BIN_L * LAIGS     + BIN_W * WAIGS     + BIN_WL * PAIGS;
+        BIGS_i      = BIGS      + BIN_L * LBIGS     + BIN_W * WBIGS     + BIN_WL * PBIGS;
+        CIGS_i      = CIGS      + BIN_L * LCIGS     + BIN_W * WCIGS     + BIN_WL * PCIGS;
+        AIGD_i      = AIGD      + BIN_L * LAIGD     + BIN_W * WAIGD     + BIN_WL * PAIGD;
+        BIGD_i      = BIGD      + BIN_L * LBIGD     + BIN_W * WBIGD     + BIN_WL * PBIGD;
+        CIGD_i      = CIGD      + BIN_L * LCIGD     + BIN_W * WCIGD     + BIN_WL * PCIGD;
+        POXEDGE_i   = POXEDGE   + BIN_L * LPOXEDGE  + BIN_W * WPOXEDGE  + BIN_WL * PPOXEDGE;
+        DLCIG_i     = DLCIG     + BIN_L * LDLCIG    + BIN_W * WDLCIG    + BIN_WL * PDLCIG;
+        DLCIGD_i    = DLCIGD    + BIN_L * LDLCIGD   + BIN_W * WDLCIGD   + BIN_WL * PDLCIGD;
+        NTOX_i      = NTOX      + BIN_L * LNTOX     + BIN_W * WNTOX     + BIN_WL * PNTOX;
+
+        KT1_i       = KT1       + BIN_L * LKT1      + BIN_W * WKT1      + BIN_WL * PKT1;
+        KT2_i       = KT2       + BIN_L * LKT2      + BIN_W * WKT2      + BIN_WL * PKT2;
+        PSATB_i     = PSATB     + BIN_L * LPSATB    + BIN_W * WPSATB    + BIN_WL * PPSATB;
+
+        A1_i        = A1        + BIN_L * LA1       + BIN_W * WA1       + BIN_WL * PA1;
+        A11_i       = A11       + BIN_L * LA11      + BIN_W * WA11      + BIN_WL * PA11;
+        A2_i        = A2        + BIN_L * LA2       + BIN_W * WA2       + BIN_WL * PA2;
+        A21_i       = A21       + BIN_L * LA21      + BIN_W * WA21      + BIN_WL * PA21;
+
+        if (ASYMMOD != 0) begin
+            CDSCDR_i    = CDSCDR    + BIN_L * LCDSCDR   + BIN_W * WCDSCDR   + BIN_WL * PCDSCDR ;
+            ETA0R_i     = ETA0R     + BIN_L * LETA0R    + BIN_W * WETA0R    + BIN_WL * PETA0R ;
+            U0R_i       = U0R       + BIN_L * LU0R      + BIN_W * WU0R      + BIN_WL * PU0R ;
+            UAR_i       = UAR       + BIN_L * LUAR      + BIN_W * WUAR      + BIN_WL * PUAR ;
+            UDR_i       = UDR       + BIN_L * LUDR      + BIN_W * WUDR      + BIN_WL * PUDR ;
+            UCSR_i      = UCSR      + BIN_L * LUCSR     + BIN_W * WUCSR     + BIN_WL * PUCSR;
+            UCR_i       = UCR       + BIN_L * LUCR      + BIN_W * WUCR      + BIN_WL * PUCR;
+            PCLMR_i     = PCLMR     + BIN_L * LPCLMR    + BIN_W * WPCLMR    + BIN_WL * PPCLMR ;
+            PDIBLCR_i   = PDIBLCR   + BIN_L * LPDIBLCR      + BIN_W * WPDIBLCR      + BIN_WL * PPDIBLCR ;
+            VSATR_i     = VSATR     + BIN_L * LVSATR    + BIN_W * WVSATR    + BIN_WL * PVSATR ;
+            PSATR_i     = PSATR     + BIN_L * LPSATR    + BIN_W * WPSATR    + BIN_WL * PPSATR ;
+            PTWGR_i     = PTWGR     + BIN_L * LPTWGR    + BIN_W * WPTWGR    + BIN_WL * PPTWGR ;
+        end
+
+        // Geometrical scaling
+        T0 = NDEPL1 * max( pow(Inv_L, NDEPLEXP1) - pow(Inv_Llong, NDEPLEXP1), 0) + NDEPL2 * max( pow(Inv_L, NDEPLEXP2) - pow(Inv_Llong, NDEPLEXP2), 0);
+        T1 = NDEPW * max( pow(Inv_W, NDEPWEXP) - pow(Inv_Wwide, NDEPWEXP), 0) + NDEPWL * pow(Inv_W * Inv_L, NDEPWLEXP);
+        NDEP_i = NDEP_i * (1.0 + T0 + T1);
+
+        T0 = NFACTORL * max( pow(Inv_L, NFACTORLEXP) - pow(Inv_Llong, NFACTORLEXP), 0);
+        T1 = NFACTORW * max( pow(Inv_W, NFACTORWEXP) - pow(Inv_Wwide, NFACTORWEXP), 0) + NFACTORWL * pow(Inv_WL, NFACTORWLEXP);
+        NFACTOR_i = NFACTOR_i * (1.0 + T0 + T1);
+
+        T0 = (1.0 + CDSCDL * max( pow(Inv_L, CDSCDLEXP) - pow(Inv_Llong, CDSCDLEXP), 0) );
+        CDSCD_i = CDSCD_i * T0;
         if (ASYMMOD != 0)
-            U0R_i = U0R_i * (1.0 - (UP1 * exp(-Leff / LP1)) - (UP2 * exp(-Leff / LP2)));
-    end
+            CDSCDR_i = CDSCDR_i * T0;
+        CDSCB_i = CDSCB_i * (1.0 + CDSCBL * max( pow(Inv_L, CDSCBLEXP) - pow(Inv_Llong, CDSCBLEXP), 0) );
+        U0_i = MULU0 * U0_i;
 
-    T0 = UAL * max( pow(Inv_L, UALEXP) - pow(Inv_Llong, UALEXP), 0);
-    T1 = UAW * max( pow(Inv_W, UAWEXP) - pow(Inv_Wwide, UAWEXP), 0) + UAWL * pow(Inv_WL, UAWLEXP);
-    UA_i = UA_i * (1.0 + T0 + T1);
-    if (ASYMMOD != 0)
-        UAR_i = UAR_i * (1.0 + T0 + T1);
-    T0 = EUL * max( pow(Inv_L, EULEXP) - pow(Inv_Llong, EULEXP), 0);
-    T1 = EUW * max( pow(Inv_W, EUWEXP) - pow(Inv_Wwide, EUWEXP), 0) + EUWL * pow(Inv_WL, EUWLEXP);
-    EU_i = EU_i * (1.0 + T0 + T1);
-    T0 = 1.0 + UDL * max( pow(Inv_L, UDLEXP) - pow(Inv_Llong, UDLEXP), 0);
-    UD_i = UD_i * T0;
-    if (ASYMMOD != 0)
-        UDR_i = UDR_i * T0;
-    T0 = UCL * max( pow(Inv_L, UCLEXP) - pow(Inv_Llong, UCLEXP), 0);
-    T1 = UCW * max( pow(Inv_W, UCWEXP) - pow(Inv_Wwide, UCWEXP), 0) + UCWL * pow(Inv_WL, UCWLEXP);
-    UC_i = UC_i * (1.0 + T0 + T1);
-    if (ASYMMOD != 0)
-        UCR_i = UCR_i * (1.0 + T0 + T1);
-    T0 = max( pow(Inv_L, DSUB) - pow(Inv_Llong, DSUB), 0);
-    ETA0_i = ETA0_i * T0;
-    if (ASYMMOD != 0)
-        ETA0R_i = ETA0R_i * T0;
-
-    ETAB_i = ETAB_i * max( pow(Inv_L, ETABEXP) - pow(Inv_Llong, ETABEXP), 0);
-    T0 = 1.0 + PDIBLCL * max( pow(Inv_L, PDIBLCLEXP) - pow(Inv_Llong, PDIBLCLEXP), 0);
-    PDIBLC_i = PDIBLC_i * T0;
-    if (ASYMMOD != 0)
-        PDIBLCR_i = PDIBLCR_i * T0;
-
-    T0 = DELTA_i * (1.0 + DELTAL * max( pow(Inv_L, DELTALEXP) - pow(Inv_Llong, DELTALEXP), 0));
-    DELTA_i = min(T0, 0.5);
-    FPROUT_i = FPROUT_i * (1.0 + FPROUTL * max( pow(Inv_L, FPROUTLEXP) - pow(Inv_Llong, FPROUTLEXP), 0));
-    T0 = (1.0 + PCLML * max( pow(Inv_L, PCLMLEXP) - pow(Inv_Llong, PCLMLEXP), 0));
-    PCLM_i = PCLM_i * T0;
-    PCLM_i = max(PCLM_i,0);
-    if (ASYMMOD != 0) begin
-        PCLMR_i = PCLMR_i * T0;
-        PCLMR_i = max(PCLMR_i,0);
-    end
-
-    T0 = VSATL * max( pow(Inv_L, VSATLEXP) - pow(Inv_Llong, VSATLEXP), 0);
-    T1 = VSATW * max( pow(Inv_W, VSATWEXP) - pow(Inv_Wwide, VSATWEXP), 0) + VSATWL * pow(Inv_WL, VSATWLEXP);
-    VSAT_i = VSAT_i * (1.0 + T0 + T1);
-    if (ASYMMOD != 0)
-        VSATR_i = VSATR_i * (1.0 + T0 + T1);
-
-    PSAT_i = max(PSAT_i * (1.0 + PSATL * max( pow(Inv_L, PSATLEXP) - pow(Inv_Llong, PSATLEXP), 0)), 0.25);
-    if (ASYMMOD != 0)
-        PSATR_i = max(PSATR_i * (1.0 + PSATL * max( pow(Inv_L, PSATLEXP) - pow(Inv_Llong, PSATLEXP), 0)), 0.25);
-
-    T0=(1.0 + PTWGL * max( pow(Inv_L, PTWGLEXP) - pow(Inv_Llong, PTWGLEXP), 0));
-    PTWG_i = PTWG_i * T0;
-    if (ASYMMOD != 0)
-        PTWGR_i = PTWGR_i * T0;
-
-    ALPHA0_i = ALPHA0_i * (1.0 + ALPHA0L * max( pow(Inv_L, ALPHA0LEXP) - pow(Inv_Llong, ALPHA0LEXP), 0));
-
-    AGIDL_i = AGIDL_i * (1.0 + AGIDLL * Inv_L + AGIDLW * Inv_W);
-    AGISL_i = AGISL_i * (1.0 + AGISLL * Inv_L + AGISLW * Inv_W);
-
-    AIGC_i = AIGC_i * (1.0 + AIGCL * Inv_L + AIGCW * Inv_W);
-    AIGS_i = AIGS_i * (1.0 + AIGSL * Inv_L + AIGSW * Inv_W);
-    AIGD_i = AIGD_i * (1.0 + AIGDL * Inv_L + AIGDW * Inv_W);
-    PIGCD_i = PIGCD * (1.0 + PIGCDL * Inv_L);
-
-    T0 = NDEPCVL1 * max( pow(Inv_Lact, NDEPCVLEXP1) - pow(Inv_Llong, NDEPCVLEXP1), 0) + NDEPCVL2 * max( pow(Inv_Lact, NDEPCVLEXP2) - pow(Inv_Llong, NDEPCVLEXP2), 0);
-    T1 = NDEPCVW * max( pow(Inv_Wact, NDEPCVWEXP) - pow(Inv_Wwide, NDEPCVWEXP), 0) + NDEPCVWL * pow(Inv_Wact * Inv_Lact, NDEPCVWLEXP);
-    NDEPCV_i = NDEPCV_i * (1.0 + T0 + T1);
-
-    T0 = VFBCVL * max( pow(Inv_Lact, VFBCVLEXP) - pow(Inv_Llong, VFBCVLEXP), 0);
-    T1 = VFBCVW * max( pow(Inv_Wact, VFBCVWEXP) - pow(Inv_Wwide, VFBCVWEXP), 0) + VFBCVWL * pow(Inv_WL, VFBCVWLEXP);
-    VFBCV_i = VFBCV_i * (1.0 + T0 + T1);
-
-    T0 = VSATCVL * max( pow(Inv_Lact, VSATCVLEXP) - pow(Inv_Llong, VSATCVLEXP), 0);
-    T1 = VSATCVW * max( pow(Inv_W, VSATCVWEXP) - pow(Inv_Wwide, VSATCVWEXP), 0) + VSATCVWL * pow(Inv_WL, VSATCVWLEXP);
-    VSATCV_i = VSATCV_i * (1.0 + T0 + T1);
-    PCLMCV_i = PCLMCV_i * (1.0 + PCLMCVL * max( pow(Inv_Lact, PCLMCVLEXP) - pow(Inv_Llong, PCLMCVLEXP), 0));
-    PCLMCV_i = max(PCLMCV_i,0);
-
-    T0 = K1L * max( pow(Inv_L, K1LEXP) - pow(Inv_Llong, K1LEXP), 0);
-    T1 = K1W * max( pow(Inv_W, K1WEXP) - pow(Inv_Wwide, K1WEXP), 0) + K1WL * pow(Inv_WL, K1WLEXP);
-    K1_i = K1_i * (1.0 + T0 + T1);
-
-    T0 = K2L * max( pow(Inv_L, K2LEXP) - pow(Inv_Llong, K2LEXP), 0);
-    T1 = K2W * max( pow(Inv_W, K2WEXP) - pow(Inv_Wwide, K2WEXP), 0) + K2WL * pow(Inv_WL, K2WLEXP);
-    K2_i = K2_i * (1.0 + T0 + T1);
-
-    PRWB_i = PRWB_i * (1.0 + PRWBL * max( pow(Inv_L, PRWBLEXP) - pow(Inv_Llong, PRWBLEXP), 0));
-
-    //Global Scaling parameters for Temperature
-    UTE_i = UTE_i * (1.0 + Inv_L * UTEL);
-    UA1_i = UA1_i * (1.0 + Inv_L * UA1L);
-    UD1_i = UD1_i * (1.0 + Inv_L * UD1L);
-    AT_i = AT_i * (1.0 + Inv_L * ATL);
-    PTWGT_i = PTWGT_i * (1.0 + Inv_L * PTWGTL);
-    `ifdef __THERMAL_NODE__
-        if ($port_connected(t) == 0) begin
-            `ifdef __SHMOD__
-                $strobe("5 terminal Module, while 't' node is not connected, SH is activated.");
-            `else
-                Temp(t) <+ 0;
-                $strobe("5 terminal Module, while 't' node is not connected, SH is not activated.");
-            `endif
-        end
-    `endif
-    `ifdef __RDSMOD__
-        if (RDSMOD == 1) begin
-            RSW_i = RSW_i * (1.0 + RSWL * max( pow(Inv_L, RSWLEXP) - pow(Inv_Llong, RSWLEXP), 0));
-            RDW_i = RDW_i * (1.0 + RDWL * max( pow(Inv_L, RDWLEXP) - pow(Inv_Llong, RDWLEXP), 0));
+        if (MOBSCALE != 1) begin
+            if (U0LEXP > 0) begin
+                U0_i = U0_i * (1.0 - U0L * max( pow(Inv_L, U0LEXP) - pow(Inv_Llong, U0LEXP), 0));
+                if (ASYMMOD != 0)
+                    U0R_i = U0R_i * (1.0 - U0L * max( pow(Inv_L, U0LEXP) - pow(Inv_Llong, U0LEXP), 0));
+            end else begin
+                U0_i = U0_i * (1.0 - U0L);
+                if (ASYMMOD != 0)
+                    U0R_i = U0R_i * (1.0 - U0L);
+            end
         end else begin
+            U0_i = U0_i * (1.0 - (UP1 * exp(-Leff / LP1)) - (UP2 * exp(-Leff / LP2)));
+            if (ASYMMOD != 0)
+                U0R_i = U0R_i * (1.0 - (UP1 * exp(-Leff / LP1)) - (UP2 * exp(-Leff / LP2)));
+        end
+
+        T0 = UAL * max( pow(Inv_L, UALEXP) - pow(Inv_Llong, UALEXP), 0);
+        T1 = UAW * max( pow(Inv_W, UAWEXP) - pow(Inv_Wwide, UAWEXP), 0) + UAWL * pow(Inv_WL, UAWLEXP);
+        UA_i = UA_i * (1.0 + T0 + T1);
+        if (ASYMMOD != 0)
+            UAR_i = UAR_i * (1.0 + T0 + T1);
+        T0 = EUL * max( pow(Inv_L, EULEXP) - pow(Inv_Llong, EULEXP), 0);
+        T1 = EUW * max( pow(Inv_W, EUWEXP) - pow(Inv_Wwide, EUWEXP), 0) + EUWL * pow(Inv_WL, EUWLEXP);
+        EU_i = EU_i * (1.0 + T0 + T1);
+        T0 = 1.0 + UDL * max( pow(Inv_L, UDLEXP) - pow(Inv_Llong, UDLEXP), 0);
+        UD_i = UD_i * T0;
+        if (ASYMMOD != 0)
+            UDR_i = UDR_i * T0;
+        T0 = UCL * max( pow(Inv_L, UCLEXP) - pow(Inv_Llong, UCLEXP), 0);
+        T1 = UCW * max( pow(Inv_W, UCWEXP) - pow(Inv_Wwide, UCWEXP), 0) + UCWL * pow(Inv_WL, UCWLEXP);
+        UC_i = UC_i * (1.0 + T0 + T1);
+        if (ASYMMOD != 0)
+            UCR_i = UCR_i * (1.0 + T0 + T1);
+        T0 = max( pow(Inv_L, DSUB) - pow(Inv_Llong, DSUB), 0);
+        ETA0_i = ETA0_i * T0;
+        if (ASYMMOD != 0)
+            ETA0R_i = ETA0R_i * T0;
+
+        ETAB_i = ETAB_i * max( pow(Inv_L, ETABEXP) - pow(Inv_Llong, ETABEXP), 0);
+        T0 = 1.0 + PDIBLCL * max( pow(Inv_L, PDIBLCLEXP) - pow(Inv_Llong, PDIBLCLEXP), 0);
+        PDIBLC_i = PDIBLC_i * T0;
+        if (ASYMMOD != 0)
+            PDIBLCR_i = PDIBLCR_i * T0;
+
+        T0 = DELTA_i * (1.0 + DELTAL * max( pow(Inv_L, DELTALEXP) - pow(Inv_Llong, DELTALEXP), 0));
+        DELTA_i = min(T0, 0.5);
+        FPROUT_i = FPROUT_i * (1.0 + FPROUTL * max( pow(Inv_L, FPROUTLEXP) - pow(Inv_Llong, FPROUTLEXP), 0));
+        T0 = (1.0 + PCLML * max( pow(Inv_L, PCLMLEXP) - pow(Inv_Llong, PCLMLEXP), 0));
+        PCLM_i = PCLM_i * T0;
+        PCLM_i = max(PCLM_i,0);
+        if (ASYMMOD != 0) begin
+            PCLMR_i = PCLMR_i * T0;
+            PCLMR_i = max(PCLMR_i,0);
+        end
+
+        T0 = VSATL * max( pow(Inv_L, VSATLEXP) - pow(Inv_Llong, VSATLEXP), 0);
+        T1 = VSATW * max( pow(Inv_W, VSATWEXP) - pow(Inv_Wwide, VSATWEXP), 0) + VSATWL * pow(Inv_WL, VSATWLEXP);
+        VSAT_i = VSAT_i * (1.0 + T0 + T1);
+        if (ASYMMOD != 0)
+            VSATR_i = VSATR_i * (1.0 + T0 + T1);
+
+        PSAT_i = max(PSAT_i * (1.0 + PSATL * max( pow(Inv_L, PSATLEXP) - pow(Inv_Llong, PSATLEXP), 0)), 0.25);
+        if (ASYMMOD != 0)
+            PSATR_i = max(PSATR_i * (1.0 + PSATL * max( pow(Inv_L, PSATLEXP) - pow(Inv_Llong, PSATLEXP), 0)), 0.25);
+
+        T0=(1.0 + PTWGL * max( pow(Inv_L, PTWGLEXP) - pow(Inv_Llong, PTWGLEXP), 0));
+        PTWG_i = PTWG_i * T0;
+        if (ASYMMOD != 0)
+            PTWGR_i = PTWGR_i * T0;
+
+        ALPHA0_i = ALPHA0_i * (1.0 + ALPHA0L * max( pow(Inv_L, ALPHA0LEXP) - pow(Inv_Llong, ALPHA0LEXP), 0));
+
+        AGIDL_i = AGIDL_i * (1.0 + AGIDLL * Inv_L + AGIDLW * Inv_W);
+        AGISL_i = AGISL_i * (1.0 + AGISLL * Inv_L + AGISLW * Inv_W);
+
+        AIGC_i = AIGC_i * (1.0 + AIGCL * Inv_L + AIGCW * Inv_W);
+        AIGS_i = AIGS_i * (1.0 + AIGSL * Inv_L + AIGSW * Inv_W);
+        AIGD_i = AIGD_i * (1.0 + AIGDL * Inv_L + AIGDW * Inv_W);
+        PIGCD_i = PIGCD * (1.0 + PIGCDL * Inv_L);
+
+        T0 = NDEPCVL1 * max( pow(Inv_Lact, NDEPCVLEXP1) - pow(Inv_Llong, NDEPCVLEXP1), 0) + NDEPCVL2 * max( pow(Inv_Lact, NDEPCVLEXP2) - pow(Inv_Llong, NDEPCVLEXP2), 0);
+        T1 = NDEPCVW * max( pow(Inv_Wact, NDEPCVWEXP) - pow(Inv_Wwide, NDEPCVWEXP), 0) + NDEPCVWL * pow(Inv_Wact * Inv_Lact, NDEPCVWLEXP);
+        NDEPCV_i = NDEPCV_i * (1.0 + T0 + T1);
+
+        T0 = VFBCVL * max( pow(Inv_Lact, VFBCVLEXP) - pow(Inv_Llong, VFBCVLEXP), 0);
+        T1 = VFBCVW * max( pow(Inv_Wact, VFBCVWEXP) - pow(Inv_Wwide, VFBCVWEXP), 0) + VFBCVWL * pow(Inv_WL, VFBCVWLEXP);
+        VFBCV_i = VFBCV_i * (1.0 + T0 + T1);
+
+        T0 = VSATCVL * max( pow(Inv_Lact, VSATCVLEXP) - pow(Inv_Llong, VSATCVLEXP), 0);
+        T1 = VSATCVW * max( pow(Inv_W, VSATCVWEXP) - pow(Inv_Wwide, VSATCVWEXP), 0) + VSATCVWL * pow(Inv_WL, VSATCVWLEXP);
+        VSATCV_i = VSATCV_i * (1.0 + T0 + T1);
+        PCLMCV_i = PCLMCV_i * (1.0 + PCLMCVL * max( pow(Inv_Lact, PCLMCVLEXP) - pow(Inv_Llong, PCLMCVLEXP), 0));
+        PCLMCV_i = max(PCLMCV_i,0);
+
+        T0 = K1L * max( pow(Inv_L, K1LEXP) - pow(Inv_Llong, K1LEXP), 0);
+        T1 = K1W * max( pow(Inv_W, K1WEXP) - pow(Inv_Wwide, K1WEXP), 0) + K1WL * pow(Inv_WL, K1WLEXP);
+        K1_i = K1_i * (1.0 + T0 + T1);
+
+        T0 = K2L * max( pow(Inv_L, K2LEXP) - pow(Inv_Llong, K2LEXP), 0);
+        T1 = K2W * max( pow(Inv_W, K2WEXP) - pow(Inv_Wwide, K2WEXP), 0) + K2WL * pow(Inv_WL, K2WLEXP);
+        K2_i = K2_i * (1.0 + T0 + T1);
+
+        PRWB_i = PRWB_i * (1.0 + PRWBL * max( pow(Inv_L, PRWBLEXP) - pow(Inv_Llong, PRWBLEXP), 0));
+
+        //Global Scaling parameters for Temperature
+        UTE_i = UTE_i * (1.0 + Inv_L * UTEL);
+        UA1_i = UA1_i * (1.0 + Inv_L * UA1L);
+        UD1_i = UD1_i * (1.0 + Inv_L * UD1L);
+        AT_i = AT_i * (1.0 + Inv_L * ATL);
+        PTWGT_i = PTWGT_i * (1.0 + Inv_L * PTWGTL);
+        `ifdef __THERMAL_NODE__
+            if ($port_connected(t) == 0) begin
+                `ifdef __SHMOD__
+                    $strobe("5 terminal Module, while 't' node is not connected, SH is activated.");
+                `else
+                    Temp(t) <+ 0;
+                    $strobe("5 terminal Module, while 't' node is not connected, SH is not activated.");
+                `endif
+            end
         `endif
-        RDSW_i = RDSW_i * (1.0 + RDSWL * max( pow(Inv_L, RDSWLEXP) - pow(Inv_Llong, RDSWLEXP),0));
-        `ifdef __RDSMOD__
-        end
-    `else
-        //Warning Message For RDSMOD
-        if (RDSMOD != 2)
-            $strobe("[BSIM6] Although the model selector RDSMOD is set to %d, the external source/drain resistance model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __RDSMOD__\" in the beginning of the Verilog-A code.", RDSMOD);
-    `endif
-
-        // Parameter Checking
-
-        if (UCS_i < 1.0)
-            UCS_i = 1.0;
-        else if (UCS_i > 2.0)
-            UCS_i = 2.0;
-
-
-        if (ASYMMOD != 0) begin
-            if (UCSR_i < 1.0)
-                UCSR_i = 1.0;
-            else if (UCSR_i > 2.0)
-                UCSR_i = 2.0;
-
-            if (UCR_i < 0) begin
-                $strobe("Fatal: UCR_i = %e is negative.", UCR_i);
-                $finish(0);
-            end
-        end
-
-
-        if (CGIDL_i < 0) begin
-            $strobe("Fatal: CGIDL_i = %e is negative.", CGIDL_i);
-            $finish(0);
-        end
-
-        if (CGISL_i < 0) begin
-            $strobe("Fatal: CGISL_i = %e is negative.", CGISL_i);
-            $finish(0);
-        end
-
-        if (CKAPPAD_i <= 0) begin
-            $strobe("Fatal: CKAPPAD_i = %e is non-positive.", CKAPPAD_i);
-            $finish(0);
-        end
-
-        if (CKAPPAS_i <= 0) begin
-            $strobe("Fatal: CKAPPAS_i = %e is non-positive.", CKAPPAS_i);
-            $finish(0);
-        end
-
-        if (PDITS_i < 0) begin
-            $strobe("Fatal: PDITS_i = %e is negative.", PDITS_i);
-            $finish(0);
-        end
-
-        if (CIT_i < 0) begin
-            $strobe("Fatal: CIT_i = %e is negative.", CIT_i);
-            $finish(0);
-        end
-
-        if (NFACTOR_i < 0) begin
-            $strobe("Fatal: NFACTOR_i = %e is negative.", NFACTOR_i);
-            $finish(0);
-        end
-
-        if (K1_i < 0) begin
-            $strobe("Fatal: K1_i = %e is positive.", K1_i);
-            $finish(0);
-        end
-
-        if (NSD_i <= 0) begin
-            $strobe("Fatal: NSD_i = %e is non-positive.", NSD_i);
-            $finish(0);
-        end
-        if (NDEP_i <= 0) begin
-            $strobe("Fatal: NDEP_i = %e is non-positive.", NDEP_i);
-            $finish(0);
-        end
-        if (NDEPCV_i <= 0) begin
-            $strobe("Fatal: NDEPCV_i = %e is non-positive.", NDEPCV_i);
-            $finish(0);
-        end
-        if (IGBMOD != 0) begin
-            if (NIGBINV_i <= 0) begin
-                $strobe("Fatal: NIGBINV_i = %e is non-positive.", NIGBINV_i);
-                $finish(0);
-            end
-            if (NIGBACC_i <= 0) begin
-                $strobe("Fatal: NIGBACC_i = %e is non-positive.", NIGBACC_i);
-                $finish(0);
-            end
-        end
-        if (IGCMOD != 0) begin
-            if (POXEDGE_i <= 0) begin
-                $strobe("Fatal: POXEDGE_i = %e is non-positive.", POXEDGE_i);
-                $finish(0);
-            end
-        end
-        if (CDSCD_i < 0) begin
-            $strobe("Fatal: CDSCD_i = %e is negative.", CDSCD_i);
-            $finish(0);
-        end
-
-        if (ASYMMOD != 0) begin
-            if (CDSCDR_i < 0) begin
-                $strobe("Fatal: CDSCDR_i = %e is negative.", CDSCDR_i);
-                $finish(0);
-            end
-        end
-
-        //* initialize variables used in geometry macros
-        nuEndD = 0; nuEndS = 0; nuIntD = 0; nuIntS = 0; Rend = 0; Rint = 0;
-
-        //* process drain series resistance
-        DMCGeff = DMCG - DMCGT;
-        DMCIeff = DMCI;
-        DMDGeff = DMDG - DMCGT;
-
-        if (RSH > 0) begin
-            if (!$param_given(NRD)&& (RGEOMOD != 0))
-                `BSIM6RdseffGeo(NF, GEOMOD, RGEOMOD, MINZ, Weff, RSH, DMCGeff, DMCIeff, DMDGeff, 0, Rtot)
-        end
-
-        /* process source series resistance */
-        if (RSH > 0) begin
-            if (!$param_given(NRS)&& (RGEOMOD != 0))
-                `BSIM6RdseffGeo(NF, GEOMOD, RGEOMOD, MINZ, Weff, RSH, DMCGeff, DMCIeff, DMDGeff, 1, Rtot)
-        end
-
-        //* Processing S/D resistance and conductance below */
-        if ($param_given(NRS)) begin
-            RSourceGeo = RSH * NRS;
-        end else if (RGEOMOD > 0) begin
-            `BSIM6RdseffGeo(NF, GEOMOD, RGEOMOD, MINZ, Weff, RSH, DMCGeff, DMCIeff, DMDGeff, 1, RSourceGeo)
-        end else
-            RSourceGeo = 0.0;
-
-        if ($param_given(NRD))
-            RDrainGeo = RSH * NRD;
-        else if (RGEOMOD > 0) begin
-            `BSIM6RdseffGeo(NF, GEOMOD, RGEOMOD, MINZ, Weff, RSH, DMCGeff, DMCIeff, DMDGeff, 0, RDrainGeo)
-        end else
-            RDrainGeo = 0.0;
-
-        /* End of Rsd processing */
-
-        // Clamping of Source/Drain Resistances
-        if (RSourceGeo <= 1.0e-3) RSourceGeo = 1.0e-3;
-        if (RDrainGeo  <= 1.0e-3) RDrainGeo  = 1.0e-3;
-
         `ifdef __RDSMOD__
             if (RDSMOD == 1) begin
-                if (RSWMIN_i <= 0) RSWMIN_i = 0;
-                if (RDWMIN_i <= 0) RDWMIN_i = 0;
-                if (RSW_i <= 0) RSW_i = 0;
-                if (RDW_i <= 0) RDW_i = 0;
+                RSW_i = RSW_i * (1.0 + RSWL * max( pow(Inv_L, RSWLEXP) - pow(Inv_Llong, RSWLEXP), 0));
+                RDW_i = RDW_i * (1.0 + RDWL * max( pow(Inv_L, RDWLEXP) - pow(Inv_Llong, RDWLEXP), 0));
             end else begin
-            `endif
-            if (RDSWMIN_i <= 0) RDSWMIN_i = 0;
-            if (RDSW_i <= 0) RDSW_i = 0;
+        `endif
+                RDSW_i = RDSW_i * (1.0 + RDSWL * max( pow(Inv_L, RDSWLEXP) - pow(Inv_Llong, RDSWLEXP),0));
+        `ifdef __RDSMOD__
+            end
+        `else
+            //Warning Message For RDSMOD
+            if (RDSMOD != 2)
+                $strobe("[BSIM6] Although the model selector RDSMOD is set to %d, the external source/drain resistance model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __RDSMOD__\" in the beginning of the Verilog-A code.", RDSMOD);
+        `endif
+
+            // Parameter Checking
+
+            if (UCS_i < 1.0)
+                UCS_i = 1.0;
+            else if (UCS_i > 2.0)
+                UCS_i = 2.0;
+
+
+            if (ASYMMOD != 0) begin
+                if (UCSR_i < 1.0)
+                    UCSR_i = 1.0;
+                else if (UCSR_i > 2.0)
+                    UCSR_i = 2.0;
+
+                if (UCR_i < 0) begin
+                    $strobe("Fatal: UCR_i = %e is negative.", UCR_i);
+                    $finish(0);
+                end
+            end
+
+
+            if (CGIDL_i < 0) begin
+                $strobe("Fatal: CGIDL_i = %e is negative.", CGIDL_i);
+                $finish(0);
+            end
+
+            if (CGISL_i < 0) begin
+                $strobe("Fatal: CGISL_i = %e is negative.", CGISL_i);
+                $finish(0);
+            end
+
+            if (CKAPPAD_i <= 0) begin
+                $strobe("Fatal: CKAPPAD_i = %e is non-positive.", CKAPPAD_i);
+                $finish(0);
+            end
+
+            if (CKAPPAS_i <= 0) begin
+                $strobe("Fatal: CKAPPAS_i = %e is non-positive.", CKAPPAS_i);
+                $finish(0);
+            end
+
+            if (PDITS_i < 0) begin
+                $strobe("Fatal: PDITS_i = %e is negative.", PDITS_i);
+                $finish(0);
+            end
+
+            if (CIT_i < 0) begin
+                $strobe("Fatal: CIT_i = %e is negative.", CIT_i);
+                $finish(0);
+            end
+
+            if (NFACTOR_i < 0) begin
+                $strobe("Fatal: NFACTOR_i = %e is negative.", NFACTOR_i);
+                $finish(0);
+            end
+
+            if (K1_i < 0) begin
+                $strobe("Fatal: K1_i = %e is positive.", K1_i);
+                $finish(0);
+            end
+
+            if (NSD_i <= 0) begin
+                $strobe("Fatal: NSD_i = %e is non-positive.", NSD_i);
+                $finish(0);
+            end
+            if (NDEP_i <= 0) begin
+                $strobe("Fatal: NDEP_i = %e is non-positive.", NDEP_i);
+                $finish(0);
+            end
+            if (NDEPCV_i <= 0) begin
+                $strobe("Fatal: NDEPCV_i = %e is non-positive.", NDEPCV_i);
+                $finish(0);
+            end
+            if (IGBMOD != 0) begin
+                if (NIGBINV_i <= 0) begin
+                    $strobe("Fatal: NIGBINV_i = %e is non-positive.", NIGBINV_i);
+                    $finish(0);
+                end
+                if (NIGBACC_i <= 0) begin
+                    $strobe("Fatal: NIGBACC_i = %e is non-positive.", NIGBACC_i);
+                    $finish(0);
+                end
+            end
+            if (IGCMOD != 0) begin
+                if (POXEDGE_i <= 0) begin
+                    $strobe("Fatal: POXEDGE_i = %e is non-positive.", POXEDGE_i);
+                    $finish(0);
+                end
+            end
+            if (CDSCD_i < 0) begin
+                $strobe("Fatal: CDSCD_i = %e is negative.", CDSCD_i);
+                $finish(0);
+            end
+
+            if (ASYMMOD != 0) begin
+                if (CDSCDR_i < 0) begin
+                    $strobe("Fatal: CDSCDR_i = %e is negative.", CDSCDR_i);
+                    $finish(0);
+                end
+            end
+
+            //* initialize variables used in geometry macros
+            nuEndD = 0; nuEndS = 0; nuIntD = 0; nuIntS = 0; Rend = 0; Rint = 0;
+
+            //* process drain series resistance
+            DMCGeff = DMCG - DMCGT;
+            DMCIeff = DMCI;
+            DMDGeff = DMDG - DMCGT;
+
+            if (RSH > 0) begin
+                if (!$param_given(NRD)&& (RGEOMOD != 0))
+                    `BSIM6RdseffGeo(NF, GEOMOD, RGEOMOD, MINZ, Weff, RSH, DMCGeff, DMCIeff, DMDGeff, 0, Rtot)
+            end
+
+            /* process source series resistance */
+            if (RSH > 0) begin
+                if (!$param_given(NRS)&& (RGEOMOD != 0))
+                    `BSIM6RdseffGeo(NF, GEOMOD, RGEOMOD, MINZ, Weff, RSH, DMCGeff, DMCIeff, DMDGeff, 1, Rtot)
+            end
+
+            //* Processing S/D resistance and conductance below */
+            if ($param_given(NRS)) begin
+                RSourceGeo = RSH * NRS;
+            end else if (RGEOMOD > 0) begin
+                `BSIM6RdseffGeo(NF, GEOMOD, RGEOMOD, MINZ, Weff, RSH, DMCGeff, DMCIeff, DMDGeff, 1, RSourceGeo)
+            end else
+                RSourceGeo = 0.0;
+
+            if ($param_given(NRD))
+                RDrainGeo = RSH * NRD;
+            else if (RGEOMOD > 0) begin
+                `BSIM6RdseffGeo(NF, GEOMOD, RGEOMOD, MINZ, Weff, RSH, DMCGeff, DMCIeff, DMDGeff, 0, RDrainGeo)
+            end else
+                RDrainGeo = 0.0;
+
+            /* End of Rsd processing */
+
+            // Clamping of Source/Drain Resistances
+            if (RSourceGeo <= 1.0e-3) RSourceGeo = 1.0e-3;
+            if (RDrainGeo  <= 1.0e-3) RDrainGeo  = 1.0e-3;
+
             `ifdef __RDSMOD__
-            end
-        `endif
-        // End - Clamping of Source/Drain Resistances
-
-        `ifdef __RBODYMOD__
-            //Body resistance network
-            Grbsb=0.0; Grbdb=0.0; Grbpb=0.0; Grbps=0.0; Grbpd=0.0;//Initialization
-            if (RBODYMOD != 0) begin
-                Lnl = ln(Leff * 1.0e6);
-                Lnw = ln(Weff * 1.0e6);
-                Lnnf = ln(NF);
-                Bodymode = 5;
-                Rbpb=RBPB;
-                Rbpd=RBPD;
-                Rbps=RBPS;
-                Rbdb=RBDB;
-                Rbsb=RBSB;
-
-                if ( !$param_given(RBPS0) || !$param_given(RBPD0))
-                    Bodymode = 1;
-                else if ( !$param_given(RBSBX0) && !$param_given(RBSBY0) || !$param_given(RBDBX0) && !$param_given(RBDBY0) )
-                    Bodymode = 3;
-
-                if (RBODYMOD == 2) begin
-                    if (Bodymode == 5) begin
-                        Rbsbx = RBSBX0 * exp( RBSDBXL * Lnl + RBSDBXW * Lnw + RBSDBXNF * Lnnf );
-                        Rbsby = RBSBY0 * exp( RBSDBYL * Lnl + RBSDBYW * Lnw + RBSDBYNF * Lnnf );
-                        Rbsb = Rbsbx * Rbsby / (Rbsbx + Rbsby);
-                        Rbdbx =  RBDBX0 * exp( RBSDBXL * Lnl + RBSDBXW * Lnw + RBSDBXNF * Lnnf );
-                        Rbdby =  RBDBY0 * exp( RBSDBYL * Lnl + RBSDBYW * Lnw + RBSDBYNF * Lnnf );
-                        Rbdb = Rbdbx * Rbdby / (Rbdbx + Rbdby);
-                    end
-                    if ((Bodymode == 3)|| (Bodymode == 5)) begin
-                        Rbps = RBPS0 * exp( RBPSL * Lnl + RBPSW * Lnw + RBPSNF * Lnnf );
-                        Rbpd = RBPD0 * exp( RBPDL * Lnl + RBPDW * Lnw + RBPDNF * Lnnf );
-                    end
-                    Rbpbx =  RBPBX0 * exp( RBPBXL * Lnl + RBPBXW * Lnw + RBPBXNF * Lnnf );
-                    Rbpby =  RBPBY0 * exp( RBPBYL * Lnl + RBPBYW * Lnw + RBPBYNF * Lnnf );
-                    Rbpb = Rbpbx*Rbpby/(Rbpbx + Rbpby);
+                if (RDSMOD == 1) begin
+                    if (RSWMIN_i <= 0) RSWMIN_i = 0;
+                    if (RDWMIN_i <= 0) RDWMIN_i = 0;
+                    if (RSW_i <= 0) RSW_i = 0;
+                    if (RDW_i <= 0) RDW_i = 0;
+                end else begin
+                `endif
+                if (RDSWMIN_i <= 0) RDSWMIN_i = 0;
+                if (RDSW_i <= 0) RDSW_i = 0;
+                `ifdef __RDSMOD__
                 end
+            `endif
+            // End - Clamping of Source/Drain Resistances
 
-                if ((RBODYMOD == 1 ) || ((RBODYMOD == 2 ) && (Bodymode == 5)) ) begin
-                    if (Rbdb < 1.0e-3)
-                        Grbdb = 1.0e3; /* in mho */
-                    else
-                        Grbdb = GBMIN + 1.0 / Rbdb;
-                    if (Rbpb < 1.0e-3)
-                        Grbpb = 1.0e3;
-                    else
-                        Grbpb = GBMIN + 1.0 / Rbpb;
-                    if (Rbps < 1.0e-3)
-                        Grbps = 1.0e3;
-                    else
-                        Grbps = GBMIN + 1.0 / Rbps;
-                    if (Rbsb < 1.0e-3)
-                        Grbsb = 1.0e3;
-                    else
-                        Grbsb = GBMIN + 1.0 / Rbsb;
-                    if (Rbpd < 1.0e-3)
-                        Grbpd = 1.0e3;
-                    else
-                        Grbpd = GBMIN + 1.0 / Rbpd;
-                end else if ((RBODYMOD == 2) && (Bodymode == 3)) begin
-                    Grbdb  =  GBMIN;
-                    Grbsb  =  GBMIN;
-                    if (Rbpb < 1.0e-3)
-                        Grbpb = 1.0e3;
-                    else
-                        Grbpb = GBMIN + 1.0 / Rbpb;
-                    if (Rbps < 1.0e-3)
-                        Grbps = 1.0e3;
-                    else
-                        Grbps = GBMIN + 1.0 / Rbps;
-                    if (Rbpd < 1.0e-3)
-                        Grbpd = 1.0e3;
-                    else
-                        Grbpd = GBMIN + 1.0 / Rbpd;
-                end else if ((RBODYMOD == 2) && (Bodymode == 1)) begin
-                    Grbdb  =  GBMIN;
-                    Grbsb  =  GBMIN;
-                    Grbps  =  1.0e3;
-                    Grbpd  =  1.0e3;
-                    if (Rbpb < 1.0e-3)
-                        Grbpb = 1.0e3;
-                    else
-                        Grbpb = GBMIN + 1.0 / Rbpb;
+            `ifdef __RBODYMOD__
+                //Body resistance network
+                Grbsb=0.0; Grbdb=0.0; Grbpb=0.0; Grbps=0.0; Grbpd=0.0;//Initialization
+                if (RBODYMOD != 0) begin
+                    Lnl = ln(Leff * 1.0e6);
+                    Lnw = ln(Weff * 1.0e6);
+                    Lnnf = ln(NF);
+                    Bodymode = 5;
+                    Rbpb=RBPB;
+                    Rbpd=RBPD;
+                    Rbps=RBPS;
+                    Rbdb=RBDB;
+                    Rbsb=RBSB;
+
+                    if ( !$param_given(RBPS0) || !$param_given(RBPD0))
+                        Bodymode = 1;
+                    else if ( !$param_given(RBSBX0) && !$param_given(RBSBY0) || !$param_given(RBDBX0) && !$param_given(RBDBY0) )
+                        Bodymode = 3;
+
+                    if (RBODYMOD == 2) begin
+                        if (Bodymode == 5) begin
+                            Rbsbx = RBSBX0 * exp( RBSDBXL * Lnl + RBSDBXW * Lnw + RBSDBXNF * Lnnf );
+                            Rbsby = RBSBY0 * exp( RBSDBYL * Lnl + RBSDBYW * Lnw + RBSDBYNF * Lnnf );
+                            Rbsb = Rbsbx * Rbsby / (Rbsbx + Rbsby);
+                            Rbdbx =  RBDBX0 * exp( RBSDBXL * Lnl + RBSDBXW * Lnw + RBSDBXNF * Lnnf );
+                            Rbdby =  RBDBY0 * exp( RBSDBYL * Lnl + RBSDBYW * Lnw + RBSDBYNF * Lnnf );
+                            Rbdb = Rbdbx * Rbdby / (Rbdbx + Rbdby);
+                        end
+                        if ((Bodymode == 3)|| (Bodymode == 5)) begin
+                            Rbps = RBPS0 * exp( RBPSL * Lnl + RBPSW * Lnw + RBPSNF * Lnnf );
+                            Rbpd = RBPD0 * exp( RBPDL * Lnl + RBPDW * Lnw + RBPDNF * Lnnf );
+                        end
+                        Rbpbx =  RBPBX0 * exp( RBPBXL * Lnl + RBPBXW * Lnw + RBPBXNF * Lnnf );
+                        Rbpby =  RBPBY0 * exp( RBPBYL * Lnl + RBPBYW * Lnw + RBPBYNF * Lnnf );
+                        Rbpb = Rbpbx*Rbpby/(Rbpbx + Rbpby);
+                    end
+
+                    if ((RBODYMOD == 1 ) || ((RBODYMOD == 2 ) && (Bodymode == 5)) ) begin
+                        if (Rbdb < 1.0e-3)
+                            Grbdb = 1.0e3; /* in mho */
+                        else
+                            Grbdb = GBMIN + 1.0 / Rbdb;
+                        if (Rbpb < 1.0e-3)
+                            Grbpb = 1.0e3;
+                        else
+                            Grbpb = GBMIN + 1.0 / Rbpb;
+                        if (Rbps < 1.0e-3)
+                            Grbps = 1.0e3;
+                        else
+                            Grbps = GBMIN + 1.0 / Rbps;
+                        if (Rbsb < 1.0e-3)
+                            Grbsb = 1.0e3;
+                        else
+                            Grbsb = GBMIN + 1.0 / Rbsb;
+                        if (Rbpd < 1.0e-3)
+                            Grbpd = 1.0e3;
+                        else
+                            Grbpd = GBMIN + 1.0 / Rbpd;
+                    end else if ((RBODYMOD == 2) && (Bodymode == 3)) begin
+                        Grbdb  =  GBMIN;
+                        Grbsb  =  GBMIN;
+                        if (Rbpb < 1.0e-3)
+                            Grbpb = 1.0e3;
+                        else
+                            Grbpb = GBMIN + 1.0 / Rbpb;
+                        if (Rbps < 1.0e-3)
+                            Grbps = 1.0e3;
+                        else
+                            Grbps = GBMIN + 1.0 / Rbps;
+                        if (Rbpd < 1.0e-3)
+                            Grbpd = 1.0e3;
+                        else
+                            Grbpd = GBMIN + 1.0 / Rbpd;
+                    end else if ((RBODYMOD == 2) && (Bodymode == 1)) begin
+                        Grbdb  =  GBMIN;
+                        Grbsb  =  GBMIN;
+                        Grbps  =  1.0e3;
+                        Grbpd  =  1.0e3;
+                        if (Rbpb < 1.0e-3)
+                            Grbpb = 1.0e3;
+                        else
+                            Grbpb = GBMIN + 1.0 / Rbpb;
+                    end
                 end
-            end
-        `else
-            if (RBODYMOD != 0)
-                $strobe("[BSIM6] Although the model selector RBODYMOD is set to %d, the body resistance model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __RBODYMOD__\" in the beginning of the Verilog-A code.", RBODYMOD);
-        `endif
+            `else
+                if (RBODYMOD != 0)
+                    $strobe("[BSIM6] Although the model selector RBODYMOD is set to %d, the body resistance model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __RBODYMOD__\" in the beginning of the Verilog-A code.", RBODYMOD);
+            `endif
 
-        // Gate process resistance
-        `ifdef __RGATEMOD__
-            Grgeltd = RSHG * (XGW + Weffcj / 3.0 / NGCON)/ ( NGCON * NF * (Lnew - XGL));
-            if (Grgeltd > 0.0)
-                Grgeltd = 1.0 / Grgeltd;
-            else begin
-                Grgeltd = 1.0e3; /* mho */
+            // Gate process resistance
+            `ifdef __RGATEMOD__
+                `ifdef insideADMS
+                    XGL_lim = min(XGL, L*LMLT+XL - 1e-09);
+                    Grgeltd = RSHG * (XGW + Weffcj / 3.0 / NGCON)/ ( NGCON * NF * (Lnew - XGL_lim));
+                `else
+                    Grgeltd = RSHG * (XGW + Weffcj / 3.0 / NGCON)/ ( NGCON * NF * (Lnew - XGL));
+                `endif
+                if (Grgeltd > 0.0)
+                    Grgeltd = 1.0 / Grgeltd;
+                else begin
+                    Grgeltd = 1.0e3; /* mho */
+                    if (RGATEMOD != 0)
+                        `STROBE("Warning: (instance %M) The gate conductance reset to 1.0e3 mho.");
+                end
+            `else
                 if (RGATEMOD != 0)
-                    `STROBE("Warning: (instance %M) The gate conductance reset to 1.0e3 mho.");
-            end
-        `else
-            if (RGATEMOD != 0)
-                $strobe("[BSIM6] Although the model selector RGATEMOD is set to %d, the gate resistance model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __RGATEMOD__\" in the beginning of the Verilog-A code.", RGATEMOD);
-        `endif
+                    $strobe("[BSIM6] Although the model selector RGATEMOD is set to %d, the gate resistance model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __RGATEMOD__\" in the beginning of the Verilog-A code.", RGATEMOD);
+            `endif
 
-        T0 = TOXE * TOXE;
-        T1 = TOXE * POXEDGE_i;
-        T2 = T1 * T1;
-        ToxRatio = exp(NTOX_i * ln(TOXREF / TOXE))/ T0;
-        ToxRatioEdge = exp(NTOX_i * ln(TOXREF / T1)) /T2;
+            T0 = TOXE * TOXE;
+            T1 = TOXE * POXEDGE_i;
+            T2 = T1 * T1;
+            ToxRatio = exp(NTOX_i * ln(TOXREF / TOXE))/ T0;
+            ToxRatioEdge = exp(NTOX_i * ln(TOXREF / T1)) /T2;
 
-        Aechvb = (TYPE == `ntype) ? 4.97232e-7 : 3.42537e-7;
-        Bechvb = (TYPE == `ntype) ? 7.45669e11 : 1.16645e12;
-        AechvbEdge = Aechvb * Weff * ToxRatioEdge;
-        BechvbEdge = -Bechvb * TOXE * POXEDGE_i;
-        Aechvb = Aechvb * ( Weff * Leff * ToxRatio);
-        Bechvb = Bechvb * ( -TOXE);
+            Aechvb = (TYPE == `ntype) ? 4.97232e-7 : 3.42537e-7;
+            Bechvb = (TYPE == `ntype) ? 7.45669e11 : 1.16645e12;
+            AechvbEdge = Aechvb * Weff * ToxRatioEdge;
+            BechvbEdge = -Bechvb * TOXE * POXEDGE_i;
+            Aechvb = Aechvb * ( Weff * Leff * ToxRatio);
+            Bechvb = Bechvb * ( -TOXE);
 
 
-        // Self Heating
-        `ifdef __SHMOD__
-            // Parameters for self-heating
-            if (SHMOD != 0 && RTH0 > 0) begin
-                gth = (WTH0 + Weff) * NF / RTH0;
-                cth = CTH0 * (WTH0 + Weff) * NF;
-            end else begin
-                gth = 1.0; // set gth to some value to prevent a singular G matrix
-                cth = 0.0;
-            end
-        `else
-            if (SHMOD != 0)
-                $strobe("[bsim6] Although the model selector SHMOD is set to 1, the self-heating model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __SHMOD__\" in bsim6.va to activate it.");
-        `endif
+            // Self Heating
+            `ifdef __SHMOD__
+                // Parameters for self-heating
+                if (SHMOD != 0 && RTH0 > 0) begin
+                    gth = (WTH0 + Weff) * NF / RTH0;
+                    cth = CTH0 * (WTH0 + Weff) * NF;
+                end else begin
+                    gth = 1.0; // set gth to some value to prevent a singular G matrix
+                    cth = 0.0;
+                end
+            `else
+                if (SHMOD != 0)
+                    $strobe("[bsim6] Although the model selector SHMOD is set to 1, the self-heating model was not activated when the Verilog-A code was compiled.  Please uncomment \"`define __SHMOD__\" in bsim6.va to activate it.");
+            `endif
 
+        end
 
         //***** Temperature Dependent Calculations Begin Here *****//
         if (TNOM <= -`P_CELSIUS0) begin
@@ -3035,6 +3066,13 @@ analog begin
         ///End of Stress Effect
 
         //Well Proximity Effect
+        // XYCE MOD:  If we do not initialize these, then there are serious
+        // problems with some compilers when WPEMOD is zero, because all of these
+        // variables get USED unconditionally.
+        local_sca = 0.0;
+        local_scb = 0.0;
+        local_scc = 0.0;
+
         if (WPEMOD)   begin
             Wdrn = W / NF;
             local_sca = SCA;
@@ -4459,9 +4497,11 @@ analog begin
                 `ifdef __SHMOD__
                     if (SHMOD !=0 && RTH0 > 0) begin
                         if (RDSMOD != 2) begin
-                            Pwr(t) <+ -(devsign * sigvds * ids * V(`IntrinsicDrain, `IntrinsicSource) + V(d,`IntrinsicDrain) * V(d,`IntrinsicDrain) / Rdrain + V(s,`IntrinsicSource) * V(s,`IntrinsicSource) / Rsource) + ddt(delTemp1 * cth) + delTemp1 * gth;
+                            Pwr(t) <+ -(devsign * sigvds * ids * V(`IntrinsicDrain, `IntrinsicSource) + V(d,`IntrinsicDrain) * V(d,`IntrinsicDrain) / Rdrain + V(s,`IntrinsicSource) * V(s,`IntrinsicSource) / Rsource) + delTemp1 * gth;
+                            Pwr(t) <+ ddt(delTemp1 * cth);
                         end else begin
-                            Pwr(t) <+ -(devsign * sigvds * ids * V(`IntrinsicDrain, `IntrinsicSource))  + ddt(delTemp1 * cth) + delTemp1 * gth;
+                            Pwr(t) <+ -(devsign * sigvds * ids * V(`IntrinsicDrain, `IntrinsicSource)) + delTemp1 * gth;
+                            Pwr(t) <+ ddt(delTemp1 * cth);
                         end
                     end else begin
                         Temp(t) <+ 0;

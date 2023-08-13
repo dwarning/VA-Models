@@ -1,0 +1,23 @@
+Diode Param Temp Test
+
+va a 0 dc 1.0
+ydiode_cmc_va dio1 a 0 diocmc AB=100e-12
+
+.step temp -25 125 50
+.dc va 0.01 1.5 0.01
+.print dc format=gnuplot v(a) i(va)
+
+.MODEL diocmc DIODE_CMC_VA IDSATRBOT=1e-06 RSBOT=10 ;RSCOM=1e-6
++ VBRBOT=100
++ VBRSTI=100
++ VBRGAT=100
++ CORECOVERY=1
++ TAU=200n
++ INJ1=1.0
++ INJ2=10.0
++ WI=5u
++ NQS=50e-09
++ DEPNQS=1e-09
+*+ TAUT=100n
+.end
+

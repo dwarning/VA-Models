@@ -1,0 +1,23 @@
+Sample netlist for BSIMBULK
+*Inverter DC Analysis
+
+.include "../Modelcards/model.l"
+
+* --- Voltage Sources ---
+vdd   supply  0 dc 1.0
+vin   vi 0 dc 0.5
+
+* --- Inverter Subcircuit ---
+.subckt inverter vin vout vdd gnd
+Ybsimbulk m1 vout vin vdd vdd pmos W = 20e-6 L = 1e-6
+Ybsimbulk m2 vout vin gnd gnd nmos W = 10e-6 L = 1e-6
+.ends
+
+* --- Inverter ---
+Xinv1  vi vo supply 0 inverter
+
+* --- DC Analysis ---
+.dc vin 0 1 0.01
+.print dc v(vi) v(vo)
+
+.end

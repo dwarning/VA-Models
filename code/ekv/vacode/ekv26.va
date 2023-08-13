@@ -30,8 +30,10 @@ $RCSfile: ekv.va,v $ $Revision: 2.6.15 $ $Date: 2020/05/29 11:50:10 $
 
 `ifdef insideADMS
     `define INITIAL_MODEL @(initial_model)
+    `define INITIAL_INSTANCE @(initial_instance)
 `else
-    `define INITIAL_MODEL @(initial_step)
+    `define INITIAL_MODEL
+    `define INITIAL_INSTANCE
 `endif
 
 //------------------------------------------ end of includes
@@ -62,7 +64,7 @@ $RCSfile: ekv.va,v $ $Revision: 2.6.15 $ $Date: 2020/05/29 11:50:10 $
         end \
     end
 
-module ekv_va(d,g,s,b);
+module ekv26_va(d,g,s,b);
     // %%DEVICE_CLASS=MOS(NMOS:TYPE=1,PMOS:TYPE=-1)%%
     //  Node definitions
     inout           d,g,s,b;         // external nodes
@@ -130,14 +132,14 @@ module ekv_va(d,g,s,b);
     real dbeta_dVD, dbeta_dVG, dbeta_dVS;
     real VGstar, sqrt_VGstar;
     real VG, VD, VS;
-    real Von, Ibd;
+//    real Von, Ibd;
     real Gn;
     real GAMMA_sqrt_PHI, Lmin, Lprime, T0_GAMMA_1, THETA_VP_1, Vc;
     real Vdsprime, Vt_Vc, dGAMMAprime_dVD, dGAMMAprime_dVG, dGAMMAprime_dVS;
     real dVPprime_dVD, dVPprime_dVG, dVPprime_dVS, ddeltaL_dVD, ddeltaL_dVG;
     real ddeltaL_dVS, dn_dVD, dn_dVG, dn_dVS;
     real log_Vc_Vt, sqrt_PHI_VP0, sqrt_VP_Vt;
-    real Lc_IBB_Vib, Vib, dIsub_factor, exp_ib;
+    real Lc_IBB_Vib, Vib, exp_ib;//, dIsub_factor;
     real inv_Vib, sqrt_PHI_VP2_2;
     real V0, deltaVFB, vL;
     real dQI_dVD, dQI_dVS, dQI_dVG;
@@ -272,16 +274,16 @@ module ekv_va(d,g,s,b);
     `OPM(Id, "A", "Drain current")
 
     analog begin
-        `INITIAL_MODEL     // Model Initialization
-        begin
+        `INITIAL_MODEL
+        begin : modelInitialization
             // Set constant
 //            EPSOX  = 3.9 * `P_EPS0;
             epssil = 11.7 * `P_EPS0;
-            Ibd = 0.0;
             // The following are necessary to prevent memory states being reserved:
-            THETA_VP_1 = 0.0;
-            VPprime = 0.0;
-            sqrt_VP_Vt = 0.0;
+//            Ibd = 0.0;
+//            THETA_VP_1 = 0.0;
+//            VPprime = 0.0;
+//            sqrt_VP_Vt = 0.0;
             // Geometry, voltage and temperature independent model variables
             eps_COX = epssil/COX;
             Lc  = sqrt(eps_COX*XJ);
@@ -292,6 +294,9 @@ module ekv_va(d,g,s,b);
             T0 = COX / (epssil*E0);
             V0 = (Q0+Q0) / COX;
             eta_qi = TYPE > 0 ? 0.5 : 0.3333333333333;
+        end
+        `INITIAL_INSTANCE
+        begin : instanceInitialization
             /* Model working variables, geometry and voltage independent,
              * which need to be updated after temperature change
              * EKV model internal variables depending on temperature.
@@ -366,6 +371,7 @@ module ekv_va(d,g,s,b);
                 deltaVFB = V0 * sqv * sqv;
             end
         end
+
         VG = TYPE * V(g,b); // wg 22/04/08 corrected for device TYPE
         VS = TYPE * V(s,b);
         VD = TYPE * V(d,b);
@@ -502,7 +508,7 @@ module ekv_va(d,g,s,b);
         Id = Ispec * if_ir;
         /* Return threshold voltage
          * Von = Vth(Vs) = Vto + Gamma*(sqrt(Phi + Vsb)-sqrt(Phi)) */
-        Von = VTO_S + GAMMAprime*(sqrt_PHI_VS - sqrt_PHI);
+//        Von = VTO_S + GAMMAprime*(sqrt_PHI_VS - sqrt_PHI);
         // Return saturation voltage (estimate)
         Vdsat = Vt * (2.0*sqrt_if + 4.0);
         // Return equivalent conductance for thermal noise calculation
@@ -648,14 +654,14 @@ module ekv_va(d,g,s,b);
             exp_ib = exp(Lc_IBB_Vib);
             isub = IBA_IBB*Vib*exp_ib;
             Isub = isub*Id;
-            dIsub_factor = Isub*inv_Vib*(1.0-Lc_IBB_Vib);
+//            dIsub_factor = Isub*inv_Vib*(1.0-Lc_IBB_Vib);
         end
         else begin
             Lc_IBB_Vib = 0.0;
             Isub = 0.0;
         end
         // END: substrate current computation
-        Ibd = Ibd - Isub;
+//        Ibd = Ibd - Isub;
         // --- Charge calculations ---
         WLCox = Weff * Leff * COX;
         sif3 = sif*sif2;
@@ -689,8 +695,8 @@ module ekv_va(d,g,s,b);
             real S_flicker, S_thermal;
             S_thermal = 4 * `P_K * T * Gn;
             S_flicker = KF * gm * gm / (Weff * NS * Leff * COX);
-            I(ds) <+ white_noise(S_thermal, "thermal") +
-                flicker_noise(S_flicker, AF, "flicker");
+            I(ds) <+ white_noise(S_thermal, "thermal");
+            I(ds) <+ flicker_noise(S_flicker, AF, "flicker");
         end
         ///////////////////////////////////
         //EXTRINSIC PART: JUNCTION DIODES//

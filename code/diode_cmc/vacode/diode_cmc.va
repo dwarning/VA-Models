@@ -60,6 +60,14 @@
 
 `define JUNCAP_StandAlone
 
+`ifdef insideADMS
+    `define INITIAL_MODEL   @(initial_model)
+    `define INITIAL_INSTANCE    @(initial_instance)
+`else
+    `define INITIAL_MODEL   @(initial_step)
+    `define INITIAL_INSTANCE
+`endif
+
 // Note: some verilog-A compilers have problems handling the ddx-operator,
 // which occurs in definition of OP-output variables. If the line below is
 // commented out, all OP-output variables using the ddx-operator are skipped.
@@ -71,7 +79,11 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+`ifdef __XYCE__
+module DIODE_CMC_VA(A,K);
+`else
 module DIODE_CMC(A,K);
+`endif
 
 //
 //  Node definitions
@@ -160,6 +172,7 @@ real EPSSI;
 
 analog begin
 
+    `INITIAL_MODEL
     begin : initialize_Model
 
         EPSSI      =  `EPSO * `EPSRSI;
@@ -169,6 +182,7 @@ analog begin
 
 
     // Code independent of bias but dependent on instance parameters
+    `INITIAL_INSTANCE
     begin : initializeInstance
 
         // Clipping of the local model parameters
@@ -561,8 +575,10 @@ analog begin
     // Diode_cmc recovery and high-injection equations code
     begin : loadRecovery
         if ( CORECOVERY > 0 && NQS > 0.0 ) begin
-            I(charge_A) <+ Inqs0_A + ddt(Q_nqs_A);
-            I(charge_K) <+ Inqs0_K + ddt(Q_nqs_K);
+            I(charge_A) <+ Inqs0_A;
+            I(charge_A) <+ ddt(Q_nqs_A);
+            I(charge_K) <+ Inqs0_K;
+            I(charge_K) <+ ddt(Q_nqs_K);
         end else begin
             V(charge_A) <+ 0.0;
             V(charge_K) <+ 0.0;

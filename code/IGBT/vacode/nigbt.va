@@ -24,17 +24,17 @@
 `include "disciplines.vams"
 `include "constants.vams"
 
-`define INITIAL_MODEL @(initial_step)
+`ifdef insideADMS
+    `define INITIAL_INSTANCE  @(initial_instance)
+`else
+    `define INITIAL_INSTANCE
+`endif
 
 // dielectric permittivity of silicon (F/cm)
 `define EPSSI          1.03594e-12
 
 // tiny conductance
-`ifdef __NGSPICE__
 `define GMIN           $simparam("gmin", 1e-12)
-`else
-`define GMIN           1e-12
-`endif
 
 `define TINY           1e-20
 `define RTOLV          1.0e-5
@@ -195,7 +195,7 @@ module nigbt (a, g, c);
     //
     analog begin
         // equation initialization
-        `INITIAL_MODEL
+        `INITIAL_INSTANCE
         begin : init
             real Tj, To;
 
@@ -244,6 +244,11 @@ module nigbt (a, g, c);
         Vgs = $limit(V(g,c), "fetlim", 1.0);
         Veb = $limit(V(e,b), "pnjlim", vt, 0.6);
         Vec = $limit(V(e,c), "pnjlim", vt, 0.6);
+`elsif __XYCE__
+        Vdg = $limit(V(b,g), "pnjlim_new", vt, 0.7);
+        Vgs = $limit(V(g,c), "pnjlim_new", vt, 0.7);
+        Veb = $limit(V(e,b), "pnjlim_new", vt, 0.7);
+        Vec = $limit(V(e,c), "pnjlim_new", vt, 0.7);
 `else
         Vdg = V(b,g);
         Vgs = V(g,c);
