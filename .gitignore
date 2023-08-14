@@ -12,7 +12,7 @@ test/*.vlog
 code/playground/*.osdi
 code/*/*/.libs
 code/*/*.dat
-code/*/*.*.prn
+code/*/*/*.*.prn
 code/*/*.*.mt0
 code/*/*.*.res
 code/*/*/*.log
@@ -26,3 +26,5 @@ code/*/*/*.*.xml
 code/*/*/*.*.adms
 .headerstring*
 .registerstring*
+*.so
+*.la
