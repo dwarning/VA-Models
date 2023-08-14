@@ -199,16 +199,22 @@ organization and externally, subject to the following restrictions.
 
 `ifdef insideADMS
     `define MODEL @(initial_model)
+    `define INSTANCE @(initial_instance)
     `define NOISE @(noise)
     `define ATTR(txt) (*txt*)
 `else
     `define MODEL
+    `define INSTANCE
     `define NOISE
     `define ATTR(txt)
 `endif
 
 // Comment this line, if calculation of operating point values should be omitted
+`ifdef __XYCE__
+//`define CALC_OP
+`else
 `define CALC_OP
+`endif
 // Uncomment this line to reduce calculation of OP values only for DC simulations
 //`define OP_STATIC
 
@@ -612,8 +618,11 @@ organization and externally, subject to the following restrictions.
     end
 
 
-
+`ifdef __XYCE__
+module hicumL2_va (c,b,e,s,tnode);
+`else
 module hicumL2va (c,b,e,s,tnode);
+`endif
 
 //Node definitions
 
@@ -971,7 +980,7 @@ real rbx_t;
 
 analog begin
 
-    `MODEL begin : Model_initialization
+    `INSTANCE begin : Model_initialization
 
         Tnom    = tnom+`P_CELSIUS0;
         Tamb    = $temperature;
@@ -1250,6 +1259,9 @@ analog begin
         Vbiei = $limit(V(ei,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis_t)));
         Vbici = $limit(V(ci,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)));
     end
+`elsif __XYCE__
+    Vbiei = $limit(V(bi,ei),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibeis_t)));
+    Vbici = $limit(V(bi,ci),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibcis_t)));
 `else
     Vbiei = type*V(br_biei);
     Vbici = type*V(br_bici);
@@ -1902,18 +1914,17 @@ analog begin
         end else begin
             V(br_sis_v)     <+ 0.0;
         end
-
+`ifdef __XYCE__
         // Following code is an intermediate solution (if branch contribution is not supported):
         // ******************************************
-        //if (flsh == 0 || rth < `MIN_R) begin
-        //      I(br_sht)       <+ V(br_sht)/`MIN_R;
-        //end else begin
-        //      I(br_sht)       <+ V(br_sht)/rth_t-pterm;
-        //      I(br_sht)       <+ ddt(cth*V(br_sht));
-        //end
-
+        if (flsh == 0 || rth < `MIN_R) begin
+              I(br_sht)       <+ V(br_sht)/`MIN_R;
+        end else begin
+              I(br_sht)       <+ V(br_sht)/rth_t-pterm;
+              I(br_sht)       <+ ddt(cth*V(br_sht));
+        end
         // ******************************************
-
+`else
         // For simulators having no problem with V(br_sht) <+ 0.0
         // with external thermal node, following code may be used.
         // Note that external thermal node should remain accessible
@@ -1926,7 +1937,7 @@ analog begin
             I(br_sht)       <+ ddt(cth*V(br_sht));
         end
         // ********************************************
-
+`endif
         // NQS effect
         I(br_bxf1) <+ Ixf1;
         I(br_cxf1) <+ ddt(Qxf1);
@@ -2005,7 +2016,8 @@ analog begin
             // realization  of modified base shot noise source I1(bi,ei)
             I(b_n1)  <+ white_noise(2*`P_Q*abs(ibei),"ibei");
             I(b_n1)  <+ -V(b_n1);
-            I(bi,ei) <+ V(b_n1)+n_2/n_w*ddt(n_w*V(b_n1));
+            I(bi,ei) <+ V(b_n1);
+            I(bi,ei) <+ n_2/n_w*ddt(n_w*V(b_n1));
 
             // realization of controlled base noise source I2(bi,ei)
 

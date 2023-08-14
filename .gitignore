@@ -24,3 +24,5 @@ code/*/*/*.h
 code/*/*/*.xml
 code/*/*/*.*.xml
 code/*/*/*.*.adms
+.headerstring*
+.registerstring*

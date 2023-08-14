@@ -1,0 +1,31 @@
+HICUM2v2.40 Noise Voltage Test
+
+*      _______
+*    _|_     _|_
+*    ///    / _ \
+*           \/ \/ I1
+*           /\_/\
+*           \___/
+*      _______|
+*     |      _|
+*     |____|'
+*     B    |`->
+*            _|_ E
+*           /VIN\
+*           \___/
+*            _|_
+*            ///
+*
+*
+
+vin                 E  0  DC    0.0 ac 1.0u
+I1                  0   B 100uA
+YhicumL2_va q1 B B E 0 tj hicumL2va
+Rth tj 0 100
+
+.include ../Modelcards/examples_va.lib
+
+.noise v(B) vin dec 10 1 100Meg
+.print noise format=gnuplot onoise
+
+.end

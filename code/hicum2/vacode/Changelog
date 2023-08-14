@@ -1,4 +1,9 @@
-Use alternative ngspice specific limit function pnjlim for inner base-emitter and base-collector junctions
+Xyce:
+Skip DC OP analysis.
+Use alternative code block for shorting thermal branch.
+Change module name to prevent name conflict with built-in model.
+
+Use alternative ngspice/Xyce specific limit functions for inner base-emitter and base-collector junctions
 
 Use disciplines.vams
 Use constants.vams

@@ -1,0 +1,18 @@
+HICUM2v2.40 AC gain Test h21 = f(Ic) Vce=1V
+
+vce 1 0 dc 1.0
+vgain 1 c dc 0.0
+f 0 2 vgain -2
+l 2 b 1g
+c 2 0 1g
+ib 0 b dc 0.0 ac 1.0
+ic 0 c 0.01
+YhicumL2_va q1 C B 0 0 dt hicumL2va
+Rth dt 0 1.0
+
+.ac dec 10 1Meg 800g
+.print ac format=gnuplot idb(vgain)
+
+.include ../Modelcards/examples_va.lib
+
+.end
