@@ -1,3 +1,6 @@
+Xyce:
+An explicit "mult" (multiplicity) parameter has been added. Xyce does not support an implicit $mfactor.
+
 Use disciplines.vams
 
 Origin of the model:

@@ -19,7 +19,7 @@ rmdir --ignore-fail-on-non-empty .libs
 cd ../..
 cd ./bsimbulk/vacode
 #buildxyceplugin bsimbulk106.va ../../admslibs
-buildxyceplugin bsimbulk107.va 
+buildxyceplugin bsimbulk107.va ../../admslibs
 rm *.la *.log
 rmdir --ignore-fail-on-non-empty .libs
 cd ../..
@@ -82,7 +82,11 @@ cd ../..
 #buildxyceplugin ../psp103/vacode/psp103.va .
 #buildxyceplugin ../r2_cmc/vacode/r2_cmc.va .
 #buildxyceplugin ../r2_cmc/vacode/r2_et_cmc.va .
-#buildxyceplugin ../r3_cmc/vacode/r3_cmc.va .
+cd ./r3_cmc/vacode
+buildxyceplugin r3_cmc.va ../../admslibs
+rm *.la *.log
+rmdir --ignore-fail-on-non-empty .libs
+cd ../..
 cd ./vbic/vacode
 buildxyceplugin vbic_1p3.va ../../admslibs
 rm *.la *.log
