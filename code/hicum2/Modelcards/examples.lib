@@ -4,7 +4,6 @@
 *Transfer current
 + c10 = 9.074e-030
 + qp0 = 1.008e-013
-+ ich = 0
 + hf0 = 40
 + hfe = 10.01
 + hfc = 20.04
@@ -44,7 +43,6 @@
 + alfav = -0.0024
 + alqav = -0.0006284
 + kavl = 0.0
-+ alkav = 0.0
 *
 *Series resistances
 + rbi0 = 4.444
@@ -155,7 +153,6 @@
 + f2vg = 0.00043215
 + zetact = 5
 + zetabet = 4.892
-+ alb = 0
 + dvgbe = 0
 + zetahjei = -0.5
 + zetavgbe = 0.7
