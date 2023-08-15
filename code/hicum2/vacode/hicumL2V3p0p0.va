@@ -1299,7 +1299,9 @@ analog begin
 
         I(br_biei)      <+ `Gmin*V(br_biei);
         I(br_bici)      <+ `Gmin*V(br_bici);
-        // I(br_ciei)     <+ `Gmin*V(br_ciei);
+        I(br_ciei)      <+ `Gmin*V(br_ciei);
+
+        I(br_bpsi)      <+ `Gmin*V(br_bpsi);
 
         I(br_bci)       <+ ddt(type*qjcx0_t_i);
         I(br_bci)       <+ ddt(cbcpar1*V(br_bci));

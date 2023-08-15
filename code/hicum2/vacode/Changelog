@@ -1,3 +1,5 @@
+Improve convergence by adding Gmin to branch bi, si.
+
 Xyce:
 Skip DC OP analysis.
 Use alternative code block for shorting thermal branch.

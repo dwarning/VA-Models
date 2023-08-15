@@ -12,7 +12,7 @@ NQ1 C B 0 hicumL2va
 .control
 pre_osdi ../../osdilibs/hicumL2.osdi
 let run = 0
-let ft_runs = 9
+let ft_runs = 10
 set curplot=new          $ create a new plot
 set curplotname=ft_plot
 set curplottitle="HICUM2v2.40 ft = f(Ic)"
@@ -20,7 +20,7 @@ set scratch=$curplot     $ store its name to 'scratch'
 setplot $scratch         $ make 'scratch' the active plot 
 let ft=unitvec(ft_runs)  $ create a vector in plot 'scratch' to store ft data 
 let ic=unitvec(ft_runs)  $ create a vector in plot 'scratch' to store ic data 
-foreach myic 0.5e-03 1e-03 3e-03 6e-03 9e-03 14e-03 21e-03 27e-03 33e-3
+foreach myic 0.5e-03 1e-03 3e-03 6e-03 9e-03 14e-03 21e-03 27e-03 33e-3 40e-3
  alter ic = $myic
  op
  print all
