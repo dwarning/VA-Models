@@ -13,8 +13,8 @@ code/playground/*.osdi
 code/*/*/.libs
 code/*/*.dat
 code/*/*/*.*.prn
-code/*/*.*.mt0
-code/*/*.*.res
+code/*/*/*.*.mt0
+code/*/*/*.*.res
 code/*/*/*.log
 code/*/*/*.la
 code/*/*/*.o

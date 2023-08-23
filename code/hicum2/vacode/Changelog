@@ -1,4 +1,5 @@
-Improve convergence by adding Gmin to branch bi, si.
+Improve convergence by adding Gmin to branches bpsi and sici.
+Add version 3.0.0
 
 Xyce:
 Skip DC OP analysis.
