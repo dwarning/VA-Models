@@ -15,6 +15,7 @@ XQ1 C B 0 0 npn13G2 nx=1
 
 .control
 pre_osdi ../../osdilibs/vbic_1p3.osdi
+*altermod @n.xq1.nqnpn13g2[RTH]=0
 let ft_runs = 15
 let run = 0
 set curplot=new          $ create a new plot
