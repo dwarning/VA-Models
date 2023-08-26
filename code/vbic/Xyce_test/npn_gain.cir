@@ -1,0 +1,126 @@
+VBIC AC gain Test h21 = f(Ic) Vce=1V
+
+vce 1 0 dc 1.0
+vgain 1 c dc 0.0
+f 0 2 vgain -2
+l 2 b 1g
+c 2 0 1g
+ib 0 b dc 0.0 ac 1.0
+ic 0 c 0.01
+XQ1 C B 0 0 npn13G2 nx=1
+
+.step dec ic 50u 5m 4
+*.op
+.ac dec 10 100Meg 1000g
+.print ac format=gnuplot idb(vgain)
+.measure ac FT when idb(vgain)=0
+
+.subckt npn13G2 c b e bn
+.param Nx=1 dtemp=0
++Ny=1 le=0.96e-6 we=0.12e-6
++El=le*1e6
+
+Yvbic13_4t_va vbic1 c b e s1 npn13G2_NX_vbic; dtemp=dtemp m=1
+*qvbic13_4t c b e s1 npn13G2_NX_vbic dtemp=dtemp m=1
+
+.model npn13G2_NX_vbic vbic13_4t_va
+*.model npn13G2_NX_vbic npn level = 12
+*+ type=1
++ bvbe = 1.6
++ bvbc = 5.1
++ bvce = 1.6
++ bvsub = 20
++ vbefwd=0.2
++ vbcfwd=0.2
++ vsubfwd=0.2
++ tnom = 27
++ cbeo = '8.00E-16*(Nx*0.25)**0.975'
++ cje = '8.418E-15*(Nx*0.25)**0.975'
++ pe = 0.92
++ me = 0.12
++ aje = -0.50
++ wbe = 1.00
++ cbco = '2.36E-15*(Nx*0.25)'
++ cjc = '1.53E-15*(Nx*0.25)'
++ pc = 0.558
++ mc = 0.12
++ ajc = -0.50
++ cjep = '3.56E-15*(Nx*0.25)'
++ cjcp = '4.56E-15*(Nx*0.25)**0.8'
++ ps = 0.46
++ ms = 0.23
++ ajs = -0.50
++ fc = 0.80
++ vef = 189
++ ver = 5.3
++ is = '4.81E-17*(Nx*0.25)'
++ nf = 1.018
++ ibei = '1.9E-19*(Nx*0.25)'
++ nei = 1.066
++ iben = '4.00E-16*(Nx*0.25)'
++ nen = 2.00
++ ikf = '0.009*(Nx*0.25)'
++ nr = 1.01
++ ibci = '1.50E-20*(Nx*0.25)'
++ nci = 1.103
++ ibcn = '1.00E-15*(Nx*0.25)'
++ ncn = 1.96
++ ikr = '0.01*(Nx*0.25)'
++ wsp = 1
++ isp = '4.00E-20*(Nx*0.25)'
++ nfp = 1.04
++ ibcip = '2.00E-15*(Nx*0.25)**0.7'
++ ncip = 1.00
++ ibcnp = '5.00E-15*(Nx*0.25)'
++ ncnp = 1.50
++ ikp = '.00E-04*(Nx*0.25)'
++ ibeip = '4.00E-19*(Nx*0.25)'
++ ibenp = '2.00E-14*(Nx*0.25)'
++ re = '7.13E+00*(4/Nx)**1'
++ rcx = '1.30E+01*(4/Nx)**1'
++ rci = '1.29E+01*(4/Nx)**1'
++ qco = 1.00E-18
++ vo = 0.80
++ gamm = 2.25E-14
++ hrcf = 1000
++ rbx = '6.93E+00*(4/Nx)**0.95'
++ rbi = '2.20E+01*(4/Nx)**0.95'
++ rbp = '5.5*(4/Nx)'
++ rs = 1
++ avc1 = 2.40
++ avc2 = 10.81
++ tf = '2.02E-13*((temper+273)/300)**0.7'
++ qtf = 1.00E-18
++ xtf = 10.0
++ vtf = 20.0
++ itf = '0.585*(Nx*0.25)'
++ tr = 3.50E-13
++ td = '2.80E-13*(Nx*0.25)**0'
++ selft = 1
++ cth = '1.60E-12*(Nx*0.25)**0.95'
++ rth = '3.26E+03*(4/Nx)**0.9'
++ ea = 1.040
++ eaie = 1.056
++ eaic = 1.12
++ eais = 1.12
++ eane = 1.12
++ eanc = 1.12
++ eans = 1.12
++ xre = -0.42
++ xrb = 0.90
++ xrc = 0.245
++ xrs = 1.50
++ xvo = 1.50
++ xis = 2.30
++ xii = 3.30
++ xin = 3.30
++ tnf = 0.00015
++ tavc = -0.00188
++ kfn = '6.00E-9*(4/Nx)'
++ afn = 1.80
++ bfn = 1.00
+Rsub s1 bn R = '300+100*Nx'
+Csub s1 bn C = '2.30E-14-(1.50E-15*Nx)'
+.ends npn13G2
+
+.end
