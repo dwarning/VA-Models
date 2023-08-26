@@ -255,7 +255,7 @@
     erfcpos = (`aerfc * terfc + berfc * (terfc * terfc) + cerfc * (terfc * terfc * terfc)) * tmp; \
     if (y > 0.0) begin \
         result       =  erfcpos; \
-    end else begin\
+    end else begin \
         `expl_low(m, tmp) \
         result       =  2.0 * tmp - erfcpos; \
     end

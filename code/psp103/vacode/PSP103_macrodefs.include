@@ -104,7 +104,7 @@
             SP_S_ysub   = 1.25 * (SP_S_yg * inv_xi); \
             SP_S_eta    = 0.5 * (SP_S_ysub + 10 - sqrt((SP_S_ysub - 6.0) * (SP_S_ysub - 6.0) + 64.0)); \
             SP_S_temp   = SP_S_yg - SP_S_eta; \
-            SP_S_a      = SP_S_temp * SP_S_temp + Gf2*(SP_S_eta + 1.0);\
+            SP_S_a      = SP_S_temp * SP_S_temp + Gf2*(SP_S_eta + 1.0); \
             SP_S_c      = 2.0 * SP_S_temp - Gf2; \
             SP_S_tau    = -SP_S_eta + ln(SP_S_a * inv_Gf2); \
             `sigma(SP_S_a, SP_S_c, SP_S_tau, SP_S_eta, SP_S_y0) \
@@ -209,7 +209,7 @@
         SP_S_qC     = SP_S_temp * SP_S_temp - Gf2 * (SP_S_delta1 + SP_S_x0 - 1.0 + SP_S_delta0 - (delta) * (SP_S_x0 + 1.0 + SP_S_xi0)); \
         SP_S_temp   = 2.0 - Gf2*(SP_S_delta1+SP_S_delta0-(delta)*SP_S_xi2); \
         SP_S_temp   = SP_S_pC * SP_S_pC - 2.0 * (SP_S_qC * SP_S_temp); \
-        sp          = SP_S_x0 + 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp)));\
+        sp          = SP_S_x0 + 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp))); \
     end
 
 //  sp_ovInit function: surface potential calculation for the overlap regions initialization
