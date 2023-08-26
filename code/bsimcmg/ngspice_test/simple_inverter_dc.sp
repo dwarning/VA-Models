@@ -8,8 +8,8 @@
 vdd   supply  0 dc=1.0
 vsig  vin  0 dc=0.5 sin (0.5 0.5 1MEG)
 
-NP1 vout vin supply supply BSIMCMG_osdi_P  TFIN=15n L=40n NFIN=20 NRS=1 NRD=1
-NN1 vout vin 0 0 BSIMCMG_osdi_N            TFIN=15n L=40n NFIN=10 NRS=1 NRD=1 D=40n
+NP1 vout vin supply supply pmos  TFIN=15n L=40n NFIN=20 NRS=1 NRD=1
+NN1 vout vin 0 0 nmos            TFIN=15n L=40n NFIN=10 NRS=1 NRD=1 D=40n
 
 * --- DC Analysis ---
 .dc vsig 0 1 0.01

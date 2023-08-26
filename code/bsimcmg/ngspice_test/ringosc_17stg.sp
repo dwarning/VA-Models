@@ -10,8 +10,8 @@ vdd   supply  0 dc=1.0
 
 * --- Inverter Subcircuit ---
 .subckt mg_inv vin vout vdd gnd
-NP1 vout vin vdd vdd BSIMCMG_osdi_P
-NN1 vout vin gnd gnd BSIMCMG_osdi_N
+NP1 vout vin vdd vdd pmos
+NN1 vout vin gnd gnd nmos
 .ends
 
 * --- 17 Stage Ring oscillator ---

@@ -10,8 +10,8 @@ Vss   ss      0 0
 
 * --- Inverter Subcircuit ---
 .subckt mg_inv vin vout vdd vss
-NP1 vout vin vdd vdd BSIMCMG_osdi_P  TFIN=15n L=40n NFIN=20 NRS=1 NRD=1
-NN1 vout vin vss vss BSIMCMG_osdi_N  TFIN=15n L=40n NFIN=10 NRS=1 NRD=1 D=40n
+NP1 vout vin vdd vdd pmos  TFIN=15n L=40n NFIN=20 NRS=1 NRD=1
+NN1 vout vin vss vss nmos  TFIN=15n L=40n NFIN=10 NRS=1 NRD=1 D=40n
 .ends
 
 * --- Inverter ---

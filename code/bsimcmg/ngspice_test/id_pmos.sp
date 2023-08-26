@@ -8,7 +8,7 @@ VB e 0 0
 .include ../Modelcards/modelcard.pmos
 
 *OSDI BSIMCMG:
-N1 d g s e BSIMCMG_osdi_P L=0.2u NF=20
+N1 d g s e pmos L=0.2u NF=20
 
 .control
 pre_osdi ../../osdilibs/bsimcmg.osdi

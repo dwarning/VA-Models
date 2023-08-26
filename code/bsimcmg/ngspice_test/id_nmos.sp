@@ -5,11 +5,11 @@ VG g 0 1
 VS s 0 0
 VB e 0 0
 
-*.model BSIMCMG_osdi_N BSIMCMG_va bulkmod=2
+*.model nmos BSIMCMG_va bulkmod=2
 .include ../Modelcards/modelcard.nmos
 
 *OSDI BSIM4:
-N1 d g s e BSIMCMG_osdi_N L=0.2u NF=10
+N1 d g s e nmos L=0.2u NF=10
 
 .control
 pre_osdi ../../osdilibs/bsimcmg.osdi

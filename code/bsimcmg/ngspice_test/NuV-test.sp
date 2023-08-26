@@ -4,8 +4,8 @@ vdd 1 0 DC 1.0
 
 .subckt Inv in out vdd
 * Invokes the BSIM CMG111.1.0 paramset infile ‘Top.v‘.
-Nxp1 out in vdd 0 BSIMCMG_osdi_P L=30n
-Nxn1 out in 0 0 BSIMCMG_osdi_N L=30n
+Nxp1 out in vdd 0 pmos L=30n
+Nxn1 out in 0 0 nmos L=30n
 .ends
 
 .subckt Ten in out vdd
