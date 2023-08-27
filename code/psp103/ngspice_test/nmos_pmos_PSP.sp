@@ -37,12 +37,12 @@ vssp 33 0 0
 vbsp 44 0 0
 
 * PSP modelparameters for PSP 103.3
-.include Modelcards/psp103_nmos-2.mod
-.include Modelcards/psp103_pmos-2.mod
+.include ../Modelcards/psp103_nmos-2.mod
+.include ../Modelcards/psp103_pmos-2.mod
 
 .control
 * Load the models dynamically
-pre_osdi ../osdilibs/psp103.osdi
+pre_osdi ../../osdilibs/psp103.osdi
 set xgridwidth=2
 set xbrushwidth=3
 

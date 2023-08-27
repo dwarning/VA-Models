@@ -1,10 +1,10 @@
-psp103 nch output
+psp103 pch output
 *
-vd  d 0 dc 0.05
+vd  d 0 dc -0.1
 vg  g 0 dc 0.0
 vs  s 0 dc 0.0
 vb  b 0 dc 0.0
-nm1  d g s b nch
+nm1  d g s b pch
 +l=0.1u
 +w=1u
 +sa=0.0e+00
@@ -18,16 +18,16 @@ nm1  d g s b nch
 +mult=1.0e+00
 *
 .option temp=21
-
-.include Modelcards/psp103_nmos-2.mod
-*.include Modelcards/psp103_nmos.mod
-
 .control
-pre_osdi ../osdilibs/psp103.osdi
-dc vd 0 2.0 0.05 vg 0 1.5 0.25
+pre_osdi ../../osdilibs/psp103.osdi
+dc vd 0 -2.0 -0.05 vg 0 -1.5 -0.25 ; saturation
 plot i(vs)
-dc vg 0 1.5 0.05 vb 0 -3.0 -1
+dc vg 0 -1.5 -0.05 vb 0 3.0 1
 plot i(vs)
 .endc
+*
+
+.include ../Modelcards/psp103_pmos-2.mod
+
 
 .end

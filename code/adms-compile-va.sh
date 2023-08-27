@@ -83,7 +83,11 @@ rm -rfd .libs/
 cd ../..
 #buildxyceplugin ../mvsg/vacode/mvsg_cmc.va .
 #buildxyceplugin ../psp102/vacode/psp102.va .
-#buildxyceplugin ../psp103/vacode/psp103.va .
+cd ./psp103/vacode
+buildxyceplugin psp103.va ../../admslibs
+rm *.la *.log
+rm -rfd .libs/
+cd ../..
 #buildxyceplugin ../r2_cmc/vacode/r2_cmc.va .
 #buildxyceplugin ../r2_cmc/vacode/r2_et_cmc.va .
 cd ./r3_cmc/vacode
