@@ -158,6 +158,8 @@
 `endif
 `include "mosvarpspMacros.va"
 
+`define MIN_R           0.001
+
 //
 //  ******************
 //  ******************
@@ -791,10 +793,17 @@ analog begin : analogBlock
             I(b_bi)  <+  V(b_bi)  *  (gsub+gac);
             I(b_bx)  <+  V(b_bx)  *  gend;
         end else begin
+`ifdef __XYCE__
+            I(s_rgs) <+  V(s_rgs) / `MIN_R;
+            I(s_rgc) <+  V(s_rgc) / `MIN_R;
+            I(s_bi)  <+  V(s_bi)  / `MIN_R;
+            I(s_bx)  <+  V(s_bx)  / `MIN_R;
+`else
             V(s_rgs) <+  0.0;
             V(s_rgc) <+  0.0;
             V(s_bi)  <+  0.0;
             V(s_bx)  <+  0.0;
+`endif
         end
 
         // gate tunneling current

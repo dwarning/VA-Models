@@ -9,7 +9,7 @@ Rhelp bi 0 1g
 *.model nmoscap mosvar type=-1 toxo=13n VFBO=0 NSUBO=1e22 igmax=1e-3
 .model pmoscap mosvar type=1 toxo=13n VFBO=-1; NSUBO=1e22 rshg=10 igmax=1e-3
 
-.tran 1n 10u 10n
+.tran 10n 10u 0 1n
 .print tran format=gnuplot v(vc) '-i(v1)/1e6'
 
 .end
