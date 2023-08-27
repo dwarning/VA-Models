@@ -15,6 +15,7 @@ code/*/*/.libs
 *.prn
 *.mt*
 *.res
+*.raw
 *.ma*
 *.log
 *.so
