@@ -13,7 +13,7 @@ openvaf -D__NGSPICE__ -o bsim4.osdi ../bsim4/vacode/bsim4.va
 openvaf -D__NGSPICE__ -o BSIM6.1.1.osdi ../bsim6/vacode/BSIM6.1.1.va
 openvaf -D__NGSPICE__ -o bsimbulk106.osdi ../bsimbulk/vacode/bsimbulk106.va
 openvaf -D__NGSPICE__ -o bsimbulk107.osdi ../bsimbulk/vacode/bsimbulk107.va
-openvaf -D__NGSPICE__ -o bsimcmg.osdi ../bsimcmg/vacode111/bsimcmg.va
+openvaf -D__NGSPICE__ -o bsimcmg.osdi ../bsimcmg/vacode/bsimcmg.va
 openvaf -D__NGSPICE__ -o bsimimg.osdi ../bsimimg/vacode/bsimimg.va
 openvaf -D__NGSPICE__ -o bsimsoi.osdi ../bsimsoi/vacode/bsimsoi.va
 openvaf -D__NGSPICE__ -o diode_cmc.osdi ../diode_cmc/vacode/diode_cmc.va
