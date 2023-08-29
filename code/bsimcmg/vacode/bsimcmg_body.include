@@ -14,6 +14,22 @@
 // *                      Chien-Ting Tung (Ph.D. student)                     *
 // ****************************************************************************
 
+// Clamped exponential function
+analog function real lexp;
+    input   x;
+    real x;
+
+    begin
+        if (x > `EXPL_THRESHOLD) begin
+            lexp =  `MAX_EXPL * (1.0+(x)-`EXPL_THRESHOLD);
+        end else if (x < -`EXPL_THRESHOLD) begin
+            lexp =  `MIN_EXPL;
+        end else begin
+            lexp =  exp(x);
+        end
+    end
+endfunction
+
 // ln(1 + exp(x)) function
 analog function real ln_one_plus_exp;
     input x; real x;
@@ -31,884 +47,888 @@ endfunction
 analog begin
     // Bias-independent calculations
     // Initialize variables for periodic steady state analysis
-    `include "bsimcmg_initialization.include"
+    `INITIAL_INSTANCE
+    begin
+        `include "bsimcmg_initialization.include"
 
-    gmin=$simparam("gmin",0);
+        gmin=$simparam("gmin",0);
 
-    if ($port_connected(t) == 1) begin
-        if ((SHMOD == 0 || RTH0 == 0.0) && SH_WARN == 1) begin
-            $strobe("The optional 5th terminal is present in instance %m but not active because SHMOD = 0 or RTH0 = 0.0");
+        if ($port_connected(t) == 1) begin
+            if ((SHMOD == 0 || RTH0 == 0.0) && SH_WARN == 1) begin
+                $strobe("The optional 5th terminal is present in instance %m but not active because SHMOD = 0 or RTH0 = 0.0");
+            end
         end
-    end
 
-    // N or p-type
-    if (TYPE == `ntype) begin
-        devsign = 1;
-    end else begin
-        devsign = -1;
-    end
+        // N or p-type
+        if (TYPE == `ntype) begin
+            devsign = 1;
+        end else begin
+            devsign = -1;
+        end
 
-    // Constants
-    epssub = EPSRSUB * `EPS0;
-    epssp = EPSRSP * `EPS0;
-    cbox = EPSROX * `EPS0 / EOTBOX;
-    epsratio = EPSRSUB / EPSROX;
+        // Constants
+        epssub = EPSRSUB * `EPS0;
+        epssp = EPSRSP * `EPS0;
+        cbox = EPSROX * `EPS0 / EOTBOX;
+        epsratio = EPSRSUB / EPSROX;
 
-    // Constants for quantum mechanical effects
-    mx = 0.916 * `MEL;
-    mxprime = 0.190 * `MEL;
-    md = 0.190 * `MEL;
-    mdprime = 0.417 * `MEL;
-    gprime = 4.0;
-    gfactor = 2.0;
+        // Constants for quantum mechanical effects
+        mx = 0.916 * `MEL;
+        mxprime = 0.190 * `MEL;
+        md = 0.190 * `MEL;
+        mdprime = 0.417 * `MEL;
+        gprime = 4.0;
+        gfactor = 2.0;
 
-    XL_i    = XL + 1.0e-6 * LXL / L + NXL / NFIN  + PXL * 1.0e-6 / (L * NFIN);
-    DLBIN_i = DLBIN + 1.0e-6 * LDLBIN / L + NDLBIN / NFIN  + PDLBIN * 1.0e-6 / (L * NFIN);
-    LINT_i  = LINT + 1.0e-6 * LLINT / L + NLINT / NFIN  + PLINT * 1.0e-6 / (L * NFIN);
+        XL_i    = XL + 1.0e-6 * LXL / L + NXL / NFIN  + PXL * 1.0e-6 / (L * NFIN);
+        DLBIN_i = DLBIN + 1.0e-6 * LDLBIN / L + NDLBIN / NFIN  + PDLBIN * 1.0e-6 / (L * NFIN);
+        LINT_i  = LINT + 1.0e-6 * LLINT / L + NLINT / NFIN  + PLINT * 1.0e-6 / (L * NFIN);
 
-    // Effective channel length for I-V and C-V
-    Lg = L + XL_i;
-    T0 = pow(Lg, -LLN);
-    deltaL = LINT_i + LL * T0;
-    deltaL1 = LINT_i + LL * pow((Lg + DLBIN_i), -LLN);
-    deltaLCV = DLC + LLC * T0;
-    Leff = Lg - 2.0 * deltaL;
-    Leff1 = Lg + DLBIN_i - 2.0 * deltaL1;
-    LeffCV = Lg - 2.0 * deltaLCV;
-    LeffCV_acc = LeffCV - DLCACC;
+        // Effective channel length for I-V and C-V
+        Lg = L + XL_i;
+        T0 = pow(Lg, -LLN);
+        deltaL = LINT_i + LL * T0;
+        deltaL1 = LINT_i + LL * pow((Lg + DLBIN_i), -LLN);
+        deltaLCV = DLC + LLC * T0;
+        Leff = Lg - 2.0 * deltaL;
+        Leff1 = Lg + DLBIN_i - 2.0 * deltaL1;
+        LeffCV = Lg - 2.0 * deltaLCV;
+        LeffCV_acc = LeffCV - DLCACC;
 
-    // Effective GAA channel width for I-V and C-V
-    if (GEOMOD == 5) begin
-        XW_i = XW + 1.0e-6 * LXW / L + NXW / NFIN  + PXW * 1.0e-6 / (L * NFIN) + 1.0e-6 * WXW / WGAA + P2XW * 1.0e-12 / (L * WGAA);
-        DWBIN_i = DWBIN + 1.0e-6 * LDWBIN / L + NDWBIN / NFIN  + PDWBIN * 1.0e-6 / (L * NFIN) +  1.0e-6 * WDWBIN / WGAA + P2DWBIN * 1.0e-12 / (L * WGAA);
-        WGAAeff = WGAA + XW_i;
-        WGAAeff1 = WGAAeff + DWBIN_i;
-    end else begin
-        XW_i = 0;
-        DWBIN_i = 0;
-        WGAAeff = WGAA;
-        WGAAeff1 = WGAA;
-    end
+        // Effective GAA channel width for I-V and C-V
+        if (GEOMOD == 5) begin
+            XW_i = XW + 1.0e-6 * LXW / L + NXW / NFIN  + PXW * 1.0e-6 / (L * NFIN) + 1.0e-6 * WXW / WGAA + P2XW * 1.0e-12 / (L * WGAA);
+            DWBIN_i = DWBIN + 1.0e-6 * LDWBIN / L + NDWBIN / NFIN  + PDWBIN * 1.0e-6 / (L * NFIN) +  1.0e-6 * WDWBIN / WGAA + P2DWBIN * 1.0e-12 / (L * WGAA);
+            WGAAeff = WGAA + XW_i;
+            WGAAeff1 = WGAAeff + DWBIN_i;
+        end else begin
+            XW_i = 0;
+            DWBIN_i = 0;
+            WGAAeff = WGAA;
+            WGAAeff1 = WGAA;
+        end
 
-    // Total Fins
-    NFINtotal = NFIN * NF;
+        // Total Fins
+        NFINtotal = NFIN * NF;
 
-    // Binning
-    Inv_L = 1.0e-6 / Leff1;
-    Inv_NFIN = 1.0 / NFIN;
-    Inv_LNFIN = 1.0e-6 / (Leff1 * NFIN);
-    if (GEOMOD == 5) begin
-        Inv_W = 1.0e-6 / WGAAeff1;
-        Inv_WL = 1.0e-12 / (WGAAeff1 * Leff1);
-    end else begin
-        Inv_W = 0.0;
-        Inv_WL = 0.0;
-    end
+        // Binning
+        Inv_L = 1.0e-6 / Leff1;
+        Inv_NFIN = 1.0 / NFIN;
+        Inv_LNFIN = 1.0e-6 / (Leff1 * NFIN);
+        if (GEOMOD == 5) begin
+            Inv_W = 1.0e-6 / WGAAeff1;
+            Inv_WL = 1.0e-12 / (WGAAeff1 * Leff1);
+        end else begin
+            Inv_W = 0.0;
+            Inv_WL = 0.0;
+        end
 
-    // Nbody binning equation
-    `binning(NBODY_i, NBODY, LNBODY, NNBODY, PNBODY, 0.0, 0.0)
-    if (NBODYN1 != 0.0) begin
-        NBODY_i = NBODY_i * (1.0 + NBODYN1 / NFIN * `lln(1.0 + NFIN / NBODYN2));
-    end
+        // Nbody binning equation
+        `binning(NBODY_i, NBODY, LNBODY, NNBODY, PNBODY, 0.0, 0.0)
+        if (NBODYN1 != 0.0) begin
+            NBODY_i = NBODY_i * (1.0 + NBODYN1 / NFIN * `lln(1.0 + NFIN / NBODYN2));
+        end
 
-    // Unified FinFET compact model
-    case (GEOMOD)
-        // Double gate
-        0: begin
-            if (TFIN_TOP == 0.0 || TFIN_BASE == 0.0) begin
-                Weff_UFCM = 2.0 * HFIN;
+        // Unified FinFET compact model
+        case (GEOMOD)
+            // Double gate
+            0: begin
+                if (TFIN_TOP == 0.0 || TFIN_BASE == 0.0) begin
+                    Weff_UFCM = 2.0 * HFIN;
+                    Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
+                    Ach = HFIN * TFIN;
+                end else begin
+                    Weff_UFCM = 2.0 * sqrt(HFIN * HFIN + (TFIN_TOP - TFIN_BASE) * (TFIN_TOP - TFIN_BASE) / 4.0);
+                    Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
+                    Ach = HFIN * (TFIN_TOP + TFIN_BASE) / 2.0;
+                end
+            end
+            // Triple gate
+            1: begin
+                if (TFIN_TOP == 0.0 || TFIN_BASE == 0.0) begin
+                    Weff_UFCM = 2.0 * HFIN + TFIN;
+                    Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
+                    Ach = HFIN * TFIN;
+                end else begin
+                    Weff_UFCM = 2.0 * sqrt(HFIN * HFIN + (TFIN_TOP - TFIN_BASE) * (TFIN_TOP - TFIN_BASE) / 4.0) + TFIN_TOP;
+                    Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
+                    Ach = HFIN * (TFIN_TOP + TFIN_BASE) / 2.0;
+                end
+            end
+            // Quadruple gate
+            2: begin
+                if (TFIN_TOP == 0.0 || TFIN_BASE == 0.0) begin
+                    Weff_UFCM = 2.0 * HFIN + 2.0 * TFIN;
+                    Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
+                    Ach = HFIN * TFIN;
+                end else begin
+                    Weff_UFCM = 2.0 * sqrt(HFIN * HFIN + (TFIN_TOP - TFIN_BASE) * (TFIN_TOP - TFIN_BASE) / 4.0) + TFIN_TOP + TFIN_BASE;
+                    Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
+                    Ach = HFIN * (TFIN_TOP + TFIN_BASE) / 2.0;
+                end
+                WeffB = TFIN_BASE;
+            end
+            // Cylindrical gate
+            3: begin
+                Weff_UFCM = `M_PI * D;
+                Cins = 2.0 * `M_PI * EPSROX * `EPS0 / `lln(1.0 + 2.0 * EOT / D);
+                Ach = `M_PI * D * D / 4.0;
+                WeffB = D;
+            end
+            // Unified model
+            4: begin
+                Weff_UFCM = W_UFCM;
+                Cins = CINS_UFCM;
+                Ach = ACH_UFCM;
+            end
+            // Gate-All-Around FET model
+            5: begin
+                Weff1 = 2 * (WGAAeff + TGAA) + DWS1;
+                Ach1 = WGAAeff * TGAA + DACH1;
+                Weff_UFCM = Weff1;
+                Ach = Ach1;
+                if (NGAA > 1) begin
+                    Weff2 = 2 * (WGAAeff + TGAA) + DWS2;
+                    Ach2 = WGAAeff * TGAA + DACH2;
+                    Weff_UFCM = Weff1 + Weff2;
+                    Ach = Ach1 + Ach2;
+                end
+                if (NGAA > 2) begin
+                    Weff3 = 2 * (WGAAeff + TGAA) + DWS3;
+                    Ach3 = WGAAeff * TGAA + DACH3;
+                    Weff_UFCM = Weff1 + Weff2 + Weff3;
+                    Ach = Ach1 + Ach2 + Ach3;
+                end
+                if (NGAA > 3) begin
+                    Weff4 = 2 * (WGAAeff + TGAA) + DWS4;
+                    Ach4 = WGAAeff * TGAA + DACH4;
+                    Weff_UFCM = Weff1 + Weff2 + Weff3 + Weff4;
+                    Ach = Ach1 + Ach2 + Ach3 + Ach4;
+                end
+                if (NGAA > 4) begin
+                    Weff5 = 2 * (WGAAeff + TGAA) + DWS5;
+                    Ach5 = WGAAeff * TGAA + DACH5;
+                    Weff_UFCM = Weff1 + Weff2 + Weff3 + Weff4 + Weff5;
+                    Ach = Ach1 + Ach2 + Ach3 + Ach4 + Ach5;
+                end
+                if (NGAA > 5) begin
+                    Weff6 = 2 * (WGAAeff + TGAA) + DWS6;
+                    Ach6 = WGAAeff * TGAA + DACH6;
+                    Weff_UFCM = Weff1 + Weff2 + Weff3 + Weff4 + Weff5 + Weff6;
+                    Ach = Ach1 + Ach2 + Ach3 + Ach4 + Ach5 + Ach6;
+                end
+                WeffB = WGAA;
                 Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
-                Ach = HFIN * TFIN;
-            end else begin
-                Weff_UFCM = 2.0 * sqrt(HFIN * HFIN + (TFIN_TOP - TFIN_BASE) * (TFIN_TOP - TFIN_BASE) / 4.0);
-                Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
-                Ach = HFIN * (TFIN_TOP + TFIN_BASE) / 2.0;
             end
-        end
-        // Triple gate
-        1: begin
-            if (TFIN_TOP == 0.0 || TFIN_BASE == 0.0) begin
-                Weff_UFCM = 2.0 * HFIN + TFIN;
-                Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
-                Ach = HFIN * TFIN;
-            end else begin
-                Weff_UFCM = 2.0 * sqrt(HFIN * HFIN + (TFIN_TOP - TFIN_BASE) * (TFIN_TOP - TFIN_BASE) / 4.0) + TFIN_TOP;
-                Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
-                Ach = HFIN * (TFIN_TOP + TFIN_BASE) / 2.0;
-            end
-        end
-        // Quadruple gate
-        2: begin
-            if (TFIN_TOP == 0.0 || TFIN_BASE == 0.0) begin
-                Weff_UFCM = 2.0 * HFIN + 2.0 * TFIN;
-                Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
-                Ach = HFIN * TFIN;
-            end else begin
-                Weff_UFCM = 2.0 * sqrt(HFIN * HFIN + (TFIN_TOP - TFIN_BASE) * (TFIN_TOP - TFIN_BASE) / 4.0) + TFIN_TOP + TFIN_BASE;
-                Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
-                Ach = HFIN * (TFIN_TOP + TFIN_BASE) / 2.0;
-            end
-            WeffB = TFIN_BASE;
-        end
-        // Cylindrical gate
-        3: begin
-            Weff_UFCM = `M_PI * D;
-            Cins = 2.0 * `M_PI * EPSROX * `EPS0 / `lln(1.0 + 2.0 * EOT / D);
-            Ach = `M_PI * D * D / 4.0;
-            WeffB = D;
-        end
-        // Unified model
-        4: begin
-            Weff_UFCM = W_UFCM;
-            Cins = CINS_UFCM;
-            Ach = ACH_UFCM;
-        end
-        // Gate-All-Around FET model
-        5: begin
-            Weff1 = 2 * (WGAAeff + TGAA) + DWS1;
-            Ach1 = WGAAeff * TGAA + DACH1;
-            Weff_UFCM = Weff1;
-            Ach = Ach1;
-            if (NGAA > 1) begin
-                Weff2 = 2 * (WGAAeff + TGAA) + DWS2;
-                Ach2 = WGAAeff * TGAA + DACH2;
-                Weff_UFCM = Weff1 + Weff2;
-                Ach = Ach1 + Ach2;
-            end
-            if (NGAA > 2) begin
-                Weff3 = 2 * (WGAAeff + TGAA) + DWS3;
-                Ach3 = WGAAeff * TGAA + DACH3;
-                Weff_UFCM = Weff1 + Weff2 + Weff3;
-                Ach = Ach1 + Ach2 + Ach3;
-            end
-            if (NGAA > 3) begin
-                Weff4 = 2 * (WGAAeff + TGAA) + DWS4;
-                Ach4 = WGAAeff * TGAA + DACH4;
-                Weff_UFCM = Weff1 + Weff2 + Weff3 + Weff4;
-                Ach = Ach1 + Ach2 + Ach3 + Ach4;
-            end
-            if (NGAA > 4) begin
-                Weff5 = 2 * (WGAAeff + TGAA) + DWS5;
-                Ach5 = WGAAeff * TGAA + DACH5;
-                Weff_UFCM = Weff1 + Weff2 + Weff3 + Weff4 + Weff5;
-                Ach = Ach1 + Ach2 + Ach3 + Ach4 + Ach5;
-            end
-            if (NGAA > 5) begin
-                Weff6 = 2 * (WGAAeff + TGAA) + DWS6;
-                Ach6 = WGAAeff * TGAA + DACH6;
-                Weff_UFCM = Weff1 + Weff2 + Weff3 + Weff4 + Weff5 + Weff6;
-                Ach = Ach1 + Ach2 + Ach3 + Ach4 + Ach5 + Ach6;
-            end
-            WeffB = WGAA;
-            Cins = Weff_UFCM * EPSROX * `EPS0 / EOT;
-        end
-    endcase
-    rc = 2.0 * Cins / (Weff_UFCM * Weff_UFCM * epssub / Ach);
-    Qdep_ov_Cins = -`q * NBODY_i * Ach / Cins;
+        endcase
+        rc = 2.0 * Cins / (Weff_UFCM * Weff_UFCM * epssub / Ach);
+        Qdep_ov_Cins = -`q * NBODY_i * Ach / Cins;
 
-    // Cox definition
-    cox = Cins / Weff_UFCM;
-    if (BULKMOD != 0) begin
-        cox_acc = cox * EOT / EOTACC;
-    end
-
-    // Effective width calculation
-    Weff0 = Weff_UFCM - DELTAW;
-    WeffCV0 = Weff_UFCM - DELTAWCV;
-    if (GEOMOD == 5) begin
-        WeffCV_acc = Weff0 - 2 * NGAA * DWCACC;
-    end else begin
-        WeffCV_acc = Weff0;
-    end
-
-    // Binning equations
-    `binning(PHIG_i, PHIG, LPHIG, NPHIG, PPHIG, WPHIG, P2PHIG)
-    `binning(NGATE_i, NGATE, LNGATE, NNGATE, PNGATE, WNGATE, P2NGATE)
-    `binning(CIT_i, CIT, LCIT, NCIT, PCIT, WCIT, P2CIT)
-    `binning(CDSC_i, CDSC, LCDSC, NCDSC, PCDSC, WCDSC, P2CDSC)
-    `binning(CDSCD_i, CDSCD, LCDSCD, NCDSCD, PCDSCD, WCDSCD, P2CDSCD)
-    `binning(DVT0_i, DVT0, LDVT0, NDVT0, PDVT0, WDVT0, P2DVT0)
-    `binning(DVT1_i, DVT1, LDVT1, NDVT1, PDVT1, WDVT1, P2DVT1)
-    `binning(DVT1SS_i, DVT1SS, LDVT1SS, NDVT1SS, PDVT1SS, WDVT1SS, P2DVT1SS)
-    `binning(PHIN_i, PHIN, LPHIN, NPHIN, PPHIN, WPHIN, P2PHIN)
-    `binning(ETA0_i, ETA0, LETA0, NETA0, PETA0, WETA0, P2ETA0)
-    `binning(DSUB_i, DSUB, LDSUB, NDSUB, PDSUB, WDSUB, P2DSUB)
-    `binning(K1RSCE_i, K1RSCE, LK1RSCE, NK1RSCE, PK1RSCE, WK1RSCE, P2K1RSCE)
-    `binning(LPE0_i, LPE0, LLPE0, NLPE0, PLPE0, WLPE0, P2LPE0)
-    `binning(DVTSHIFT_i, DVTSHIFT, LDVTSHIFT, NDVTSHIFT, PDVTSHIFT, WDVTSHIFT, P2DVTSHIFT)
-    `binning(K0_i, K0, LK0, NK0, PK0, WK0, P2K0)
-    `binning(K01_i, K01, LK01, NK01, PK01, WK01, P2K01)
-    `binning(K0SI_i, K0SI, LK0SI, NK0SI, PK0SI, WK0SI, P2K0SI)
-    `binning(K0SI1_i, K0SI1, LK0SI1, NK0SI1, PK0SI1, WK0SI1, P2K0SI1)
-    `binning(K2SI_i, K2SI, LK2SI, NK2SI, PK2SI, WK2SI, P2K2SI)
-    `binning(K2SI1_i, K2SI1, LK2SI1, NK2SI1, PK2SI1, WK2SI1, P2K2SI1)
-    `binning(K0SISAT_i, K0SISAT, LK0SISAT, NK0SISAT, PK0SISAT, WK0SISAT, P2K0SISAT)
-    `binning(K0SISAT1_i, K0SISAT1, LK0SISAT1, NK0SISAT1, PK0SISAT1, WK0SISAT1, P2K0SISAT1)
-    `binning(K2SISAT_i, K2SISAT, LK2SISAT, NK2SISAT, PK2SISAT, WK2SISAT, P2K2SISAT )
-    `binning(K2SISAT1_i, K2SISAT1, LK2SISAT1, NK2SISAT1, PK2SISAT1, WK2SISAT1, P2K2SISAT1)
-    `binning(QMFACTOR_i, QMFACTOR, LQMFACTOR, NQMFACTOR, PQMFACTOR, WQMFACTOR, P2QMFACTOR)
-    `binning(QMTCENCV_i, QMTCENCV, LQMTCENCV, NQMTCENCV, PQMTCENCV, WQMTCENCV, P2QMTCENCV)
-    `binning(QMTCENCVA_i, QMTCENCVA, LQMTCENCVA, NQMTCENCVA, PQMTCENCVA, WQMTCENCVA, P2QMTCENCVA)
-    `binning(VSAT_i, VSAT, LVSAT, NVSAT, PVSAT, WVSAT, P2VSAT)
-    `binning(VSAT1_i, VSAT1, LVSAT1, NVSAT1, PVSAT1, WVSAT1, P2VSAT1)
-    `binning(VSATCV_i, VSATCV, LVSATCV, NVSATCV, PVSATCV, WVSATCV, P2VSATCV)
-    `binning(DELTAVSAT_i, DELTAVSAT, LDELTAVSAT, NDELTAVSAT, PDELTAVSAT, WDELTAVSAT, P2DELTAVSAT)
-    `binning(PSAT_i, PSAT, LPSAT, NPSAT, PPSAT, WPSAT, P2PSAT)
-    `binning(DELTAVSATCV_i, DELTAVSATCV, LDELTAVSATCV, NDELTAVSATCV, PDELTAVSATCV, WDELTAVSATCV, P2DELTAVSATCV)
-    `binning(PSATCV_i, PSATCV, LPSATCV, NPSATCV, PPSATCV, WPSATCV, P2PSATCV)
-    `binning(KSATIV_i, KSATIV, LKSATIV, NKSATIV, PKSATIV, WKSATIV, P2KSATIV)
-    `binning(MEXP_i, MEXP, LMEXP, NMEXP, PMEXP, WMEXP, P2MEXP)
-    `binning(PTWG_i, PTWG, LPTWG, NPTWG, PPTWG, WPTWG, P2PTWG)
-    `binning(U0_i, U0, LU0, NU0, PU0, WU0, P2U0)
-    `binning(ETAMOB_i, ETAMOB, LETAMOB, NETAMOB, PETAMOB, WETAMOB, P2ETAMOB)
-    `binning(UP_i, UP, LUP, NUP, PUP, WUP, P2UP)
-    `binning(UA_i, UA, LUA, NUA, PUA, WUA, P2UA)
-    `binning(EU_i, EU, LEU, NEU, PEU, WEU, P2EU)
-    `binning(UD_i, UD, LUD, NUD, PUD, WUD, P2UD)
-    `binning(UCS_i, UCS, LUCS, NUCS, PUCS, WUCS, P2UCS)
-    `binning(UDS_i, UDS, LUDS, NUDS, PUDS, WUDS, P2UDS)
-    `binning(UDS1_i, UDS1, LUDS1, NUDS1, PUDS1, WUDS1, P2UDS1)
-    `binning(UDD_i, UDD, LUDD, NUDD, PUDD, WUDD, P2UDD)
-    `binning(UDD1_i, UDD1, LUDD1, NUDD1, PUDD1, WUDD1, P2UDD1)
-    `binning(PCLM_i, PCLM, LPCLM, NPCLM, PPCLM, WPCLM, P2PCLM)
-    `binning(PCLMG_i, PCLMG, LPCLMG, NPCLMG, PPCLMG, WPCLMG, P2PCLMG)
-    `binning(PCLMCV_i, PCLMCV, LPCLMCV, NPCLMCV, PPCLMCV, WPCLMCV, P2PCLMCV)
-    `binning(A1_i, A1, LA1, NA1, PA1, WA1, P2A1)
-    `binning(A11_i, A11, LA11, NA11, PA11, WA11, P2A11)
-    `binning(A2_i, A2, LA2, NA2, PA2, WA2, P2A2)
-    `binning(A21_i, A21, LA21, NA21, PA21, WA21, P2A21)
-    `binning(RDSW_i, RDSW, LRDSW, NRDSW, PRDSW, WRDSW, P2RDSW)
-    `binning(RSW_i, RSW, LRSW, NRSW, PRSW, WRSW, P2RSW)
-    `binning(RDW_i, RDW, LRDW, NRDW, PRDW, WRDW, P2RDW)
-    `binning(PRWGD_i, PRWGD, LPRWGD, NPRWGD, PPRWGD, WPRWGD, P2PRWGD)
-    `binning(PRWGS_i, PRWGS, LPRWGS, NPRWGS, PPRWGS, WPRWGS, P2PRWGS)
-    `binning(WR_i, WR, LWR, NWR, PWR, WWR, P2WR)
-    `binning(PDIBL1_i, PDIBL1, LPDIBL1, NPDIBL1, PPDIBL1, WPDIBL1, P2PDIBL1)
-    `binning(PDIBL2_i, PDIBL2, LPDIBL2, NPDIBL2, PPDIBL2, WPDIBL2, P2PDIBL2)
-    `binning(DROUT_i, DROUT, LDROUT, NDROUT, PDROUT, WDROUT, P2DROUT)
-    `binning(PVAG_i, PVAG, LPVAG, NPVAG, PPVAG, WPVAG, P2PVAG)
-    `binning(AIGBINV_i, AIGBINV, LAIGBINV, NAIGBINV, PAIGBINV, WAIGBINV, P2AIGBINV)
-    `binning(AIGBINV1_i, AIGBINV1, LAIGBINV1, NAIGBINV1, PAIGBINV1, WAIGBINV1, P2AIGBINV1)
-    `binning(BIGBINV_i, BIGBINV, LBIGBINV, NBIGBINV, PBIGBINV, WBIGBINV, P2BIGBINV)
-    `binning(CIGBINV_i, CIGBINV, LCIGBINV, NCIGBINV, PCIGBINV, WCIGBINV, P2CIGBINV)
-    `binning(EIGBINV_i, EIGBINV, LEIGBINV, NEIGBINV, PEIGBINV, WEIGBINV, P2EIGBINV)
-    `binning(NIGBINV_i, NIGBINV, LNIGBINV, NNIGBINV, PNIGBINV, WNIGBINV, P2NIGBINV)
-    `binning(AIGBACC_i, AIGBACC, LAIGBACC, NAIGBACC, PAIGBACC, WAIGBACC, P2AIGBACC)
-    `binning(AIGBACC1_i, AIGBACC1, LAIGBACC1, NAIGBACC1, PAIGBACC1, WAIGBACC1, P2AIGBACC1)
-    `binning(BIGBACC_i, BIGBACC, LBIGBACC, NBIGBACC, PBIGBACC, WBIGBACC, P2BIGBACC)
-    `binning(CIGBACC_i, CIGBACC, LCIGBACC, NCIGBACC, PCIGBACC, WCIGBACC, P2CIGBACC)
-    `binning(NIGBACC_i, NIGBACC, LNIGBACC, NNIGBACC, PNIGBACC, WNIGBACC, P2NIGBACC)
-    `binning(AIGC_i, AIGC, LAIGC, NAIGC, PAIGC, WAIGC, P2AIGC)
-    `binning(AIGC1_i, AIGC1, LAIGC1, NAIGC1, PAIGC1, WAIGC1, P2AIGC1)
-    `binning(BIGC_i, BIGC, LBIGC, NBIGC, PBIGC, WBIGC, P2BIGC)
-    `binning(CIGC_i, CIGC, LCIGC, NCIGC, PCIGC, WCIGC, P2CIGC)
-    `binning(PIGCD_i, PIGCD, LPIGCD, NPIGCD, PPIGCD, WPIGCD, P2PIGCD)
-    `binning(AIGS_i, AIGS, LAIGS, NAIGS, PAIGS, WAIGS, P2AIGS)
-    `binning(AIGS1_i, AIGS1, LAIGS1, NAIGS1, PAIGS1, WAIGS1, P2AIGS1)
-    `binning(BIGS_i, BIGS, LBIGS, NBIGS, PBIGS, WBIGS, P2BIGS)
-    `binning(CIGS_i, CIGS, LCIGS, NCIGS, PCIGS, WCIGS, P2CIGS)
-    `binning(AIGD_i, AIGD, LAIGD, NAIGD, PAIGD, WAIGD, P2AIGD)
-    `binning(AIGD1_i, AIGD1, LAIGD1, NAIGD1, PAIGD1, WAIGD1, P2AIGD1)
-    `binning(BIGD_i, BIGD, LBIGD, NBIGD, PBIGD, WBIGD, P2BIGD)
-    `binning(CIGD_i, CIGD, LCIGD, NCIGD, PCIGD, WCIGD, P2CIGD)
-    `binning(NTOX_i, NTOX, LNTOX, NNTOX, PNTOX, WNTOX, P2NTOX)
-    `binning(POXEDGE_i, POXEDGE, LPOXEDGE, NPOXEDGE, PPOXEDGE, WPOXEDGE, P2POXEDGE)
-    `binning(AGIDL_i, AGIDL, LAGIDL, NAGIDL, PAGIDL, WAGIDL, P2AGIDL)
-    `binning(BGIDL_i, BGIDL, LBGIDL, NBGIDL, PBGIDL, WBGIDL, P2BGIDL)
-    `binning(CGIDL_i, CGIDL, LCGIDL, NCGIDL, PCGIDL, WCGIDL, P2CGIDL)
-    `binning(EGIDL_i, EGIDL, LEGIDL, NEGIDL, PEGIDL, WEGIDL, P2EGIDL)
-    `binning(PGIDL_i, PGIDL, LPGIDL, NPGIDL, PPGIDL, WPGIDL, P2PGIDL)
-    `binning(AGISL_i, AGISL, LAGISL, NAGISL, PAGISL, WAGISL, P2AGISL)
-    `binning(BGISL_i, BGISL, LBGISL, NBGISL, PBGISL, WBGISL, P2BGISL)
-    `binning(CGISL_i, CGISL, LCGISL, NCGISL, PCGISL, WCGISL, P2CGISL)
-    `binning(EGISL_i, EGISL, LEGISL, NEGISL, PEGISL, WEGISL, P2EGISL)
-    `binning(PGISL_i, PGISL, LPGISL, NPGISL, PPGISL, WPGISL, P2PGISL)
-    `binning(ALPHA0_i, ALPHA0, LALPHA0, NALPHA0, PALPHA0, WALPHA0, P2ALPHA0)
-    `binning(ALPHA1_i, ALPHA1, LALPHA1, NALPHA1, PALPHA1, WALPHA1, P2ALPHA1)
-    `binning(ALPHAII0_i, ALPHAII0, LALPHAII0, NALPHAII0, PALPHAII0, WALPHAII0, P2ALPHAII0)
-    `binning(ALPHAII1_i, ALPHAII1, LALPHAII1, NALPHAII1, PALPHAII1, WALPHAII1, P2ALPHAII1)
-    `binning(BETA0_i, BETA0, LBETA0, NBETA0, PBETA0, WBETA0, P2BETA0)
-    `binning(BETAII0_i, BETAII0, LBETAII0, NBETAII0, PBETAII0, WBETAII0, P2BETAII0)
-    `binning(BETAII1_i, BETAII1, LBETAII1, NBETAII1, PBETAII1, WBETAII1, P2BETAII1)
-    `binning(BETAII2_i, BETAII2, LBETAII2, NBETAII2, PBETAII2, WBETAII2, P2BETAII2)
-    `binning(ESATII_i, ESATII, LESATII, NESATII, PESATII, WESATII, P2ESATII)
-    `binning(LII_i, LII, LLII, NLII, PLII, WLII, P2LII)
-    `binning(SII0_i, SII0, LSII0, NSII0, PSII0, WSII0, P2SII0)
-    `binning(SII1_i, SII1, LSII1, NSII1, PSII1, WSII1, P2SII1)
-    `binning(SII2_i, SII2, LSII2, NSII2, PSII2, WSII2, P2SII2)
-    `binning(SIID_i, SIID, LSIID, NSIID, PSIID, WSIID, P2SIID)
-    `binning(TII_i, TII, LTII, NTII, PTII, WTII, P2TII)
-    `binning(CFS_i, CFS, LCFS, NCFS, PCFS, WCFS, P2CFS)
-    `binning(CFD_i, CFD, LCFD, NCFD, PCFD, WCFD, P2CFD)
-    `binning(COVS_i, COVS, LCOVS, NCOVS, PCOVS, WCOVS, P2COVS)
-    `binning(COVD_i, COVD, LCOVD, NCOVD, PCOVD, WCOVD, P2COVD)
-    `binning(CGSL_i, CGSL, LCGSL, NCGSL, PCGSL, WCGSL, P2CGSL)
-    `binning(CGDL_i, CGDL, LCGDL, NCGDL, PCGDL, WCGDL, P2CGDL)
-    `binning(CGBL_i, CGBL, LCGBL, NCGBL, PCGBL, WCGBL, P2CGBL)
-    `binning(CKAPPAS_i, CKAPPAS, LCKAPPAS, NCKAPPAS, PCKAPPAS, WCKAPPAS, P2CKAPPAS)
-    `binning(CKAPPAD_i, CKAPPAD, LCKAPPAD, NCKAPPAD, PCKAPPAD, WCKAPPAD, P2CKAPPAD)
-    `binning(CKAPPAB_i, CKAPPAB, LCKAPPAB, NCKAPPAB, PCKAPPAB, WCKAPPAB, P2CKAPPAB)
-    `binning(NTGEN_i, NTGEN, LNTGEN, NNTGEN, PNTGEN, WNTGEN, P2NTGEN)
-    `binning(AIGEN_i, AIGEN, LAIGEN, NAIGEN, PAIGEN, WAIGEN, P2AIGEN)
-    `binning(BIGEN_i, BIGEN, LBIGEN, NBIGEN, PBIGEN, WBIGEN, P2BIGEN)
-    `binning(UTE_i, UTE, LUTE, NUTE, PUTE, WUTE, P2UTE)
-    `binning(UTE1_i, UTE1, LUTE1, NUTE1, PUTE1, WUTE1, P2UTE1)
-    `binning(UTL_i, UTL, LUTL, NUTL, PUTL, WUTL, P2UTL)
-    `binning(EMOBT_i, EMOBT, LEMOBT, NEMOBT, PEMOBT, WEMOBT, P2EMOBT)
-    `binning(UA1_i, UA1, LUA1, NUA1, PUA1, WUA1, P2UA1)
-    `binning(UA2_i, UA2, LUA2, NUA2, PUA2, WUA2, P2UA2)
-    `binning(EU1_i, EU1, LEU1, NEU1, PEU1, WEU1, P2EU1)
-    `binning(UD1_i, UD1, LUD1, NUD1, PUD1, WUD1, P2UD1)
-    `binning(UD2_i, UD2, LUD2, NUD2, PUD2, WUD2, P2UD2)
-    `binning(UCSTE_i, UCSTE, LUCSTE, NUCSTE, PUCSTE, WUCSTE, P2UCSTE)
-    `binning(UCSTE1_i, UCSTE1, LUCSTE1, NUCSTE1, PUCSTE1, WUCSTE1, P2UCSTE1)
-    `binning(PTWGT_i, PTWGT, LPTWGT, NPTWGT, PPTWGT, WPTWGT, P2PTWGT)
-    `binning(AT_i, AT, LAT, NAT, PAT, WAT, P2AT)
-    `binning(ATCV_i, ATCV, LATCV, NATCV, PATCV, WATCV, P2ATCV)
-    `binning(PRT_i, PRT, LPRT, NPRT, PPRT, WPRT, P2PRT)
-    `binning(PRT1_i, PRT1, LPRT1, NPRT1, PPRT1, WPRT1, P2PRT1)
-    `binning(TR0_i, TR0, LTR0, NTR0, PTR0, WTR0, P2TR0)
-    `binning(SPRT_i, SPRT, LSPRT, NSPRT, PSPRT, WSPRT, P2SPRT)
-    `binning(KT1_i, KT1, LKT1, NKT1, PKT1, WKT1, P2KT1)
-    `binning(TSS_i, TSS, LTSS, NTSS, PTSS, WTSS, P2TSS)
-    `binning(IIT_i, IIT, LIIT, NIIT, PIIT, WIIT, P2IIT)
-    `binning(TGIDL_i, TGIDL, LTGIDL, NTGIDL, PTGIDL, WTGIDL, P2TGIDL)
-    `binning(IGT_i, IGT, LIGT, NIGT, PIGT, WIGT, P2IGT)
-    `binning(DVTP0_i, DVTP0, LDVTP0, NDVTP0, PDVTP0, WDVTP0, P2DVTP0)
-    `binning(DVTP1_i, DVTP1, LDVTP1, NDVTP1, PDVTP1, WDVTP1, P2DVTP1)
-    `binning(NOIA2_i, NOIA2, LNOIA2, NNOIA2, PNOIA2, WNOIA2, P2NOIA2)
-    `binning(QSREF_i, QSREF, LQSREF, NQSREF, PQSREF, WQSREF, P2QSREF)
-    `binning(MPOWER_i, MPOWER, LMPOWER, NMPOWER, PMPOWER, WMPOWER, P2MPOWER)
-    if (BULKMOD != 0) begin
-        `binning(PHIBE_i, PHIBE, LPHIBE, NPHIBE, PPHIBE, WPHIBE, P2PHIBE)
-        `binning(K1_i, K1, LK1, NK1, PK1, WK1, P2K1)
-        `binning(K11_i, K11, LK11, NK11, PK11, WK11, P2K11)
-        `binning(UC_i, UC, LUC, NUC, PUC, WUC, P2UC)
-        `binning(UC1_i, UC1, LUC1, NUC1, PUC1, WUC1, P2UC1)
-        if (BULKMOD == 2) begin
-            `binning(K2_i, K2, LK2, NK2, PK2, WK2, P2K2)
-            `binning(K21_i, K21, LK21, NK21, PK21, WK21, P2K21)
-            `binning(K2SAT_i, K2SAT, LK2SAT, NK2SAT, PK2SAT, WK2SAT, P2K2SAT)
-            `binning(K2SAT1_i, K2SAT1, LK2SAT1, NK2SAT1, PK2SAT1, WK2SAT1, P2K2SAT1)
-        end
-        if (GIDLMOD == 2 && (GEOMOD == 2 || GEOMOD == 3 || GEOMOD == 5)) begin
-            `binning(AGIDLB_i, AGIDLB, LAGIDLB, NAGIDLB, PAGIDLB, WAGIDLB, P2AGIDLB)
-            `binning(BGIDLB_i, BGIDLB, LBGIDLB, NBGIDLB, PBGIDLB, WBGIDLB, P2BGIDLB)
-            `binning(CGIDLB_i, CGIDLB, LCGIDLB, NCGIDLB, PCGIDLB, WCGIDLB, P2CGIDLB)
-            `binning(EGIDLB_i, EGIDLB, LEGIDLB, NEGIDLB, PEGIDLB, WEGIDLB, P2EGIDLB)
-            `binning(PGIDLB_i, PGIDLB, LPGIDLB, NPGIDLB, PPGIDLB, WPGIDLB, P2PGIDLB)
-            `binning(AGISLB_i, AGISLB, LAGISLB, NAGISLB, PAGISLB, WAGISLB, P2AGISLB)
-            `binning(BGISLB_i, BGISLB, LBGISLB, NBGISLB, PBGISLB, WBGISLB, P2BGISLB)
-            `binning(CGISLB_i, CGISLB, LCGISLB, NCGISLB, PCGISLB, WCGISLB, P2CGISLB)
-            `binning(EGISLB_i, EGISLB, LEGISLB, NEGISLB, PEGISLB, WEGISLB, P2EGISLB)
-            `binning(PGISLB_i, PGISLB, LPGISLB, NPGISLB, PPGISLB, WPGISLB, P2PGISLB)
-        end
-    end
-    if (ASYMMOD != 0) begin
-        `binning(CDSCDR_i, CDSCDR, LCDSCDR, NCDSCDR, PCDSCDR, WCDSCDR, P2CDSCDR)
-        `binning(CITR_i, CITR, LCITR, NCITR, PCITR, WCITR, P2CITR)
-        `binning(ETA0R_i, ETA0R, LETA0R, NETA0R, PETA0R, WETA0R, P2ETA0R)
-        `binning(VSAT1R_i, VSAT1R, LVSAT1R, NVSAT1R, PVSAT1R, WVSAT1R, P2VSAT1R)
-        `binning(MEXPR_i, MEXPR, LMEXPR, NMEXPR, PMEXPR, WMEXPR, P2MEXPR)
-        `binning(PTWGR_i, PTWGR, LPTWGR, NPTWGR, PPTWGR, WPTWGR, P2PTWGR)
-        `binning(PDIBL1R_i, PDIBL1R, LPDIBL1R, NPDIBL1R, PPDIBL1R, WPDIBL1R, P2PDIBL1R)
-        `binning(PDIBL2R_i, PDIBL2R, LPDIBL2R, NPDIBL2R, PPDIBL2R, WPDIBL2R, P2PDIBL2R)
-        `binning(PCLMR_i, PCLMR, LPCLMR, NPCLMR, PPCLMR, WPCLMR, P2PCLMR)
-        `binning(DVTSHIFTR_i, DVTSHIFTR, LDVTSHIFTR, NDVTSHIFTR, PDVTSHIFTR, WDVTSHIFTR, P2DVTSHIFTR)
-        `binning(VSATR_i, VSATR, LVSATR, NVSATR, PVSATR, WVSATR, P2VSATR)
-        `binning(KSATIVR_i, KSATIVR, LKSATIVR, NKSATIVR, PKSATIVR, WKSATIVR, P2KSATIVR)
-        `binning(U0R_i, U0R, LU0R, NU0R, PU0R, WU0R, P2U0R)
-        `binning(UAR_i, UAR, LUAR, NUAR, PUAR, WUAR, P2UAR)
-        `binning(UPR_i, UPR, LUPR, NUPR, PUPR, WUPR, P2UPR)
-        `binning(EUR_i, EUR, LEUR, NEUR, PEUR, WEUR, P2EUR)
-        `binning(UDR_i, UDR, LUDR, NUDR, PUDR, WUDR, P2UDR)
-        `binning(UTER_i, UTER, LUTER, NUTER, PUTER, WUTER, P2UTER)
-        `binning(UTLR_i, UTLR, LUTLR, NUTLR, PUTLR, WUTLR, P2UTLR)
-        `binning(UA1R_i, UA1R, LUA1R, NUA1R, PUA1R, WUA1R, P2UA1R)
-        `binning(UD1R_i, UD1R, LUD1R, NUD1R, PUD1R, WUD1R, P2UD1R)
-        `binning(ATR_i, ATR, LATR, NATR, PATR, WATR, P2ATR)
+        // Cox definition
+        cox = Cins / Weff_UFCM;
         if (BULKMOD != 0) begin
-            `binning(UCR_i, UCR, LUCR, NUCR, PUCR, WUCR, P2UCR)
-            `binning(UC1R_i, UC1R, LUC1R, NUC1R, PUC1R, WUC1R, P2UC1R)
+            cox_acc = cox * EOT / EOTACC;
         end
-    end
-    if (CVMOD == 1) begin
-        `binning(U0CV_i, U0CV, LU0CV, NU0CV, PU0CV, WU0CV, P2U0CV)
-        `nfin_scaling(U0CV_i, U0N1CV, U0N2CV)
-        `binning(UACV_i, UACV, LUACV, NUACV, PUACV, WUACV, P2UACV)
-        `binning(UDCV_i, UDCV, LUDCV, NUDCV, PUDCV, WUDCV, P2UDCV)
-        `binning(UTECV_i, UTECV, LUTECV, NUTECV, PUTECV, WUTECV, P2UTECV)
-        `binning(UTE1CV_i, UTE1CV, LUTE1CV, NUTE1CV, PUTE1CV, WUTE1CV, P2UTE1CV)
-        `binning(UTLCV_i, UTLCV, LUTLCV, NUTLCV, PUTLCV, WUTLCV, P2UTLCV)
-        `binning(UA1CV_i, UA1CV, LUA1CV, NUA1CV, PUA1CV, WUA1CV, P2UA1CV)
-        `binning(UA2CV_i, UA2CV, LUA2CV, NUA2CV, PUA2CV, WUA2CV, P2UA2CV)
-        `binning(UD1CV_i, UD1CV, LUD1CV, NUD1CV, PUD1CV, WUD1CV, P2UD1CV)
-        `binning(UD2CV_i, UD2CV, LUD2CV, NUD2CV, PUD2CV, WUD2CV, P2UD2CV)
+
+        // Effective width calculation
+        Weff0 = Weff_UFCM - DELTAW;
+        WeffCV0 = Weff_UFCM - DELTAWCV;
+        if (GEOMOD == 5) begin
+            WeffCV_acc = Weff0 - 2 * NGAA * DWCACC;
+        end else begin
+            WeffCV_acc = Weff0;
+        end
+
+        // Binning equations
+        `binning(PHIG_i, PHIG, LPHIG, NPHIG, PPHIG, WPHIG, P2PHIG)
+        `binning(NGATE_i, NGATE, LNGATE, NNGATE, PNGATE, WNGATE, P2NGATE)
+        `binning(CIT_i, CIT, LCIT, NCIT, PCIT, WCIT, P2CIT)
+        `binning(CDSC_i, CDSC, LCDSC, NCDSC, PCDSC, WCDSC, P2CDSC)
+        `binning(CDSCD_i, CDSCD, LCDSCD, NCDSCD, PCDSCD, WCDSCD, P2CDSCD)
+        `binning(DVT0_i, DVT0, LDVT0, NDVT0, PDVT0, WDVT0, P2DVT0)
+        `binning(DVT1_i, DVT1, LDVT1, NDVT1, PDVT1, WDVT1, P2DVT1)
+        `binning(DVT1SS_i, DVT1SS, LDVT1SS, NDVT1SS, PDVT1SS, WDVT1SS, P2DVT1SS)
+        `binning(PHIN_i, PHIN, LPHIN, NPHIN, PPHIN, WPHIN, P2PHIN)
+        `binning(ETA0_i, ETA0, LETA0, NETA0, PETA0, WETA0, P2ETA0)
+        `binning(DSUB_i, DSUB, LDSUB, NDSUB, PDSUB, WDSUB, P2DSUB)
+        `binning(K1RSCE_i, K1RSCE, LK1RSCE, NK1RSCE, PK1RSCE, WK1RSCE, P2K1RSCE)
+        `binning(LPE0_i, LPE0, LLPE0, NLPE0, PLPE0, WLPE0, P2LPE0)
+        `binning(DVTSHIFT_i, DVTSHIFT, LDVTSHIFT, NDVTSHIFT, PDVTSHIFT, WDVTSHIFT, P2DVTSHIFT)
+        `binning(K0_i, K0, LK0, NK0, PK0, WK0, P2K0)
+        `binning(K01_i, K01, LK01, NK01, PK01, WK01, P2K01)
+        `binning(K0SI_i, K0SI, LK0SI, NK0SI, PK0SI, WK0SI, P2K0SI)
+        `binning(K0SI1_i, K0SI1, LK0SI1, NK0SI1, PK0SI1, WK0SI1, P2K0SI1)
+        `binning(K2SI_i, K2SI, LK2SI, NK2SI, PK2SI, WK2SI, P2K2SI)
+        `binning(K2SI1_i, K2SI1, LK2SI1, NK2SI1, PK2SI1, WK2SI1, P2K2SI1)
+        `binning(K0SISAT_i, K0SISAT, LK0SISAT, NK0SISAT, PK0SISAT, WK0SISAT, P2K0SISAT)
+        `binning(K0SISAT1_i, K0SISAT1, LK0SISAT1, NK0SISAT1, PK0SISAT1, WK0SISAT1, P2K0SISAT1)
+        `binning(K2SISAT_i, K2SISAT, LK2SISAT, NK2SISAT, PK2SISAT, WK2SISAT, P2K2SISAT )
+        `binning(K2SISAT1_i, K2SISAT1, LK2SISAT1, NK2SISAT1, PK2SISAT1, WK2SISAT1, P2K2SISAT1)
+        `binning(QMFACTOR_i, QMFACTOR, LQMFACTOR, NQMFACTOR, PQMFACTOR, WQMFACTOR, P2QMFACTOR)
+        `binning(QMTCENCV_i, QMTCENCV, LQMTCENCV, NQMTCENCV, PQMTCENCV, WQMTCENCV, P2QMTCENCV)
+        `binning(QMTCENCVA_i, QMTCENCVA, LQMTCENCVA, NQMTCENCVA, PQMTCENCVA, WQMTCENCVA, P2QMTCENCVA)
+        `binning(VSAT_i, VSAT, LVSAT, NVSAT, PVSAT, WVSAT, P2VSAT)
+        `binning(VSAT1_i, VSAT1, LVSAT1, NVSAT1, PVSAT1, WVSAT1, P2VSAT1)
+        `binning(VSATCV_i, VSATCV, LVSATCV, NVSATCV, PVSATCV, WVSATCV, P2VSATCV)
+        `binning(DELTAVSAT_i, DELTAVSAT, LDELTAVSAT, NDELTAVSAT, PDELTAVSAT, WDELTAVSAT, P2DELTAVSAT)
+        `binning(PSAT_i, PSAT, LPSAT, NPSAT, PPSAT, WPSAT, P2PSAT)
+        `binning(DELTAVSATCV_i, DELTAVSATCV, LDELTAVSATCV, NDELTAVSATCV, PDELTAVSATCV, WDELTAVSATCV, P2DELTAVSATCV)
+        `binning(PSATCV_i, PSATCV, LPSATCV, NPSATCV, PPSATCV, WPSATCV, P2PSATCV)
+        `binning(KSATIV_i, KSATIV, LKSATIV, NKSATIV, PKSATIV, WKSATIV, P2KSATIV)
+        `binning(MEXP_i, MEXP, LMEXP, NMEXP, PMEXP, WMEXP, P2MEXP)
+        `binning(PTWG_i, PTWG, LPTWG, NPTWG, PPTWG, WPTWG, P2PTWG)
+        `binning(U0_i, U0, LU0, NU0, PU0, WU0, P2U0)
+        `binning(ETAMOB_i, ETAMOB, LETAMOB, NETAMOB, PETAMOB, WETAMOB, P2ETAMOB)
+        `binning(UP_i, UP, LUP, NUP, PUP, WUP, P2UP)
+        `binning(UA_i, UA, LUA, NUA, PUA, WUA, P2UA)
+        `binning(EU_i, EU, LEU, NEU, PEU, WEU, P2EU)
+        `binning(UD_i, UD, LUD, NUD, PUD, WUD, P2UD)
+        `binning(UCS_i, UCS, LUCS, NUCS, PUCS, WUCS, P2UCS)
+        `binning(UDS_i, UDS, LUDS, NUDS, PUDS, WUDS, P2UDS)
+        `binning(UDS1_i, UDS1, LUDS1, NUDS1, PUDS1, WUDS1, P2UDS1)
+        `binning(UDD_i, UDD, LUDD, NUDD, PUDD, WUDD, P2UDD)
+        `binning(UDD1_i, UDD1, LUDD1, NUDD1, PUDD1, WUDD1, P2UDD1)
+        `binning(PCLM_i, PCLM, LPCLM, NPCLM, PPCLM, WPCLM, P2PCLM)
+        `binning(PCLMG_i, PCLMG, LPCLMG, NPCLMG, PPCLMG, WPCLMG, P2PCLMG)
+        `binning(PCLMCV_i, PCLMCV, LPCLMCV, NPCLMCV, PPCLMCV, WPCLMCV, P2PCLMCV)
+        `binning(A1_i, A1, LA1, NA1, PA1, WA1, P2A1)
+        `binning(A11_i, A11, LA11, NA11, PA11, WA11, P2A11)
+        `binning(A2_i, A2, LA2, NA2, PA2, WA2, P2A2)
+        `binning(A21_i, A21, LA21, NA21, PA21, WA21, P2A21)
+        `binning(RDSW_i, RDSW, LRDSW, NRDSW, PRDSW, WRDSW, P2RDSW)
+        `binning(RSW_i, RSW, LRSW, NRSW, PRSW, WRSW, P2RSW)
+        `binning(RDW_i, RDW, LRDW, NRDW, PRDW, WRDW, P2RDW)
+        `binning(PRWGD_i, PRWGD, LPRWGD, NPRWGD, PPRWGD, WPRWGD, P2PRWGD)
+        `binning(PRWGS_i, PRWGS, LPRWGS, NPRWGS, PPRWGS, WPRWGS, P2PRWGS)
+        `binning(WR_i, WR, LWR, NWR, PWR, WWR, P2WR)
+        `binning(PDIBL1_i, PDIBL1, LPDIBL1, NPDIBL1, PPDIBL1, WPDIBL1, P2PDIBL1)
+        `binning(PDIBL2_i, PDIBL2, LPDIBL2, NPDIBL2, PPDIBL2, WPDIBL2, P2PDIBL2)
+        `binning(DROUT_i, DROUT, LDROUT, NDROUT, PDROUT, WDROUT, P2DROUT)
+        `binning(PVAG_i, PVAG, LPVAG, NPVAG, PPVAG, WPVAG, P2PVAG)
+        `binning(AIGBINV_i, AIGBINV, LAIGBINV, NAIGBINV, PAIGBINV, WAIGBINV, P2AIGBINV)
+        `binning(AIGBINV1_i, AIGBINV1, LAIGBINV1, NAIGBINV1, PAIGBINV1, WAIGBINV1, P2AIGBINV1)
+        `binning(BIGBINV_i, BIGBINV, LBIGBINV, NBIGBINV, PBIGBINV, WBIGBINV, P2BIGBINV)
+        `binning(CIGBINV_i, CIGBINV, LCIGBINV, NCIGBINV, PCIGBINV, WCIGBINV, P2CIGBINV)
+        `binning(EIGBINV_i, EIGBINV, LEIGBINV, NEIGBINV, PEIGBINV, WEIGBINV, P2EIGBINV)
+        `binning(NIGBINV_i, NIGBINV, LNIGBINV, NNIGBINV, PNIGBINV, WNIGBINV, P2NIGBINV)
+        `binning(AIGBACC_i, AIGBACC, LAIGBACC, NAIGBACC, PAIGBACC, WAIGBACC, P2AIGBACC)
+        `binning(AIGBACC1_i, AIGBACC1, LAIGBACC1, NAIGBACC1, PAIGBACC1, WAIGBACC1, P2AIGBACC1)
+        `binning(BIGBACC_i, BIGBACC, LBIGBACC, NBIGBACC, PBIGBACC, WBIGBACC, P2BIGBACC)
+        `binning(CIGBACC_i, CIGBACC, LCIGBACC, NCIGBACC, PCIGBACC, WCIGBACC, P2CIGBACC)
+        `binning(NIGBACC_i, NIGBACC, LNIGBACC, NNIGBACC, PNIGBACC, WNIGBACC, P2NIGBACC)
+        `binning(AIGC_i, AIGC, LAIGC, NAIGC, PAIGC, WAIGC, P2AIGC)
+        `binning(AIGC1_i, AIGC1, LAIGC1, NAIGC1, PAIGC1, WAIGC1, P2AIGC1)
+        `binning(BIGC_i, BIGC, LBIGC, NBIGC, PBIGC, WBIGC, P2BIGC)
+        `binning(CIGC_i, CIGC, LCIGC, NCIGC, PCIGC, WCIGC, P2CIGC)
+        `binning(PIGCD_i, PIGCD, LPIGCD, NPIGCD, PPIGCD, WPIGCD, P2PIGCD)
+        `binning(AIGS_i, AIGS, LAIGS, NAIGS, PAIGS, WAIGS, P2AIGS)
+        `binning(AIGS1_i, AIGS1, LAIGS1, NAIGS1, PAIGS1, WAIGS1, P2AIGS1)
+        `binning(BIGS_i, BIGS, LBIGS, NBIGS, PBIGS, WBIGS, P2BIGS)
+        `binning(CIGS_i, CIGS, LCIGS, NCIGS, PCIGS, WCIGS, P2CIGS)
+        `binning(AIGD_i, AIGD, LAIGD, NAIGD, PAIGD, WAIGD, P2AIGD)
+        `binning(AIGD1_i, AIGD1, LAIGD1, NAIGD1, PAIGD1, WAIGD1, P2AIGD1)
+        `binning(BIGD_i, BIGD, LBIGD, NBIGD, PBIGD, WBIGD, P2BIGD)
+        `binning(CIGD_i, CIGD, LCIGD, NCIGD, PCIGD, WCIGD, P2CIGD)
+        `binning(NTOX_i, NTOX, LNTOX, NNTOX, PNTOX, WNTOX, P2NTOX)
+        `binning(POXEDGE_i, POXEDGE, LPOXEDGE, NPOXEDGE, PPOXEDGE, WPOXEDGE, P2POXEDGE)
+        `binning(AGIDL_i, AGIDL, LAGIDL, NAGIDL, PAGIDL, WAGIDL, P2AGIDL)
+        `binning(BGIDL_i, BGIDL, LBGIDL, NBGIDL, PBGIDL, WBGIDL, P2BGIDL)
+        `binning(CGIDL_i, CGIDL, LCGIDL, NCGIDL, PCGIDL, WCGIDL, P2CGIDL)
+        `binning(EGIDL_i, EGIDL, LEGIDL, NEGIDL, PEGIDL, WEGIDL, P2EGIDL)
+        `binning(PGIDL_i, PGIDL, LPGIDL, NPGIDL, PPGIDL, WPGIDL, P2PGIDL)
+        `binning(AGISL_i, AGISL, LAGISL, NAGISL, PAGISL, WAGISL, P2AGISL)
+        `binning(BGISL_i, BGISL, LBGISL, NBGISL, PBGISL, WBGISL, P2BGISL)
+        `binning(CGISL_i, CGISL, LCGISL, NCGISL, PCGISL, WCGISL, P2CGISL)
+        `binning(EGISL_i, EGISL, LEGISL, NEGISL, PEGISL, WEGISL, P2EGISL)
+        `binning(PGISL_i, PGISL, LPGISL, NPGISL, PPGISL, WPGISL, P2PGISL)
+        `binning(ALPHA0_i, ALPHA0, LALPHA0, NALPHA0, PALPHA0, WALPHA0, P2ALPHA0)
+        `binning(ALPHA1_i, ALPHA1, LALPHA1, NALPHA1, PALPHA1, WALPHA1, P2ALPHA1)
+        `binning(ALPHAII0_i, ALPHAII0, LALPHAII0, NALPHAII0, PALPHAII0, WALPHAII0, P2ALPHAII0)
+        `binning(ALPHAII1_i, ALPHAII1, LALPHAII1, NALPHAII1, PALPHAII1, WALPHAII1, P2ALPHAII1)
+        `binning(BETA0_i, BETA0, LBETA0, NBETA0, PBETA0, WBETA0, P2BETA0)
+        `binning(BETAII0_i, BETAII0, LBETAII0, NBETAII0, PBETAII0, WBETAII0, P2BETAII0)
+        `binning(BETAII1_i, BETAII1, LBETAII1, NBETAII1, PBETAII1, WBETAII1, P2BETAII1)
+        `binning(BETAII2_i, BETAII2, LBETAII2, NBETAII2, PBETAII2, WBETAII2, P2BETAII2)
+        `binning(ESATII_i, ESATII, LESATII, NESATII, PESATII, WESATII, P2ESATII)
+        `binning(LII_i, LII, LLII, NLII, PLII, WLII, P2LII)
+        `binning(SII0_i, SII0, LSII0, NSII0, PSII0, WSII0, P2SII0)
+        `binning(SII1_i, SII1, LSII1, NSII1, PSII1, WSII1, P2SII1)
+        `binning(SII2_i, SII2, LSII2, NSII2, PSII2, WSII2, P2SII2)
+        `binning(SIID_i, SIID, LSIID, NSIID, PSIID, WSIID, P2SIID)
+        `binning(TII_i, TII, LTII, NTII, PTII, WTII, P2TII)
+        `binning(CFS_i, CFS, LCFS, NCFS, PCFS, WCFS, P2CFS)
+        `binning(CFD_i, CFD, LCFD, NCFD, PCFD, WCFD, P2CFD)
+        `binning(COVS_i, COVS, LCOVS, NCOVS, PCOVS, WCOVS, P2COVS)
+        `binning(COVD_i, COVD, LCOVD, NCOVD, PCOVD, WCOVD, P2COVD)
+        `binning(CGSL_i, CGSL, LCGSL, NCGSL, PCGSL, WCGSL, P2CGSL)
+        `binning(CGDL_i, CGDL, LCGDL, NCGDL, PCGDL, WCGDL, P2CGDL)
+        `binning(CGBL_i, CGBL, LCGBL, NCGBL, PCGBL, WCGBL, P2CGBL)
+        `binning(CKAPPAS_i, CKAPPAS, LCKAPPAS, NCKAPPAS, PCKAPPAS, WCKAPPAS, P2CKAPPAS)
+        `binning(CKAPPAD_i, CKAPPAD, LCKAPPAD, NCKAPPAD, PCKAPPAD, WCKAPPAD, P2CKAPPAD)
+        `binning(CKAPPAB_i, CKAPPAB, LCKAPPAB, NCKAPPAB, PCKAPPAB, WCKAPPAB, P2CKAPPAB)
+        `binning(NTGEN_i, NTGEN, LNTGEN, NNTGEN, PNTGEN, WNTGEN, P2NTGEN)
+        `binning(AIGEN_i, AIGEN, LAIGEN, NAIGEN, PAIGEN, WAIGEN, P2AIGEN)
+        `binning(BIGEN_i, BIGEN, LBIGEN, NBIGEN, PBIGEN, WBIGEN, P2BIGEN)
+        `binning(UTE_i, UTE, LUTE, NUTE, PUTE, WUTE, P2UTE)
+        `binning(UTE1_i, UTE1, LUTE1, NUTE1, PUTE1, WUTE1, P2UTE1)
+        `binning(UTL_i, UTL, LUTL, NUTL, PUTL, WUTL, P2UTL)
+        `binning(EMOBT_i, EMOBT, LEMOBT, NEMOBT, PEMOBT, WEMOBT, P2EMOBT)
+        `binning(UA1_i, UA1, LUA1, NUA1, PUA1, WUA1, P2UA1)
+        `binning(UA2_i, UA2, LUA2, NUA2, PUA2, WUA2, P2UA2)
+        `binning(EU1_i, EU1, LEU1, NEU1, PEU1, WEU1, P2EU1)
+        `binning(UD1_i, UD1, LUD1, NUD1, PUD1, WUD1, P2UD1)
+        `binning(UD2_i, UD2, LUD2, NUD2, PUD2, WUD2, P2UD2)
+        `binning(UCSTE_i, UCSTE, LUCSTE, NUCSTE, PUCSTE, WUCSTE, P2UCSTE)
+        `binning(UCSTE1_i, UCSTE1, LUCSTE1, NUCSTE1, PUCSTE1, WUCSTE1, P2UCSTE1)
+        `binning(PTWGT_i, PTWGT, LPTWGT, NPTWGT, PPTWGT, WPTWGT, P2PTWGT)
+        `binning(AT_i, AT, LAT, NAT, PAT, WAT, P2AT)
+        `binning(ATCV_i, ATCV, LATCV, NATCV, PATCV, WATCV, P2ATCV)
+        `binning(PRT_i, PRT, LPRT, NPRT, PPRT, WPRT, P2PRT)
+        `binning(PRT1_i, PRT1, LPRT1, NPRT1, PPRT1, WPRT1, P2PRT1)
+        `binning(TR0_i, TR0, LTR0, NTR0, PTR0, WTR0, P2TR0)
+        `binning(SPRT_i, SPRT, LSPRT, NSPRT, PSPRT, WSPRT, P2SPRT)
+        `binning(KT1_i, KT1, LKT1, NKT1, PKT1, WKT1, P2KT1)
+        `binning(TSS_i, TSS, LTSS, NTSS, PTSS, WTSS, P2TSS)
+        `binning(IIT_i, IIT, LIIT, NIIT, PIIT, WIIT, P2IIT)
+        `binning(TGIDL_i, TGIDL, LTGIDL, NTGIDL, PTGIDL, WTGIDL, P2TGIDL)
+        `binning(IGT_i, IGT, LIGT, NIGT, PIGT, WIGT, P2IGT)
+        `binning(DVTP0_i, DVTP0, LDVTP0, NDVTP0, PDVTP0, WDVTP0, P2DVTP0)
+        `binning(DVTP1_i, DVTP1, LDVTP1, NDVTP1, PDVTP1, WDVTP1, P2DVTP1)
+        `binning(NOIA2_i, NOIA2, LNOIA2, NNOIA2, PNOIA2, WNOIA2, P2NOIA2)
+        `binning(QSREF_i, QSREF, LQSREF, NQSREF, PQSREF, WQSREF, P2QSREF)
+        `binning(MPOWER_i, MPOWER, LMPOWER, NMPOWER, PMPOWER, WMPOWER, P2MPOWER)
         if (BULKMOD != 0) begin
-            `binning(UCCV_i, UCCV, LUCCV, NUCCV, PUCCV, WUCCV, P2UCCV)
-            `binning(UC1CV_i, UC1CV, LUC1CV, NUC1CV, PUC1CV, WUC1CV, P2UC1CV)
+            `binning(PHIBE_i, PHIBE, LPHIBE, NPHIBE, PPHIBE, WPHIBE, P2PHIBE)
+            `binning(K1_i, K1, LK1, NK1, PK1, WK1, P2K1)
+            `binning(K11_i, K11, LK11, NK11, PK11, WK11, P2K11)
+            `binning(UC_i, UC, LUC, NUC, PUC, WUC, P2UC)
+            `binning(UC1_i, UC1, LUC1, NUC1, PUC1, WUC1, P2UC1)
+            if (BULKMOD == 2) begin
+                `binning(K2_i, K2, LK2, NK2, PK2, WK2, P2K2)
+                `binning(K21_i, K21, LK21, NK21, PK21, WK21, P2K21)
+                `binning(K2SAT_i, K2SAT, LK2SAT, NK2SAT, PK2SAT, WK2SAT, P2K2SAT)
+                `binning(K2SAT1_i, K2SAT1, LK2SAT1, NK2SAT1, PK2SAT1, WK2SAT1, P2K2SAT1)
+            end
+            if (GIDLMOD == 2 && (GEOMOD == 2 || GEOMOD == 3 || GEOMOD == 5)) begin
+                `binning(AGIDLB_i, AGIDLB, LAGIDLB, NAGIDLB, PAGIDLB, WAGIDLB, P2AGIDLB)
+                `binning(BGIDLB_i, BGIDLB, LBGIDLB, NBGIDLB, PBGIDLB, WBGIDLB, P2BGIDLB)
+                `binning(CGIDLB_i, CGIDLB, LCGIDLB, NCGIDLB, PCGIDLB, WCGIDLB, P2CGIDLB)
+                `binning(EGIDLB_i, EGIDLB, LEGIDLB, NEGIDLB, PEGIDLB, WEGIDLB, P2EGIDLB)
+                `binning(PGIDLB_i, PGIDLB, LPGIDLB, NPGIDLB, PPGIDLB, WPGIDLB, P2PGIDLB)
+                `binning(AGISLB_i, AGISLB, LAGISLB, NAGISLB, PAGISLB, WAGISLB, P2AGISLB)
+                `binning(BGISLB_i, BGISLB, LBGISLB, NBGISLB, PBGISLB, WBGISLB, P2BGISLB)
+                `binning(CGISLB_i, CGISLB, LCGISLB, NCGISLB, PCGISLB, WCGISLB, P2CGISLB)
+                `binning(EGISLB_i, EGISLB, LEGISLB, NEGISLB, PEGISLB, WEGISLB, P2EGISLB)
+                `binning(PGISLB_i, PGISLB, LPGISLB, NPGISLB, PPGISLB, WPGISLB, P2PGISLB)
+            end
         end
-        `binning(ETA0CV_i, ETA0CV, LETA0CV, NETA0CV, PETA0CV, WETA0CV, P2ETA0CV)
-        `nfin_scaling(ETA0CV_i, ETA0N1CV, ETA0N2CV)
+        if (ASYMMOD != 0) begin
+            `binning(CDSCDR_i, CDSCDR, LCDSCDR, NCDSCDR, PCDSCDR, WCDSCDR, P2CDSCDR)
+            `binning(CITR_i, CITR, LCITR, NCITR, PCITR, WCITR, P2CITR)
+            `binning(ETA0R_i, ETA0R, LETA0R, NETA0R, PETA0R, WETA0R, P2ETA0R)
+            `binning(VSAT1R_i, VSAT1R, LVSAT1R, NVSAT1R, PVSAT1R, WVSAT1R, P2VSAT1R)
+            `binning(MEXPR_i, MEXPR, LMEXPR, NMEXPR, PMEXPR, WMEXPR, P2MEXPR)
+            `binning(PTWGR_i, PTWGR, LPTWGR, NPTWGR, PPTWGR, WPTWGR, P2PTWGR)
+            `binning(PDIBL1R_i, PDIBL1R, LPDIBL1R, NPDIBL1R, PPDIBL1R, WPDIBL1R, P2PDIBL1R)
+            `binning(PDIBL2R_i, PDIBL2R, LPDIBL2R, NPDIBL2R, PPDIBL2R, WPDIBL2R, P2PDIBL2R)
+            `binning(PCLMR_i, PCLMR, LPCLMR, NPCLMR, PPCLMR, WPCLMR, P2PCLMR)
+            `binning(DVTSHIFTR_i, DVTSHIFTR, LDVTSHIFTR, NDVTSHIFTR, PDVTSHIFTR, WDVTSHIFTR, P2DVTSHIFTR)
+            `binning(VSATR_i, VSATR, LVSATR, NVSATR, PVSATR, WVSATR, P2VSATR)
+            `binning(KSATIVR_i, KSATIVR, LKSATIVR, NKSATIVR, PKSATIVR, WKSATIVR, P2KSATIVR)
+            `binning(U0R_i, U0R, LU0R, NU0R, PU0R, WU0R, P2U0R)
+            `binning(UAR_i, UAR, LUAR, NUAR, PUAR, WUAR, P2UAR)
+            `binning(UPR_i, UPR, LUPR, NUPR, PUPR, WUPR, P2UPR)
+            `binning(EUR_i, EUR, LEUR, NEUR, PEUR, WEUR, P2EUR)
+            `binning(UDR_i, UDR, LUDR, NUDR, PUDR, WUDR, P2UDR)
+            `binning(UTER_i, UTER, LUTER, NUTER, PUTER, WUTER, P2UTER)
+            `binning(UTLR_i, UTLR, LUTLR, NUTLR, PUTLR, WUTLR, P2UTLR)
+            `binning(UA1R_i, UA1R, LUA1R, NUA1R, PUA1R, WUA1R, P2UA1R)
+            `binning(UD1R_i, UD1R, LUD1R, NUD1R, PUD1R, WUD1R, P2UD1R)
+            `binning(ATR_i, ATR, LATR, NATR, PATR, WATR, P2ATR)
+            if (BULKMOD != 0) begin
+                `binning(UCR_i, UCR, LUCR, NUCR, PUCR, WUCR, P2UCR)
+                `binning(UC1R_i, UC1R, LUC1R, NUC1R, PUC1R, WUC1R, P2UC1R)
+            end
+        end
+        if (CVMOD == 1) begin
+            `binning(U0CV_i, U0CV, LU0CV, NU0CV, PU0CV, WU0CV, P2U0CV)
+            `nfin_scaling(U0CV_i, U0N1CV, U0N2CV)
+            `binning(UACV_i, UACV, LUACV, NUACV, PUACV, WUACV, P2UACV)
+            `binning(UDCV_i, UDCV, LUDCV, NUDCV, PUDCV, WUDCV, P2UDCV)
+            `binning(UTECV_i, UTECV, LUTECV, NUTECV, PUTECV, WUTECV, P2UTECV)
+            `binning(UTE1CV_i, UTE1CV, LUTE1CV, NUTE1CV, PUTE1CV, WUTE1CV, P2UTE1CV)
+            `binning(UTLCV_i, UTLCV, LUTLCV, NUTLCV, PUTLCV, WUTLCV, P2UTLCV)
+            `binning(UA1CV_i, UA1CV, LUA1CV, NUA1CV, PUA1CV, WUA1CV, P2UA1CV)
+            `binning(UA2CV_i, UA2CV, LUA2CV, NUA2CV, PUA2CV, WUA2CV, P2UA2CV)
+            `binning(UD1CV_i, UD1CV, LUD1CV, NUD1CV, PUD1CV, WUD1CV, P2UD1CV)
+            `binning(UD2CV_i, UD2CV, LUD2CV, NUD2CV, PUD2CV, WUD2CV, P2UD2CV)
+            if (BULKMOD != 0) begin
+                `binning(UCCV_i, UCCV, LUCCV, NUCCV, PUCCV, WUCCV, P2UCCV)
+                `binning(UC1CV_i, UC1CV, LUC1CV, NUC1CV, PUC1CV, WUC1CV, P2UC1CV)
+            end
+            `binning(ETA0CV_i, ETA0CV, LETA0CV, NETA0CV, PETA0CV, WETA0CV, P2ETA0CV)
+            `nfin_scaling(ETA0CV_i, ETA0N1CV, ETA0N2CV)
+            if (NFINNOM != 0.0) begin
+                `nfinnom_scaling(U0CV_i, U0LTCV)
+                `nfinnom_scaling(ETA0CV_i, ETA0LTCV)
+            end
+        end
+        if (NQSMOD != 0 && XRCRG1 != 0.0) begin
+            `binning(XRCRG1_i, XRCRG1, LXRCRG1, NXRCRG1, PXRCRG1, WXRCRG1, P2XRCRG1)
+            `binning(XRCRG2_i, XRCRG2, LXRCRG2, NXRCRG2, PXRCRG2, WXRCRG2, P2XRCRG2)
+        end
+        if (SUBBANDMOD == 1) begin
+            `binning(DIMENSION1_i, DIMENSION1, LDIMENSION1, NDIMENSION1, PDIMENSION1, WDIMENSION1, P2DIMENSION1)
+            `binning(DIMENSION2_i, DIMENSION2, LDIMENSION2, NDIMENSION2, PDIMENSION2, WDIMENSION2, P2DIMENSION2)
+            `binning(DIMENSION3_i, DIMENSION3, LDIMENSION3, NDIMENSION3, PDIMENSION3, WDIMENSION3, P2DIMENSION3)
+            `binning(SSP1_i, SSP1, LSSP1, NSSP1, PSSP1, WSSP1, P2SSP1)
+            `binning(SSP2_i, SSP2, LSSP2, NSSP2, PSSP2, WSSP2, P2SSP2)
+            `binning(SSP3_i, SSP3, LSSP3, NSSP3, PSSP3, WSSP3, P2SSP3)
+            `binning(E2NOM_i, E2NOM, LE2NOM, NE2NOM, PE2NOM, WE2NOM, P2E2NOM)
+            `binning(E3NOM_i, E3NOM, LE3NOM, NE3NOM, PE3NOM, WE3NOM, P2E3NOM)
+            `binning(MFQ1NOM_i, MFQ1NOM, LMFQ1NOM, NMFQ1NOM, PMFQ1NOM, WMFQ1NOM, P2MFQ1NOM)
+            `binning(MFQ2NOM_i, MFQ2NOM, LMFQ2NOM, NMFQ2NOM, PMFQ2NOM, WMFQ2NOM, P2MFQ2NOM)
+            `binning(MFQ3NOM_i, MFQ3NOM, LMFQ3NOM, NMFQ3NOM, PMFQ3NOM, WMFQ3NOM, P2MFQ3NOM)
+        end
+
+        // NFIN scaling
+        `nfin_scaling(PHIG_i, PHIGN1, PHIGN2)
+        `nfin_scaling(ETA0_i, ETA0N1, ETA0N2)
+        `nfin_scaling(CDSC_i, CDSCN1, CDSCN2)
+        `nfin_scaling(CDSCD_i, CDSCDN1, CDSCDN2)
+        `nfin_scaling(CDSCDR_i, CDSCDRN1, CDSCDRN2)
+        `nfin_scaling(VSAT_i, VSATN1, VSATN2)
+        `nfin_scaling(VSAT1_i, VSAT1N1, VSAT1N2)
+        `nfin_scaling(VSAT1R_i, VSAT1RN1, VSAT1RN2)
+        `nfin_scaling(U0_i, U0N1, U0N2)
+        `nfin_scaling(U0R_i, U0N1R, U0N2R)
         if (NFINNOM != 0.0) begin
-            `nfinnom_scaling(U0CV_i, U0LTCV)
-            `nfinnom_scaling(ETA0CV_i, ETA0LTCV)
+            `nfinnom_scaling(PHIG_i, PHIGLT)
+            `nfinnom_scaling(ETA0_i, ETA0LT)
+            `nfinnom_scaling(U0_i, U0LT)
         end
-    end
-    if (NQSMOD != 0 && XRCRG1 != 0.0) begin
-        `binning(XRCRG1_i, XRCRG1, LXRCRG1, NXRCRG1, PXRCRG1, WXRCRG1, P2XRCRG1)
-        `binning(XRCRG2_i, XRCRG2, LXRCRG2, NXRCRG2, PXRCRG2, WXRCRG2, P2XRCRG2)
-    end
-    if (SUBBANDMOD == 1) begin
-        `binning(DIMENSION1_i, DIMENSION1, LDIMENSION1, NDIMENSION1, PDIMENSION1, WDIMENSION1, P2DIMENSION1)
-        `binning(DIMENSION2_i, DIMENSION2, LDIMENSION2, NDIMENSION2, PDIMENSION2, WDIMENSION2, P2DIMENSION2)
-        `binning(DIMENSION3_i, DIMENSION3, LDIMENSION3, NDIMENSION3, PDIMENSION3, WDIMENSION3, P2DIMENSION3)
-        `binning(SSP1_i, SSP1, LSSP1, NSSP1, PSSP1, WSSP1, P2SSP1)
-        `binning(SSP2_i, SSP2, LSSP2, NSSP2, PSSP2, WSSP2, P2SSP2)
-        `binning(SSP3_i, SSP3, LSSP3, NSSP3, PSSP3, WSSP3, P2SSP3)
-        `binning(E2NOM_i, E2NOM, LE2NOM, NE2NOM, PE2NOM, WE2NOM, P2E2NOM)
-        `binning(E3NOM_i, E3NOM, LE3NOM, NE3NOM, PE3NOM, WE3NOM, P2E3NOM)
-        `binning(MFQ1NOM_i, MFQ1NOM, LMFQ1NOM, NMFQ1NOM, PMFQ1NOM, WMFQ1NOM, P2MFQ1NOM)
-        `binning(MFQ2NOM_i, MFQ2NOM, LMFQ2NOM, NMFQ2NOM, PMFQ2NOM, WMFQ2NOM, P2MFQ2NOM)
-        `binning(MFQ3NOM_i, MFQ3NOM, LMFQ3NOM, NMFQ3NOM, PMFQ3NOM, WMFQ3NOM, P2MFQ3NOM)
-    end
 
-    // NFIN scaling
-    `nfin_scaling(PHIG_i, PHIGN1, PHIGN2)
-    `nfin_scaling(ETA0_i, ETA0N1, ETA0N2)
-    `nfin_scaling(CDSC_i, CDSCN1, CDSCN2)
-    `nfin_scaling(CDSCD_i, CDSCDN1, CDSCDN2)
-    `nfin_scaling(CDSCDR_i, CDSCDRN1, CDSCDRN2)
-    `nfin_scaling(VSAT_i, VSATN1, VSATN2)
-    `nfin_scaling(VSAT1_i, VSAT1N1, VSAT1N2)
-    `nfin_scaling(VSAT1R_i, VSAT1RN1, VSAT1RN2)
-    `nfin_scaling(U0_i, U0N1, U0N2)
-    `nfin_scaling(U0R_i, U0N1R, U0N2R)
-    if (NFINNOM != 0.0) begin
-        `nfinnom_scaling(PHIG_i, PHIGLT)
-        `nfinnom_scaling(ETA0_i, ETA0LT)
-        `nfinnom_scaling(U0_i, U0LT)
-    end
-
-    // Length scaling
-    Leff_ln = ln(Leff);
-    PHIG_i = PHIG_i + PHIGL * Leff;
-    if (LPA > 0.0) begin
-        U0_i = U0_i * (1.0 - UP_i * exp(-LPA * Leff_ln));
-    end else begin
-        U0_i = U0_i * (1.0 - UP_i);
-    end
-    `length_scaling(UA_i, AUA, BUA)
-    `length_scaling(UD_i, AUD, BUD)
-    `length_scaling(EU_i, AEU, BEU)
-    if (ASYMMOD != 0) begin
-        `length_scaling(UAR_i, AUAR, BUAR)
-        `length_scaling(UDR_i, AUDR, BUDR)
-        `length_scaling(EUR_i, AEUR, BEUR)
-        if (LPAR > 0.0) begin
-            U0R_i = U0R_i * (1.0 - UPR_i * exp(-LPAR * Leff_ln));
+        // Length scaling
+        Leff_ln = ln(Leff);
+        PHIG_i = PHIG_i + PHIGL * Leff;
+        if (LPA > 0.0) begin
+            U0_i = U0_i * (1.0 - UP_i * exp(-LPA * Leff_ln));
         end else begin
-            U0R_i = U0R_i * (1.0 - UPR_i);
+            U0_i = U0_i * (1.0 - UP_i);
         end
-    end
-    if (RDSMOD == 1) begin
-        `length_scaling(RSW_i, ARSW, BRSW)
-        `length_scaling(RDW_i, ARDW, BRDW)
-    end else begin
-        `length_scaling(RDSW_i, ARDSW, BRDSW)
-    end
-    `length_scaling(PCLM_i, APCLM, BPCLM)
-    if (ASYMMOD != 0) begin
-        PCLMR_i = PCLMR_i + APCLMR * exp(-BPCLMR * Leff_ln);
-    end
-    MEXP_i = MEXP_i + AMEXP * exp(-BMEXP * Leff_ln);
-    if (ASYMMOD != 0) begin
-        MEXPR_i = MEXPR_i + AMEXPR * exp(-BMEXPR * Leff_ln);
-    end
-    `length_scaling(PTWG_i, APTWG, BPTWG)
-    if (ASYMMOD != 0) begin
-        `length_scaling(PTWGR_i, APTWG, BPTWG)
-    end
-    `length_scaling(VSAT_i, AVSAT, BVSAT)
-    `length_scaling(VSAT1_i, AVSAT1, BVSAT1)
-    if (ASYMMOD != 0) begin
-        `length_scaling(VSAT1R_i, AVSAT1, BVSAT1)
-    end
-    `length_scaling(PSAT_i, APSAT, BPSAT)
-    `length_scaling(PSATCV_i, APSATCV, BPSATCV)
-    `length_scaling(VSATCV_i, AVSATCV, BVSATCV)
-    DVTP0_i = DVTP0_i + ADVTP0 * `lexp(-Leff / BDVTP0);
-    DVTP1_i = DVTP1_i + ADVTP1 * `lexp(-Leff / BDVTP1);
-    // Geometric scaling for Toxeff / charge centroid Tcen
-    if (QMTCENCV_i > 0.0 || QMTCENCVA_i > 0.0) begin
-        MTcen = 1.0 + AQMTCEN * `lexp(-(2.0 * Ach / Weff_UFCM) / BQMTCEN);
-        Tcen0 = (2.0 * Ach / Weff_UFCM) * MTcen;
-    end
-
-    // Parameter checking
-    `include "bsimcmg_checking.include"
-
-    // Self-heating
-    if (SHMOD != 0 && RTH0 > 0.0) begin
-        if (BSHEXP != 0.0) begin
-            T1 = WTH0 * pow(NF, BSHEXP);
-        end else begin
-            T1 = WTH0;
-        end
-        if (ASHEXP != 0.0) begin
-            T2 = FPITCH * pow(NFINtotal, ASHEXP);
-        end else begin
-            T2 = FPITCH;
-        end
-        gth = (T1 + T2) / RTH0;
-        cth = CTH0 * (T1 + T2);
-    end
-
-    // Gate electrode resistance
-    if (RGATEMOD != 0) begin
-        Rgeltd = (RGEXT / NGCON + (RGFIN * NFIN) / (NGCON == 2 ? 12.0 : 3.0)) / NF;
-        ggeltd = 1.0 / max(1.0e-3, Rgeltd);
-    end
-
-    // Geometry-dependent source/drain resistances
-    if (RGEOMOD == 0) begin
-        RSourceGeo = RSHS * NRS;
-        RDrainGeo = RSHD * NRD;
-    end else begin
-        // Area and perimeter calculation
-        if (HEPI > 0.0) begin
-            Arsd = FPITCH * HFIN + (TFIN + (FPITCH - TFIN) * CRATIO) * HEPI;
-        end else begin
-            Arsd = FPITCH * max(1.0e-9, HFIN + HEPI);
-        end
-        Prsd = FPITCH + DELTAPRSD;
-        // Resistivity calculation
-        if ($param_given(RHORSD)) begin
-            rhorsd = RHORSD;
-        end else begin
-            mu_max = (TYPE == `ntype) ? 1417.0 : 470.5;
-            if (TYPE == `ntype) begin
-                T0 = pow((NSD / 9.68e22), 0.68);
-                T1 = 3.43e26 / NSD;
-                mu_rsd = (52.2 + (mu_max - 52.2) / (1.0 + T0) - 43.4 / (1.0 + T1 * T1)) * 1.0e-4;
+        `length_scaling(UA_i, AUA, BUA)
+        `length_scaling(UD_i, AUD, BUD)
+        `length_scaling(EU_i, AEU, BEU)
+        if (ASYMMOD != 0) begin
+            `length_scaling(UAR_i, AUAR, BUAR)
+            `length_scaling(UDR_i, AUDR, BUDR)
+            `length_scaling(EUR_i, AEUR, BEUR)
+            if (LPAR > 0.0) begin
+                U0R_i = U0R_i * (1.0 - UPR_i * exp(-LPAR * Leff_ln));
             end else begin
-                T0 = pow((NSD / 2.23e22), 0.719);
-                T1 = 6.10e26 / NSD;
-                mu_rsd = (44.9 + (mu_max - 44.9) / (1.0 + T0) - 29.0 / (1.0 + T1 * T1)) * 1.0e-4;
+                U0R_i = U0R_i * (1.0 - UPR_i);
             end
-            rhorsd = 1.0 / (`q * NSD * mu_rsd);
         end
-        // Component: spreading resistance
-        thetarsp = 55.0 * `M_PI / 180.0;
-        afin = min(Arsd, max(1.0e-18, TFIN * (HFIN + min(0.0, HEPI))));
-        Rsp = rhorsd / tan(thetarsp) / (sqrt(`M_PI) * NFIN) * (1.0 / sqrt(afin) - 2.0 / sqrt(Arsd) + sqrt(afin / (Arsd * Arsd)));
-        // Component: contact resistance
-        arsd_total = Arsd * NFIN + ARSDEND;
-        prsd_total = Prsd * NFIN + PRSDEND;
-        lt = sqrt(RHOC * arsd_total / (rhorsd * prsd_total));
-        alpha = LRSD / lt;
-        T0 = `lexp(2.0 * alpha);
-        if (SDTERM == 1.0) begin
-            eta = rhorsd * lt / RHOC;
-            T1 = T0 * (1.0 + eta);
-            T2 = T1 + 1.0 - eta;
-            T3 = T1 - 1.0 + eta;
+        if (RDSMOD == 1) begin
+            `length_scaling(RSW_i, ARSW, BRSW)
+            `length_scaling(RDW_i, ARDW, BRDW)
         end else begin
-            T2 = T0 + 1.0;
-            T3 = T0 - 1.0;
+            `length_scaling(RDSW_i, ARDSW, BRDSW)
         end
-        RrsdTML = rhorsd * lt * T2 / (arsd_total * T3);
-        if (HEPI < -1.0e-10) begin
-            Rrsdside = RHOC / (-HEPI * TFIN * NFIN);
-            Rrsd = (RrsdTML + Rsp) * Rrsdside / ((RrsdTML + Rsp) + Rrsdside);
-        end else begin
-            Rrsd = RrsdTML + Rsp;
+        `length_scaling(PCLM_i, APCLM, BPCLM)
+        if (ASYMMOD != 0) begin
+            PCLMR_i = PCLMR_i + APCLMR * exp(-BPCLMR * Leff_ln);
         end
-        Rdsgeo = Rrsd / NF * max(0.0, RGEOA + RGEOB * TFIN + RGEOC * FPITCH + RGEOD * LRSD + RGEOE * HEPI);
-        RSourceGeo = Rdsgeo;
-        RDrainGeo = Rdsgeo;
-    end
+        MEXP_i = MEXP_i + AMEXP * exp(-BMEXP * Leff_ln);
+        if (ASYMMOD != 0) begin
+            MEXPR_i = MEXPR_i + AMEXPR * exp(-BMEXPR * Leff_ln);
+        end
+        `length_scaling(PTWG_i, APTWG, BPTWG)
+        if (ASYMMOD != 0) begin
+            `length_scaling(PTWGR_i, APTWG, BPTWG)
+        end
+        `length_scaling(VSAT_i, AVSAT, BVSAT)
+        `length_scaling(VSAT1_i, AVSAT1, BVSAT1)
+        if (ASYMMOD != 0) begin
+            `length_scaling(VSAT1R_i, AVSAT1, BVSAT1)
+        end
+        `length_scaling(PSAT_i, APSAT, BPSAT)
+        `length_scaling(PSATCV_i, APSATCV, BPSATCV)
+        `length_scaling(VSATCV_i, AVSATCV, BVSATCV)
+        DVTP0_i = DVTP0_i + ADVTP0 * `lexp(-Leff / BDVTP0);
+        DVTP1_i = DVTP1_i + ADVTP1 * `lexp(-Leff / BDVTP1);
+        // Geometric scaling for Toxeff / charge centroid Tcen
+        if (QMTCENCV_i > 0.0 || QMTCENCVA_i > 0.0) begin
+            MTcen = 1.0 + AQMTCEN * `lexp(-(2.0 * Ach / Weff_UFCM) / BQMTCEN);
+            Tcen0 = (2.0 * Ach / Weff_UFCM) * MTcen;
+        end
 
-    // Clamping of source/drain resistances
-    if (RDSMOD == 0) begin
-        if (RSourceGeo < minr) begin
-            RSourceGeo = 0;
-        end
-        if (RDrainGeo < minr) begin
-            RDrainGeo = 0;
-        end
-    end else begin
-        if (RSourceGeo <= minr) begin
-            RSourceGeo = minr;
-        end
-        if (RDrainGeo <= minr) begin
-            RDrainGeo = minr;
-        end
-    end
-    if (CGEOMOD != 1) begin
-        if ($param_given(CGSO)) begin
-            CGSO_i = CGSO;
-        end else begin
-            if ($param_given(DLC) && DLC > 0.0) begin
-                CGSO_i = max(0.0, DLC * cox - CGSL_i);
+        // Parameter checking
+        `include "bsimcmg_checking.include"
+
+        // Self-heating
+        if (SHMOD != 0 && RTH0 > 0.0) begin
+            if (BSHEXP != 0.0) begin
+                T1 = WTH0 * pow(NF, BSHEXP);
             end else begin
-                if (CGEOMOD == 3) begin
-                    CGSO_i = 0.3 * WGAA * cox;
+                T1 = WTH0;
+            end
+            if (ASHEXP != 0.0) begin
+                T2 = FPITCH * pow(NFINtotal, ASHEXP);
+            end else begin
+                T2 = FPITCH;
+            end
+            gth = (T1 + T2) / RTH0;
+            cth = CTH0 * (T1 + T2);
+        end
+
+        // Gate electrode resistance
+        if (RGATEMOD != 0) begin
+            Rgeltd = (RGEXT / NGCON + (RGFIN * NFIN) / (NGCON == 2 ? 12.0 : 3.0)) / NF;
+            ggeltd = 1.0 / max(1.0e-3, Rgeltd);
+        end
+
+        // Geometry-dependent source/drain resistances
+        if (RGEOMOD == 0) begin
+            RSourceGeo = RSHS * NRS;
+            RDrainGeo = RSHD * NRD;
+        end else begin
+            // Area and perimeter calculation
+            if (HEPI > 0.0) begin
+                Arsd = FPITCH * HFIN + (TFIN + (FPITCH - TFIN) * CRATIO) * HEPI;
+            end else begin
+                Arsd = FPITCH * max(1.0e-9, HFIN + HEPI);
+            end
+            Prsd = FPITCH + DELTAPRSD;
+            // Resistivity calculation
+            if ($param_given(RHORSD)) begin
+                rhorsd = RHORSD;
+            end else begin
+                mu_max = (TYPE == `ntype) ? 1417.0 : 470.5;
+                if (TYPE == `ntype) begin
+                    T0 = pow((NSD / 9.68e22), 0.68);
+                    T1 = 3.43e26 / NSD;
+                    mu_rsd = (52.2 + (mu_max - 52.2) / (1.0 + T0) - 43.4 / (1.0 + T1 * T1)) * 1.0e-4;
                 end else begin
-                    CGSO_i = 0.3 * TFIN * cox;
+                    T0 = pow((NSD / 2.23e22), 0.719);
+                    T1 = 6.10e26 / NSD;
+                    mu_rsd = (44.9 + (mu_max - 44.9) / (1.0 + T0) - 29.0 / (1.0 + T1 * T1)) * 1.0e-4;
+                end
+                rhorsd = 1.0 / (`q * NSD * mu_rsd);
+            end
+            // Component: spreading resistance
+            thetarsp = 55.0 * `M_PI / 180.0;
+            afin = min(Arsd, max(1.0e-18, TFIN * (HFIN + min(0.0, HEPI))));
+            Rsp = rhorsd / tan(thetarsp) / (sqrt(`M_PI) * NFIN) * (1.0 / sqrt(afin) - 2.0 / sqrt(Arsd) + sqrt(afin / (Arsd * Arsd)));
+            // Component: contact resistance
+            arsd_total = Arsd * NFIN + ARSDEND;
+            prsd_total = Prsd * NFIN + PRSDEND;
+            lt = sqrt(RHOC * arsd_total / (rhorsd * prsd_total));
+            alpha = LRSD / lt;
+            T0 = `lexp(2.0 * alpha);
+            if (SDTERM == 1.0) begin
+                eta = rhorsd * lt / RHOC;
+                T1 = T0 * (1.0 + eta);
+                T2 = T1 + 1.0 - eta;
+                T3 = T1 - 1.0 + eta;
+            end else begin
+                T2 = T0 + 1.0;
+                T3 = T0 - 1.0;
+            end
+            RrsdTML = rhorsd * lt * T2 / (arsd_total * T3);
+            if (HEPI < -1.0e-10) begin
+                Rrsdside = RHOC / (-HEPI * TFIN * NFIN);
+                Rrsd = (RrsdTML + Rsp) * Rrsdside / ((RrsdTML + Rsp) + Rrsdside);
+            end else begin
+                Rrsd = RrsdTML + Rsp;
+            end
+            Rdsgeo = Rrsd / NF * max(0.0, RGEOA + RGEOB * TFIN + RGEOC * FPITCH + RGEOD * LRSD + RGEOE * HEPI);
+            RSourceGeo = Rdsgeo;
+            RDrainGeo = Rdsgeo;
+        end
+
+        // Clamping of source/drain resistances
+        if (RDSMOD == 0) begin
+            if (RSourceGeo < minr) begin
+                RSourceGeo = 0;
+            end
+            if (RDrainGeo < minr) begin
+                RDrainGeo = 0;
+            end
+        end else begin
+            if (RSourceGeo <= minr) begin
+                RSourceGeo = minr;
+            end
+            if (RDrainGeo <= minr) begin
+                RDrainGeo = minr;
+            end
+        end
+        if (CGEOMOD != 1) begin
+            if ($param_given(CGSO)) begin
+                CGSO_i = CGSO;
+            end else begin
+                if ($param_given(DLC) && DLC > 0.0) begin
+                    CGSO_i = max(0.0, DLC * cox - CGSL_i);
+                end else begin
+                    if (CGEOMOD == 3) begin
+                        CGSO_i = 0.3 * WGAA * cox;
+                    end else begin
+                        CGSO_i = 0.3 * TFIN * cox;
+                    end
+                end
+            end
+            if ($param_given(CGDO)) begin
+                CGDO_i = CGDO;
+            end else begin
+                if ($param_given(DLC) && DLC > 0.0) begin
+                    CGDO_i = max(0.0, DLC * cox - CGDL_i);
+                end else begin
+                    if (CGEOMOD == 3) begin
+                        CGDO_i = 0.3 * WGAA * cox;
+                    end else begin
+                        CGDO_i = 0.3 * TFIN * cox;
+                    end
                 end
             end
         end
-        if ($param_given(CGDO)) begin
-            CGDO_i = CGDO;
-        end else begin
-            if ($param_given(DLC) && DLC > 0.0) begin
-                CGDO_i = max(0.0, DLC * cox - CGDL_i);
+
+        // Parasitic source/drain-to-gate fringe capacitance
+        if (CGEOMOD == 2) begin
+            Hg = TGATE + TMASK;
+            Trsd = 0.5 * (FPITCH - TFIN);
+            Wg = max(0.0, Trsd - TOXP);
+            Hrsd = max(0.0, HEPI + TSILI);
+            // Top component
+            if (TMASK > 0.0) begin
+                T0 = 3.467e-11 * `lln(1.0e-7 * EPSRSP / (3.9 * LSP));
+                T1 = 0.942 * Hrsd * epssp / LSP;
+                Cgg_top = (T0 + T1) * (TFIN + (FPITCH - TFIN) * CRATIO);
             end else begin
-                if (CGEOMOD == 3) begin
-                    CGDO_i = 0.3 * WGAA * cox;
+                `cfringe_2d(Hg, Hrsd, TFIN, 0.85, Cgg_top)
+            end
+            // Side component
+            if (TMASK > 0.0) begin
+                `cfringe_2d(Wg, Trsd, HFIN, 0.70, Cgg_side)
+            end else begin
+                `cfringe_2d(Wg, Trsd, HFIN, 0.85, Cgg_side)
+            end
+            // Corner component
+            if (TMASK > 0.0) begin
+                Acorner = 0.0;
+            end else begin
+                if (HEPI > 0.0) begin
+                    Acorner = (FPITCH - TFIN) * (HEPI * CRATIO + TSILI);
                 end else begin
-                    CGDO_i = 0.3 * TFIN * cox;
+                    Acorner = (FPITCH - TFIN) * Hrsd;
                 end
             end
+            Ccorner = (NFIN * Acorner + ARSDEND + ASILIEND) * epssp / LSP;
+            Cfr_geo = (Ccorner + Cgg_top * NFIN + CGEOE * Cgg_side * NFIN * 2.0) * NF;
+            Cfr_geo = Cfr_geo * max(0.0, CGEOA + CGEOB * TFIN + CGEOC * FPITCH + CGEOD * LRSD);
         end
-    end
-
-    // Parasitic source/drain-to-gate fringe capacitance
-    if (CGEOMOD == 2) begin
-        Hg = TGATE + TMASK;
-        Trsd = 0.5 * (FPITCH - TFIN);
-        Wg = max(0.0, Trsd - TOXP);
-        Hrsd = max(0.0, HEPI + TSILI);
-        // Top component
-        if (TMASK > 0.0) begin
-            T0 = 3.467e-11 * `lln(1.0e-7 * EPSRSP / (3.9 * LSP));
-            T1 = 0.942 * Hrsd * epssp / LSP;
-            Cgg_top = (T0 + T1) * (TFIN + (FPITCH - TFIN) * CRATIO);
-        end else begin
-            `cfringe_2d(Hg, Hrsd, TFIN, 0.85, Cgg_top)
-        end
-        // Side component
-        if (TMASK > 0.0) begin
-            `cfringe_2d(Wg, Trsd, HFIN, 0.70, Cgg_side)
-        end else begin
-            `cfringe_2d(Wg, Trsd, HFIN, 0.85, Cgg_side)
-        end
-        // Corner component
-        if (TMASK > 0.0) begin
-            Acorner = 0.0;
-        end else begin
-            if (HEPI > 0.0) begin
-                Acorner = (FPITCH - TFIN) * (HEPI * CRATIO + TSILI);
+        //Gate-All-Around FET fringe capacitance model
+        if (CGEOMOD == 3) begin
+            Hg = TGATE + TMASK;
+            Trsd = 0.5 * (FPITCH - WGAA);
+            Wg = max(0.0, Trsd - TOXP);
+            Hrsd = max(0.0, HEPI + TSILI);
+            Hrsd2 = 0.5 * TSUS;
+            // Topmost component: topmost GAA body
+            if (TMASK > 0.0) begin
+                T0 = 3.467e-11 * `lln(1.0e-7 * EPSRSP / (3.9 * LSP));
+                T1 = 0.942 * Hrsd * epssp / LSP;
+                Cgg_topm = (T0 + T1) * (WGAA + (FPITCH - WGAA) * CRATIO);
             end else begin
-                Acorner = (FPITCH - TFIN) * Hrsd;
+                `cfringe_2d(Hg, Hrsd, WGAA, 0.85, Cgg_topm)
             end
-        end
-        Ccorner = (NFIN * Acorner + ARSDEND + ASILIEND) * epssp / LSP;
-        Cfr_geo = (Ccorner + Cgg_top * NFIN + CGEOE * Cgg_side * NFIN * 2.0) * NF;
-        Cfr_geo = Cfr_geo * max(0.0, CGEOA + CGEOB * TFIN + CGEOC * FPITCH + CGEOD * LRSD);
-    end
-    //Gate-All-Around FET fringe capacitance model
-    if (CGEOMOD == 3) begin
-        Hg = TGATE + TMASK;
-        Trsd = 0.5 * (FPITCH - WGAA);
-        Wg = max(0.0, Trsd - TOXP);
-        Hrsd = max(0.0, HEPI + TSILI);
-        Hrsd2 = 0.5 * TSUS;
-        // Topmost component: topmost GAA body
-        if (TMASK > 0.0) begin
-            T0 = 3.467e-11 * `lln(1.0e-7 * EPSRSP / (3.9 * LSP));
-            T1 = 0.942 * Hrsd * epssp / LSP;
-            Cgg_topm = (T0 + T1) * (WGAA + (FPITCH - WGAA) * CRATIO);
-        end else begin
-            `cfringe_2d(Hg, Hrsd, WGAA, 0.85, Cgg_topm)
-        end
-        // Top or bottom component: intermeditate GAA bodies
-        `cfringe_2d(TGATE, Hrsd2, WGAA, 0.85, Cgg_tb)
-        // Topmost side component
-        if (TMASK > 0.0) begin
-            `cfringe_2d(Wg, Trsd, TGAA, 0.70, Cgg_sidetopm)
-        end else begin
-            `cfringe_2d(Wg, Trsd, TGAA, 0.85, Cgg_sidetopm)
-        end
-        // Intermediate side component
-        `cfringe_2d(Wg, Trsd, TGAA, 0.85, Cgg_sidetb)
-        // Parasitic FinFET side component
-        `cfringe_2d(Wg, Trsd, HPFF, 0.85, Cgg_sidepff)
-        // Topmost corner component
-        if (TMASK > 0.0) begin
-            Acorner_topm  =  0.0;
-        end else begin
-            if (HEPI > 0.0) begin
-                Acorner_topm = (FPITCH - WGAA) * (HEPI * CRATIO + TSILI);
+            // Top or bottom component: intermeditate GAA bodies
+            `cfringe_2d(TGATE, Hrsd2, WGAA, 0.85, Cgg_tb)
+            // Topmost side component
+            if (TMASK > 0.0) begin
+                `cfringe_2d(Wg, Trsd, TGAA, 0.70, Cgg_sidetopm)
             end else begin
-                Acorner_topm = (FPITCH - WGAA) * Hrsd;
+                `cfringe_2d(Wg, Trsd, TGAA, 0.85, Cgg_sidetopm)
             end
+            // Intermediate side component
+            `cfringe_2d(Wg, Trsd, TGAA, 0.85, Cgg_sidetb)
+            // Parasitic FinFET side component
+            `cfringe_2d(Wg, Trsd, HPFF, 0.85, Cgg_sidepff)
+            // Topmost corner component
+            if (TMASK > 0.0) begin
+                Acorner_topm  =  0.0;
+            end else begin
+                if (HEPI > 0.0) begin
+                    Acorner_topm = (FPITCH - WGAA) * (HEPI * CRATIO + TSILI);
+                end else begin
+                    Acorner_topm = (FPITCH - WGAA) * Hrsd;
+                end
+            end
+            // Intermediate corner component
+            Acorner_tb = (FPITCH - WGAA) * Hrsd2;
+            Ccorner = (NFIN * (Acorner_topm + 2 * NGAA * Acorner_tb) + ARSDEND + ASILIEND) * epssp / LSP;
+            Cfr_geo = (Ccorner + (Cgg_topm + 2 * NGAA * Cgg_tb) * NFIN + CGEOE * (Cgg_sidetopm + Cgg_sidetb * (NGAA - 1) + Cgg_sidepff) * NFIN * 2.0) * NF;
+            Cfr_geo = Cfr_geo * max(0.0, CGEOA + CGEOB * WGAA + CGEOC * FPITCH + CGEOD * LRSD);
         end
-        // Intermediate corner component
-        Acorner_tb = (FPITCH - WGAA) * Hrsd2;
-        Ccorner = (NFIN * (Acorner_topm + 2 * NGAA * Acorner_tb) + ARSDEND + ASILIEND) * epssp / LSP;
-        Cfr_geo = (Ccorner + (Cgg_topm + 2 * NGAA * Cgg_tb) * NFIN + CGEOE * (Cgg_sidetopm + Cgg_sidetb * (NGAA - 1) + Cgg_sidepff) * NFIN * 2.0) * NF;
-        Cfr_geo = Cfr_geo * max(0.0, CGEOA + CGEOB * WGAA + CGEOC * FPITCH + CGEOD * LRSD);
-    end
-    // Source/gate/drain-to-substrate parasitic capacitances
-    T0 = CSDESW * `lln(1.0 + HFIN / EOTBOX);
-    csbox = cbox * ASEO + T0 * max(0.0, PSEO - FPITCH * NFINtotal);
-    cdbox = cbox * ADEO + T0 * max(0.0, PDEO - FPITCH * NFINtotal);
-    if (GEOMOD != 5) begin
-        cgbox = (CGBO * NF * NGCON + CGBN * NFINtotal) * Lg;
-    end else begin
-        cgbox = (CGBO * NF * NGCON + (CGBN + CGBW * WGAAeff) * NFINtotal) * Lg;
-    end
+        // Source/gate/drain-to-substrate parasitic capacitances
+        T0 = CSDESW * `lln(1.0 + HFIN / EOTBOX);
+        csbox = cbox * ASEO + T0 * max(0.0, PSEO - FPITCH * NFINtotal);
+        cdbox = cbox * ADEO + T0 * max(0.0, PDEO - FPITCH * NFINtotal);
+        if (GEOMOD != 5) begin
+            cgbox = (CGBO * NF * NGCON + CGBN * NFINtotal) * Lg;
+        end else begin
+            cgbox = (CGBO * NF * NGCON + (CGBN + CGBW * WGAAeff) * NFINtotal) * Lg;
+        end
 
-    // Mobility degradation
-    EeffFactor = 1.0e-8 / (epsratio * EOT);
-    WeffWRFactor = 1.0 / (NFINtotal * pow((Weff0 * 1.0e6), WR_i));
-    litl = sqrt(epsratio * EOT * 0.5 * TFIN);
-    scl = sqrt((epssub * Ach / Cins) * (1.0 + Ach * Cins / (2.0 * epssub * Weff_UFCM * Weff_UFCM)));
-    if (!$param_given(THETASCE)) begin
-        tmp = DVT1_i * Leff / scl + 1.0e-6;
-        if (tmp < 40.0) begin
-            Theta_SCE = 0.5 / (cosh(tmp) - 1.0);
+        // Mobility degradation
+        EeffFactor = 1.0e-8 / (epsratio * EOT);
+        WeffWRFactor = 1.0 / (NFINtotal * pow((Weff0 * 1.0e6), WR_i));
+        litl = sqrt(epsratio * EOT * 0.5 * TFIN);
+        scl = sqrt((epssub * Ach / Cins) * (1.0 + Ach * Cins / (2.0 * epssub * Weff_UFCM * Weff_UFCM)));
+        if (!$param_given(THETASCE)) begin
+            tmp = DVT1_i * Leff / scl + 1.0e-6;
+            if (tmp < 40.0) begin
+                Theta_SCE = 0.5 / (cosh(tmp) - 1.0);
+            end else begin
+                Theta_SCE = `lexp(-tmp);
+            end
         end else begin
-            Theta_SCE = `lexp(-tmp);
+            Theta_SCE = THETASCE;
         end
-    end else begin
-        Theta_SCE = THETASCE;
-    end
-    if (!$param_given(THETASW)) begin
-        tmp = DVT1SS_i * Leff / scl + 1.0e-6;
-        if (tmp < 40.0) begin
-            Theta_SW = 0.5 / (cosh(tmp) - 1.0);
+        if (!$param_given(THETASW)) begin
+            tmp = DVT1SS_i * Leff / scl + 1.0e-6;
+            if (tmp < 40.0) begin
+                Theta_SW = 0.5 / (cosh(tmp) - 1.0);
+            end else begin
+                Theta_SW = `lexp(-tmp);
+            end
         end else begin
-            Theta_SW = `lexp(-tmp);
+            Theta_SW = THETASW;
         end
-    end else begin
-        Theta_SW = THETASW;
-    end
-    if (!$param_given(THETADIBL)) begin
+        if (!$param_given(THETADIBL)) begin
+            tmp = DSUB_i * Leff / scl + 1.0e-6;
+            if (tmp < 40.0) begin
+                Theta_DIBL = 0.5 / (cosh(tmp) - 1.0);
+            end else begin
+                Theta_DIBL = `lexp(-tmp);
+            end
+        end else begin
+            Theta_DIBL = THETADIBL;
+        end
+        Theta_RSCE = sqrt(1.0 + LPE0_i / Leff) - 1.0;
         tmp = DSUB_i * Leff / scl + 1.0e-6;
         if (tmp < 40.0) begin
-            Theta_DIBL = 0.5 / (cosh(tmp) - 1.0);
+            Theta_DITS = 1.0 / max((1.0 + DVTP2 * (cosh(tmp) - 2.0)), 1.0e-6);
         end else begin
-            Theta_DIBL = `lexp(-tmp);
+            Theta_DITS = `lexp(-tmp) / max((DVTP2 + `lexp(-tmp)), 1.0e-6);
         end
-    end else begin
-        Theta_DIBL = THETADIBL;
-    end
-    Theta_RSCE = sqrt(1.0 + LPE0_i / Leff) - 1.0;
-    tmp = DSUB_i * Leff / scl + 1.0e-6;
-    if (tmp < 40.0) begin
-        Theta_DITS = 1.0 / max((1.0 + DVTP2 * (cosh(tmp) - 2.0)), 1.0e-6);
-    end else begin
-        Theta_DITS = `lexp(-tmp) / max((DVTP2 + `lexp(-tmp)), 1.0e-6);
-    end
-    qbs = `q * NBODY_i * Ach / Cins;
+        qbs = `q * NBODY_i * Ach / Cins;
 
-    // Gate current
-    if (TYPE == `ntype) begin
-        Aechvb = 4.97232e-7;
-        Bechvb = 7.45669e11;
-    end else begin
-        Aechvb = 3.42537e-7;
-        Bechvb = 1.16645e12;
-    end
-    T0 = TOXG * TOXG;
-    T1 = TOXG * POXEDGE_i;
-    T2 = T1 * T1;
-    Toxratio = pow((TOXREF / TOXG), NTOX_i) / T0;
-    Toxratioedge = pow((TOXREF / T1), NTOX_i) / T2;
-    igsd_mult0 = Weff0 * Aechvb * Toxratioedge;
-    if (TNOM < -`P_CELSIUS0) begin
-        $strobe("Warning: (TNOM = %g) < -`P_CELSIUS0. Set to 27 C.", TNOM);
-        Tnom = `REFTEMP;
-    end else begin
-        Tnom = TNOM + `CONSTCtoK;
-    end
+        // Gate current
+        if (TYPE == `ntype) begin
+            Aechvb = 4.97232e-7;
+            Bechvb = 7.45669e11;
+        end else begin
+            Aechvb = 3.42537e-7;
+            Bechvb = 1.16645e12;
+        end
+        T0 = TOXG * TOXG;
+        T1 = TOXG * POXEDGE_i;
+        T2 = T1 * T1;
+        Toxratio = pow((TOXREF / TOXG), NTOX_i) / T0;
+        Toxratioedge = pow((TOXREF / T1), NTOX_i) / T2;
+        igsd_mult0 = Weff0 * Aechvb * Toxratioedge;
+        if (TNOM < -`P_CELSIUS0) begin
+            $strobe("Warning: (TNOM = %g) < -`P_CELSIUS0. Set to 27 C.", TNOM);
+            Tnom = `REFTEMP;
+        end else begin
+            Tnom = TNOM + `CONSTCtoK;
+        end
 
-    //Gate-All-Around (GAA) FET quantum subband model: Geometry dependent calculations
-    // (Ref: A. Dasgupta et.al., IEEE TED, vol. 67, no. 2, 2020.)
-    if (SUBBANDMOD == 1) begin
-        //Dimension scaling
-        d1 = (DIM1H - DIMENSION1_i) / (1 + `lexp((WDIM0 * 1e9 - WGAA * 1e9) / WDIMR)) + DIMENSION1_i;
-        d2 = (DIM2H - DIMENSION2_i) / (1 + `lexp((WDIM0 * 1e9 - WGAA * 1e9) / WDIMR)) + DIMENSION2_i;
-        d3 = (DIM3H - DIMENSION3_i) / (1 + `lexp((WDIM0 * 1e9 - WGAA * 1e9) / WDIMR)) + DIMENSION3_i;
-        p1 = `smoothminx(-DSSP1 / (1 + `lexp((WSSP0 * 1e9 - WGAA * 1e9) / WSSPR)) + SSP1_i, 0.0, 0.001);
-        p2 = `smoothminx(-DSSP2 / (1 + `lexp((WSSP0 * 1e9 - WGAA * 1e9) / WSSPR)) + SSP2_i, 0.0, 0.001);
-        p3 = `smoothminx(-DSSP3 / (1 + `lexp((WSSP0 * 1e9 - WGAA * 1e9) / WSSPR)) + SSP3_i, 0.0, 0.001);
+        //Gate-All-Around (GAA) FET quantum subband model: Geometry dependent calculations
+        // (Ref: A. Dasgupta et.al., IEEE TED, vol. 67, no. 2, 2020.)
+        if (SUBBANDMOD == 1) begin
+            //Dimension scaling
+            d1 = (DIM1H - DIMENSION1_i) / (1 + `lexp((WDIM0 * 1e9 - WGAA * 1e9) / WDIMR)) + DIMENSION1_i;
+            d2 = (DIM2H - DIMENSION2_i) / (1 + `lexp((WDIM0 * 1e9 - WGAA * 1e9) / WDIMR)) + DIMENSION2_i;
+            d3 = (DIM3H - DIMENSION3_i) / (1 + `lexp((WDIM0 * 1e9 - WGAA * 1e9) / WDIMR)) + DIMENSION3_i;
+            p1 = `smoothminx(-DSSP1 / (1 + `lexp((WSSP0 * 1e9 - WGAA * 1e9) / WSSPR)) + SSP1_i, 0.0, 0.001);
+            p2 = `smoothminx(-DSSP2 / (1 + `lexp((WSSP0 * 1e9 - WGAA * 1e9) / WSSPR)) + SSP2_i, 0.0, 0.001);
+            p3 = `smoothminx(-DSSP3 / (1 + `lexp((WSSP0 * 1e9 - WGAA * 1e9) / WSSPR)) + SSP3_i, 0.0, 0.001);
 
-        //Effect of dimension on capacitance normalizations
-        Wp1 = `smoothmaxx(`smoothminx(1.001 * (d1 - 1.001), 0, 0.001), 1, 0.001);
-        Tp1 = `smoothmaxx(`smoothminx(1.001 * (d1 - 2.001), 0, 0.001), 1, 0.001);
-        Wp2 = `smoothmaxx(`smoothminx(1.001 * (d2 - 1.001), 0, 0.001), 1, 0.001);
-        Tp2 = `smoothmaxx(`smoothminx(1.001 * (d2 - 2.001), 0, 0.001), 1, 0.001);
-        Wp3 = `smoothmaxx(`smoothminx(1.001 * (d3 - 1.001), 0, 0.001), 1, 0.001);
-        Tp3 = `smoothmaxx(`smoothminx(1.001 * (d3 - 2.001), 0, 0.001), 1, 0.001);
-        VnD1 = pow(Weff0, Wp1) * pow(Ach / Weff0, Tp1);
-        qndnf1 = VnD1 / Cins;
-        VnD2 = pow(Weff0, Wp2) * pow(Ach / Weff0, Tp2);
-        qndnf2 = VnD2 / Cins;
-        VnD3 = pow(Weff0, Wp3) * pow(Ach / Weff0, Tp3);
-        qndnf3 = VnD3 / Cins;
+            //Effect of dimension on capacitance normalizations
+            Wp1 = `smoothmaxx(`smoothminx(1.001 * (d1 - 1.001), 0, 0.001), 1, 0.001);
+            Tp1 = `smoothmaxx(`smoothminx(1.001 * (d1 - 2.001), 0, 0.001), 1, 0.001);
+            Wp2 = `smoothmaxx(`smoothminx(1.001 * (d2 - 1.001), 0, 0.001), 1, 0.001);
+            Tp2 = `smoothmaxx(`smoothminx(1.001 * (d2 - 2.001), 0, 0.001), 1, 0.001);
+            Wp3 = `smoothmaxx(`smoothminx(1.001 * (d3 - 1.001), 0, 0.001), 1, 0.001);
+            Tp3 = `smoothmaxx(`smoothminx(1.001 * (d3 - 2.001), 0, 0.001), 1, 0.001);
+            VnD1 = pow(Weff0, Wp1) * pow(Ach / Weff0, Tp1);
+            qndnf1 = VnD1 / Cins;
+            VnD2 = pow(Weff0, Wp2) * pow(Ach / Weff0, Tp2);
+            qndnf2 = VnD2 / Cins;
+            VnD3 = pow(Weff0, Wp3) * pow(Ach / Weff0, Tp3);
+            qndnf3 = VnD3 / Cins;
 
-        nc3d0 = `smoothminx(1 / (1 + `lexp((2.75 - TGAA * 1e9) / 0.78)), 0.5, 0.003);
-        nc3d = (1 - nc3d0) * (d1 - DIMENSION1_i) / (DIM1H - DIMENSION1_i) + nc3d0;
-        ncq = 1 / (1 + `lexp((nc3d - 0.999) / 1e-4));
-        //TGAA scaling model for subband energies
-        QT0= 0.5 * TGAA * TGAA * 1e18 - 1.5 * TGAA * 1e9 + 2;
-        QT1= `smoothmaxx(QT0, 4, 0.01);
-        ne2h = `smoothmaxx(`smoothminx(T0 + pow(TGAA * 1e9 - QT1, TSRE2) * (9.24e5 - 1.81e4) / pow(2, TSRE2) , 1.81e4, 0.01), 9.24e5, 9.24e3);
-        pe2h = `smoothmaxx(`smoothminx(5.5 + pow(TGAA * 1e9 - QT1, TDWSE2) * (8 - 5.5) / pow(2, TDWSE2), 0, 0.01), 8, 0.01);
-        ne3h = (120.66 * pow(4, TSRE3)) / pow(TGAA * 1e9, TSRE3);
-        pe3h = 2 * pow(4, TDWSE3) / pow(TGAA * 1e9, TDWSE3);
-        //TGAA scaling model for subband contributions
-        nc1l0 = 107 * pow(4, TSRQ1) / pow(TGAA * 1e9, TSRQ1);
-        pnc1l = `smoothmaxx(`smoothminx(0.7 + pow(TGAA * 1e9 - QT1, TDWSQ1) * 0.1, 0.5, 0.01), 1, 0.01);
-        nc2l0 = 103 * pow(4, TSRQ2) / pow(TGAA * 1e9, TSRQ2);
-        pnc2l = 1.5 * pow(4, TDWSQ2) / pow(TGAA * 1e9, TDWSQ2);
-        nc3l0 = 833 * pow(4, TSRQ3) / pow(TGAA * 1e9, TSRQ3);
-        pnc3l = 3.4 * pow(4, TDWSQ3) / pow(TGAA * 1e9, TDWSQ3);
-        //WGAA scaling model for subband energies
-        qe2n = ne2h / pow(WGAANOM * 1e9, WSFE2 * pe2h);
-        qe3n = ne3h / pow(WGAANOM * 1e9, WSFE3 * pe3h);
-        qe2 = `smoothminx(E2NOM_i + MFE2 * (ne2h / pow(WGAA * 1e9, WSFE2 * pe2h)-qe2n), 0, 0.01);
-        qe3 = `smoothminx(E3NOM_i + MFE3 * (ne3h / pow(WGAA * 1e9, WSFE3 * pe3h)-qe3n), 0, 0.01);
-        //WGAA scaling model for subband contributions
-        nc1l = `smoothminx(nc1l0 / pow(1 + 5 * pow(WGAA * 1e9, WSFQ1 * pnc1l), 0.5), 0, 0.1);
-        nc1ln = `smoothminx(nc1l0 / pow(1 + 5 * pow(WGAANOM * 1e9, WSFQ1 * pnc1l), 0.5), 0, 0.1);
-        nc1 = MFQ1NOM_i + MFQ1 * (nc1l-nc1ln);
-        nc2l = `smoothminx(nc2l0 / pow(1 + 5 * pow(WGAA * 1e9, WSFQ2 * pnc2l), 0.5), 0, 0.1);
-        nc2ln = `smoothminx(nc2l0 / pow(1 + 5 * pow(WGAANOM * 1e9, WSFQ2 * pnc2l), 0.5), 0, 0.1);
-        nc2 = MFQ2NOM_i + MFQ2 * (nc2l-nc2ln);
-        nc3l = `smoothminx(nc3l0 / pow(1 + 5 * pow(WGAA * 1e9, WSFQ3 * pnc3l), 0.5), 0, 0.1);
-        nc3ln = `smoothminx(nc3l0 / pow(1 + 5 * pow(WGAANOM * 1e9, WSFQ3 * pnc3l), 0.5), 0, 0.1);
-        nc3 = MFQ3NOM_i + MFQ3 * (nc3l-nc3ln);
-        //Pre-factors for charge
-        qnd10 = `q * (d1 / 2) * (pow(3.14, d1 / 2) / `gammafunc(1 + d1 / 2)) * pow(nc1 * 1e6, d1) * qndnf1;
-        qnd20 = `q * (d2 / 2) * (pow(3.14, d2 / 2) / `gammafunc(1 + d2 / 2)) * pow(nc2 * 1e6, d2) * qndnf2;
-        qnd30 = `q * (d3 / 2) * (pow(3.14, d3 / 2) / `gammafunc(1 + d3 / 2)) * pow(nc3 * 1e6, d3) * qndnf3;
-    end
+            nc3d0 = `smoothminx(1 / (1 + `lexp((2.75 - TGAA * 1e9) / 0.78)), 0.5, 0.003);
+            nc3d = (1 - nc3d0) * (d1 - DIMENSION1_i) / (DIM1H - DIMENSION1_i) + nc3d0;
+            ncq = 1 / (1 + `lexp((nc3d - 0.999) / 1e-4));
+            //TGAA scaling model for subband energies
+            QT0= 0.5 * TGAA * TGAA * 1e18 - 1.5 * TGAA * 1e9 + 2;
+            QT1= `smoothmaxx(QT0, 4, 0.01);
+            ne2h = `smoothmaxx(`smoothminx(T0 + pow(TGAA * 1e9 - QT1, TSRE2) * (9.24e5 - 1.81e4) / pow(2, TSRE2) , 1.81e4, 0.01), 9.24e5, 9.24e3);
+            pe2h = `smoothmaxx(`smoothminx(5.5 + pow(TGAA * 1e9 - QT1, TDWSE2) * (8 - 5.5) / pow(2, TDWSE2), 0, 0.01), 8, 0.01);
+            ne3h = (120.66 * pow(4, TSRE3)) / pow(TGAA * 1e9, TSRE3);
+            pe3h = 2 * pow(4, TDWSE3) / pow(TGAA * 1e9, TDWSE3);
+            //TGAA scaling model for subband contributions
+            nc1l0 = 107 * pow(4, TSRQ1) / pow(TGAA * 1e9, TSRQ1);
+            pnc1l = `smoothmaxx(`smoothminx(0.7 + pow(TGAA * 1e9 - QT1, TDWSQ1) * 0.1, 0.5, 0.01), 1, 0.01);
+            nc2l0 = 103 * pow(4, TSRQ2) / pow(TGAA * 1e9, TSRQ2);
+            pnc2l = 1.5 * pow(4, TDWSQ2) / pow(TGAA * 1e9, TDWSQ2);
+            nc3l0 = 833 * pow(4, TSRQ3) / pow(TGAA * 1e9, TSRQ3);
+            pnc3l = 3.4 * pow(4, TDWSQ3) / pow(TGAA * 1e9, TDWSQ3);
+            //WGAA scaling model for subband energies
+            qe2n = ne2h / pow(WGAANOM * 1e9, WSFE2 * pe2h);
+            qe3n = ne3h / pow(WGAANOM * 1e9, WSFE3 * pe3h);
+            qe2 = `smoothminx(E2NOM_i + MFE2 * (ne2h / pow(WGAA * 1e9, WSFE2 * pe2h)-qe2n), 0, 0.01);
+            qe3 = `smoothminx(E3NOM_i + MFE3 * (ne3h / pow(WGAA * 1e9, WSFE3 * pe3h)-qe3n), 0, 0.01);
+            //WGAA scaling model for subband contributions
+            nc1l = `smoothminx(nc1l0 / pow(1 + 5 * pow(WGAA * 1e9, WSFQ1 * pnc1l), 0.5), 0, 0.1);
+            nc1ln = `smoothminx(nc1l0 / pow(1 + 5 * pow(WGAANOM * 1e9, WSFQ1 * pnc1l), 0.5), 0, 0.1);
+            nc1 = MFQ1NOM_i + MFQ1 * (nc1l-nc1ln);
+            nc2l = `smoothminx(nc2l0 / pow(1 + 5 * pow(WGAA * 1e9, WSFQ2 * pnc2l), 0.5), 0, 0.1);
+            nc2ln = `smoothminx(nc2l0 / pow(1 + 5 * pow(WGAANOM * 1e9, WSFQ2 * pnc2l), 0.5), 0, 0.1);
+            nc2 = MFQ2NOM_i + MFQ2 * (nc2l-nc2ln);
+            nc3l = `smoothminx(nc3l0 / pow(1 + 5 * pow(WGAA * 1e9, WSFQ3 * pnc3l), 0.5), 0, 0.1);
+            nc3ln = `smoothminx(nc3l0 / pow(1 + 5 * pow(WGAANOM * 1e9, WSFQ3 * pnc3l), 0.5), 0, 0.1);
+            nc3 = MFQ3NOM_i + MFQ3 * (nc3l-nc3ln);
+            //Pre-factors for charge
+            qnd10 = `q * (d1 / 2) * (pow(3.14, d1 / 2) / `gammafunc(1 + d1 / 2)) * pow(nc1 * 1e6, d1) * qndnf1;
+            qnd20 = `q * (d2 / 2) * (pow(3.14, d2 / 2) / `gammafunc(1 + d2 / 2)) * pow(nc2 * 1e6, d2) * qndnf2;
+            qnd30 = `q * (d3 / 2) * (pow(3.14, d3 / 2) / `gammafunc(1 + d3 / 2)) * pow(nc3 * 1e6, d3) * qndnf3;
+        end
 
-    // Geometry dependent mobility scaling
-    // (Ref: A. Dasgupta et.al., IEEE EDL, vol. 41, no. 3, 2020.)
-    if (MOBSCMOD == 1) begin
-        ETAMOB_i=ETAMOBTHIN + (ETAMOB_i-ETAMOBTHIN) / (`lexp((ETAMOBTNI*1e9 - TGAA*1e9) / ETAMOBIR) + 1);
+        // Geometry dependent mobility scaling
+        // (Ref: A. Dasgupta et.al., IEEE EDL, vol. 41, no. 3, 2020.)
+        if (MOBSCMOD == 1) begin
+            ETAMOB_i=ETAMOBTHIN + (ETAMOB_i-ETAMOBTHIN) / (`lexp((ETAMOBTNI*1e9 - TGAA*1e9) / ETAMOBIR) + 1);
 
-        mut0 =UA_i - UATHIN - UATSAT*1e9*UARTSC;
-        mut1 = (mut0 + TGAA*1e9*UARTSC )/ (1+`lexp((UATNI*1e9 - TGAA*1e9)/UAIR));
-        UA_i = `smoothmaxx2(mut1 + UATHIN, UA_i + 0.2, 0.6);
+            mut0 =UA_i - UATHIN - UATSAT*1e9*UARTSC;
+            mut1 = (mut0 + TGAA*1e9*UARTSC )/ (1+`lexp((UATNI*1e9 - TGAA*1e9)/UAIR));
+            UA_i = `smoothmaxx2(mut1 + UATHIN, UA_i + 0.2, 0.6);
 
-        mut2 = (EUTHIN-EU_i)*370/pow(TGAA*1e9,EUPTSC) + (EUTHIN-EU_i)/(1+`lexp((TGAA*1e9-EUTNI*1e9)/EUIR)) + EU_i;
-        EU_i = `smoothmaxx2(mut2, EUTHIN, 0.2);
+            mut2 = (EUTHIN-EU_i)*370/pow(TGAA*1e9,EUPTSC) + (EUTHIN-EU_i)/(1+`lexp((TGAA*1e9-EUTNI*1e9)/EUIR)) + EU_i;
+            EU_i = `smoothmaxx2(mut2, EUTHIN, 0.2);
 
-        mut3 = WGAA/(WGAA + TGAA);
-        mut4 = EGBULK*TGAA*TGAA*1e18 - U0EMSM1*1e-3;
-        mut5 = (mut4 + pow(mut4*mut4 + 4*U0EMSM1*1e-3*(EGBULK+0.24)*TGAA*TGAA*1e18, 0.5))/(2*(EGBULK+0.24)*TGAA*TGAA*1e18);
-        mut6 = `smoothmaxx2(1e-4/(mut5 - 0.8208 - U0EMSM2*1e-5), 1, 0.06);
-        U0_i = U0_i * (mut3 + U0ETAWSC * (1 - mut3)) * mut6;
+            mut3 = WGAA/(WGAA + TGAA);
+            mut4 = EGBULK*TGAA*TGAA*1e18 - U0EMSM1*1e-3;
+            mut5 = (mut4 + pow(mut4*mut4 + 4*U0EMSM1*1e-3*(EGBULK+0.24)*TGAA*TGAA*1e18, 0.5))/(2*(EGBULK+0.24)*TGAA*TGAA*1e18);
+            mut6 = `smoothmaxx2(1e-4/(mut5 - 0.8208 - U0EMSM2*1e-5), 1, 0.06);
+            U0_i = U0_i * (mut3 + U0ETAWSC * (1 - mut3)) * mut6;
 
-        UD_i = (UDTHIN-UD_i) * pow(`smoothminx(UDTSAT*1e9-TGAA*1e9,0,1),UDPTSC) + UD_i;
-    end
+            UD_i = (UDTHIN-UD_i) * pow(`smoothminx(UDTSAT*1e9-TGAA*1e9,0,1),UDPTSC) + UD_i;
+        end
+
+    end // initial_instance
 
     // Temperature dependence calculations
     if (SHMOD != 0 && RTH0 > 0.0) begin

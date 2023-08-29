@@ -1,0 +1,10 @@
+Xyce: 
+Use specific attributes to activate certain parameter as model and instance parameter.
+Use &initial_instance pseudo event.
+Use lexp as analog function instead macro.
+
+Use disciplines.vams
+Use constants.vams
+
+Origin of the model Version 111.2.1:
+http://bsim.berkeley.edu/models/bsimcmg/

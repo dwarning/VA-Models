@@ -17,6 +17,13 @@
 `include "constants.vams"
 `include "disciplines.vams"
 `include "bsimcmg_macros.include"
+
+`ifdef insideADMS
+    `define INITIAL_INSTANCE @(initial_instance)
+`else
+    `define INITIAL_INSTANCE
+`endif
+
 module bsimcmg_va(d, g, s, e, t);
     inout d, g, s, e, t;
     electrical d, g, s, e;

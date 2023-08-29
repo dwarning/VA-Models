@@ -11,7 +11,9 @@ vdd   supply  0 dc 1.0
 * --- Inverter Subcircuit ---
 .subckt mg_inv vin vout vdd gnd
 Ybsimcmg_va m1 vout vin vdd vdd tn pmos
+Rthn tn 0 1k
 Ybsimcmg_va m2 vout vin gnd gnd tp nmos
+Rthp tp 0 1k
 .ends
 
 * --- 17 Stage Ring oscillator ---
