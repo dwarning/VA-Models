@@ -968,9 +968,9 @@ standard can be found at: http://www.si2.org/cmc
 `MPRnb(PBGIDL, 0.0, "V", "P-term of BGIDL")
 
 `MPRnb(CGIDL, 0.5, "V^3", "Parameter for body-effect of GIDL")
-`MPRnb(LCGIDL, 0.0, "m*(V^3)", "L-term of CGIDL")
+`MPRnb(LCGIDL, 0.0, "m*V^3", "L-term of CGIDL")
 `MPRnb(NCGIDL, 0.0, "V^3", "N-term of CGIDL")
-`MPRnb(PCGIDL, 0.0, "m*(V^3)", "P-term of CGIDL")
+`MPRnb(PCGIDL, 0.0, "m*V^3", "P-term of CGIDL")
 
 `MPRnb(EGIDL, 0.2, "V", "Band bending parameter for GIDL")
 `MPRnb(LEGIDL, 0.0, "m*V", "L-term of EGIDL")

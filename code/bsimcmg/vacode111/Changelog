@@ -1,3 +1,6 @@
+Xyce: 
+Use specific attributes to activate certain parameter as model and instance parameter.
+
 Prevent division by 0 for parameters: MJS2, MJD2, MJSWS2, MJSWD2, MJSWGS2, MJSWGD2
 Prevent division by 0 for parameters: MJS, MJD, MJSWS, MJSWD, MJSWGS, MJSWGD
 

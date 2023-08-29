@@ -223,11 +223,19 @@ end
 `define OPP(nam, uni, des) (* units = uni, desc = des *) real nam;
 `define OPM(nam,uni,des)   (* units=uni, desc=des, multiplicity="multiply" *)  real    nam;
 `define OPD(nam,uni,des)   (* units=uni, desc=des, multiplicity="divide"   *)  real    nam;
+`ifdef __XYCE__
+`define BPRco(nam, def, uni, lwr, upr, des) (* units = uni, type = "instance", desc = des, xyceAlsoModel="yes" *) parameter real nam = def from[lwr : upr);
+`define BPRoz(nam, def, uni, des) (* units = uni, type = "instance", desc = des, xyceAlsoModel="yes" *) parameter real nam = def from(0.0 : inf);
+`define BPRcz(nam, def, uni, des) (* units = uni, type = "instance", desc = des, xyceAlsoModel="yes" *) parameter real nam = def from[0.0 : inf);
+`define BPRnb(nam, def, uni, des) (* units = uni, type = "instance", desc = des, xyceAlsoModel="yes" *) parameter real nam = def;
+`define BPIcc(nam, def, uni, lwr, upr, des) (* units = uni, type = "instance", desc = des, xyceAlsoModel="yes" *) parameter integer nam = def from[lwr : upr];
+`else
 `define BPRco(nam, def, uni, lwr, upr, des) (* units = uni, type = "instance", desc = des *) parameter real nam = def from[lwr : upr);
 `define BPRoz(nam, def, uni, des) (* units = uni, type = "instance", desc = des *) parameter real nam = def from(0.0 : inf);
 `define BPRcz(nam, def, uni, des) (* units = uni, type = "instance", desc = des *) parameter real nam = def from[0.0 : inf);
 `define BPRnb(nam, def, uni, des) (* units = uni, type = "instance", desc = des *) parameter real nam = def;
 `define BPIcc(nam, def, uni, lwr, upr, des) (* units = uni, type = "instance", desc = des *) parameter integer nam = def from[lwr : upr];
+`endif
 `define IPIco(nam, def, uni, lwr, upr, des) (* units = uni, type = "instance", desc = des *) parameter integer nam = def from[lwr : upr);
 `define MPRnb(nam, def, uni, des) (* units = uni, desc = des *) parameter real nam = def;
 `define MPRex(nam, def, uni, exc, des) (* units = uni, desc = des *) parameter real nam = def exclude exc;
