@@ -23,7 +23,7 @@ buildxyceplugin bsimbulk107.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..
-cd ./bsimcmg/vacode110
+cd ./bsimcmg/vacode
 buildxyceplugin bsimcmg.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
