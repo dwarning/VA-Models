@@ -35,7 +35,7 @@ V1 VEE GND -5.2
 .tran 0.02n 200n
 
 .control
-pre_osdi ../osdilibs/HICUML0-2.osdi
+pre_osdi ../osdilibs/hicumL0_v2p0p0.osdi
 run
 rusage all
 plot out9 xlimit 100n 110n

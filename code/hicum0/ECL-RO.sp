@@ -18,7 +18,7 @@ V3 In2 GND dc -1.75 pulse(-1.75 -0.9 0 1n 1n 2.5u 5u)
 Rt1 DT GND 1G
 .tran 0.1n 100u
 .control
-pre_osdi ../osdilibs/HICUML0-2.osdi
+pre_osdi ../osdilibs/hicumL0_v2p0p0.osdi
 run
 plot a1 a2+2 in1+4 in2+6
 .endc
