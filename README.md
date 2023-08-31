@@ -73,8 +73,8 @@ openvaf-compile-va.bat for MS Windows
 
 ### Xyce
 
-Xyce must be installed and their executables in the PATH. Another prerequisite is the availability of ADMS. ADMS source code may be downloaded 
-from the Qucs/ADMS GitHub project **[website](https://github.com/Qucs/ADMS)** .
+Xyce must be installed and their executables in the PATH. These days only Linux executables with the ability to load shared libraries are available.
+Another prerequisite is the availability of ADMS. ADMS source code may be downloaded from the Qucs/ADMS GitHub project **[website](https://github.com/Qucs/ADMS)** .
 
 A user guide for Verilog-A models for Xyce can be found under the **[website](https://xyce.sandia.gov/documentation-tutorials/xyce-adms-users-guide/)** .
 
