@@ -1072,6 +1072,7 @@ analog begin
         I(br_biei)  <+ `Gmin * V(br_biei);
         I(br_bici)  <+ `Gmin * V(br_bici);
         //I(br_ciei)  <+ `Gmin * V(br_ciei);
+        I(br_sci)   <+ `Gmin * V(br_sci);
 
         I(br_bs)    <+ type * iT_sub;
         I(br_sci)   <+ ijsc;

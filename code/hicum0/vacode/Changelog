@@ -1,3 +1,5 @@
+Add Gmin to branch sci.
+
 Use alternative ngspice specific limit function pnjlim for inner base-emitter and base-collector junctions
 
 Use disciplines.vams
