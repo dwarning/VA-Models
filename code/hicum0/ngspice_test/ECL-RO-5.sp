@@ -1,5 +1,5 @@
 .title ECL nor gate ring oscillator, 9 stages, 734 MHz
-.include "Modelcards/model-card-hicumL0V1p11_mod.lib"
+.include "../Modelcards/model-card-hicumL0V1p11_mod.lib"
 
 .subckt nor in1 in2 a1 a2 vee GND
 XQ1 Net-_R1-Pad2_ IN1 Net-_Q1-Pad3_ VEE DT1 hicumL0V1p1_c_sbt
@@ -35,7 +35,7 @@ V1 VEE GND -5.2
 .tran 0.02n 200n
 
 .control
-pre_osdi ../osdilibs/hicumL0_v2p0p0.osdi
+pre_osdi ../../osdilibs/hicumL0_v2p0p0.osdi
 run
 rusage all
 plot out9 xlimit 100n 110n

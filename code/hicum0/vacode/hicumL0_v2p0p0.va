@@ -13,6 +13,9 @@
 
 // Comment this line, if calculation of operating point values should be omitted
 `define CALC_OP
+`ifndef __XYCE__
+`define PORT_CURR
+`endif
 
 `define VPT_thresh  1.0e2
 `define Dexp_lim    80.0
@@ -653,32 +656,35 @@ real iavl, Cjci;
 
 
 `ifdef CALC_OP
-    `OPD( RCX   , "Ohm",  "External (saturated) collector series resistance"   )
-    `OPD( RE    , "Ohm",  "Emitter series resistance"                          )
-    `OPD( RBi   , "Ohm",  "Internal base resistance as calculated in the model")
-    `OPD( RB    , "Ohm",  "Total base resistance as calculated in the model"   )
-    `OPD( RPIi  , "Ohm",  "Internal base-emitter (input) resistance"           )
-    `OPD( RMUi  , "Ohm",  "Internal feedback resistance"                       )
-    `OPD( ROi   , "Ohm",  "Internal Output resistance"                         )
+`OPD( RCX   , "Ohm",  "External (saturated) collector series resistance"   )
+`OPD( RE    , "Ohm",  "Emitter series resistance"                          )
+`OPD( RBi   , "Ohm",  "Internal base resistance as calculated in the model")
+`OPD( RB    , "Ohm",  "Total base resistance as calculated in the model"   )
+`OPD( RPIi  , "Ohm",  "Internal base-emitter (input) resistance"           )
+`OPD( RMUi  , "Ohm",  "Internal feedback resistance"                       )
+`OPD( ROi   , "Ohm",  "Internal Output resistance"                         )
+`ifdef PORT_CURR
+`OPM( IB    , "A"  ,  "Base terminal current"                              )
+`OPM( IC    , "A"  ,  "Collector terminal current"                         )
+`OPM( IS    , "A"  ,  "Substrate terminal current"                         )
+`endif
+`OPM( IAVL  , "A"  ,  "Avalanche current"                                  )
+`OPM( GMi   , "A/V",  "Internal transconductance"                          )
+`OPM( CPIi  , "F"  ,  "Total internal BE capacitance"                      )
+`OPM( CMUi  , "F"  ,  "Total internal BC capacitance"                      )
+`OPM( CBCX  , "F"  ,  "Total external BC capacitance"                      )
+`OPM( CCS   , "F"  ,  "CS junction capacitance"                            )
 
-    `OPM( IB    , "A"  ,  "Base terminal current"                              )
-    `OPM( IC    , "A"  ,  "Collector terminal current"                         )
-    `OPM( IS    , "A"  ,  "Substrate terminal current"                         )
-    `OPM( IAVL  , "A"  ,  "Avalanche current"                                  )
-    `OPM( GMi   , "A/V",  "Internal transconductance"                          )
-    `OPM( CPIi  , "F"  ,  "Total internal BE capacitance"                      )
-    `OPM( CMUi  , "F"  ,  "Total internal BC capacitance"                      )
-    `OPM( CBCX  , "F"  ,  "Total external BC capacitance"                      )
-    `OPM( CCS   , "F"  ,  "CS junction capacitance"                            )
-
-    `OPP( VBE   , "V"  ,  "External BE voltage"                                )
-    `OPP( VBC   , "V"  ,  "External BC voltage"                                )
-    `OPP( VCE   , "V"  ,  "External CE voltage"                                )
-    `OPP( VSC   , "V"  ,  "External SC voltage"                                )
-    `OPP( BETADC, ""   ,  "Common emitter forward current gain"                )
-    `OPP( BETAAC, ""   ,  "Small signal current gain"                          )
-    `OPP( TF    , "s"  ,  "Forward transit time"                               )
-    `OPP( FT    , "Hz" ,  "Transit frequency"                                  )
+`OPP( VBE   , "V"  ,  "External BE voltage"                                )
+`OPP( VBC   , "V"  ,  "External BC voltage"                                )
+`OPP( VCE   , "V"  ,  "External CE voltage"                                )
+`OPP( VSC   , "V"  ,  "External SC voltage"                                )
+`ifdef PORT_CURR
+`OPP( BETADC, ""   ,  "Common emitter forward current gain"                )
+`endif
+`OPP( BETAAC, ""   ,  "Small signal current gain"                          )
+`OPP( TF    , "s"  ,  "Forward transit time"                               )
+`OPP( FT    , "Hz" ,  "Transit frequency"                                  )
 `endif
 
 //end of variables
@@ -1093,7 +1099,7 @@ analog begin
         I(br_biei)  <+ ijbe;
         I(br_biei)  <+ ddt(Qbiei);
         I(br_ciei)  <+ it;
-
+`ifndef __XYCE__
         // For simulators having no problem with V(br_sht) <+ 0.0 with external thermal
         // node, following code may be used.
         // Note that external thermal node should remain accessible even without self-heating.
@@ -1103,16 +1109,16 @@ analog begin
             I(br_sht)   <+ V(br_sht)/rth_t-pterm;
             I(br_sht)   <+ ddt(cth*V(br_sht));
         end
-
+`else
         // Following code is a solution if branch contribution is not supported
         // ******************************************
-        //  if(flsh == 0 || rth < `MIN_R) begin
-        //      I(br_sht)   <+ V(br_sht)/`MIN_R;
-        //  end else begin
-        //      I(br_sht)   <+ V(br_sht)/rth-pterm;
-        //      I(br_sht)   <+ ddt(cth*V(br_sht));
-        //  end
-
+        if (flsh == 0 || rth < `MIN_R) begin
+            I(br_sht)   <+ V(br_sht)/`MIN_R;
+        end else begin
+            I(br_sht)   <+ V(br_sht)/rth-pterm;
+            I(br_sht)   <+ ddt(cth*V(br_sht));
+        end
+`endif
         // vertical NQS effects
         // qf_nqs:
         I(br_a_qf_nqs)  <+ Da_qf;
@@ -1152,81 +1158,81 @@ analog begin
     // Operating point calculations
 `ifdef CALC_OP
 `ifdef OP_STATIC
-            if (analysis("static")) begin: OPERATING_POINT
+    if (analysis("static")) begin: OPERATING_POINT
 `else
-            begin: OPERATING_POINT
+    begin: OPERATING_POINT
 `endif
-            real gPIi;
-            real gMUi, gAVL;
-            real del;
-            real gOi;
-            real Cdei, Cdci, Cjei, Cjci, Cjcx, CBC;
-            real R_tot;
-
-            IB = I(<b>);
-            IC = I(<c>);
-            IS = I(<s>);
-            IAVL = iavl;
-
-            VBE = V(b,e);
-            VBC = V(b,c);
-            VCE = V(c,e);
-            VSC = V(s,c);
-
-            if (IB != 0.0) begin
-                BETADC = IC/IB;
-            end else begin
-                BETADC = 1e9;
-            end
-
-            GMi = ddx(it_wop,V(bi))+`Gmin;
-
-            gPIi = ddx(ijbe,V(bi))+`Gmin;
-            RPIi = 1.0/gPIi;
-
-            gMUi = -1*ddx(Ibici,V(ci))+`Gmin;
-            gAVL = type*ddx(iavl,V(ci));
-
-            del = gMUi-gAVL;
-            if (abs(del)>1e-12) begin
-                RMUi = 1.0/del;
-            end else begin
-                RMUi = 1.0/`Gmin;
-                if (RMUi<1e12) begin
-                    RMUi = 1e12; // conditional to set RMUi at least equal to 1e12
-                end
-            end
-
-            gOi = ddx(it_wop,V(ci))+`Gmin;
-            ROi = 1.0/(gOi+gAVL);
-
-            Cdei = -1*type*ddx(qf,V(ei));
-            Cjei = ddx(qjei,V(bi));
-            CPIi = Cjei + Cdei + cbepar;
-
-            Cdci = -type*ddx(qr,V(ci));
-            Cjci = ddx(qjci_int,V(bi));
-            CMUi = Cjci + Cdci;
-
-            Cjcx = -ddx(qjcxi,V(ci));
-            CBCX = Cjcx + cbcpar ;
-
-            CCS = ddx(qjs,V(s));
-
-            RBi = rbi;
-            RB  = rb;
-            RCX = rcx_t;
-            RE  = re_t;
-
-            BETAAC = GMi*RPIi;
-
-            R_tot = RCX + RE + ((RB+RE)/BETAAC);
-
-            TF = tf;
-
-            CBC = CMUi+CBCX;
-            FT  = GMi/(2.0*`M_PI*(CPIi+CBC+(R_tot*CBC*GMi)));
+        real gPIi;
+        real gMUi, gAVL;
+        real del;
+        real gOi;
+        real Cdei, Cdci, Cjei, Cjci, Cjcx, CBC;
+        real R_tot;
+`ifdef PORT_CURR
+        IB = I(<b>);
+        IC = I(<c>);
+        IS = I(<s>);
+`endif
+        IAVL = iavl;
+        VBE = V(b,e);
+        VBC = V(b,c);
+        VCE = V(c,e);
+        VSC = V(s,c);
+`ifdef PORT_CURR
+        if (IB != 0.0) begin
+            BETADC = IC/IB;
+        end else begin
+            BETADC = 1e9;
         end
+`endif
+        GMi = ddx(it_wop,V(bi))+`Gmin;
+
+        gPIi = ddx(ijbe,V(bi))+`Gmin;
+        RPIi = 1.0/gPIi;
+
+        gMUi = -1*ddx(Ibici,V(ci))+`Gmin;
+        gAVL = type*ddx(iavl,V(ci));
+
+        del = gMUi-gAVL;
+        if (abs(del)>1e-12) begin
+            RMUi = 1.0/del;
+        end else begin
+            RMUi = 1.0/`Gmin;
+            if (RMUi<1e12) begin
+                RMUi = 1e12; // conditional to set RMUi at least equal to 1e12
+            end
+        end
+
+        gOi = ddx(it_wop,V(ci))+`Gmin;
+        ROi = 1.0/(gOi+gAVL);
+
+        Cdei = -1*type*ddx(qf,V(ei));
+        Cjei = ddx(qjei,V(bi));
+        CPIi = Cjei + Cdei + cbepar;
+
+        Cdci = -type*ddx(qr,V(ci));
+        Cjci = ddx(qjci_int,V(bi));
+        CMUi = Cjci + Cdci;
+
+        Cjcx = -ddx(qjcxi,V(ci));
+        CBCX = Cjcx + cbcpar ;
+
+        CCS = ddx(qjs,V(s));
+
+        RBi = rbi;
+        RB  = rb;
+        RCX = rcx_t;
+        RE  = re_t;
+
+        BETAAC = GMi*RPIi;
+
+        R_tot = RCX + RE + ((RB+RE)/BETAAC);
+
+        TF = tf;
+
+        CBC = CMUi+CBCX;
+        FT  = GMi/(2.0*`M_PI*(CPIi+CBC+(R_tot*CBC*GMi)));
+    end
 `endif
 
 end  // analog

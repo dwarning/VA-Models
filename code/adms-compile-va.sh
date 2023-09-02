@@ -47,9 +47,13 @@ cd ../..
 #buildxyceplugin ../EPFL-HEMT/vacode/epfl_hemt.va .
 #buildxyceplugin ../fbh_hbt/vacode/fbh_hbt-2_1.va .
 #buildxyceplugin ../fbh_hbt/vacode/fbh_hbt-2_3.va .
-#buildxyceplugin ../hicum0/vacode/HICUML0-2.va .
+cd ./hicum0/vacode
+buildxyceplugin hicumL0_v2p0p0.va ../../admslibs
+rm *.la *.log
+rm -rfd .libs/
+cd ../..
 cd ./hicum2/vacode
-buildxyceplugin hicumL2.va ../../admslibs
+buildxyceplugin hicumL2V3p0p0.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..

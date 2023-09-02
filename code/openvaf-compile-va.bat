@@ -19,8 +19,8 @@ openvaf.exe -D__NGSPICE__ -o ekv26.osdi ../ekv/vacode/ekv26.va
 openvaf.exe -D__NGSPICE__ -o epfl_hemt.osdi ../EPFL-HEMT/vacode/epfl_hemt.va
 openvaf.exe -D__NGSPICE__ -o fbh_hbt-2_1.osdi ../fbh_hbt/vacode/fbh_hbt-2_1.va
 openvaf.exe -D__NGSPICE__ -o fbh_hbt-2_3.osdi ../fbh_hbt/vacode/fbh_hbt-2_3.va
-openvaf.exe -D__NGSPICE__ -o HICUML0-2.osdi ../hicum0/vacode/HICUML0-2.va
-openvaf.exe -D__NGSPICE__ -o hicumL2.osdi ../hicum2/vacode/hicumL2.va
+openvaf.exe -D__NGSPICE__ -o hicumL0_v2p0p0.osdi ../hicum0/vacode/hicumL0_v2p0p0.va
+openvaf.exe -D__NGSPICE__ -o hicumL2.osdi ../hicum2/vacode/hicumL2V3p0p0.va
 openvaf.exe -D__NGSPICE__ -o hisim2.osdi ../hisim2/vacode/hisim2.va
 openvaf.exe -D__NGSPICE__ -o hisimhv242.osdi ../hisimhv/vacode242/hisimhv.va
 openvaf.exe -D__NGSPICE__ -o hisimhv250.osdi ../hisimhv/vacode250/hisimhv.va

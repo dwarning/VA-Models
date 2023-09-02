@@ -10,10 +10,10 @@
 * Complete transistor: Isothermal Simulation with substrate diode
 ********************************************************************************
 .subckt hicumL0V1p1_c_sbt c b e s dt
-nqhcm0 c b e s dt hicum0
+YhicumL0va q1 c b e s dt hicum0
 .ends
 .model hicum0 hicumL0va
-+ level=7
+*+ level=7
 + type=1 ; npn=1 pnp=-1
 + tnom=27
 + is=1.3525E-18 vef=8.0 iqf=3.0e-2 iqr=1e6
@@ -34,8 +34,8 @@ nqhcm0 c b e s dt hicum0
 * Complete test transistor: default
 ********************************************************************************
 .subckt hicumL0V11_default c b e s dt
-nqhcm0 c b e s dt hicum0
-.model hicum0 hicumL0va
+YhicumL0va q1 c b e s dt hic0_full
+.model hic0_full hicumL0va
 .ends hicumL0V11_default
 ********************************************************************************
 
