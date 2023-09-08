@@ -67,7 +67,11 @@ buildxyceplugin nigbt.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..
-#buildxyceplugin ../L-UTSOI/vacode/L_UTSOI_102.va .
+cd ./L-UTSOI/vacode
+buildxyceplugin L_UTSOI_102.va ../../admslibs
+rm *.la *.log
+rm -rfd .libs/
+cd ../..
 cd ./mextram/504p12p1_vacode
 buildxyceplugin bjt504.va ../../admslibs
 buildxyceplugin bjt504t.va ../../admslibs

@@ -1,0 +1,7 @@
+Changes for ADMS/Xyce:
+Rename module to l_utsoi_va - not to come in conflict with Xyce build-in code
+Use @(initial_instance) and @(initial_model) to separate bias-dependent variables
+Move TKD initialization into initializeInstance block
+
+Origin of the model version 102.5.0:
+https://www.cea.fr/cea-tech/leti/l-utsoisupport/RELEASES

@@ -623,12 +623,22 @@
 
 `define EXTERNAL_TH_NODE
 
+`ifdef __XYCE__
+`ifdef EXTERNAL_TH_NODE
+module l_utsoi_va(d,g,s,b,Tnode);
+    inout      d, g, s, b, Tnode;
+`else
+module l_utsoi_va(d,g,s,b);
+    inout      d, g, s, b;
+`endif
+`else
 `ifdef EXTERNAL_TH_NODE
 module l_utsoi(d,g,s,b,Tnode);
     inout      d, g, s, b, Tnode;
 `else
 module l_utsoi(d,g,s,b);
     inout      d, g, s, b;
+`endif
 `endif
 
     //  Electrical node definitions
@@ -1303,11 +1313,14 @@ module l_utsoi(d,g,s,b);
 
         //  Initialize Model
         //  **************************************************************************************************************
+`ifdef insideADMS
+        @(initial_model)
+`endif
         begin : initializeModel
 
         // *********** Transistor temperature ***********
             TKR        =  273.15 + TR;
-            TKD        =  min($temperature + DTEMP, 1000.0);
+//            TKD        =  min($temperature + DTEMP, 1000.0);
 
         // *********** Flag for self-heating effect ***********
             if (((SWSCALE == 0) && (RTH > 0.0)) || ((SWSCALE > 0) && (RTHO > 0.0))) begin
@@ -1323,8 +1336,12 @@ module l_utsoi(d,g,s,b);
 
         //  Initialize Instance
         //  **************************************************************************************************************
+`ifdef insideADMS
+        @(initial_instance)
+`endif
         begin : initializeInstance
 
+            TKD        =  min($temperature + DTEMP, 1000.0);
         // *********** Initializing channel temperature ***********
             DTC        =  0.0;
             TKC        =  TKD;
