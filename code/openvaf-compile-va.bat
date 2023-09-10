@@ -36,6 +36,7 @@ openvaf.exe -D__NGSPICE__ -o mosvar.osdi ../MOSVAR/vacode/mosvar.va
 openvaf.exe -D__NGSPICE__ -o mvsg_cmc.osdi ../mvsg/vacode/mvsg_cmc.va
 openvaf.exe -D__NGSPICE__ -o psp102.osdi ../psp102/vacode/psp102.va
 openvaf.exe -D__NGSPICE__ -o psp103.osdi ../psp103/vacode/psp103.va
+openvaf.exe -D__NGSPICE__ -o psp103_nqs.osdi ../psp103/vacode/psp103_nqs.va
 openvaf.exe -D__NGSPICE__ -o r2_cmc.osdi ../r2_cmc/vacode/r2_cmc.va
 openvaf.exe -D__NGSPICE__ -o r2_et_cmc.osdi ../r2_cmc/vacode/r2_et_cmc.va
 openvaf.exe -D__NGSPICE__ -o r3_cmc.osdi ../r3_cmc/vacode/r3_cmc.va
