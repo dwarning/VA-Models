@@ -35,6 +35,7 @@ openvaf.exe -D__NGSPICE__ -o bjt505t.osdi ../mextram/505p2p0_vacode/bjt505t.va
 openvaf.exe -D__NGSPICE__ -o mosvar.osdi ../MOSVAR/vacode/mosvar.va
 openvaf.exe -D__NGSPICE__ -o mvsg_cmc.osdi ../mvsg/vacode/mvsg_cmc.va
 openvaf.exe -D__NGSPICE__ -o psp102.osdi ../psp102/vacode/psp102.va
+openvaf.exe -D__NGSPICE__ -o juncap200.osdi ../psp103/vacode/juncap200.va
 openvaf.exe -D__NGSPICE__ -o psp103.osdi ../psp103/vacode/psp103.va
 openvaf.exe -D__NGSPICE__ -o psp103_nqs.osdi ../psp103/vacode/psp103_nqs.va
 openvaf.exe -D__NGSPICE__ -o r2_cmc.osdi ../r2_cmc/vacode/r2_cmc.va

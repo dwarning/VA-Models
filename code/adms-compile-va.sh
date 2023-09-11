@@ -92,6 +92,7 @@ cd ../..
 #buildxyceplugin ../mvsg/vacode/mvsg_cmc.va .
 #buildxyceplugin ../psp102/vacode/psp102.va .
 cd ./psp103/vacode
+buildxyceplugin juncap200.va ../../admslibs
 buildxyceplugin psp103.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
