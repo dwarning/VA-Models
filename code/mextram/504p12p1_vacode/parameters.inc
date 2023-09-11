@@ -7,6 +7,8 @@
 `MPIco( LEVEL          ,504            ,""            ,504         ,505         ,"Model level" )
 `MPRco( TREF           ,25.0           ,""            ,-273.0      ,inf         ,"Reference temperature" )
 `MPRnb( DTA            ,0.0            ,""                                      ,"Difference between the local and global ambient temperatures" )
+aliasparam TRISE = DTA;
+aliasparam DTEMP = DTA;
 `MPIcc( EXMOD          ,1              ,""            ,0           ,2           ,"Flag for extended modeling of the reverse current gain" )
 `MPIcc( EXPHI          ,1              ,""            ,0           ,1           ,"Flag for the distributed high-frequency effects in transient" )
 `MPIcc( EXAVL          ,0              ,""            ,0           ,1           ,"Flag for extended modeling of avalanche currents" )

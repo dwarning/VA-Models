@@ -203,6 +203,7 @@ branch (bi,  b )  b_bx, s_bx;   // resistance outside cap branch (extrinsic)
 `IPRoo( L        , 1.0e-06   , "m"        , 0.0     , inf     , "design length of varactor")
 `IPIcc( NGCON    , 1         , ""         , 1       , 2       , "number of gate contacts")
 `IPRnb( DTA      , 0.0       , "degC"                         , "local temperature delta to ambient")
+aliasparam TRISE = DTA;
 
 //
 //  Special model parameters, some may be simulator global parameters
