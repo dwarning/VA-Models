@@ -1154,8 +1154,10 @@ analog begin
         V(xt2)          <+ 0;
         I(di,si)        <+ ids + gmin * V(di,si);
     end else begin
-        I(xt1)          <+ ids - V(xt2) - ddt(taugmrf * V(xt1));
-        I(xt2)          <+ V(xt1) - V(xt2) - ddt((taugmrf/3.0) * V(xt2));
+        I(xt1)          <+ ids - V(xt2);
+        I(xt1)          <+ - ddt(taugmrf * V(xt1));
+        I(xt2)          <+ V(xt1) - V(xt2);
+        I(xt2)          <+ - ddt((taugmrf/3.0) * V(xt2));
         I(di,si)        <+ idsrf + gmin * V(di,si);
     end
     I(gi2,si)          <+ ddt(qgs) + ddt(minc * V(gi2,si));
