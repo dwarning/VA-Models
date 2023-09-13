@@ -80,9 +80,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 `ifdef __XYCE__
-module DIODE_CMC_VA(A,K);
+    module DIODE_CMC_VA(A,K);
 `else
-module DIODE_CMC(A,K);
+    module DIODE_CMC(A,K);
 `endif
 
 //

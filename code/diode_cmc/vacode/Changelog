@@ -3,6 +3,7 @@ Rename module to DIODE_CMC_VA
 Use of @(initial_model) and @(initial_instance)
 Split static and dynamic contributions
 
+Parameter SCALE and CORECOVERY cant use `from() macro to prevent out of bounds with default values
 Use true instance parameter instead the `P macro
 
 Included disciplines.vams
