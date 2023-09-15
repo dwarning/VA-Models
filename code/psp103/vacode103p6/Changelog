@@ -1,3 +1,4 @@
+Use DTA and TRISE as instance parameter
 
 PSP103_module.include, line 2364: Unexpected bitwise operator '&'
 Changed to && operator
