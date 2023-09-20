@@ -24,6 +24,14 @@
 // Further information can be found in the file releasenotesPSP103.txt
 //
 
+`ifdef insideADMS
+    `define INITIAL_MODEL @(initial_model)
+    `define INITIAL_INSTANCE @(initial_instance)
+`else
+    `define INITIAL_MODEL
+    `define INITIAL_INSTANCE
+`endif
+
 //////////////////////////////////////////////////////////////
 //
 //  General macros and constants for compact va-models
@@ -164,3 +172,6 @@
 `define IPIoz(nam,def,uni,        des) (*units=uni, type="instance",            desc=des*) parameter integer nam=def from(  0:inf);
 `define IPInb(nam,def,uni,        des) (*units=uni, type="instance",            desc=des*) parameter integer nam=def;
 `define IPIsw(nam,def,uni,        des) (*units=uni, type="instance",            desc=des*) parameter integer nam=def from[  0:inf);
+`ifdef __XYCE__
+    `define MPRnb_BOTH(nam,def,uni, des) (*units=uni, desc=des, type="instance", xyceAlsoModel="yes" *) parameter real nam=def;
+`endif

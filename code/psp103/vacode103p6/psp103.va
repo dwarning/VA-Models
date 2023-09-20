@@ -45,7 +45,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-module PSP103VA(D, G, S, B);
+module PSP103_VA(D, G, S, B);
 
 `include "PSP103_module.include"
 

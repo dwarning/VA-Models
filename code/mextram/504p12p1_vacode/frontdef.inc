@@ -119,4 +119,12 @@
 `define MPIsw(nam,def,uni,        des) (*units=uni,                   desc=des*) parameter integer nam=def from[  0:  1] ;
 `define MPIty(nam,def,uni,        des) (*units=uni,                   desc=des*) parameter integer nam=def from[ -1:  1] exclude 0 ;
 
+`ifdef __OPENVAF__
+`define IPRnb(nam,def,uni,        des) (*units=uni, type="instance",  desc=des*) parameter real    nam=def;
+`endif
+
+`ifdef __XYCE__
+`define MPRnb_BOTH(nam,def,uni, des) (*units=uni, desc=des, type="instance", xyceAlsoModel="yes" *) parameter real nam=def;
+`endif
+
 `define GMIN $simparam("gmin",1.0e-12)

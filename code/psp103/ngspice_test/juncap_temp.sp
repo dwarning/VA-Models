@@ -1,7 +1,7 @@
 Diode Param Temp Test
 
 va a 0 dc 1.0
-nd1 a 0 juncap AB=100e-12
+nd1 a 0 juncap AB=100e-12 dta=0.0
 
 .control
 pre_osdi ../../osdilibs/juncap200.osdi

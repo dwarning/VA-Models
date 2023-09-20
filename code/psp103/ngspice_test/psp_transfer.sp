@@ -16,6 +16,7 @@ nm1  d g s b nch
 +lsdrain=1.0e-06
 +lgdrain=1.0e-06
 +mult=1.0e+00
++dta=0
 *
 .option temp=21
 .control

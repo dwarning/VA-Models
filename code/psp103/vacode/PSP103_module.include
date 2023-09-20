@@ -536,6 +536,7 @@ analog begin
     //  --------------------------------------------------------------------------------------------------------------
     //  Definition of bias/instance independent model variables
     //  --------------------------------------------------------------------------------------------------------------
+    `INITIAL_MODEL
     begin : initial_model
 
         //  Clipping and rounding of switch parameters
@@ -603,7 +604,7 @@ analog begin
         `DefACparam(PWALPAC_i,      PWALP,      PWALPAC)
         `DefACparam(PLWALPAC_i,     PLWALP,     PLWALPAC)
         `DefACparam(KVSATAC_i,      KVSAT,      KVSATAC)
-
+`ifndef __XYCE__
         //  Transistor temperature
         TKR         = `KELVINCONVERSION + TR;
         TKA         =  $temperature + DTA;
@@ -620,7 +621,7 @@ analog begin
 
         // JUNCAP2
         `include "JUNCAP200_InitModel.include"
-
+`endif
         //  Gmin definition
         gmin        =  $simparam("gmin",0.0);
 
@@ -629,6 +630,7 @@ analog begin
     //  --------------------------------------------------------------------------------------------------------------
     //  Definition of instance dependent and bias independent variables
     //  --------------------------------------------------------------------------------------------------------------
+    `INITIAL_INSTANCE
     begin : initial_instance
 
         //  Declaration of local variables
@@ -670,6 +672,25 @@ analog begin
         SCB_i        =  SCB;
         SCC_i        =  SCC;
         NGCON_i      =  (NGCON < 1.5) ? 1.0 : 2.0;
+
+`ifdef __XYCE__
+        //  Transistor temperature
+        TKR         = `KELVINCONVERSION + TR;
+        TKA         =  $temperature + DTA;
+        rTa         =  TKA / TKR;
+        delTa       =  TKA - TKR;
+        phita       =  TKA * `KBOL / `QELE;
+        inv_phita   =  1.0 / phita;
+        `ifdef SelfHeating
+            // do nothing
+        `else // SelfHeating
+            TKD         =  TKA;
+            `TempInitialize
+        `endif // SelfHeating
+
+        // JUNCAP2
+        `include "JUNCAP200_InitModel.include"
+`endif
 
         //  Internal local parameters
         `include "PSP103_scaling.include"

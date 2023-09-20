@@ -58,7 +58,11 @@ module JUNCAP200(A,K);
     //  --------------------------------------------------------------------------------------------------------------
     `MPInb(LEVEL          ,200        ,""                                     ,"Model level must be 200")
     `MPIty(TYPE           ,1.0        ,""                                     ,"Type parameter, in output value 1 reflects n-type, -1 reflects p-type")
-    `MPRnb(DTA            ,0.0        ,"K"                                    ,"Temperature offset with respect to ambient temperature")
+`ifdef __XYCE__
+    `MPRnb_BOTH(DTA            ,0.0        ,"K"                                    ,"Temperature offset with respect to ambient temperature")
+`else
+    `IPRnb(DTA            ,0.0        ,"K"                                    ,"Temperature offset with respect to ambient temperature")
+`endif
 
     //  --------------------------------------------------------------------------------------------------------------
     //  Instance parameters

@@ -16,6 +16,7 @@ YPSP103_VA m1  d g s b nch
 +lsdrain=1.0e-06
 +lgdrain=1.0e-06
 +mult=1.0e+00
++dta=0.0
 *
 .option temp=21
 .step  vb -3 0 0.5

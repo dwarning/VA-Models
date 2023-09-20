@@ -659,10 +659,10 @@ electrical BD;
 //  --------------------------------------------------------------------------------------------------------------
 //  Other Parameters
 //  --------------------------------------------------------------------------------------------------------------
-`ifdef __OPENVAF__
-`IPRnb(DTA            ,0.0        ,"K"                                  ,"Temperature offset w.r.t. ambient temperature")
+`ifdef __XYCE__
+`MPRnb_BOTH(DTA       ,0.0        ,"K"                                  ,"Temperature offset w.r.t. ambient temperature")
 `else
-`MPRnb(DTA            ,0.0        ,"K"                                  ,"Temperature offset w.r.t. ambient temperature")
+`IPRnb(DTA            ,0.0        ,"K"                                  ,"Temperature offset w.r.t. ambient temperature")
 `endif
 `ALIAS(TRISE, DTA)
 
@@ -1043,6 +1043,7 @@ analog begin
     //  --------------------------------------------------------------------------------------------------------------
     //  Definition of bias/instance independent model variables
     //  --------------------------------------------------------------------------------------------------------------
+    `INITIAL_MODEL
     begin : initial_model
 
         // Clipping and rounding of switch parameters
@@ -1127,7 +1128,7 @@ analog begin
         RVPOLY_i    = `CLIP_LOW(RVPOLY, 0.0);
         NSUBEDGEO_i = `CLIP_LOW(NSUBEDGEO, 1.0e20);
         LPEDGE_i    = `CLIP_LOW(LPEDGE, 1.0e-10);
-
+`ifndef __XYCE__
         // Transistor temperature
         TR_i        = `CLIP_LOW(TR, -273.0);
         TKR         = `KELVINCONVERSION + TR_i;
@@ -1145,12 +1146,14 @@ analog begin
 
         // JUNCAP2
         `include "JUNCAP200_InitModel.include"
+`endif
 
     end // initial_model
 
     //  --------------------------------------------------------------------------------------------------------------
     //  Definition of instance dependent and bias independent variables
     //  --------------------------------------------------------------------------------------------------------------
+    `INITIAL_INSTANCE
     begin : initial_instance
 
         // Declaration of local variables
@@ -1193,6 +1196,26 @@ analog begin
         SCB_i        = `CLIP_LOW(SCB, 0.0);
         SCC_i        = `CLIP_LOW(SCC, 0.0);
         NGCON_i      =  (NGCON < 1.5) ? 1.0 : 2.0;
+
+`ifdef __XYCE__
+        // Transistor temperature
+        TR_i        = `CLIP_LOW(TR, -273.0);
+        TKR         = `KELVINCONVERSION + TR_i;
+        TKA         =  $temperature + DTA;
+        rTa         =  TKA / TKR;
+        delTa       =  TKA - TKR;
+        phita       =  TKA * `KBOL / `QELE;
+        inv_phita   =  1.0 / phita;
+        `ifdef SelfHeating
+            // do nothing
+        `else // SelfHeating
+            TKD         =  TKA;
+            `TempInitialize
+        `endif // SelfHeating
+
+        // JUNCAP2
+        `include "JUNCAP200_InitModel.include"
+`endif
 
         // Geometrical device variables
         // Transistor geometry
