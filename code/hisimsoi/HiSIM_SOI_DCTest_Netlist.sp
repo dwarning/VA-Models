@@ -1,10 +1,10 @@
 DC Analysis for HiSIM_SOI
 
 .model MOSFET hisimsoi_va
-.INCLUDE HiSIM_SOI_1.4.0_Default_Model.txt
+.INCLUDE Modelcards/HiSIM_SOI_1.5.0_Default_Model.txt
 
-NMLDMOS  d g 0 0 sub MOSFET
-.INCLUDE HiSIM_SOI_1.4.0_Default_Instance.txt
+NMLDMOS  d g 0 sub th MOSFET
+.INCLUDE Modelcards/HiSIM_SOI_1.5.0_Default_Instance.txt
 
 Vds   d 0  dc   0.0
 Vgs   g 0  dc   0.0

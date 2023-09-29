@@ -2,17 +2,17 @@
 
  HiSIM (Hiroshima University STARC IGFET Model)
  Copyright (C) 2000-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
  HiSIM_SOI (Silicon-On-Insulator Model)
  Copyright (C) 2012-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
 
  MODEL NAME : HiSIM_SOI
- ( VERSION : 1  SUBVERSION : 5  REVISION : 0 )
- Model Parameter 'VERSION' : 1.50
+ ( VERSION : 1  SUBVERSION : 4  REVISION : 0 )
+ Model Parameter 'VERSION' : 1.40
  FILE : HSMSOI_eval_newPT.inc
 
- Date : 2021.10.08
+ Date : 2018.07.30
 
  released by Hiroshima University
 
@@ -20,14 +20,13 @@
 //
 ////////////////////////////////////////////////////////////////
 //
-//
 //Licensed under the Educational Community License, Version 2.0
 //(the "License"); you may not use this file except in
 //compliance with the License.
 //
 //You may obtain a copy of the License at:
 //
-//      http://opensource.org/licenses/ECL-2.0
+//  http://opensource.org/licenses/ECL-2.0
 //
 //Unless required by applicable law or agreed to in writing,
 //software distributed under the License is distributed on an
@@ -60,7 +59,6 @@ begin : HSMSOI_eval_newPT
 
     real wfactor; // accounts for diminished influence exerted by gate; in aid of depletion width
     real wQbu, Wdep, delta;    // depletion width in association with Ps0//
-    real T5sign, T5y; // 20190507
 
     Leff  = Lgleff ;
     t_SOI = `t_SOI ;
@@ -85,26 +83,13 @@ begin : HSMSOI_eval_newPT
 
     // From Ps0 here, depletion width will be estimated.
     T5 = -beta *(Ps0 - dphi_vds);
-
-    T5sign= ( T5 >= 0.0 ?  1.0 : -1.0); // 20190507
-    T5y=  T5sign * T5; // positive         20190507
-
     T6 = exp(T5);
     T7= T6 - 1.0 - T5;
-
-    if (T5 > `C_PHI__MINIMUM) begin                                                     // 20190507
-        Qbu = -cnst0SOI*sqrt(T7); // sign inverted; accumulation side                    // 20190507
-    end else if (T5y >`C_PHI__MINIMUM)  begin                                           // 20190507
-        Qbu =  cnst0SOI*sqrt(T7); // sign inverted; depletion, inversion side            // 20190507
-    end else begin // avoid loss of accuracy                                                  // 20190507
-        Qbu = -T5sign * T5y * `C_SQRT_2inv * sqrt(1.0+ T5y*`C_1o3*(1.0+0.25*T5y)); // 20190507
+    if (T5 >= `C_PHI__MINIMUM) begin
+        Qbu = -cnst0SOI*sqrt(T7); // sign inverted; accumulation side
+    end else begin
+        Qbu =  cnst0SOI*sqrt(T7); // sign inverted; depletion, inversion side
     end
-
-    //org      if (T5 >= `C_PHI__MINIMUM) begin
-    //org         Qbu = -cnst0SOI*sqrt(T7); // sign inverted; accumulation side
-    //org      end else begin
-    //org         Qbu =  cnst0SOI*sqrt(T7); // sign inverted; depletion, inversion side
-    //org      end
     `Fn_SZtemp(wQbu, Qbu, 1e-6)
     Wdep = wQbu / (`C_QE * Nsub) ;
     T1 = Wdep - WK_XJ ;

@@ -2,17 +2,17 @@
 
  HiSIM (Hiroshima University STARC IGFET Model)
  Copyright (C) 2000-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
  HiSIM_SOI (Silicon-On-Insulator Model)
  Copyright (C) 2012-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
 
  MODEL NAME : HiSIM_SOI
- ( VERSION : 1  SUBVERSION : 5  REVISION : 0 )
- Model Parameter 'VERSION' : 1.50
+ ( VERSION : 1  SUBVERSION : 4  REVISION : 0 )
+ Model Parameter 'VERSION' : 1.40
  FILE : vaFiles/HSOI_eval_rdrift.inc
 
- Date : 2021.10.08
+ Date : 2018.07.30
 
  released by Hiroshima University
 
@@ -20,14 +20,13 @@
 //
 ////////////////////////////////////////////////////////////////
 //
-//
 //Licensed under the Educational Community License, Version 2.0
 //(the "License"); you may not use this file except in
 //compliance with the License.
 //
 //You may obtain a copy of the License at:
 //
-//      http://opensource.org/licenses/ECL-2.0
+//  http://opensource.org/licenses/ECL-2.0
 //
 //Unless required by applicable law or agreed to in writing,
 //software distributed under the License is distributed on an
@@ -51,7 +50,7 @@
 
 // Input instance parameters : NRD , NRS , NF ;
 // Input model parameters : RSH , XLD , LDRIFT , LDRIFTS ;
-// -- RDRMUE  , RDRVMAX  , RDRMUETMP , RDRVTMP  , RDRDJUNC ;
+// -- RDRMUED , RDRVMAXD , RDRMUETMP , RDRVTMP  , RDRDJUNC ;
 // -- RDRMUES , RDRVMAXS ;
 // Input variables : Weff , TTEMP , UC_TNOM , NOVER , NOVERS ;
 real Rdrmuele , Rdrvmaxwe , Rdrvmaxle ;
@@ -72,9 +71,9 @@ if ( rdmod == 1 ) begin
 end else begin
     // drain resistance
     Nover = NOVER    / `C_cm2m_p3; //"cm^-3"
-    MKS_RDRMUE  = RDRMUE ;
-    MKS_RDRVMAX = RDRVMAX ;
-    RRDRBB      = RDRBB ;
+    MKS_RDRMUE  = RDRMUED ;
+    MKS_RDRVMAX = RDRVMAXD ;
+    RRDRBB      = RDRBBD ;
     Rsd0 = (RSH > 0.0 ) ? RSH  * NRD : 0.0 ;
     Ldrifte = LDRIFT  ;
     Vrdr  = TYPE * V(BRddp);  // get bias
@@ -132,15 +131,20 @@ end
 `ifdef __DEBUG_RDRIFTS__
     $write("debug_eval_rdrifts_a[ %g %g %g  %g %g ]\n", rdmod, Vdri, Vmaxe, Edri, Mu0);
 `endif
-if ( 1.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 1.0e0 + `epsm10 ) begin
-    T3 = 1.0e0 ;
-end else if ( 2.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 2.0e0 + `epsm10 ) begin
-    T3 = T1 ;
-end else  begin
-    T3 = pow( T1 , RRDRBB - 1.0e0 ) ;  // if( T1 == 0.0 ) is removed because T1 is bias-dependent.
+if ( T1 == 0.0 ) begin
+    T2 = 0.0 ;
+    T4 = 1.0 ;
+end else begin
+    if ( 1.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 1.0e0 + `epsm10 ) begin
+        T3 = 1.0e0 ;
+    end else if ( 2.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 2.0e0 + `epsm10 ) begin
+        T3 = T1 ;
+    end else  begin
+        T3 = `Fn_Pow( T1 , RRDRBB - 1.0e0 ) ;
+    end
+    T2 = T1 * T3 ;
+    T4 = 1.0e0 + T2 ;
 end
-T2 = T1 * T3 ;
-T4 = 1.0e0 + T2 ;
 if ( 1.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 1.0e0 + `epsm10 ) begin
     T5 = 1.0 / T4 ;
 end else if ( 2.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 2.0e0 + `epsm10 ) begin
@@ -182,9 +186,7 @@ Rsd = Rsd + Rsd0 ;
 Conductance =  ( Rsd > `Res_min && COTHRML != 0 ) ? Mfactor / Rsd : 0.0 ;
 
 // Clamping to Res_min //
-if (Rsd < `Res_min) begin
-    Rsd = `Res_min ;
-end
+if (Rsd < `Res_min) begin Rsd = `Res_min ; end
 
 `ifdef __DEBUG_RDRIFTS__
     $write("debug_eval_rdrifts_d[ %g %g %g %g %g %g  ]\n", rdmod, GD, Rsd, Rsd0, Weff_nf, Conductance);

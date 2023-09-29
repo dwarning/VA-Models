@@ -2,17 +2,17 @@
 
  HiSIM (Hiroshima University STARC IGFET Model)
  Copyright (C) 2000-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
  HiSIM_SOI (Silicon-On-Insulator Model)
  Copyright (C) 2012-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
 
  MODEL NAME : HiSIM_SOI
- ( VERSION : 1  SUBVERSION : 5  REVISION : 0 )
- Model Parameter 'VERSION' : 1.50
+ ( VERSION : 1  SUBVERSION : 4  REVISION : 0 )
+ Model Parameter 'VERSION' : 1.40
  FILE : HSMSOI_TOP_module.inc
 
- Date : 2021.10.08
+ Date : 2018.07.30
 
  released by Hiroshima University
 
@@ -20,14 +20,13 @@
 //
 ////////////////////////////////////////////////////////////////
 //
-//
 //Licensed under the Educational Community License, Version 2.0
 //(the "License"); you may not use this file except in
 //compliance with the License.
 //
 //You may obtain a copy of the License at:
 //
-//      http://opensource.org/licenses/ECL-2.0
+//  http://opensource.org/licenses/ECL-2.0
 //
 //Unless required by applicable law or agreed to in writing,
 //software distributed under the License is distributed on an
@@ -81,13 +80,6 @@ branch(bp,g ) BRbpg  ;
 branch(g ,bp) BRgbp  ;
 branch(e ,bp) BRebp  ;
 
-branch(sb,bp) BRsbbp ; // body resistance network
-branch(sb,bc) BRsbbc ; // body resistance network
-branch(db,bp) BRdbbp ; // body resistance network
-branch(db,bc) BRdbbc ; // body resistance network
-branch(sb,sp) BRsbsp ; // junction diode (source)
-branch(db,dp) BRdbdp ; // junction diode (drain)
-
 //
 // Parameter definitions
 //******* Device Parameters *******//
@@ -98,29 +90,30 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `IPRco( PD        , 0.0       , "m"            , 0, inf , "Perimeter of drain junction" )
 `IPRco( PS        , 0.0       , "m"            , 0, inf , "Perimeter of source junction" )
 `IPRoo( NGCON     , 1.0       , "-"            , 0, inf , "Number of gate contacts" )
-`IPRco( XGW       , 0E0       , "m"            , 0, inf , "Distance from gate contact to channel edge" )
-`IPRco( XGL       , 0E0       , "m"            , 0, L   , "Offset of gate length" )
+`IPRnb( XGW       , 0E0       , "m"                     , "Distance from gate contact to channel edge" )
+`IPRco( XGL       , 0E0       , "m",             0, L   , "Offset of gate length" )
 `IPM
 `IPRoo( NF        , 1.0       , "-",             0, inf , "Number of gate fingers" )
 `IPRco( SA        , 0         , "m",             0, inf , "Length of diffusion between gate and STI" )
 `IPRco( SB        , 0         , "m",             0, inf , "Length of diffusion between gate and STI" )
 `IPRco( SD        , 0         , "m",             0, inf , "Length of diffusion between gate and gate" )
-`IPRco( PDBCP     , 0.0       , "m",             0, inf , "Parasitic perimeter length for body contact at drain" )
-`IPRco( PSBCP     , 0.0       , "m",             0, inf , "Parasitic perimeter length for body contact at source" )
-`IPRco( LOD       , 10.0E-6   , "m",             0, inf , "diffusion length between gate and STI edge" )
-`IPRoo( TEMP      , 0.0       , "C",       -273.15, inf , "Device temperature" )
+`IPRnb( PDBCP     , 0.0       , "m"                     , "Parasitic perimeter length for body contact at drain" )
+`IPRnb( PSBCP     , 0.0       , "m"                     , "Parasitic perimeter length for body contact at source" )
+`IPRnb( LOD       , 10.0E-6   , "m"                     , "diffusion length between gate and STI edge" )
+`IPRnb( TEMP      , 0.0       , "C"                     , "Device temperature" )
 `IPRnb( DTEMP     , 0         , "C"                     , "Device temperature change" )
-`IPRnb( NBT       , 1.0       , "-"                     , "Number of body contact" )
-`IPRco( LBT       , 0.0       , "m"            , 0, inf , "Length of gate over body-contact well" )
-`IPRco( WBTP      , 0.0       , "m"            , 0, inf , "Distance of gate protrusion over body-contact well" )
-`IPRco( WBTN      , 0.0       , "m"            , 0, inf , "Distance of gate protrusion over body-contact well" )
-`IPRco( ABTN      , 0.0       , "m^2"          , 0, inf , "Area of N^+ poly area of body contact" )
-`IPRco( ABTP      , 0.0       , "m^2"          , 0, inf , "Area of P^+ poly area of body contact" )
+`IPRnb( NBT       , 1.0       , ""                      , "Number of body contact" )
+`IPRnb( LBT       , 0.0       , "m"                     , "Length of gate over body-contact well" )
+`IPRnb( WBTP      , 0.0       , "m"                     , "Distance of gate protrusion over body-contact well" )
+`IPRnb( WBTN      , 0.0       , "m"                     , "Distance of gate protrusion over body-contact well" )
+`IPRnb( ABTN      , 0.0       , "m^2"                   , "Area of N^+ poly area of body contact" )
+`IPRnb( ABTP      , 0.0       , "m^2"                   , "Area of P^+ poly area of body contact" )
 
 //******* Model Flags *******//
+`MPIsw( COPPRV    , 0         , ""                      , "Previous phi_s flag" )
 `MPIsw( COADOV    , 1         , ""                      , "Lateral field induced and overlap capacitances are added to intrinsic" )
 `MPIsw( COISUB    , 0         , ""                      , "Substrate current flag" )
-`MPIcc( COFBE     , 0         , ""                , 0, 2, "Floating-Body Effect flag" )
+`MPIsw( COFBE     , 0         , ""                      , "Floating-Body Effect flag" )
 `MPIsw( COIIGS    , 0         , ""                      , "Gate current flag" )
 `MPIsw( COGIDL    , 0         , ""                      , "GIDL current flag" )
 `MPIsw( COOVLP    , 0         , ""                      , "Overlap capacitance model selector" )
@@ -138,16 +131,11 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPIcc( COQOVSM   , 1         , ""                , 0, 2, "Qover capacitance model selector" )
 `MPIcc( COQBDSM   , 1         , ""                , 0, 2, "Gate/body contact well MOS-capacitance model selector" )
 `MPRnb( COBCNODE  , 0         , ""                      , "Body contact node flag" )
-`MPIsw( COSUBSCALE, 0         , ""                      , "Switch scaling for Isub" )
-`MPIsw( COISUBFB  , 0         , ""                      , "Switch Isub in FB mode: 0 with analytical Ids; 1 with iterative Ids" )
 `MPInb( INFO      , 0         , ""                      , "print information selector" )
-`MPRnb( QHSMAX    , 1e-3      , ""                      , "upper limit Qhs " )
-`MPRnb( DVGPSUB   , 0         , ""                      , "delta VGPSUB (in addition to VFBSUB) " )
-`MPRnb( DVBSSUB   , 0         , ""                      , "delta VBSSUB for Qh effect " )
 
 //******* Technology Model Parameters *******//
 `MPIty( TYPE      , 1         , "-"                     , "1 for nMOS and -1 for pMOS" )
-`MPRnb( VERSION   , 1.50      , "-"                     , "model version selector" )
+`MPRnb( VERSION   , 1.40      , "-"                     , "model version selector" )
 `MPRoo( VMAX      , 7.00E+6   , "cm*s^-1"      , 0, inf , "saturation velocity" )
 `MPRnb( BGTMP1    , 90.25E-6  , "eV*K^-1"               , "temperature dependence of bandgap" )
 `MPRnb( BGTMP2    , 100.0E-9  , "eV*K^-2"               , "temperature dependence of bandgap" )
@@ -172,11 +160,11 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPRnb( PARL2     , 10.0E-9   , "m"                     , "depletion width of channel/contact junction" )
 `MPRnb( LP        , 0.0       , "m"                     , "pocket penetration length" )
 `MPRoo( NSUBP     , 1.0E+17   , "cm^-3"        , 0, inf , "max pocket concentration" )
-`MPRnb( NSUBP0    , 0.0       , "-"                     , "modification of pocket concentration for narrow W" )
+`MPRnb( NSUBP0    , 0.0       , "um^NSUBWP"             , "modification of pocket concentration for narrow W" )
 `MPRnb( NSUBWP    , 1.0       , "-"                     , "modification of pocket concentration for narrow W" )
-`MPRnb( WL1       , 0.0       , "m"                     , "small-size effect parameter for STI leakage" )
+`MPRnb( WL1       , 0.0       , "um^2WL1P+1"            , "small-size effect parameter for STI leakage" )
 `MPRnb( WL1P      , 1.0       , "-"                     , "small-size effect parameter for STI leakage" )
-`MPRnb( WL2       , 0.0       , "-"                     , "threshold voltage shift due to small-size effect" )
+`MPRnb( WL2       , 0.0       , "Vum^WL2P"              , "threshold voltage shift due to small-size effect" )
 `MPRnb( WL2P      , 1.0       , "-"                     , "threshold voltage shift due to small-size effect" )
 `MPRnb( SCP1      , 0.0       , "-"                     , "magnitude of short-channel effect due to pocket" )
 `MPRnb( SCP2      , 0.0       , "V^-1"                  , "Vds-dependence of SCE due to pocket" )
@@ -196,21 +184,21 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPRnb( MUECB0    , 300.0     , "cm^2V^-1s^-1"          , "Coulomb scattering" )
 `MPRnb( MUECB1    , 30.0      , "cm^2V^-1s^-1"          , "Coulomb scattering" )
 `MPRnb( MUEPH0    , 300.0E-3  , "-"                     , "phonon scattering" )
-`MPRnb( MUEPHW    , 0.0       , "-"                     , "phonon-related mobility reduction" )
+`MPRnb( MUEPHW    , 0.0       , "um^MUEPHP"             , "phonon-related mobility reduction" )
 `MPRnb( MUEPWP    , 1.0       , "-"                     , "phonon-related mobility reduction" )
 `MPRnb( MUEPHL    , 0.0       , "-"                     , "L-dependence of phonon mobility reduction" )
 `MPRnb( MUEPLP    , 1.0       , "-"                     , "L-dependence of phonon mobility reduction" )
-`MPRnb( MUEPHS    , 0.0       , "-"                     , "mobility change due to small size" )
+`MPRnb( MUEPHS    , 0.0       , "um^MUEPSP"             , "mobility change due to small size" )
 `MPRnb( MUEPSP    , 1.0       , "-"                     , "mobility change due to small size" )
 `MPRnb( VTMP      , 0.0       , "cm*s^-1"               , "temperature-dependence of saturation velocity" )
 `MPRnb( WVTH0     , 0.0       , "Vum"                   , "threshold voltage shift" )
 `MPRoo( MUESR1    , 2.0E15    , "cm^2V^-1s^-1" , 0, inf , "surface-roughness scattering" )
 `MPRnb( MUESR0    , 2.0       , "-"                     , "surface-roughness scattering" )
-`MPRnb( MUESRL    , 0.0       , "-"                     , "L-dependence of surface roughness on mobility" )
-`MPRnb( MUESRW    , 0.0       , "-"                     , "surface roughness-related mobility change" )
+`MPRnb( MUESRL    , 0.0       , "um^MUESLP"             , "L-dependence of surface roughness on mobility" )
+`MPRnb( MUESRW    , 0.0       , "um^MUESWP"             , "surface roughness-related mobility change" )
 `MPRnb( MUESWP    , 1.0       , "-"                     , "surface roughness-related mobility change" )
 `MPRnb( MUESLP    , 1.0       , "-"                     , "L-dependence of surface roughness on mobility" )
-`MPRnb( MUETMP    , 1.5       , "-"                     , "temperature-dependence of phonon scattering" )
+`MPRnb( MUETMP    , 1.5       , "um^MUEPLP"             , "temperature-dependence of phonon scattering" )
 `MPRco( BB        , ((TYPE>0)?2.0:1.0), "-"  , 0.1, inf , "high-field-mobility degradation" )
 `MPRnb( DDLTMAX   , 10.0      , "-"                     , "smoothing coefficient for Vds" )
 `MPRnb( DDLTSLP   , 10.0      , "um^-1"                 , "Lgate-dependence of smoothing coefficient" )
@@ -223,20 +211,18 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPRnb( SVDS      , 3.0       , "-"                     , "Substrate current dependence on Vds" )
 `MPRnb( SLG       , 3.0E-8    , "m"                     , "substrate current dependence on Lgate" )
 `MPRnb( SVBS      , 0.5       , "-"                     , "substrate current dependence on Vbs" )
-`MPRnb( SVBSL     , 0.0       , "-"                     , "Lgate-dependence of SVBS" )
+`MPRnb( SVBSL     , 0.0       , "m^SVBSLP"              , "Lgate-dependence of SVBS" )
 `MPRnb( SVBSLP    , 1.0       , "-"                     , "Lgate-dependence of SVBS" )
 `MPRnb( SVGS      , 0.8       , "-"                     , "substrate current dependence on Vgs" )
-`MPRnb( SVGSL     , 0.0       , "-"                     , "Lgate-dependence of SVGS" )
+`MPRnb( SVGSL     , 0.0       , "m^SLGLP"               , "Lgate-dependence of SVGS" )
 `MPRnb( SVGSLP    , 1.0       , "-"                     , "Lgate-dependence of SVGS" )
-`MPRnb( SVGSW     , 0.0       , "-"                     , "Wgate-dependence of SVGS" )
+`MPRnb( SVGSW     , 0.0       , "m^SVGSWP"              , "Wgate-dependence of SVGS" )
 `MPRnb( SVGSWP    , 1.0       , "-"                     , "Wgate-dependence of SVGS" )
-`MPRnb( SLGL      , 0.0       , ""                      , "Substrate current dependence on Lgate ")
-`MPRnb( SLGLP     , 1.0       , ""                      , "Substrate current dependence on Lgate ")
 `MPRnb( VFBSUB    , -1.0      , "V"                     , "flatband voltage for Isub calculation" )
-`MPRnb( VFBSUBL   , 0.0       , "-"                     , "Lgate-dependence of VFBSUB" )
+`MPRnb( VFBSUBL   , 0.0       , "um^VFBSUBLP"           , "Lgate-dependence of VFBSUB" )
 `MPRnb( VFBSUBLP  , 1.0       , "-"                     , "Lgate-dependence of VFBSUB" )
 `MPRnb( SUBDLT    , 2.0E-3    , "-"                     , "smoothing parameter (hisimsoi_fb only)" )
-`MPRco( HIST1     , 10E-9     , "V"           ,  0, inf , "history-effect parameter" )
+`MPRnb( HIST1     , 10E-9     , "V"                     , "history-effect parameter" )
 `MPRnb( HIST2     , 1E-20     , "A"                     , "history-effect parameter" )
 `MPRnb( QHE1      , 1.5       , "-"                     , "FBE parameter" )
 `MPRnb( QHE2      , 0.35      , "V"                     , "FBE parameter" )
@@ -248,22 +234,22 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPRnb( IBPC2     , 0.0       , "V^-1"                  , "impact-ionization-induced bulk potential change" )
 `MPRnb( NSTI      , 5.0E17    , "cm^-3"                 , "substrate impurity concentration at STI edge" )
 `MPRnb( WSTI      , 0.0       , "m"                     , "width of high-field region at STI edge" )
-`MPRnb( WSTIL     , 0.0       , "-"                     , "channel-length dependence of WSTI" )
+`MPRnb( WSTIL     , 0.0       , "um^WSTILP"             , "channel-length dependence of WSTI" )
 `MPRnb( WSTILP    , 1.0       , "-"                     , "channel-length dependence of WSTI" )
-`MPRnb( WSTIW     , 0.0       , "-"                     , "channel-width dependence of WSTI" )
+`MPRnb( WSTIW     , 0.0       , "um^WSTIWP"             , "channel-width dependence of WSTI" )
 `MPRnb( WSTIWP    , 1.0       , "-"                     , "channel-width dependence of WSTI" )
 `MPRnb( SCSTI1    , 0.0       , "-"                     , "the same effect as SC1 but at STI edge" )
 `MPRnb( SCSTI2    , 0.0       , "V^-1"                  , "the same effect as SC2 but at STI edge" )
 `MPRnb( VTHSTI    , 0.0       , "V"                     , "threshold voltage shift due to STI" )
 `MPRnb( VDSTI     , 0.0       , "-"                     , "Vds dependence of STI subthreshold" )
 `MPRnb( MUESTI1   , 0.0       , "m"                     , "mobility change due to diffusion length" )
-`MPRoo( MUESTI2   , 0.0       , "-"            ,-1, inf , "mobility change due to diffusion length" )
+`MPRnb( MUESTI2   , 0.0       , "-"                     , "mobility change due to diffusion length" )
 `MPRnb( MUESTI3   , 1.0       , "-"                     , "mobility change due to diffusion length" )
 `MPRnb( NSUBPSTI1 , 0.0       , "m"                     , "pocket concentration modifier" )
-`MPRoo( NSUBPSTI2 , 0.0       , "-"            ,-1, inf , "pocket concentration modifier" )
+`MPRnb( NSUBPSTI2 , 0.0       , "-"                     , "pocket concentration modifier" )
 `MPRnb( NSUBPSTI3 , 1.0       , "-"                     , "pocket concentration modifier" )
 `MPRnb( NSUBCSTI1 , 0.0       , "m"                     , "channel concentration modifier" )
-`MPRoo( NSUBCSTI2 , 0.0       , "-"            ,-1, inf , "channel concentration modifier" )
+`MPRnb( NSUBCSTI2 , 0.0       , "-"                     , "channel concentration modifier" )
 `MPRnb( NSUBCSTI3 , 1.0       , "-"                     , "channel concentration modifier" )
 `MPRnb( TPOLY     , 0.0       , "m"                     , "height of poly-Si gate for fringing cap" )
 `MPRco( CGBO      , 0.0       , "F*m^-1"       , 0, inf , "gate-to-B overlap cap" )
@@ -280,9 +266,9 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPRnb( CJ        , 5.0E-04   , "F*m^-2"                , "bottom junc cap/unit area at zero bias" )
 `MPRnb( CJSW      , 5.0E-10   , "F*m^-1"                , "sidewall junc cap grading coefficient" )
 `MPRnb( CJSWG     , 5.0E-10   , "F*m^-1"                , "sidewall junc cap per unit length at zero bias" )
-`MPRco( MJ        , 0.33      , "-"            , 0, 1.0 , "bottom junc cap grading coefficient" )
-`MPRco( MJSW      , 0.33      , "-"            , 0, 1.0 , "sidewall junc cap grading coefficient" )
-`MPRco( MJSWG     , 0.33      , "-"            , 0, 1.0 , "gate sidewall junc cap grading coefficient" )
+`MPRoo( MJ        , 0.33      , "-"           ,-inf,1.0 , "bottom junc cap grading coefficient" )
+`MPRoo( MJSW      , 0.33      , "-"           ,-inf,1.0 , "sidewall junc cap grading coefficient" )
+`MPRoo( MJSWG     , 0.33      , "-"           ,-inf,1.0 , "gate sidewall junc cap grading coefficient" )
 `MPRoo( PB        , 1.0       , "V"            , 0, inf , "bottom junc built-in potential" )
 `MPRoo( PBSW      , 1.0       , "V"            , 0, inf , "sidewall junc built-in potential" )
 `MPRoo( PBSWG     , 1.0       , "V"            , 0, inf , "gate sidewall junc built-in potential" )
@@ -291,16 +277,16 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPRnb( CLM2      , 2.0       , "-"                     , "coefficient for QB contribution" )
 `MPRnb( CLM3      , 1.0       , "-"                     , "coefficient for QI contribution" )
 `MPRnb( CLM5      , 1.0       , "-"                     , "CLM parameter" )
-`MPRnb( CLM6      , 0.0       , "-"                     , "CLM parameter" )
-`MPRnb( VOVER     , 10.0E-3   , "-"                     , "velocity overshoot effect parameter" )
+`MPRnb( CLM6      , 0.0       , "um^-CLM5"              , "CLM parameter" )
+`MPRnb( VOVER     , 10.0E-3   , "cm^VOVERP"             , "velocity overshoot effect parameter" )
 `MPRnb( VOVERP    , 100.0E-3  , "-"                     , "Leff-dependence of velocity overshoot" )
 `MPRnb( VOVERS    , 0.0       , "-"                     , "modification of max velocity due to small size" )
 `MPRnb( VOVERSP   , 1.0       , "-"                     , "modification of max velocity due to small size" )
 `MPRnb( WFC       , 0.0       , "F*cm^-2*m^-1"          , "Threshold voltage change due to cap change" )
-`MPRnb( NSUBCW    , 0.0       , "-"                     , "substrate concentration modifier" )
+`MPRnb( NSUBCW    , 0.0       , "um^NSUBCWP"            , "substrate concentration modifier" )
 `MPRnb( NSUBCWP   , 1.0       , "-"                     , "substrate concentration modifier" )
 `MPRnb( NSUBCMAX  , 5E18      , "cm^-3"                 , "upper limit of substrate concentration" )
-`MPRnb( NSUBCL    , 0.0       , "-"                     , "Lgate-dependence of substrate concentration " )
+`MPRnb( NSUBCL    , 0.0       , "um^NSUBCLP"            , "Lgate-dependence of substrate concentration " )
 `MPRnb( NSUBCLP   , 1.0       , "-"                     , "Lgate-dependence of substrate concentration " )
 `MPRnb( QME1      , 0.0       , "mV"                    , "Vgs-dependence of quantum mechanical effect" )
 `MPRnb( QME2      , 0.0       , "V"                     , "Vgs-dependence of quantum mechanical effect" )
@@ -310,7 +296,6 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPRnb( GIDL3     , 300.0E-3  , "-"                     , "Vds-dependence of GIDL" )
 `MPRnb( GIDL4     , 0.0       , "V"                     , "threshold for Vds dependence" )
 `MPRnb( GIDL5     , 0.2E0     , "-"                     , "high-field correction" )
-`MPRoo( GIDLVB    , 0.5       , "V^3"         ,0, inf   , "Vb-dependence of GIDL")
 `MPRnb( GLEAK1    , 10.0E3    , "V^-3/2*s^-1"           , "gate-to-channel current coefficient" )
 `MPRnb( GLEAK2    , 20.0E6    , "V^-1/2*m^-1"           , "gate-to-channel current coefficient" )
 `MPRnb( GLEAK3    , 300.0E-3  , "-"                     , "gate-to-channel current coefficient" )
@@ -342,50 +327,52 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 `MPRoo( NSUBB     , 4.0E+14   , "cm^-3"        , 0, inf , "substrate impurity concentration" )
 `MPRnb( RTH0      , 0.1       , "Kcm/W"                 , "Thermal resistance" )
 `MPRnb( CTH0      , 1.0E-7    , "Ws/(Kcm)"              , "thermal capacitance" )
-`MPRnb( PTL       , 0.0       , "V^(1-PTP)"             , "punchthrough parameter" )
+`MPRnb( SC4       , 0.0       , "-"                     , "SCE parameter" )
+`MPRnb( PTL       , 0.0       , "V^PTP-1m^PTLP"         , "punchthrough parameter" )
 `MPRnb( PTP       , 3.5       , "-"                     , "punchthrough parameter" )
 `MPRnb( PT2       , 0.0       , "V^-1"                  , "punchthrough parameter" )
 `MPRnb( PTLP      , 1.0       , "-"                     , "punchthrough parameter" )
-`MPRnb( GDL       , 0.0       , "-"                     , "strength of high-field effect" )
+`MPRnb( GDL       , 0.0       , "m^GDLP"                , "strength of high-field effect" )
 `MPRnb( GDLP      , 0.0       , "-"                     , "modification of channel conductance" )
 `MPRnb( GDLD      , 0.0       , "m"                     , "modification of channel conductance" )
-`MPRnb( PT4       , 0.0       , "V^-1"                  , "punchthrough parameter" )
+`MPRnb( PT4       , 0.0       , "-"                     , "punchthrough parameter" )
 `MPRnb( PT4P      , 1.0       , "-"                     , "punchthrough parameter" )
 `MPRnb( VGSMIN    , -5.0*TYPE , "V"                     , "surface potential limiter" )
+`MPRnb( RMIN      , 1E-3      , "ohm"                   , "Minimum resistance" )
 `MPRnb( MUEPH1    , 25.0E3    , "cm^2V^-1s^-1"          , "phonon scattering" )
 
 // Definition for the source resistance
 
 //******* Instance parameters *******//
-`IPRco( NRS       , 1.0        , "-"                  ,   0 , inf , "Number of squares in source ")
-`IPRco( NRD       , 1.0        , "-"                  ,   0 , inf , "Number of squares in drain ")
+`IPRco( NRS       , 1.0        , ""                  ,   0 , inf , "Number of squares in source ")
+`IPRco( NRD       , 1.0        , ""                  ,   0 , inf , "Number of squares in drain ")
 `BPRco( LDRIFT    , 1.0E-6     , "m"                 ,   0 , inf , "Parameter for drift region length (drain) ")
 `BPRco( LDRIFTS   , 1.0E-6     , "m"                 ,   0 , inf , "Parameter for drift region length (source) ")
 
 //******* Model Flags *******//
-`MPIcc( CORS      , 0          , "-"                  ,   0 ,   1 , "source side resistance OFF(0)/ON(1)")
-`MPIcc( CORD      , 0          , "-"                  ,   0 ,   1 , "drain side resistance OFF(0)/ON(1)")
-`MPIcc( CORBULK   , 0          , "-"                  ,   0 ,   1 , "bulk resistance OFF(0)/ON(1)")
-`MPIsw( CORBNET   , 0          , "-"                              , "Activate body resistance net (1) or not (0)")
+`MPIcc( CORS      , 0          , ""                  ,   0 ,   1 , "source side resistance OFF(0)/ON(1)")
+`MPIcc( CORD      , 0          , ""                  ,   0 ,   1 , "drain side resistance OFF(0)/ON(1)")
+`MPIcc( CORBULK   , 0          , ""                  ,   0 ,   1 , "bulk resistance OFF(0)/ON(1)")
+
 //******* Model parameters *******//
 `MPRco( RSH       , 0.0        , "ohm"               ,   0 , inf , "Drain diffusion sheet resistance ")
 `MPRnb( NOVERS    , 1E19       , "cm^-3"                         , "impurity concentration in overlap region" )
-`MPRoo( RDRMUE    , 1.0E3      , "cm^2/Vs"                  ,   0 , inf , "Mobility in drift region (drain)")
-`MPRoo( RDRMUES   , 1.0E3      , "cm^2/Vs"                  ,   0 , inf , "Mobility in drift region (source)")
-`MPRoo( RDRVMAX   , 3.0E7      , "cm/s"                  ,   0 , inf , "Saturation velocity in drift region (drain)")
-`MPRoo( RDRVMAXS  , 3.0E7      , "cm/s"                  ,   0 , inf , "Saturation velocity in drift region (source)")
-`MPRnb( RDRMUETMP , 0.0        , "-"                              , "Temperature dependence of resistance ")
-`MPRnb( RDRVTMP   , 0.0        , "-"                              , "Temperature dependence of resistance ")
-`MPRoo( RDRDJUNC  , 1.0E-6     , "m"                  ,   0 , inf , "Junction depth at channel/drift region ")
-`MPRco( RDRBB     , 1          , "-"                  , 0.1 , inf , "Degradation of the mobility in drift region (drain)")
-`MPRco( RDRBBS    , 1          , "-"                  , 0.1 , inf , "degradation of the mobility in drift region (source)")
-`MPRnb( RDRBBTMP  , 0          , "-"                              , "Temperature coefficient of RDRBB ")
-`MPRnb( RDRVMAXW  , 0.0        , "-"                              , "Wgate dependence of the saturation velocity in drift region")
-`MPRnb( RDRVMAXWP , 1.0        , "-"                              , "Wgate dependence of the saturation velocity in drift region")
-`MPRnb( RDRVMAXL  , 0.0        , "-"                              , "Lgate dependence of the saturation velocity in drift region")
-`MPRnb( RDRVMAXLP , 1.0        , "-"                              , "Lgate dependence of the saturation velocity in drift region")
-`MPRnb( RDRMUEL   , 0.0        , "-"                              , "Lgate dependence of the mobility in drift region ")
-`MPRnb( RDRMUELP  , 1.0        , "-"                              , "Lgate dependence of the mobility in drift region ")
+`MPRoo( RDRMUED   , 1.0E3      , ""                  ,   0 , inf , "Mobility in drift region (drain)")
+`MPRoo( RDRMUES   , 1.0E3      , ""                  ,   0 , inf , "Mobility in drift region (source)")
+`MPRoo( RDRVMAXD  , 3.0E7      , ""                  ,   0 , inf , "Saturation velocity in drift region (drain)")
+`MPRoo( RDRVMAXS  , 3.0E7      , ""                  ,   0 , inf , "Saturation velocity in drift region (source)")
+`MPRnb( RDRMUETMP , 0.0        , ""                              , "Temperature dependence of resistance ")
+`MPRnb( RDRVTMP   , 0.0        , ""                              , "Temperature dependence of resistance ")
+`MPRoo( RDRDJUNC  , 1.0E-6     , ""                  ,   0 , inf , "Junction depth at channel/drift region ")
+`MPRco( RDRBBD    , 1          , ""                  , 0.1 , inf , "Degradation of the mobility in drift region (drain)")
+`MPRco( RDRBBS    , 1          , ""                  , 0.1 , inf , "degradation of the mobility in drift region (source)")
+`MPRnb( RDRBBTMP  , 0          , ""                              , "Temperature coefficient of RDRBB ")
+`MPRnb( RDRVMAXW  , 0.0        , ""                              , "Wgate dependence of the saturation velocity in drift region")
+`MPRnb( RDRVMAXWP , 1.0        , ""                              , "Wgate dependence of the saturation velocity in drift region")
+`MPRnb( RDRVMAXL  , 0.0        , ""                              , "Lgate dependence of the saturation velocity in drift region")
+`MPRnb( RDRVMAXLP , 1.0        , ""                              , "Lgate dependence of the saturation velocity in drift region")
+`MPRnb( RDRMUEL   , 0.0        , ""                              , "Lgate dependence of the mobility in drift region ")
+`MPRnb( RDRMUELP  , 1.0        , ""                              , "Lgate dependence of the mobility in drift region ")
 
 // for new punchthrough model
 `MPIcc( COPT      , 0          , "-"                 ,  0 , 1    , "flag punchthrough ")
@@ -398,19 +385,16 @@ branch(db,dp) BRdbdp ; // junction diode (drain)
 //bulk resistance
 `MPRco( RBULK0    , 0.0        , "Ohm"               , 0  , inf  , "offset of bulk resistance ")
 `MPRco( RBULKW    , 0.0        , "Ohm/m"             , 0  , inf  , "bulk resistance per width ")
-`BPRco( RBDB      , 50.0       , "Ohm"                ,   0 , inf , "Substrate resistance network")
-`BPRco( RBSB      , 50.0       , "Ohm"                ,   0 , inf , "Substrate resistance network")
+
 //******* Output Values *******//
-`OPD( Rdd       , "Ohm" , " Drift Resistance on Drain side")
-`OPD( Rsd       , "Ohm" , " Drift Resistance on Source side")
-`OPD( Rbulk     , "Ohm" , " Body Contact Resistance ")
+`OPP( Rdd       , "Ohm" , " Drift Resistance on Drain side")
+`OPP( Rsd       , "Ohm" , " Drift Resistance on Source side")
+`OPP( Rbulk     , "Ohm" , " Body Contact Resistance ")
 
 integer rdmod /* 1:RS 2:RD */ ;
 real Rdde , Rsde , Conductance , drainConductance , sourceConductance ;
 
 `define Res_min       ( 1e-4 )
-`define Gres_max      ( 1e4  )
-`define Gres_min      ( 1e-6 )
 
 //`define __DEBUG_RDRIFTS__
 
@@ -434,40 +418,38 @@ real Rdde , Rsde , Conductance , drainConductance , sourceConductance ;
 
 
 // Output Physical Values in operating point analysis //
-`OPM( idse      , "A"   , "Drain-Source current")
-`OPM( Isuba     , "A"   , "Substrate current")
-`OPM( igidle    , "A"   , "Gate-Induced Drain Leakage current")
-`OPM( igisle    , "A"   , "Gate-Induced Source Leakage current")
-`OPM( igde      , "A"   , "Gate-Drain current")
-`OPM( igse      , "A"   , "Gate-Source current")
-`OPM( igbe      , "A"   , "Gate-Substrate current")
-`OPM( ggm       , "S"   , "Transconductance")
-`OPM( ggds      , "S"   , "Channel conductance")
-`OPM( ggmbs     , "S"   , "Body effect(Back gate) transconductance")
-`OPM( ggmt      , "S"   , "Temperature transconductance")
-`OPM( deltemp   , "S"   , "Temperature ")
+`OPP( idse      , "A"   , "Drain-Source current")
+`OPP( Isuba     , "A"   , "Substrate current")
+`OPP( igidle    , "A"   , "Gate-Induced Drain Leakage current")
+`OPP( igisle    , "A"   , "Gate-Induced Source Leakage current")
+`OPP( igde      , "A"   , "Gate-Drain current")
+`OPP( igse      , "A"   , "Gate-Source current")
+`OPP( igbe      , "A"   , "Gate-Substrate current")
+`OPP( ggm       , "S"   , "Transconductance")
+`OPP( ggds      , "S"   , "Channel conductance")
+`OPP( ggmbs     , "S"   , "Body effect(Back gate) transconductance")
+`OPP( ggmt      , "S"   , "Temperature transconductance")
+`OPP( deltemp   , "S"   , "Temperature ")
 `OPP( vone      , "V"   , "Threshold voltage")
 `OPP( vdsate    , "V"   , "Saturation voltage")
-`OPM( qge       , "C"   , "Gate charge")
-`OPM( qde       , "C"   , "Drain charge")
-`OPM( qse       , "C"   , "Bulk charge")
-`OPM( cggbd     , "F"   , " g-g MOSFET capacitance")
-`OPM( cgdbd     , "F"   , " g-d MOSFET capacitance")
-`OPM( cgsbd     , "F"   , " g-s MOSFET capacitance")
-`OPM( cbgbd     , "F"   , " b-g MOSFET capacitance")
-`OPM( cbsbd     , "F"   , " b-s MOSFET capacitance")
-`OPM( cbdbd     , "F"   , " b-d MOSFET capacitance")
-`OPM( cdgbd     , "F"   , " d-g MOSFET capacitance")
-`OPM( cddbd     , "F"   , " d-d MOSFET capacitance")
-`OPM( cdsbd     , "F"   , " d-s MOSFET capacitance")
-`OPM( ibdb      , "A"   , " b-d Diode current")
-`OPM( ibsb      , "A"   , " b-s Diode current")
-`OPM( Gbd       , "S"   , " b-d Diode conductance")
-`OPM( Gbs       , "S"   , " b-s Diode conductance")
-`OPM( capbdb    , "F"   , " b-d Diode capacitance")
-`OPM( capbsb    , "F"   , " b-s Diode capacitance")
-`OPP( OP_QHS    , "C/m^2"," Qhs ")
-`OPP( OP_DVBS_FBE,"V"   , " delat Vbs for FBE")
+`OPP( qge       , "C"   , "Gate charge")
+`OPP( qde       , "C"   , "Drain charge")
+`OPP( qse       , "C"   , "Bulk charge")
+`OPP( cggbd     , "F"   , " g-g MOSFET capacitance")
+`OPP( cgdbd     , "F"   , " g-d MOSFET capacitance")
+`OPP( cgsbd     , "F"   , " g-s MOSFET capacitance")
+`OPP( cbgbd     , "F"   , " b-g MOSFET capacitance")
+`OPP( cbsbd     , "F"   , " b-s MOSFET capacitance")
+`OPP( cbdbd     , "F"   , " b-d MOSFET capacitance")
+`OPP( cdgbd     , "F"   , " d-g MOSFET capacitance")
+`OPP( cddbd     , "F"   , " d-d MOSFET capacitance")
+`OPP( cdsbd     , "F"   , " d-s MOSFET capacitance")
+`OPP( ibdb      , "A"   , " b-d Diode current")
+`OPP( ibsb      , "A"   , " b-s Diode current")
+`OPP( Gbd       , "S"   , " b-d Diode conductance")
+`OPP( Gbs       , "S"   , " b-s Diode conductance")
+`OPP( capbdb    , "F"   , " b-d Diode capacitance")
+`OPP( capbsb    , "F"   , " b-s Diode capacitance")
 // End of Output Physical Values //
 
 //*-----------------*/
@@ -585,7 +567,6 @@ real      xvbs;
 real      xgate;
 real      xsub1;
 real      xsub2;
-real      vg2const;
 //   Additional   term   of   lateral-field-induced   capacitance   //
 real      cqyb0;
 //   Lg   dependence   for   Vfbsub   //
@@ -796,8 +777,6 @@ real      Vbsbiz ;
 // Qb for FB devices //
 real      Qs_FB, Qd_FB ;
 real      Qinm , Qidn ,  Qdnm , Qddn , Quot ;
-//unused//         real      Isub_FB , Isub_QH ;
-real      dVbssub ;
 // for BT device //
 real      exp_bVbsVds, exp_bPs0, exp_bVbs, cfs1, fs01 ;
 real      fs01_dPs0, fs02, fs02_dPs0, Fs0, Fs0_dPs0, dPs0, dPsl, dPlim ;
@@ -834,7 +813,6 @@ real      ptovr0 , wdpl;
 real      vmax0 ;
 // real ddlte;
 real      grg;
-real      grbpdb, grbpsb; // body resistance network
 real      qbe;
 // Vars for capacitance fitting
 real      cgsb   , Xd     ,  isube   , noiigate;
@@ -868,7 +846,8 @@ real      ci, sid, sigrat, sigrat_s, sigrat_d ;
 real Pss0_ini, Pbs0_ini, Psb0_ini ;
 real Pssl_ini, Pbsl_ini, Psbl_ini ;
 
-`ifndef DISABLE_COPPRV
+`ifdef DISABLE_COPPRV
+`else
     integer called , mode_prv , mode_prv2 , flg_zone_prv ;
     real    vtol_pprv ;
     real    vtol_pprv_l, vtol_pprv_u ;
@@ -891,18 +870,16 @@ analog begin
         V(n6) <+ 0.0;
         V(bc) <+ 0.0;
         if ( COBCNODE == 1 ) begin
-            //$write(" *** Fatal(HiSIM_SOI): COBCNODE = 1 but terminal 'bc' is not connected.\n" );
-            //$finish(0);
-            $error(" *** Fatal(HiSIM_SOI): COBCNODE = 1 but terminal 'bc' is not connected.\n"); //changed from $finish(0) for NOTICE from VAMPyRE
+            $write(" *** Fatal(HiSIM_SOI): COBCNODE = 1 but terminal 'bc' is not connected.\n" );
+            $finish(0);
         end
 `else
 `ifdef _5_PORTS_CONNECTED_
             V(n6) <+ 0.0;
             if ($port_connected(bc) == 0) begin // 4 nodes
                 if ( COBCNODE == 1 )  begin
-                    //$write(" *** Fatal(HiSIM_SOI): 'bc' is not connected but COBCNODE = 1.\n" );
-                    //$finish(0);
-                    $error(" *** Fatal(HiSIM_SOI): 'bc' is not connected but COBCNODE = 1.\n"); //changed from $finish(0) for NOTICE from VAMPyRE
+                    $write(" *** Fatal(HiSIM_SOI): 'bc' is not connected but COBCNODE = 1.\n" );
+                    $finish(0);
                 end
             end
 `else
@@ -910,18 +887,16 @@ analog begin
             if ($port_connected(n6) == 1) begin
                 V(n6,temp) <+ 0.0;
                 if ( COBCNODE == 0 ) begin
-                    //$write(" *** Fatal(HiSIM_SOI): 6 nodes are connected but COBCNODE = 0.\n" );
-                    //$finish(0);
-                    $error(" *** Fatal(HiSIM_SOI): 6 nodes are connected but COBCNODE = 0.\n"); //changed from $finish(0) for NOTICE from VAMPyRE
+                    $write(" *** Fatal(HiSIM_SOI): 6 nodes are connected but COBCNODE = 0.\n" );
+                    $finish(0);
                 end
             end
             else begin
                 V(n6) <+ 0.0;
                 if ($port_connected(bc) == 0) begin // 4 nodes
                     if ( COBCNODE == 1 )  begin
-                        //$write(" *** Fatal(HiSIM_SOI): 'bc' is not connected but COBCNODE = 1.\n" );
-                        //$finish(0);
-                        $error(" *** Fatal(HiSIM_SOI): 'bc' is not connected but COBCNODE = 1.\n"); //changed from $finish(0) for NOTICE from VAMPyRE
+                        $write(" *** Fatal(HiSIM_SOI): 'bc' is not connected but COBCNODE = 1.\n" );
+                        $finish(0);
                     end
                 end
             end
@@ -961,8 +936,6 @@ analog begin
     Muun       = 0.0 ;
     Ey         = 0.0 ;
     Isub       = 0.0 ;
-    //unused//         Isub_FB    = 0.0 ;
-    //unused//         Isub_QH    = 0.0 ;
     betaWL     = 1.0 ;
     IdsIBPC    = 0.0 ;
     Qgos       = 0.0 ;
@@ -1038,9 +1011,6 @@ analog begin
     Qd_nqs     = 0.0 ;
     Qs_nqs     = 0.0 ;
 
-    OP_QHS = 0.0;      // 20201013 probing
-    OP_DVBS_FBE = 0.0; // 20201013 probing
-
     phi_b_dep0 = 0.0 ;
     Qsub       = 0.0 ;
     Qhs        = 0.0 ;
@@ -1073,8 +1043,6 @@ analog begin
     Q_s0_dep_ini = 0.0 ;
     IdsPT0 = 0.0 ;
     Lch_cv = 0.0;
-    Ps0          = 0.0 ;
-    Vbcs_cl      = 0.0 ;
 
     //-----------------------------------------------------------*
     //Change units into MKS.
@@ -1187,22 +1155,11 @@ analog begin
     grg_cnst = RSHG * ( XGW + Weff / (3.0e0 * NGCON)) / (NGCON * ( Lgate - XGL ) * NF);
 
     // Isub //
-    if ( COSUBSCALE <= 0 ) begin //version 1.4.0:
-        zvgs = 1.0 + SVGSW / pow(WG, SVGSWP);
-        xvbs = SVBS  * (1.0 + SVBSL / pow(LGLE, SVBSLP));
-        xgate = LGLE / (LGLE + SLG);
-        xsub1 = SUB1  * (1.0  + SUB1L / pow(LGLE, SUB1LP));
-        xsub2 = SUB2 * (1.0 + SUB2L / LGLE);
-    end else begin //version 1.5.0:
-        T2 = pow( WG , SVGSWP ) ;
-        vg2const = SVGS
-                          * ( 1.0e0 + SVGSL / pow( LGLE , SVGSLP ) )
-                            * ( T2 / ( T2 + SVGSW ) ) ;
-        xvbs = SVBS  * (1.0 + SVBSL / pow(LGLE, SVBSLP));
-        xgate = SLG * ( 1.0 + SLGL / pow( LGLE , SLGLP ) );
-        xsub1 = SUB1 * (1.0 + SUB1L / pow(LGLE, SUB1LP));
-        xsub2 = SUB2 * (1.0 + SUB2L / LGLE);
-    end
+    zvgs = 1.0 + SVGSW / pow(WG, SVGSWP);
+    xvbs = SVBS  * (1.0 + SVBSL / pow(LGLE, SVBSLP));
+    xgate = LGLE / (LGLE + SLG);
+    xsub1 = SUB1  * (1.0  + SUB1L / pow(LGLE, SUB1LP));
+    xsub2 = SUB2 * (1.0 + SUB2L / LGLE);
 
     // Additional term of lateral-field-induced capacitance //
     cqyb0 = `C_m2um * weffcv_nf * XQY1 / pow(LGLE, XQY2);
@@ -1211,9 +1168,7 @@ analog begin
     vfbsub0 = VFBSUB * (1.0e0 + (VFBSUBL / pow(LGLE, VFBSUBLP)));
 
     // Lg dependence for SVGS //
-    if ( COSUBSCALE <= 0 ) begin //version 1.4.0:
-        UC_SVGS = SVGS * (1.0e0 + (SVGSL / pow(LGLE, SVGSLP)));
-    end
+    UC_SVGS = SVGS * (1.0e0 + (SVGSL / pow(LGLE, SVGSLP)));
 
     // Vdseff //
     DDLTe = DDLTSLP * LGLE * DDLTMAX / (DDLTSLP * LGLE + DDLTMAX) + DDLTICT + `Small;
@@ -1240,7 +1195,7 @@ analog begin
         dtemp_Given = (DTEMP==0) ? 0 : 1 ;
 
         Mfactor = `MFACTOR_USE ;
-        Gjmin = $simparam("gmin",0); //changed from 1.0e-12 for VAMPyRE WARNING.
+        Gjmin = $simparam("gmin",1.0e-12);
 
     end // initializeModel
 
@@ -1292,7 +1247,7 @@ analog begin
             UC_NSUBS = UC_NSUBS * (1.0e0 + T1 * T2) / (1.0e0 + T1 * T3) ;
         end
 
-        if (Lgleff > LP || LP <= 0.0) begin
+        if (Lgleff > LP) begin
             Nsub = (UC_NSUBS * (Lgleff - LP) + Nsubps * LP) / Lgleff ;
         end else begin
             Nsub = Nsubps + (Nsubps - UC_NSUBS) * (LP - Lgleff) / LP ;
@@ -1303,7 +1258,7 @@ analog begin
         qnsub_esi2 = 2.0 * qnsub_esi ;
 
         // Pocket Overlap(temperature-independent part) //
-        if (Lgleff <= 2.0e0 * LP && LP > 0) begin
+        if (Lgleff <= 2.0e0 * LP) begin
             Nsubb0 = 2.0e0 * Nsubps - (Nsubps - UC_NSUBS) * Lgleff / LP - UC_NSUBS ;
             ptovr0 = ln (Nsubb0 / UC_NSUBS) ;
             // ptovr0 will be divided by beta later. //
@@ -1338,21 +1293,12 @@ analog begin
         end
 
         // Bulk resistance //
-        if (CORBULK == 1) begin // originally intended for body potential build-up
+        if (CORBULK == 1) begin
             T0 = RBULKW * weff_nf + RBULK0 ;
             Rbulk = T0 / Mfactor ;
             if (Rbulk < `Res_min) Rbulk = `Res_min ;
         end else begin
             Rbulk = `Res_min ;
-        end
-        // Any conflict against Gmin/Rmin WG policy?
-        // Body resistance network other than Rbulk above
-        grbpdb = 0.0; grbpsb = 0.0;
-        if (CORBNET == 1) begin
-            if (RBDB < `Res_min) grbpdb = Mfactor * `Gres_max;
-            else grbpdb = Mfactor * ( `Gres_min + 1.0 / RBDB );
-            if (RBSB < `Res_min) grbpsb = Mfactor * `Gres_max;
-            else grbpsb = Mfactor * ( `Gres_min + 1.0 / RBSB );
         end
 
         //  End of hsmsoitemp.c
@@ -1362,8 +1308,7 @@ analog begin
 
                 area_bt_p = (ABTP_GIVEN) ? ABTP : WBTP * NF * LBT ;
                 area_bt_n = (ABTN_GIVEN) ? ABTN : WBTN * NF * LBT ;
-                Cbtp = 0.0 ;
-                Cbtn = 0.0 ;
+                Cbtp = 0.0 ; Cbtn = 0.0 ;
 
                 if ( area_bt_p > 0.0 && CBTBP_GIVEN) begin
                     Cbtp =  -area_bt_p * CBTBP ;
@@ -1374,10 +1319,8 @@ analog begin
                 end
 
             end else begin /* COADOV=0 */
-                area_bt_n = 0.0 ;
-                Cbtn = 0.0 ;
-                area_bt_p = 0.0 ;
-                Cbtp = 0.0 ;
+                area_bt_n = 0.0 ; Cbtn = 0.0 ;
+                area_bt_p = 0.0 ; Cbtp = 0.0 ;
             end
 
             /* Calc. the parasitic parameters for j-diode */
@@ -1391,14 +1334,10 @@ analog begin
             W_dioscv = weffcv_nf + (NF * UC_PSBCP) ;
 
         end else begin
-            area_bt_n = 0.0 ;
-            Cbtn = 0.0 ;
-            area_bt_p = 0.0 ;
-            Cbtp = 0.0 ;
-            W_diod    = 0.0 ;
-            W_dios   = 0.0 ;
-            W_diodcv  = 0.0 ;
-            W_dioscv = 0.0 ;
+            area_bt_n = 0.0 ; Cbtn = 0.0 ;
+            area_bt_p = 0.0 ; Cbtp = 0.0 ;
+            W_diod    = 0.0 ; W_dios   = 0.0 ;
+            W_diodcv  = 0.0 ; W_dioscv = 0.0 ;
         end
     end // initializeInstance
 
@@ -1592,8 +1531,7 @@ analog begin
         `PMINCHECK(Weff,1e-9,"An effective channel width  < 1nm ")
         `PMINCHECK(weff_cv,1e-9,"An effective channel width for C-V < 1nm")
         `PMINCHECK(Leff,1e-9,"An effective channel length < 1nm")
-        //if(FATAL_flag) $finish(0);
-        if (FATAL_flag) $error(" *** Fatal(HiSIM_SOI): An effective channel width/length < 1nm"); //changed from $finish(0) for NOTICE from VAMPyRE
+        if (FATAL_flag) $finish(0);
 
     end // paramCheck
 
@@ -1643,16 +1581,10 @@ analog begin
     flg_pprv = 0;
 
     /* Initialization for hidden states */
-    Pss0_ini=0.0;
-    Pbs0_ini=0.0;
-    Psb0_ini=0.0;
-    Pssl_ini=0.0;
-    Pbsl_ini=0.0;
-    Psbl_ini=0.0;
-    Ai       = 0.0 ;
-    Db       = 0.0 ;
-    Di       = 0.0 ;
-    C2       = 0.0 ;
+    Pss0_ini=0.0; Pbs0_ini=0.0; Psb0_ini=0.0;
+    Pssl_ini=0.0; Pbsl_ini=0.0; Psbl_ini=0.0;
+    Ai       = 0.0 ; Db       = 0.0 ;
+    Di       = 0.0 ; C2       = 0.0 ;
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //PART-1: Basic device characteristics.
@@ -1923,10 +1855,15 @@ analog begin
     fac1 = cnst0SOI * C_fox_inv ;
     fac1p2 = fac1 * fac1 ;
 
+
     if ( COBCNODE == 0 ) begin
 `include "HSMSOI_FB_module.inc"
+        V(nqs_qi)  <+ 0.0 ;
     end else begin
 `include "HSMSOI_BT_module.inc"
+        V(nqs_qd ) <+ 0.0 ;
+        V(nqs_qs ) <+ 0.0 ;
+        V(nqs_qhs) <+ 0.0 ;
     end
 
     if (end_of_part_1 == 0) begin
@@ -2255,7 +2192,8 @@ analog begin
         //----------------//
     end // end if(end_of_part_1==0)
 
-`ifndef DISABLE_COPPRV
+`ifdef DISABLE_COPPRV
+`else
         flg_zone_prv = flg_zone ;
         called = called + 1 ;
 `endif // COPPRV
@@ -2277,11 +2215,11 @@ analog begin
     //* PART-2: Substrate / gate / leak currents
     //*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
 
-    if ( COBCNODE == 1 || COISUBFB == 1 ) begin
+    if ( COBCNODE == 1 ) begin
         //-----------------------------------------------------------*
         //* Isub : substrate current induced by impact ionization.
         //*-----------------//
-        begin : IsubModel
+        begin : IsubModel1
             real T1, T2, T3, T4, T5, T6,T6w, T7, T8, T9;
             real Psislsat, Psisubsat;
 
@@ -2295,40 +2233,21 @@ analog begin
                 if (SUB1 <= 0.0 || MKS_VMAX <= 0.0) begin
                     Isub = 0.0 ;
                 end else begin
-                    Vgpsub = Vgsz - vfbsub0 + dVth - dPpg + DVGPSUB ;
-                    if ( COSUBSCALE <= 0 ) begin //version 1.4.0:
-                        T1 = Vgpsub ;
-                        T7 = C_fox * C_fox ;
-                        T8 = qnsub_esi ;
-                        T3 = T8 / T7 ;
-                        T9 = 2.0 / T8 ;
-                        T4 = T9 * T7 ;
-                        T5 = T1 - beta_inv - `X_vbs * Vbspz ;
-                        dVbssub = DVBSSUB * Qhs / C_soi ;
-                        T5 = T5 - `X_vbs * dVbssub ;
-                        T6w = 1.0 + T4 * T5 ;
-                        `Fn_SZtemp(T6, T6w, 1.0e-3)
-                        T6 = T6 + `Small ;
-                        T6 = sqrt(T6) ;
-                        Psislsat = T1 * `X_vgs + T3 * (1.0 - T6) ;
-                        Psisubsat = `X_vds * Vdsz + Ps0z - `X_slg * `Z_vgs * Psislsat ;
-                        `Fn_SZtemp(Psisubsat, Psisubsat, 1.0e-2)  // delta can be 1e-3 //
-                    end else begin //version 1.5.0:
-                        T1 = vg2const * Vgpsub ;
-                        T3 = qnsub_esi / (C_fox * C_fox) ;
-                        T4 = 2.0 / qnsub_esi * (C_fox * C_fox) ;
-                        T5 = T1 - beta_inv - xvbs * Vbspz ;
-                        dVbssub = DVBSSUB * Qhs / C_soi ;
-                        T5 = T5 - xvbs * dVbssub ;
-                        T6 = 1.0 + T4 * T5 ;
-                        T7 = 2.0 * ( 1.0 + T4 ) ;
-                        `Fn_SL_CP( T6 , T6 , `Small, T7 , 4 )
-                        T6 = (T6 <=0 ) ? 0.0 : sqrt( T6 ) ;
-                        Psislsat = T1 + T3 * ( 1.0 - T6 ) ;
-                        T2 = LGLE / (xgate + LGLE) ;
-                        Psisubsat = SVDS * Vdsz + Ps0z - T2 * Psislsat ;
-                        `Fn_SZtemp(Psisubsat, Psisubsat, 1.0e-3)
-                    end
+                    Vgpsub = Vgsz - vfbsub0 + dVth - dPpg ;
+                    T1 = Vgpsub ;
+                    T7 = C_fox * C_fox ;
+                    T8 = qnsub_esi ;
+                    T3 = T8 / T7 ;
+                    T9 = 2.0 / T8 ;
+                    T4 = T9 * T7 ;
+                    T5 = T1 - beta_inv - `X_vbs * Vbspz ;
+                    T6w = 1.0 + T4 * T5 ;
+                    `Fn_SZtemp(T6, T6w, 1.0e-3)
+                    T6 = T6 + `Small ;
+                    T6 = sqrt(T6) ;
+                    Psislsat = T1 * `X_vgs + T3 * (1.0 - T6) ;
+                    Psisubsat = `X_vds * Vdsz + Ps0z - `X_slg * `Z_vgs * Psislsat ;
+                    `Fn_SZtemp(Psisubsat, Psisubsat, 1.0e-2)  // delta can be 1e-3 //
                     Psisubsat = Psisubsat + `Small ;
                     T2 = exp(-`X_sub2 / Psisubsat) ;
                     Isub = `X_sub1 * Psisubsat * Ids * T2 ;
@@ -2337,44 +2256,6 @@ analog begin
             end
         end  // IsubModel
     end
-
-
-    if (COISUB == 1 && COFBE == 2 && COBCNODE == 1) begin
-        //---------------------------------------------------------//
-        // @@@  Qh vs Isub Calculation // 20201030
-        begin : QHSmodel
-            real T1, T2, T4, T5, T6, T7, T8, T9;
-
-            // The following values should not be hard-coded. //
-            T1 = `C_QE * `t_SOI * weff_nf * exp(-beta * QHE2) ;  // Vbi => qhe2
-            T2 = `Lp * `Dn * `Nd + `Ln * `Dp * `N_sub_SOI ;
-            T4 = `Lp * `Ln / (T1 * T2) ;
-            nume = (Isub ) * T4 ;
-            T5 = QHE1 * beta_inv * log1p(nume) ; // qhe1 : fitting param
-            `Fn_SUtemp( T5, T5, Pb2, Pb2*0.01 )
-            OP_DVBS_FBE = T5; // 20201013 probing
-
-            // Qb(Vb=Vbody) - Qb(Vb=0) //
-            T6 = sqrt(2 * `C_ESI * `C_QE * `N_sub_SOI * beta_inv) ;
-            T7 = expm1(-beta * (Ps0z - T5)) + beta * (Ps0z - T5) ;
-            T7 = (T7 > 0) ? sqrt(T7) : - sqrt(-T7) ;
-            T8 = sqrt(expm1(-beta * Ps0z) + beta * Ps0z) ;
-            T9 = -T6 * (T7 - T8) ;
-            `Fn_SUtemp( Qhs, T9, QHSMAX, QHSMAX*0.01 )
-
-            //             Rsb = HIST1 / (Isub + HIST2) ;
-            T1  = (HIST1 > 0) ? HIST1 : 1 ;
-            Rsb = T1 / (Isub + HIST2) ;
-            tauh = Rsb * C_fox ;
-            Qhs_prev = Qhs ;
-            Qhs_hist = `NQS_CAP * V(nqs_qhs) ;
-            Qhs      =  Qhs_hist ;
-            Iqh_nqs  = (Qhs_hist - Qhs_prev) / tauh ;
-
-        end // QHSmodel
-    end // COFBE==2
-
-
     //---------------------------------------------------*
     //* Impact-Ionization Induced Bulk Potential Change(IBPC)
     //*-----------------//
@@ -2546,8 +2427,7 @@ analog begin
             if (Vdb > 0.0) begin
                 T2 = Vdb * Vdb ;
                 T4 = T2 * Vdb ;
-                //T0 = T4 + `C_gidl_delta ;
-                T0 = T4 + GIDLVB ; // 20190606 Vb dep.
+                T0 = T4 + `C_gidl_delta ;
                 T5 = T4 / T0 ;
                 Igidl = Igidl * T5 ;
             end else begin
@@ -2586,8 +2466,7 @@ analog begin
             if (Vsb > 0.0) begin
                 T2 = Vsb * Vsb ;
                 T4 = T2 * Vsb ;
-                //T0 = T4 + `C_gidl_delta ;
-                T0 = T4 + GIDLVB ;
+                T0 = T4 + `C_gidl_delta ;
                 T5 = T4 / T0 ;
                 Igisl = Igisl * T5 ;
             end else begin
@@ -2615,8 +2494,7 @@ analog begin
             real    T0, T1, T2, T3, T5,  T10, T11;
             real    TX, TY;
             real    Cox0, Cox0_inv;
-            real    flg_ovloops, flg_ovloopd; //changed from integer for VAMPyRE WARNING//
-            integer flg_overs, flg_overd, lcover, flg_ovzone, flg_conv;
+            integer flg_ovloops, flg_ovloopd, flg_overs, flg_overd, lcover, flg_ovzone, flg_conv;
             integer lp_ld, lbt;
             real    Vxbgmt, Vxbgmtcl;
             real    Vbsgmt, Vdsgmt, Vgsgmt, Vgdgmt, Vdbgmt, Vsbgmt, Vgbgmt;
@@ -2674,8 +2552,8 @@ analog begin
                         // If charge partition to S and D does matter, activate for-loop counting twice.
                         for ( lcover = -1 ; lcover <= +1 ; lcover = lcover + 2 ) begin  // source side only
 
-                            flg_ovloops = ( 1 - lcover ) / 2.0 ; // 1 in Source overlap calc. // //for VAMPyRE WARNING//
-                            flg_ovloopd = ( 1 + lcover ) / 2.0 ; // 1 in Drain overlap calc. // //for VAMPyRE WARNING//
+                            flg_ovloops = ( 1 - lcover ) / 2 ; // 1 in Source overlap calc. //
+                            flg_ovloopd = ( 1 + lcover ) / 2 ; // 1 in Drain overlap calc. //
                             //-------------------------------------------*
                             //* Qover(G/D overlap charge)  |  note: _dVxs means _dVxse
                             //*------------------------//
@@ -2926,12 +2804,8 @@ analog begin
                                         //-------------------------------------------*
                                         //* zone-D1/D2. (Ps0LD)
                                         //*-----------------//
-                                        if ( Chi < `znbd3 ) begin
-                                            flg_ovzone = 1;
-                                        end
-                                        else begin
-                                            flg_ovzone = 2;
-                                        end
+                                        if ( Chi < `znbd3 ) begin flg_ovzone = 1; end
+                                        else begin flg_ovzone = 2; end
                                         Xi0 = fb * fb + `epsm10 ;
                                         Xi0p12 = fb + `epsm10 ;
                                     end else begin
@@ -3032,8 +2906,7 @@ analog begin
         real    T0, T1, T2, T3, T4, T5,  T9, T10, T11;
         real    TX, TY;
         real    Cox0, Cox0_inv, Lov, cov_slp, cov_mag, covvg;
-        real    flg_ovloops, flg_ovloopd; //changed from integer for VAMPyRE WARNING//
-        integer flg_overs, flg_overd, lcover, flg_ovzone, flg_conv;
+        integer flg_ovloops, flg_ovloopd, flg_overs, flg_overd, lcover, flg_ovzone, flg_conv;
         integer lp_ld;
         real    Vxbgmt, Vxbgmtcl;
         real    Vbsgmt, Vdsgmt, Vgsgmt,  Vdbgmt, Vsbgmt, Vgbgmt;
@@ -3079,8 +2952,8 @@ analog begin
                 end else begin
                     cnst0over = cnst0SOI * sqrt(MKS_NOVER / Nsub ) ;
                     for ( lcover = -1 ; lcover <= +1 ; lcover = lcover + 2 ) begin
-                        flg_ovloops = ( 1 - lcover ) / 2.0 ; // 1 in Source overlap calc. // //for VAMPyRE WARNING//
-                        flg_ovloopd = ( 1 + lcover ) / 2.0 ; // 1 in Drain overlap calc. // //for VAMPyRE WARNING//
+                        flg_ovloops = ( 1 - lcover ) / 2 ; // 1 in Source overlap calc. //
+                        flg_ovloopd = ( 1 + lcover ) / 2 ; // 1 in Drain overlap calc. //
                         //-------------------------------------------*
                         //* Qover(G/D overlap charge)  |  note: _dVxs means _dVxse
                         //*------------------------//
@@ -3337,12 +3210,8 @@ analog begin
                                     //-------------------------------------------*
                                     //* zone-D1/D2. (Ps0LD)
                                     //*-----------------//
-                                    if ( Chi < `znbd3 ) begin
-                                        flg_ovzone = 1;
-                                    end
-                                    else begin
-                                        flg_ovzone = 2;
-                                    end
+                                    if ( Chi < `znbd3 ) begin flg_ovzone = 1; end
+                                    else begin flg_ovzone = 2; end
                                     Xi0 = fb * fb + `epsm10 ;
                                     Xi0p12 = fb + `epsm10 ;
                                 end else begin
@@ -3736,11 +3605,10 @@ analog begin
             T1 = Qn0 / `C_QE ;
             T2 = (C_fox + Qn0 / (Ps0 - Vbsz2) + Cite) * beta_inv / `C_QE ;
             T3 = -2.0E0 * Qi / `C_QE / Lch_cv / weffcv_nf - T1 ;
-            if ( abs(T3 - T1) > `epsm10 ) begin
+            if (T3 != T1) begin
                 T4 = 1.0E0 / (T1 + T2) / (T3 + T2) + 2.0E0 * NFalpe * Ey * Mu / (T3 - T1)
                     * ln((T3 + T2) /(T1 + T2)) + NFalpe * Ey * Mu * NFalpe * Ey * Mu ;
             end else begin
-                //series expansion for ln(1+(T3-T1)/(T1+T2)) about the point T3=T1:
                 T4 = 1.0 / (T1 + T2) / (T3 + T2) + 2.0 * NFalpe * Ey * Mu / (T1 + T2)
                     + NFalpe * Ey * Mu * NFalpe * Ey * Mu ;
             end
@@ -3967,10 +3835,8 @@ analog begin
         qbd_s0 = Mfactor * Qbd ;
         qbs_s0 = Mfactor * Qbs ;
     end else begin
-        ibsb   = 0.0 ;
-        ibdb   = 0.0 ;
-        qbd_s0 = 0.0 ;
-        qbs_s0 = 0.0 ;
+        ibsb   = 0.0 ; ibdb   = 0.0 ;
+        qbd_s0 = 0.0 ; qbs_s0 = 0.0 ;
     end
 
     //---------------------------------------------------*
@@ -4003,12 +3869,9 @@ analog begin
     noiflick = Mfactor * Nflic ;
     noithrml = Mfactor * Nthrml ;
 
-    cgdbd = ddx(qge,V(dp)) ;
-    cgdbd = TYPE * cgdbd ;  // quantity obtained from ddx
-    cgsbd = ddx(qge,V(sp)) ;
-    cgsbd = TYPE * cgsbd ;  // quantity obtained from ddx
+    cgdbd = ddx(qge,V(dp)) ; cgdbd = TYPE * cgdbd ;
+    cgsbd = ddx(qge,V(sp)) ; cgsbd = TYPE * cgsbd ;
     cgsb  = (mode > 0) ? cgsbd : cgdbd ;
-    //cgsb  = - C_fox * weffcv_nf * Leff_cv * Mfactor ;  //possible solution for VAMPyRE ERROR//
 
     //----------------------------------------------------------*
     //* induced gate noise. ( Part 3/3 )
@@ -4087,11 +3950,8 @@ analog begin
             Qs_nqs =  Qi_nqs * (1.0 - Qdrat) + q_bt_se ;
             Qg_nqs = -Qi_nqs - Qb_nqs + q_bt_ge ;
         end else begin
-            Iqi_nqs = 0.0 ;
-            Iqb_nqs = 0.0 ;
-            Qd_nqs  = 0.0 ;
-            Qs_nqs  = 0.0 ;
-            Qg_nqs = 0.0 ;
+            Iqi_nqs = 0.0 ; Iqb_nqs = 0.0 ;
+            Qd_nqs  = 0.0 ; Qs_nqs  = 0.0 ; Qg_nqs = 0.0 ;
             Qb_nqs  = 0.0 ;
         end
     end else begin
@@ -4105,12 +3965,8 @@ analog begin
             Iqb_nqs = 0.0 ;
             Qg_nqs  = -Qd_nqs -Qs_nqs -Qb_nqs ;
         end else begin
-            Iqd_nqs = 0.0 ;
-            Iqs_nqs = 0.0 ;
-            Iqb_nqs = 0.0 ;
-            Qd_nqs  = 0.0 ;
-            Qs_nqs = 0.0 ;
-            Qg_nqs = 0.0 ;
+            Iqd_nqs = 0.0 ; Iqs_nqs = 0.0 ; Iqb_nqs = 0.0 ;
+            Qd_nqs  = 0.0 ;  Qs_nqs = 0.0 ;  Qg_nqs = 0.0 ;
             Qb_nqs  = 0.0 ;
         end
     end
@@ -4175,56 +4031,36 @@ analog begin
     idse    =  Ids  ;
     Isuba   =  TYPE * (Isub + Isubs) ;
 
-    ggds    =  ddx(idse,V(dp)) ;
-    ggds  = TYPE * ggds  ;
-    ggdss   =  ddx(idse,V(sp)) ;
-    ggdss = TYPE * ggdss ;
+    ggds    =  ddx(idse,V(dp)) ;  ggds  = TYPE * ggds  ;
+    ggdss   =  ddx(idse,V(sp)) ;  ggdss = TYPE * ggdss ;
 
     if (mode != `HiSIM_NORMAL_MODE) begin
         ggds    = ggdss ;
     end
 
-    ggm     =  ddx(idse,V(gp)) ;
-    ggm   = TYPE * ggm   ;
-    ggmbs   =  ddx(idse,V(bp)) ;
-    ggmbs = TYPE * ggmbs ;
+    ggm     =  ddx(idse,V(gp)) ;  ggm   = TYPE * ggm   ;
+    ggmbs   =  ddx(idse,V(bp)) ;  ggmbs = TYPE * ggmbs ;
     ggmt    =  ddx(idse,V(temp)) ;
 
-    cggbd   =  ddx(Qg,V(gp)) ;
-    cggbd = TYPE * cggbd ;
-    cgdbd   =  ddx(Qg,V(dp)) ;
-    cgdbd = TYPE * cgdbd ;
-    cgsbd   =  ddx(Qg,V(sp)) ;
-    cgsbd = TYPE * cgsbd ;
-    cgbbd   =  ddx(Qg,V(bp)) ;
-    cgbbd = TYPE * cgbbd ;
+    cggbd   =  ddx(Qg,V(gp)) ;  cggbd = TYPE * cggbd ;
+    cgdbd   =  ddx(Qg,V(dp)) ;  cgdbd = TYPE * cgdbd ;
+    cgsbd   =  ddx(Qg,V(sp)) ;  cgsbd = TYPE * cgsbd ;
+    cgbbd   =  ddx(Qg,V(bp)) ;  cgbbd = TYPE * cgbbd ;
 
-    cdgbd   =  ddx(Qd,V(gp)) ;
-    cdgbd = TYPE * cdgbd ;
-    cddbd   =  ddx(Qd,V(dp)) ;
-    cddbd = TYPE * cddbd ;
-    cdsbd   =  ddx(Qd,V(sp)) ;
-    cdsbd = TYPE * cdsbd ;
-    cdbbd   =  ddx(Qd,V(bp)) ;
-    cdbbd = TYPE * cdbbd ;
+    cdgbd   =  ddx(Qd,V(gp)) ;  cdgbd = TYPE * cdgbd ;
+    cddbd   =  ddx(Qd,V(dp)) ;  cddbd = TYPE * cddbd ;
+    cdsbd   =  ddx(Qd,V(sp)) ;  cdsbd = TYPE * cdsbd ;
+    cdbbd   =  ddx(Qd,V(bp)) ;  cdbbd = TYPE * cdbbd ;
 
-    cbgbd   =  ddx(Qb,V(gp)) ;
-    cbgbd = TYPE * cbgbd ;
-    cbdbd   =  ddx(Qb,V(dp)) ;
-    cbdbd = TYPE * cbdbd ;
-    cbsbd   =  ddx(Qb,V(sp)) ;
-    cbsbd = TYPE * cbsbd ;
-    cbbbd   =  ddx(Qb,V(bp)) ;
-    cbbbd = TYPE * cbbbd ;
+    cbgbd   =  ddx(Qb,V(gp)) ;  cbgbd = TYPE * cbgbd ;
+    cbdbd   =  ddx(Qb,V(dp)) ;  cbdbd = TYPE * cbdbd ;
+    cbsbd   =  ddx(Qb,V(sp)) ;  cbsbd = TYPE * cbsbd ;
+    cbbbd   =  ddx(Qb,V(bp)) ;  cbbbd = TYPE * cbbbd ;
 
-    csgbd   =  ddx(Qs,V(gp)) ;
-    csgbd = TYPE * csgbd ;
-    csdbd   =  ddx(Qs,V(dp)) ;
-    csdbd = TYPE * csdbd ;
-    cssbd   =  ddx(Qs,V(sp)) ;
-    cssbd = TYPE * cssbd ;
-    csbbd   =  ddx(Qs,V(bp)) ;
-    csbbd = TYPE * csbbd ;
+    csgbd   =  ddx(Qs,V(gp)) ;  csgbd = TYPE * csgbd ;
+    csdbd   =  ddx(Qs,V(dp)) ;  csdbd = TYPE * csdbd ;
+    cssbd   =  ddx(Qs,V(sp)) ;  cssbd = TYPE * cssbd ;
+    csbbd   =  ddx(Qs,V(bp)) ;  csbbd = TYPE * csbbd ;
 
     if ( COBCNODE == 1 ) begin
         ibdb    =  TYPE * Ibd  ;
@@ -4236,8 +4072,7 @@ analog begin
         capbdb  =  ddx(Qbd,V(bp)) ;
         capbsb  =  ddx(Qbs,V(bp)) ;
     end else begin
-        capbdb = 0.0 ;
-        capbsb = 0.0 ;
+        capbdb = 0.0 ; capbsb = 0.0 ;
     end
 
     // print all outputs ------------VV //
@@ -4311,19 +4146,19 @@ analog begin
 
     // Noise Currents
     Qdrat = Qdrat_noi ;
-    I(BRdpsp) <+ flicker_noise(mode * noiflick * `Kflic , FALPH  , "iflick") ; //updated for Pnoise
+    I(BRdpsp) <+ flicker_noise(noiflick * `Kflic , FALPH  , "iflick") ;
     // Thermal & IG Noise
     sid    = whi_noise * noithrml;
     ci     = noicross;
     sigrat = (sid > 0.0 && noiigate > 0.0) ? sqrt(noiigate/sid) : 0.0 ;
     I(n)     <+ 1*V(n) ;
-    I(n)     <+ white_noise(sid , "internal") ;
-    I(BRdpsp) <+ white_noise((1.0-ci*ci)*sid , "ids") ;
-    I(BRdpsp) <+ ci*V(n) ;  // ERROR (requires second derivatives)
+    I(n)     <+ white_noise(sid) ;
+    I(BRdpsp) <+ white_noise((1.0-ci*ci)*sid) ;
+    I(BRdpsp) <+ ci*V(n) ;
     sigrat_s  = (mode > 0) ? sigrat*(1-Qdrat) : sigrat*   Qdrat ;
     sigrat_d  = (mode > 0) ? sigrat*   Qdrat  : sigrat*(1-Qdrat) ;
-    I(BRgpsp) <+ ddt(V(n)*sigrat_s) ;  // ERROR (requires second derivatives)
-    I(BRgpdp) <+ ddt(V(n)*sigrat_d) ;  // ERROR (requires second derivatives)
+    I(BRgpsp) <+ ddt(V(n)*sigrat_s) ;
+    I(BRgpdp) <+ ddt(V(n)*sigrat_d) ;
     //
     if (CORS) I(BRsps ) <+ white_noise(whi_noise * sourceConductance , "isource");
     if (CORD) I(BRddp ) <+ white_noise(whi_noise * drainConductance  , "idrain");
@@ -4359,18 +4194,10 @@ analog begin
         I(BRdpbp) <+  TYPE * (Igidl + Isub ) ;
         I(BRspbp) <+  TYPE * (Igisl + Isubs) ;
         // Junction Diode Currents
-        I(BRsbsp) <+  TYPE * (Ibs + ddt(Qbs)) ;
-        I(BRdbdp) <+  TYPE * (Ibd + ddt(Qbd)) ;
+        I(BRbpsp) <+  TYPE * (Ibs + ddt(Qbs)) ;
+        I(BRbpdp) <+  TYPE * (Ibd + ddt(Qbd)) ;
         // Substrate Currents
         if (CORBULK) I(BRbcbp) <+ V(BRbcbp) / Rbulk; else V(BRbcbp) <+ 0.0 ;
-        // Body Resistance Network
-        if (CORBNET) begin
-            I(BRsbbp) <+ grbpsb * V(BRsbbp); // sb, bp
-            I(BRdbbp) <+ grbpdb * V(BRdbbp); // db, bp
-        end else begin
-            V(BRsbbp) <+ 0.0;
-            V(BRdbbp) <+ 0.0;
-        end
         // NQS Node Currents
         if (CONQS) begin
             I(nqs_qi) <+ Iqi_nqs ;
@@ -4382,22 +4209,8 @@ analog begin
         end else begin
             V(nqs_qi) <+ 0.0 ;
             V(nqs_qb) <+ 0.0 ;
-        end // else: !if(CONQS)
-        // QHS Node Currents
-
-        if (COHIST || (COISUB == 1 && COFBE == 2)) begin
-            I(nqs_qhs) <+ Iqh_nqs ;
-            I(nqs_qhs) <+ V(nqs_qhs)* `Gnqsmin;
-            I(nqs_qhs) <+ ddt( `NQS_CAP * V(nqs_qhs) ) ;
-        end else begin
-            V(nqs_qhs) <+ 0.0 ;
         end
-`ifdef  PROBE
-            V(PROBE1)  <+ OP_QHS ; // 20201013 probing only
-            V(PROBE2)  <+ OP_DVBS_FBE ; // 20201013 probing only
-`endif // PROBE
     end else begin
-        // if ( COBCNODE == 0 )
         //  Substrate ,  GIDL and GISL Currents
         I(BRdpsp)  <+  TYPE * (Igidl + Isub ) ;
         I(BRspdp)  <+  TYPE * (Igisl + Isubs) ;
@@ -4411,11 +4224,6 @@ analog begin
         end else begin
             V(nqs_qhs) <+ 0.0 ;
         end
-`ifdef  PROBE
-            V(PROBE1)  <+ OP_QHS ; // 20201013 probing only
-            V(PROBE2)  <+ OP_DVBS_FBE; // 20201013 probing only
-`endif // PROBE
-
         if (CONQS) begin
             I(nqs_qd) <+ Iqd_nqs ;
             I(nqs_qs) <+ Iqs_nqs ;
@@ -4431,13 +4239,6 @@ analog begin
             V(nqs_qs) <+ 0.0 ;
             V(nqs_qb) <+ 0.0 ;
         end
-    end
-    // collapsing nodes
-    if ( COBCNODE == 0 ) begin
-        V(nqs_qi)  <+ 0.0 ;
-    end else begin
-        V(nqs_qd ) <+ 0.0 ;
-        V(nqs_qs ) <+ 0.0 ;
     end
 
     // end // HSMSOI_model

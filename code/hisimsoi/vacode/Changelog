@@ -1,10 +1,3 @@
-Rename double named blocks IsubModel to IsubModel1 and IsubModel2
 
-Prevent division by 0 for MJ, MJS and MJSW
-
-Use multiplicity macro in HSMSOI_macrosAndDefs.inc
-
-Used discipline.h
-
-Origin of the model version 1.4.0:
+Origin of the model version 1.5.0:
 https://www.hisim.hiroshima-u.ac.jp/index.php?id=121

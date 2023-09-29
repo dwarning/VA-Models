@@ -2,17 +2,17 @@
 
  HiSIM (Hiroshima University STARC IGFET Model)
  Copyright (C) 2000-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
  HiSIM_SOI (Silicon-On-Insulator Model)
  Copyright (C) 2012-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
 
  MODEL NAME : HiSIM_SOI
- ( VERSION : 1  SUBVERSION : 5  REVISION : 0 )
- Model Parameter 'VERSION' : 1.50
+ ( VERSION : 1  SUBVERSION : 4  REVISION : 0 )
+ Model Parameter 'VERSION' : 1.40
  FILE : HSMSOI_macrosAndDefs.inc
 
- Date : 2021.10.08
+ Date : 2018.07.30
 
  released by Hiroshima University
 
@@ -20,14 +20,13 @@
 //
 ////////////////////////////////////////////////////////////////
 //
-//
 //Licensed under the Educational Community License, Version 2.0
 //(the "License"); you may not use this file except in
 //compliance with the License.
 //
 //You may obtain a copy of the License at:
 //
-//      http://opensource.org/licenses/ECL-2.0
+//  http://opensource.org/licenses/ECL-2.0
 //
 //Unless required by applicable law or agreed to in writing,
 //software distributed under the License is distributed on an
@@ -68,8 +67,6 @@
 //
 `define ALIAS(alias,paramName) aliasparam alias = paramName ;
 `define OPP(nam,uni,des)               (*units=uni,                   desc=des*)           real    nam ;
-`define OPM(nam,uni,des)               (*units=uni, multiplicity="multiply",    desc=des*) real    nam ;
-`define OPD(nam,uni,des)               (*units=uni, multiplicity="divide",      desc=des*) real    nam ;
 `define MPRnb(nam,def,uni,        des) (*units=uni,                   desc=des*) parameter real    nam=def ;
 `define MPRoo(nam,def,uni,lwr,upr,des) (*units=uni,                   desc=des*) parameter real    nam=def from(lwr:upr) ;
 `define MPRco(nam,def,uni,lwr,upr,des) (*units=uni,                   desc=des*) parameter real    nam=def from[lwr:upr) ;
@@ -94,7 +91,11 @@
 `ifdef insideADMS
     `define IPM                        (*units="" , type="instance",  desc="multiplicity factor"*) parameter real m=1.0 from(0.0:inf) ;
 `else // notInsideADMS
-    `define IPM
+    `ifdef __OPENVAF__
+        `define IPM (*units="" , type="instance", ask="yes", desc="multiplicity factor"*) parameter real m=1.0 from(0.0:inf);
+    `else
+        `define IPM
+    `endif
 `endif
 `define MFACTOR_USE 1.0
 
@@ -145,7 +146,6 @@
     `define C_EPS_M                   (2.2204460492503131e-16)
 `endif
 `define C_SQRT_2                  (1.414213562373095e+00)       // sqrt(2)
-`define C_SQRT_2inv               (0.7071067811865475)          // 1/sqrt(2) 20190507
 `define C_1o3                     (3.333333333333333e-01)       // 1/3
 `define C_2o3                     (6.666666666666667e-01)       // 2/3
 `define C_2p_1o3                  (1.259921049894873e+00)       // 2^(1/3)
@@ -193,7 +193,7 @@
 `define C_PHI_SDL0_MINIMUM        (1e-15)
 `define C_PHI_S0_BULK_MIN         (2.3/beta)
 `define EXP_THR                   34.0
-//`define C_gidl_delta              0.5
+`define C_gidl_delta              0.5
 `define C_QBRAT                   0.5
 `define C_IDD_MIN                 1E-15
 
@@ -353,10 +353,7 @@ end
     TMF2 = sqrt ( ( x ) *  ( x ) + 4.0 * ( delta ) * ( delta) ) ; \
     dx = 0.5 * ( 1.0 + ( x ) / TMF2 ) ; \
     y = 0.5 * ( ( x ) + TMF2 ) + 1e-10 * delta ; \
-    if ( y < 0.0 ) begin \
-        y=0.0; \
-        dx=0.0; \
-    end \
+    if ( y < 0.0 ) begin y=0.0; dx=0.0; end \
 end
 //---------------------------------------------------*
 //* CeilingPow: ceiling for positive x, flooring for negative x.
@@ -369,34 +366,22 @@ end
 `define Fn_CP( y , x , xmax , pw ) begin \
     x2 = (x) * (x) ; \
     xmax2 = (xmax) * (xmax) ; \
-    xp = 1.0  ;\
+    xp = 1.0  ; \
     xmp = 1.0 ; \
-    m0 = 0 ;\
+    m0 = 0 ; \
     mm =0 ; \
-    arg = 0.0 ;\
+    arg = 0.0 ; \
     dnm =0.0 ; \
-    for ( m0 = 0 ; m0 < pw ; m0 = m0 + 1 ) begin \
-        xp = xp * x2 ; \
-        xmp = xmp * xmax2 ; \
-    end \
+    for ( m0 = 0 ; m0 < pw ; m0 = m0 + 1 ) begin xp = xp * x2 ; xmp = xmp * xmax2 ; end \
     arg = xp + xmp ; \
     dnm = arg ; \
     if ( pw == 1 || pw == 2 || pw == 4 || pw == 8 ) begin \
-        if ( pw == 1 ) begin \
-            mm = 1 ; \
-        end else if ( pw == 2 ) begin \
-            mm = 2 ; \
-        end else if ( pw == 4 ) begin \
-            mm = 3 ; \
-        end else if ( pw == 8 ) begin \
-            mm = 4 ; \
-        end \
-        for ( m0 = 0 ; m0 < mm ; m0 = m0 + 1 ) begin \
-            dnm = sqrt( dnm ) ; \
-        end \
-    end else begin \
-        dnm = `Fn_Pow( dnm , 1.0 / ( 2.0 * pw ) ) ; \
-    end \
+        if ( pw == 1 ) begin mm = 1 ; \
+        end else if ( pw == 2 ) begin mm = 2 ; \
+        end else if ( pw == 4 ) begin mm = 3 ; \
+        end else if ( pw == 8 ) begin mm = 4 ; end \
+            for ( m0 = 0 ; m0 < mm ; m0 = m0 + 1 ) begin dnm = sqrt( dnm ) ; end \
+        end else begin dnm = `Fn_Pow( dnm , 1.0 / ( 2.0 * pw ) ) ; end \
     dnm = 1.0 / dnm ; \
     y = (x) * (xmax) * dnm ; \
 end
@@ -404,34 +389,22 @@ end
 `define Fn_CP_DX( y , x , xmax , pw , dx ) begin \
     x2 = (x) * (x) ; \
     xmax2 = (xmax) * (xmax) ; \
-    xp = 1.0  ;\
+    xp = 1.0  ; \
     xmp = 1.0 ; \
-    m0 = 0 ;\
+    m0 = 0 ; \
     mm =0 ; \
-    arg = 0.0 ;\
+    arg = 0.0 ; \
     dnm =0.0 ; \
-    for ( m0 = 0 ; m0 < pw ; m0 = m0 + 1 ) begin \
-        xp = xp * x2 ; \
-        xmp = xmp * xmax2 ; \
-    end \
+    for ( m0 = 0 ; m0 < pw ; m0 = m0 + 1 ) begin xp = xp * x2 ; xmp = xmp * xmax2 ; end \
     arg = xp + xmp ; \
     dnm = arg ; \
     if ( pw == 1 || pw == 2 || pw == 4 || pw == 8 ) begin \
-        if ( pw == 1 ) begin \
-            mm = 1 ; \
-        end else if ( pw == 2 ) begin \
-            mm = 2 ; \
-        end else if ( pw == 4 ) begin \
-            mm = 3 ; \
-        end else if ( pw == 8 ) begin \
-            mm = 4 ; \
-        end \
-        for ( m0 = 0 ; m0 < mm ; m0 = m0 + 1 ) begin \
-            dnm = sqrt( dnm ) ; \
-        end \
-    end else begin \
-        dnm = `Fn_Pow( dnm , 1.0 / ( 2.0 * pw ) ) ; \
-    end \
+        if ( pw == 1 ) begin mm = 1 ; \
+        end else if ( pw == 2 ) begin mm = 2 ; \
+        end else if ( pw == 4 ) begin mm = 3 ; \
+        end else if ( pw == 8 ) begin mm = 4 ; end \
+            for ( m0 = 0 ; m0 < mm ; m0 = m0 + 1 ) begin dnm = sqrt( dnm ) ; end \
+        end else begin dnm = `Fn_Pow( dnm , 1.0 / ( 2.0 * pw ) ) ; end \
     dnm = 1.0 / dnm ; \
     y = (x) * (xmax) * dnm ; \
     dx = (xmax) * xmp * dnm / arg ; \
@@ -531,8 +504,7 @@ end
             y = y * `C_UNIT_EXP_RES; \
             TMF1 = TMF1 - `C_UNIT_EXP_ARG; \
         end \
-        y = y * exp(TMF1); \
-        dx = y; \
+        y = y * exp(TMF1); dx = y; \
     end \
 end
 
@@ -558,12 +530,8 @@ end
         $write("reset(HiSIM_SOI(%m)): (%s = %g to %g) range [%g , %g].\n", \
            pname, (param), (min*1.0), (min*1.0), (max*1.0) );     \
     end \
-    if ((param) <(min) ) begin  \
-        param  =(min); \
-    end    \
-    if ((param) >(max) ) begin  \
-        param  =(max); \
-    end
+    if ((param) <(min) ) begin  param  =(min); end    \
+    if ((param) >(max) ) begin  param  =(max); end
 `define MINCHECK(param, min, pname) \
     if ((param) <(min) ) begin \
         $write("warning(HiSIM_SOI): (%M) The model/instance parameter %s (= %e) must be greater than %e.\n", \
@@ -582,9 +550,7 @@ end
 `define Fn_SZtemp( y , x , delta ) begin \
     TMF1 = sqrt ( ( x ) *  ( x ) + 4.0 * ( delta ) * ( delta) ) ; \
     y = 0.5 * ( ( x ) + TMF1 ) + 1e-10 * delta ; \
-    if ( y < 0.0 ) begin \
-        y=0.0; \
-    end \
+    if ( y < 0.0 ) begin y=0.0; end \
 end
 `define Fn_SUtemp( y , x , xmax , delta ) begin \
     TMF1 = ( xmax ) - ( x ) - ( delta ) ; \

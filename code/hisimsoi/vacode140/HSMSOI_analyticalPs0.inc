@@ -2,17 +2,17 @@
 
  HiSIM (Hiroshima University STARC IGFET Model)
  Copyright (C) 2000-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
  HiSIM_SOI (Silicon-On-Insulator Model)
  Copyright (C) 2012-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2018 Hiroshima University
 
  MODEL NAME : HiSIM_SOI
- ( VERSION : 1  SUBVERSION : 5  REVISION : 0 )
- Model Parameter 'VERSION' : 1.50
+ ( VERSION : 1  SUBVERSION : 4  REVISION : 0 )
+ Model Parameter 'VERSION' : 1.40
  FILE : HSMSOI_analyticalPss.inc
 
- Date : 2021.10.08
+ Date : 2018.07.30
 
  released by Hiroshima University
 
@@ -20,14 +20,13 @@
 //
 ////////////////////////////////////////////////////////////////
 //
-//
 //Licensed under the Educational Community License, Version 2.0
 //(the "License"); you may not use this file except in
 //compliance with the License.
 //
 //You may obtain a copy of the License at:
 //
-//      http://opensource.org/licenses/ECL-2.0
+//  http://opensource.org/licenses/ECL-2.0
 //
 //Unless required by applicable law or agreed to in writing,
 //software distributed under the License is distributed on an
