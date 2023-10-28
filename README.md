@@ -24,7 +24,7 @@ Any code directory has a set of test cases to show main functionality and perfor
 
 ## Related Projects
 
-The usage of the model code is mainly dependent from two projects: OpenVAF, NGSPICE and Xyce.
+The usage of the model code is mainly dependent from following projects: OpenVAF, NGSPICE, ADMS and Xyce.
 
 ### OpenVAF
 
@@ -36,7 +36,6 @@ OpenVAF has been tested with NGSPICE version 39. It can already support a large 
 
 Furthermore, some Verilog-A language features are currently not supported by openVAF:
 
-* Noise analysis (white_noise(), flicker_noise())
 * Laplace transform filters
 * Language constructs: $abstime(), @cross()
 * Indirect branch contribution
@@ -102,7 +101,7 @@ You can also extend the ngspice environment variable SPICE_LIB_DIR to your_path/
 
 It is important that the *.model* card use the name of the Verilog-A module, e.g. in case of bsimcmg: *.model BSIMCMG_N bsimcmg_va*.
 
-Edit file 'spinit', typically found in share/ngspice/scripts: Comment out the line
+Edit file 'spinit', typically found in share/ngspice/scripts: To enable OSDI usage comment out the line
 
 'unset osdi_enabled'
 
