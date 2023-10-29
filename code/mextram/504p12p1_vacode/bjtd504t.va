@@ -6,7 +6,11 @@
 `include "frontdef.inc"
 `define  SELFHEATING
 
+`ifdef __XYCE__
+module bjtd504t_va (c, b, e, dt);
+`else
 module bjtd504tva (c, b, e, dt);
+`endif
 
 // External ports
     inout c, b, e, dt;

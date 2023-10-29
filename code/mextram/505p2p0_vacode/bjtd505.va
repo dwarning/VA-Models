@@ -5,7 +5,11 @@
 
 `include "frontdef.inc"
 
+`ifdef __XYCE__
 module bjtd505_va (c, b, e);
+`else
+module bjtd505va (c, b, e);
+`endif
 
     // External ports
     inout c, b, e;

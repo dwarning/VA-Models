@@ -7,7 +7,11 @@
 `define SELFHEATING
 `define SUBSTRATE
 
+`ifdef __XYCE__
 module bjt505t_va (c, b, e, s, dt);
+`else
+module bjt505tva (c, b, e, s, dt);
+`endif
 
     // External ports
     inout c, b, e, s, dt;

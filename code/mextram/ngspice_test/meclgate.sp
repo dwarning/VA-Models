@@ -50,8 +50,8 @@ rp5 21 22 560
 
 *.model BJTRF1 bjt504va
 *.model BJTRF1 bjt504tva
-.model BJTRF1 bjt505_va
-*.model BJTRF1 bjt505t_va
+.model BJTRF1 bjt505va
+*.model BJTRF1 bjt505tva
 
 
 *.options acct bypass=1

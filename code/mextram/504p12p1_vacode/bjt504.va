@@ -6,7 +6,11 @@
 `include "frontdef.inc"
 `define SUBSTRATE
 
+`ifdef __XYCE__
 module bjt504_va (c, b, e, s);
+`else
+module bjt504va (c, b, e, s);
+`endif
 
 // External ports
     inout c, b, e, s;

@@ -2,14 +2,13 @@ MEXTRAM Gummel Test Ic,b,s=f(Vc,Ib)
 
 *.model BJTRF1 bjt504va
 *.model BJTRF1 bjt504tva
-.model BJTRF1 bjt505_va
-*.model BJTRF1 bjt505t_va
+.model BJTRF1 bjt505va
+*.model BJTRF1 bjt505tva
 
 VB B 0 0.5
 VC C 0 1.0
 VS S 0 0.0
 NQ1 C B 0 S BJTRF1
-*RT dt 0 100
 
 .control
 *pre_osdi ../../osdilibs/bjt504.osdi
