@@ -27,8 +27,6 @@ plot ally
 plot inoise_spectrum onoise_spectrum loglog
 setplot noise2
 print all
-echo
-print inoise_total onoise_total
 .endc
 
 .END

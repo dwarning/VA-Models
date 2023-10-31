@@ -1,6 +1,6 @@
 MEXTRAM Noise Test
 
-vcc 4 0 26
+vcc 4 0 16
 vin 1 0 dc 0 ac 1
 
 ccouple 1 b 1
@@ -23,15 +23,13 @@ pre_osdi ../../osdilibs/bjt505.osdi
 *pre_osdi ../../osdilibs/bjt505t.osdi
 op
 print all
-noise v(3) vin dec 10 10 99Meg 1
+noise v(c) vin dec 10 10 99Meg 1
 setplot
 setplot noise1
 plot ally
 plot inoise_spectrum onoise_spectrum loglog
 setplot noise2
 print all
-echo
-print inoise_total onoise_total
 .endc
 
 .end

@@ -1,15 +1,15 @@
 VBIC Noise Test
 
-vcc 4 0 50
-vin 1 0 ac 1
+vcc 4 0 10
+vin 1 0 dc 0 ac 1
 
-ccouple 1 2 1
+ccouple 1 b 1
 
-ibias 0 2 100uA
+ibias 0 b 200uA
 
-rload 4 3 1k noisy=0
+rload 4 c 1k noisy=0
 
-nq1 3 2 0 0 VBIC_EXAMPLE sw_noise=1
+nq1 c b 0 0 VBIC_EXAMPLE sw_noise=1
 
 .model VBIC_EXAMPLE vbic13_4t
 +ajc=-0.5 aje=0.5 ajs=0.5
@@ -32,7 +32,9 @@ nq1 3 2 0 0 VBIC_EXAMPLE sw_noise=1
 
 .control
 pre_osdi ../../osdilibs/vbic_1p3.osdi
-noise v(3) vin dec 10 10 99Meg 1
+noise v(c) vin dec 10 10 99Meg 1
+op
+print all
 setplot
 setplot noise1
 plot ally
@@ -40,8 +42,6 @@ plot inoise_spectrum
 plot onoise_spectrum
 setplot noise2
 print all
-echo
-print inoise_total onoise_total
 .endc
 
 .end
