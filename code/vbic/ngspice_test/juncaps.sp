@@ -23,9 +23,6 @@ v3 3 0 dc 0
 **************************************
 .control
 pre_osdi ../../osdilibs/vbic_1p3.osdi
-altermod @q.xq1.nqnpn13g2[RTH]=0
-altermod @q.xq2.nqnpn13g2[RTH]=0
-destroy all
 deftype v admittance S
 deftype v capacitance F
 set width=180
