@@ -32,9 +32,9 @@ nq1 c b 0 0 VBIC_EXAMPLE sw_noise=1
 
 .control
 pre_osdi ../../osdilibs/vbic_1p3.osdi
-noise v(c) vin dec 10 10 99Meg 1
 op
 print all
+noise v(c) vin dec 10 10 99Meg 1
 setplot
 setplot noise1
 plot ally
