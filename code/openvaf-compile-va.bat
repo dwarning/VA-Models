@@ -11,6 +11,7 @@ openvaf.exe -D__NGSPICE__ -o bsim4.osdi ../bsim4/vacode/bsim4.va
 openvaf.exe -D__NGSPICE__ -o BSIM6.1.1.osdi ../bsim6/vacode/BSIM6.1.1.va
 openvaf.exe -D__NGSPICE__ -o bsimbulk106.osdi ../bsimbulk/vacode/bsimbulk106.va
 openvaf.exe -D__NGSPICE__ -o bsimbulk107.osdi ../bsimbulk/vacode/bsimbulk107.va
+openvaf.exe -D__NGSPICE__ -o bsimcmg110.osdi ../bsimcmg/vacode110/bsimcmg.va
 openvaf.exe -D__NGSPICE__ -o bsimcmg.osdi ../bsimcmg/vacode/bsimcmg.va
 openvaf.exe -D__NGSPICE__ -o bsimimg.osdi ../bsimimg/vacode/bsimimg.va
 openvaf.exe -D__NGSPICE__ -o bsimsoi.osdi ../bsimsoi/vacode/bsimsoi.va
@@ -20,6 +21,7 @@ openvaf.exe -D__NGSPICE__ -o epfl_hemt.osdi ../EPFL-HEMT/vacode/epfl_hemt.va
 openvaf.exe -D__NGSPICE__ -o fbh_hbt-2_1.osdi ../fbh_hbt/vacode/fbh_hbt-2_1.va
 openvaf.exe -D__NGSPICE__ -o fbh_hbt-2_3.osdi ../fbh_hbt/vacode/fbh_hbt-2_3.va
 openvaf.exe -D__NGSPICE__ -o hicumL0_v2p0p0.osdi ../hicum0/vacode/hicumL0_v2p0p0.va
+openvaf.exe -D__NGSPICE__ -o hicumL2V2p4p0.osdi ../hicum2/vacode/hicumL2.va
 openvaf.exe -D__NGSPICE__ -o hicumL2.osdi ../hicum2/vacode/hicumL2V3p0p0.va
 openvaf.exe -D__NGSPICE__ -o hisim2.osdi ../hisim2/vacode/hisim2.va
 openvaf.exe -D__NGSPICE__ -o hisimhv242.osdi ../hisimhv/vacode242/hisimhv.va
@@ -41,6 +43,7 @@ openvaf.exe -D__NGSPICE__ -o psp103_nqs.osdi ../psp103/vacode/psp103_nqs.va
 openvaf.exe -D__NGSPICE__ -o r2_cmc.osdi ../r2_cmc/vacode/r2_cmc.va
 openvaf.exe -D__NGSPICE__ -o r2_et_cmc.osdi ../r2_cmc/vacode/r2_et_cmc.va
 openvaf.exe -D__NGSPICE__ -o r3_cmc.osdi ../r3_cmc/vacode/r3_cmc.va
+openvaf.exe -D__NGSPICE__ -o vbic_4T_et_cf.osdi ../vbic/vacode/vbic_4T_et_cf.va
 openvaf.exe -D__NGSPICE__ -o vbic_1p3.osdi ../vbic/vacode/vbic_1p3.va
 
 CD ..
