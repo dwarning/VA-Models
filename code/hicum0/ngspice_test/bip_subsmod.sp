@@ -17,6 +17,7 @@ plot abs(i(vc))/abs(i(vb)) vs abs(i(vc)) xlog xlimit 1n 1  ylimit 0 150 retracep
 ********************************************************************************
 .subckt bip_default c b e s dt
 nqhcm0 c b e s dt hic0_full
+rth1 dt 0 100
 .model hic0_full hicumL0va
 .ends bip_default
 ********************************************************************************
