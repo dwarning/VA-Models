@@ -1,6 +1,6 @@
 *modelcard for BSIM6_BD
 
-.model nmos bsim6
+.model nmos bsim6_va
 +LLONG =2E-06
 +WWIDE =1E-05
 +TYPE =1

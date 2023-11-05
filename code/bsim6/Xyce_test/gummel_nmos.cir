@@ -1,7 +1,7 @@
 Sample netlist for BSIM6
 *Drain current symmetry for nmos
 
-.include "../Modelcards/modelcard.nmos"
+.include "../Modelcards/modelcard_va.nmos"
 
 * --- Voltage Sources ---
 vdrain drain 0 dc 0.0

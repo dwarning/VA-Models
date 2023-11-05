@@ -1,6 +1,6 @@
 Sample netlist BSIM6: Id plot pmos
 
-.include "../Modelcards/modelcard.pmos"
+.include "../Modelcards/modelcard_va.pmos"
 
 vd d 0 dc -50m
 vg g 0 dc 0.0

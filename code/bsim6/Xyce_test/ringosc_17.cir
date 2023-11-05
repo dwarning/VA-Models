@@ -1,8 +1,8 @@
 Sample netlist for BSIM6
 *17-stage ring oscillator
 
-.include "../Modelcards/modelcard.nmos"
-.include "../Modelcards/modelcard.pmos"
+.include "../Modelcards/modelcard_va.nmos"
+.include "../Modelcards/modelcard_va.pmos"
 
 * --- Voltage Sources ---
 vdd supply  0 dc 1.0
