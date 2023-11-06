@@ -72,13 +72,13 @@ buildxyceplugin L_UTSOI_102.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..
-cd ./mextram/504p12p1_vacode
+cd ./mextram/vacode504p12p1
 buildxyceplugin bjt504.va ../../admslibs
 buildxyceplugin bjt504t.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..
-cd ./mextram/505p2p0_vacode
+cd ./mextram/vacode505p2p0
 buildxyceplugin bjt505.va ../../admslibs
 buildxyceplugin bjt505t.va ../../admslibs
 rm *.la *.log
