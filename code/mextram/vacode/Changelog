@@ -1,0 +1,4 @@
+ADMS/XYCE: ommit gmuz op calculation (opinfo.inc:108) because ddx expression (-Iavl) of type mapply_unary can't handled
+
+Origin of the model version 505.4:
+https://si2.org/download-links/

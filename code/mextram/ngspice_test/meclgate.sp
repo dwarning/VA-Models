@@ -48,10 +48,10 @@ rp5 21 22 560
 
 .model dmod d rs=40 tt=0.1ns cjo=0.9pf n=1 is=1e-14 eg=1.11 vj=0.8 m=0.5
 
-*.model BJTRF1 bjt504va
-*.model BJTRF1 bjt504tva
-.model BJTRF1 bjt505va
-*.model BJTRF1 bjt505tva
+*.model BJTRF1 bjt504_va
+*.model BJTRF1 bjt504t_va
+.model BJTRF1 bjt505_va
+*.model BJTRF1 bjt505t_va
 
 
 *.options acct bypass=1

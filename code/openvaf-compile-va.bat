@@ -1,3 +1,5 @@
+::
+::
 :: Copyright 2023 The ngspice team
 :: Authors: Holger Vogt, Dietmar Warning
 :: License: New BSD
@@ -32,8 +34,8 @@ openvaf.exe -D__NGSPICE__ -o nigbt.osdi ../IGBT/vacode/nigbt.va
 openvaf.exe -D__NGSPICE__ -o L_UTSOI_102.osdi ../L-UTSOI/vacode/L_UTSOI_102.va
 openvaf.exe -D__NGSPICE__ -o bjt504.osdi ../mextram/vacode504p12p1/bjt504.va
 openvaf.exe -D__NGSPICE__ -o bjt504t.osdi ../mextram/vacode504p12p1/bjt504t.va
-openvaf.exe -D__NGSPICE__ -o bjt505.osdi ../mextram/vacode505p2p0/bjt505.va
-openvaf.exe -D__NGSPICE__ -o bjt505t.osdi ../mextram/vacode505p2p0/bjt505t.va
+openvaf.exe -D__NGSPICE__ -o bjt505.osdi ../mextram/vacode/bjt505.va
+openvaf.exe -D__NGSPICE__ -o bjt505t.osdi ../mextram/vacode/bjt505t.va
 openvaf.exe -D__NGSPICE__ -o mosvar.osdi ../MOSVAR/vacode/mosvar.va
 openvaf.exe -D__NGSPICE__ -o mvsg_cmc.osdi ../mvsg/vacode/mvsg_cmc.va
 openvaf.exe -D__NGSPICE__ -o psp102.osdi ../psp102/vacode/psp102.va

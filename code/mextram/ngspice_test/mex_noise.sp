@@ -11,10 +11,10 @@ rload 4 c 1k noisy=0
 
 NQ1 C B 0 0 BJTRF1
 
-*.model BJTRF1 bjt504va
-*.model BJTRF1 bjt504tva
-.model BJTRF1 bjt505va
-*.model BJTRF1 bjt505tva
+*.model BJTRF1 bjt504_va
+*.model BJTRF1 bjt504t_va
+.model BJTRF1 bjt505_va
+*.model BJTRF1 bjt505t_va
 
 .control
 *pre_osdi ../../osdilibs/bjt504.osdi

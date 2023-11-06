@@ -1,9 +1,9 @@
 MEXTRAM Gummel Test Ic,b,s=f(Vc,Ib)
 
-*.model BJTRF1 bjt504va
-*.model BJTRF1 bjt504tva
-.model BJTRF1 bjt505va
-*.model BJTRF1 bjt505tva
+*.model BJTRF1 bjt504_va
+*.model BJTRF1 bjt504t_va
+.model BJTRF1 bjt505_va
+*.model BJTRF1 bjt505t_va
 
 VB B 0 0.5
 VC C 0 1.0

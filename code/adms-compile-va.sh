@@ -78,7 +78,7 @@ buildxyceplugin bjt504t.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..
-cd ./mextram/vacode505p2p0
+cd ./mextram/vacode
 buildxyceplugin bjt505.va ../../admslibs
 buildxyceplugin bjt505t.va ../../admslibs
 rm *.la *.log
