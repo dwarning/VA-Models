@@ -1,3 +1,6 @@
+Origin of the model version 101.4.0:
+https://si2.org/download-links/
+
 Removed obsolete op variables gmbi, cgbi, cdbi, csbi, cbbi because no V(b) dependency
 
 Use disciplines.vams
