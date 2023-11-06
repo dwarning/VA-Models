@@ -8,7 +8,7 @@ XQ1 C B 0 S DT hicumL0V1p1_c_sbt
 Rdt dt 0 1G
 
 .control
-pre_osdi ../../osdilibs/hicumL0_v2p0p0.osdi
+pre_osdi ../../osdilibs/hicumL0_v2p1p0.osdi
 dc vb 0.2 1.4 0.01
 set xbrushwidth=2
 plot abs(i(vc)) abs(i(vb)) abs(i(vs)) ylimit 0.1p 100m ylog
