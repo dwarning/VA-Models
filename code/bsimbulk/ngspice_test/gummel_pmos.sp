@@ -16,7 +16,7 @@ nm1 d g s b pmos W=20u L=10u
 .dc vd -0.1 0.1 0.001 vg -1.0 0.0 0.2
 
 .control
-pre_osdi ../../osdilibs/bsimbulk107.osdi
+pre_osdi ../../osdilibs/bsimbulk.osdi
 run
 plot -i(vd)
 let gx=deriv(-i(vd))

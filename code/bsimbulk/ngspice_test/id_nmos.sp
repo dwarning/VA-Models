@@ -11,7 +11,7 @@ vb b 0 dc=0
 nm1 d g s b nmos W=10e-6 L=1e-6
 
 .control
-pre_osdi ../../osdilibs/bsimbulk107.osdi
+pre_osdi ../../osdilibs/bsimbulk.osdi
 dc vg 0.0 1.3 0.01 vb 0 -1.2 -0.2
 plot -i(vd)
 dc vd 0.0 1.3 0.01 vg 0.4 1.2 0.2

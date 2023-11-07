@@ -17,7 +17,7 @@ vbsp 44 0 0
 
 .control
 * Load the models dynamically
-pre_osdi ../../osdilibs/bsimbulk107.osdi
+pre_osdi ../../osdilibs/bsimbulk.osdi
 set xgridwidth=2
 set xbrushwidth=3
 

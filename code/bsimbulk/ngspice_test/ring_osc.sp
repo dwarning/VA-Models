@@ -33,7 +33,7 @@ x17 17 1 vdd 0 inv
 .tran 1n 10u uic
 
 .control
-pre_osdi ../../osdilibs/bsimbulk107.osdi
+pre_osdi ../../osdilibs/bsimbulk.osdi
 run
 rusage all
 plot v(1)

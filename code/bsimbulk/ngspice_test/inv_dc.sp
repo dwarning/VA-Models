@@ -18,7 +18,7 @@ x1 in out vdd 0 inv
 .dc v2 0.0 1 0.01
 
 .control
-pre_osdi ../../osdilibs/bsimbulk107.osdi
+pre_osdi ../../osdilibs/bsimbulk.osdi
 run
 plot v(in) v(out)
 .endc

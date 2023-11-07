@@ -1,8 +1,8 @@
-The BSIM-BULK standard has been supported by the members of Silicon Integration Initiative's Compact Model Coalition. 
+The BSIM-BULK standard has been supported by the members of Silicon Integration Initiative's Compact Model Coalition.
 
-CMC Release Date: March 04, 2020
-Public Release Date: September 04, 2022
+CMC Release Date: April 30, 2022
+Public Release Date: October 30, 2023
 
 
 A link to the most recent version of this standard can be found at:
-http://www.si2.org/cmc 
+http://www.si2.org
