@@ -70,7 +70,7 @@
 // Flag for .OP calculations. Commenting this line cancels OP-related variables definition and OP calculations
 `define OP_CALC
 
-// `define NQSmodel
+`define NQSmodel
 
 `include "L_UTSOI_102_macrodef.include"
 
