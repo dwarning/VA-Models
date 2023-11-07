@@ -2,7 +2,7 @@ PSP103 noise test
 
 nm1 out in 0 0 nch
 +l=0.1u
-+w=1u
++w=10u
 +sa=0.0e+00
 +sb=0.0e+00
 +absource=1.0e-12
@@ -15,7 +15,7 @@ nm1 out in 0 0 nch
 
 Vin in 0 dc 0.9 ac 1
 Vdd vdd 0 1.5
-Rl out vdd 1e2 noisy=0
+Rl out vdd 200 noisy=0
 
 .include ../Modelcards/psp103_nmos-2.mod
 
