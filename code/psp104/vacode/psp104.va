@@ -1,0 +1,47 @@
+//======================================================================================
+//======================================================================================
+// Filename: psp104.va
+//======================================================================================
+//======================================================================================
+//
+//  (c) Copyright notice
+//
+//  Since 2015 until today, PSP has been co-developed by NXP Semiconductors and
+//  CEA-Leti. For this part of the model, each claim undivided ownership and copyrights
+//  Since 2012 until 2015, PSP has been co-developed by NXP Semiconductors and
+//  Delft University of Technology. For this part of the model, each claim undivided
+//  ownership and copyrights
+//  Until and including 2011, PSP has been co-developed by NXP Semiconductors and
+//  Arizona State University. For this part of the model, NXP Semiconductors claims
+//  undivided ownership and copyrights.
+//
+//
+//  Version: 104.0.0 (PSP), 200.6.2 (JUNCAP), September 2023
+//
+//======================================================================================
+//======================================================================================
+//
+// Further information can be found in the file releasenotesPSP104.txt
+//
+
+`include "discipline.h"
+
+`include "Common104_macrodefs.include"
+
+`include "JUNCAP200_macrodefs.include"
+
+`include "PSP104_macrodefs.include"
+
+`include "PSP104_opvar.include"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  PSP global model code
+//
+/////////////////////////////////////////////////////////////////////////////
+
+module PSP104VA(d, g, s, b);
+
+`include "PSP104_module.include"
+
+endmodule

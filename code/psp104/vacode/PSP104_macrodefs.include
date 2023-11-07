@@ -1,0 +1,845 @@
+//======================================================================================
+//======================================================================================
+// Filename: PSP104_macrodefs.include
+//======================================================================================
+//======================================================================================
+//
+//  (c) Copyright notice
+//
+//  Since 2015 until today, PSP has been co-developed by NXP Semiconductors and
+//  CEA-Leti. For this part of the model, each claim undivided ownership and copyrights
+//  Since 2012 until 2015, PSP has been co-developed by NXP Semiconductors and
+//  Delft University of Technology. For this part of the model, each claim undivided
+//  ownership and copyrights
+//  Until and including 2011, PSP has been co-developed by NXP Semiconductors and
+//  Arizona State University. For this part of the model, NXP Semiconductors claims
+//  undivided ownership and copyrights.
+//
+//
+//  Version: 104.0.0 (PSP), 200.6.2 (JUNCAP), September 2023
+//
+//======================================================================================
+//======================================================================================
+//
+// Further information can be found in the file releasenotesPSP104.txt
+//
+
+/////////////////////////////////////////////
+//
+// Macros and constants used in PSP
+//
+/////////////////////////////////////////////
+
+`define PMOS                 -1
+`define NMOS                 +1
+
+// Some functions
+`define MINA(x,y,a)           0.5*((x)+(y)-sqrt(((x)-(y))*((x)-(y))+(a)))
+`define MAXA(x,y,a)           0.5*((x)+(y)+sqrt(((x)-(y))*((x)-(y))+(a)))
+
+`define MNE(x,y,a,mne) \
+    tme1    =  4.0 - (a); \
+    tme2    =  (x) + (y); \
+    mne     =  2.0 / tme1 * (tme2 - sqrt(tme2 * tme2 - tme1 * (x) * (y)));
+
+`define MXE(x,y,a,mxe) \
+    tme1    =  4.0 - (a); \
+    tme2    =  (x) + (y); \
+    mxe     =  2.0 / tme1 * (tme2 + sqrt(tme2 * tme2 - tme1 * (x) * (y)));
+
+// Physical constants
+`define QMN                   5.951993
+`define QMP                   7.448711
+
+// Other constants (PSP-mos)
+`define DELTA1                0.02
+`define invSqrt2              7.0710678118654746e-01
+`define oneSixth              1.6666666666666667e-01
+`define LEN                   1.0e-06
+`define WEN                   1.0e-06
+`define fact_sat              0.99
+`define x_dsat_lim            4.60517018598809 /* =  -ln(1.0 - `fact_sat) */
+
+/////////////////////////////////////////////////////////////////////////////
+//
+//  Macro definitions.
+//
+//  Note that because at present locally scoped variables
+//  can only be in named blocks, the intermediate variables
+//  used in the macros below must be explicitly declared
+//  as variables in the main code.
+//
+/////////////////////////////////////////////////////////////////////////////
+
+//  Function for parameter definition in the case of separate calculation of charge model in saturation
+//  --------------------------------------------------------------------------------------------------------------
+`define DefACparam(param_i,param_dc,param_ac) \
+    param_i      =  (param_dc); \
+    if ($param_given(param_ac) == 1) \
+        param_i      =  (param_ac);
+
+//  Function for binning rules
+//  --------------------------------------------------------------------------------------------------------------
+`define BinningRuleFct(LocParam,PoParam,PlParam,PwParam,PlwParam) \
+    if (($param_given(PoParam) == 1) || ($param_given(PlParam) == 1) || ($param_given(PwParam) == 1) || ($param_given(PlwParam) == 1)) \
+        LocParam     =  (PoParam) + (PlParam) * iLE + (PwParam) * iWE + (PlwParam) * iAE;
+
+`define BinningRuleScalFct(LocParam,fscaling,PoParam,PlParam,PwParam,PlwParam) \
+    if (($param_given(PoParam) == 1) || ($param_given(PlParam) == 1) || ($param_given(PwParam) == 1) || ($param_given(PlwParam) == 1)) \
+        LocParam     =  (fscaling) * ((PoParam) + (PlParam) * iLE + (PwParam) * iWE + (PlwParam) * iAE);
+
+`define BinningRuleScalFctAC(LocParam,fscaling,PoParam_ac,PlParam_ac,PwParam_ac,PlwParam_ac,PoParam_dc,PlParam_dc,PwParam_dc,PlwParam_dc) \
+    if (($param_given(PoParam_ac) == 1) || ($param_given(PlParam_ac) == 1) || ($param_given(PwParam_ac) == 1) || ($param_given(PlwParam_ac) == 1) \
+        || ($param_given(PoParam_dc) == 1) || ($param_given(PlParam_dc) == 1) || ($param_given(PwParam_dc) == 1) || ($param_given(PlwParam_dc) == 1)) begin \
+        `DefACparam(PoParam_i, PoParam_dc, PoParam_ac) \
+        `DefACparam(PlParam_i, PlParam_dc, PlParam_ac) \
+        `DefACparam(PwParam_i, PwParam_dc, PwParam_ac) \
+        `DefACparam(PlwParam_i, PlwParam_dc, PlwParam_ac) \
+        LocParam     =  (fscaling) * (PoParam_i + PlParam_i * iLE + PwParam_i * iWE + PlwParam_i * iAE); \
+    end
+
+//  sigma function used in surface potential and other calculations
+//  --------------------------------------------------------------------------------------------------------------
+//  Note: one call uses expressions for arguments so parentheses around the arguments in the expressions are necessary
+`define sigma(a,c,tau,eta,y) \
+    nu           =  (a) + (c); \
+    mutau        =  nu * nu + (tau) * (0.5 * ((c) * (c)) - (a)); \
+    y            =  (eta) + (a) * nu * (tau) / (mutau + (nu / mutau) * (tau) * (tau) * (c) * ((c) * (c) * `oneThird - (a)));
+
+// modified version of sigma function, which takes 4 arguments
+//  --------------------------------------------------------------------------------------------------------------
+`define sigma2(a,b,c,tau,eta,y) \
+    nu           =  (a) + (c); \
+    mutau        =  (nu) * (nu) + (tau) * (0.5 * ((c) * (c)) - (a) * (b)); \
+    y            =  (eta) + (a) * nu * (tau) / (mutau + (nu / mutau) * (tau) * (tau) * (c) * ((c) * (c) * `oneThird - (a) * (b)));
+
+//  sp_s function: surface potential calculation
+//  --------------------------------------------------------------------------------------------------------------
+`define sp_s(sp,xg,xn,delta) \
+    if (abs(xg) <= margin) begin \
+        SP_S_temp1   =  inv_xi * inv_xi * `oneSixth * `invSqrt2; \
+        sp           =  (xg) * inv_xi * (1.0 + (xg) * (1.0 - (delta)) * Gf * SP_S_temp1); \
+    end else begin \
+        if ((xg) < -margin) begin \
+            SP_S_yg      = -(xg); \
+            SP_S_ysub    =  1.25 * (SP_S_yg * inv_xi); \
+            SP_S_eta     =  0.5 * (SP_S_ysub + 10.0 - sqrt((SP_S_ysub - 6.0) * (SP_S_ysub - 6.0) + 64.0)); \
+            SP_S_temp    =  SP_S_yg - SP_S_eta; \
+            SP_S_a       =  SP_S_temp * SP_S_temp + Gf2 * (SP_S_eta + 1.0); \
+            SP_S_c       =  2.0 * SP_S_temp - Gf2; \
+            SP_S_tau     = -SP_S_eta + ln(SP_S_a * inv_Gf2); \
+            `sigma(SP_S_a, SP_S_c, SP_S_tau, SP_S_eta, SP_S_y0) \
+            `expl_high(SP_S_y0, SP_S_delta0) \
+            SP_S_delta1  =  1.0 / SP_S_delta0; \
+            SP_S_temp    =  1.0 / (2.0 + SP_S_y0 * SP_S_y0); \
+            SP_S_xi0     =  SP_S_y0 * SP_S_y0 * SP_S_temp; \
+            SP_S_xi1     =  4.0 * (SP_S_y0 * SP_S_temp * SP_S_temp); \
+            SP_S_xi2     =  (8.0 * SP_S_temp - 12.0 * SP_S_xi0) * SP_S_temp * SP_S_temp; \
+            SP_S_temp    =  SP_S_yg - SP_S_y0; \
+            SP_S_temp1   =  (delta) * SP_S_delta1; \
+            SP_S_pC      =  2.0 * SP_S_temp + Gf2 * (SP_S_delta0 - 1.0 - SP_S_temp1 + (delta) * (1.0 - SP_S_xi1)); \
+            SP_S_qC      =  SP_S_temp * SP_S_temp - Gf2 * (SP_S_delta0 - SP_S_y0 - 1.0 + SP_S_temp1 + (delta) * (SP_S_y0 - 1.0 - SP_S_xi0)); \
+            SP_S_temp    =  2.0 - Gf2 * (SP_S_delta0 + SP_S_temp1 - (delta) * SP_S_xi2); \
+            SP_S_temp    =  SP_S_pC * SP_S_pC - 2.0 * (SP_S_qC * SP_S_temp); \
+            sp           = -SP_S_y0 - 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp))); \
+        end else begin \
+            SP_xg1       =  1.0 / (1.25 + Gf * 7.324648775608221e-01); \
+            SP_S_A_fac   =  (xi * 1.25 * SP_xg1 - 1.0) * SP_xg1; \
+            SP_S_xbar    =  (xg) * inv_xi * (1.0 + SP_S_A_fac * (xg)); \
+            `expl_low(-SP_S_xbar, SP_S_temp) \
+            SP_S_w       =  1.0 - SP_S_temp; \
+            SP_S_x1      =  (xg) + Gf2 * 0.5 - Gf * sqrt((xg) + Gf2 * 0.25 - SP_S_w); \
+            SP_S_bx      =  (xn) + 3.0; \
+            SP_S_eta     = `MINA(SP_S_x1, SP_S_bx, 5.0) - 0.5 * (SP_S_bx - sqrt(SP_S_bx * SP_S_bx + 5.0)); \
+            SP_S_temp    =  (xg) - SP_S_eta; \
+            SP_S_temp1   =  exp(-SP_S_eta); \
+            SP_S_temp2   =  1.0 / (2.0 + SP_S_eta * SP_S_eta); \
+            SP_S_xi0     =  SP_S_eta * SP_S_eta * SP_S_temp2; \
+            SP_S_xi1     =  4.0 * (SP_S_eta * SP_S_temp2 * SP_S_temp2); \
+            SP_S_xi2     =  (8.0 * SP_S_temp2 - 12.0 * SP_S_xi0) * SP_S_temp2 * SP_S_temp2; \
+            SP_S_a       = `MAX(1.0e-40, SP_S_temp * SP_S_temp - Gf2 * (SP_S_temp1 + SP_S_eta - 1.0 - (delta) * (SP_S_eta + 1.0 + SP_S_xi0))); \
+            SP_S_b       =  1.0 - 0.5 * (Gf2 * (SP_S_temp1 - (delta) * SP_S_xi2)); \
+            SP_S_c       =  2.0 * SP_S_temp + Gf2 * (1.0 - SP_S_temp1 - (delta) * (1.0 + SP_S_xi1)); \
+            SP_S_tau     =  (xn) - SP_S_eta + ln(SP_S_a / Gf2); \
+            `sigma2(SP_S_a, SP_S_b, SP_S_c, SP_S_tau, SP_S_eta, SP_S_x0) \
+            if (SP_S_x0 < `se05) begin \
+                SP_S_delta0  =  exp(SP_S_x0); \
+                SP_S_delta1  =  1.0 / SP_S_delta0; \
+                SP_S_delta0  =  (delta) * SP_S_delta0; \
+            end else begin \
+                if (SP_S_x0 > (xn) - `se05) begin \
+                    SP_S_delta0  =  exp(SP_S_x0 - (xn)); \
+                    SP_S_delta1  =  (delta) / SP_S_delta0; \
+                end else begin \
+                    SP_S_delta0  = `ke05 / `P3((xn) - SP_S_x0 - `se05); \
+                    SP_S_delta1  = `ke05 / `P3(SP_S_x0 - `se05); \
+                end \
+            end \
+            SP_S_temp    =  1.0 / (2.0 + SP_S_x0 * SP_S_x0); \
+            SP_S_xi0     =  SP_S_x0 * SP_S_x0 * SP_S_temp; \
+            SP_S_xi1     =  4.0 * (SP_S_x0 * SP_S_temp * SP_S_temp); \
+            SP_S_xi2     =  (8.0 * SP_S_temp - 12.0 * SP_S_xi0) * SP_S_temp * SP_S_temp; \
+            SP_S_temp    =  (xg) - SP_S_x0; \
+            SP_S_pC      =  2.0 * SP_S_temp + Gf2 * (1.0 - SP_S_delta1 + SP_S_delta0 - (delta) * (1.0 + SP_S_xi1)); \
+            SP_S_qC      =  SP_S_temp * SP_S_temp - Gf2 * (SP_S_delta1 + SP_S_x0 - 1.0 + SP_S_delta0 - (delta) * (SP_S_x0 + 1.0 + SP_S_xi0)); \
+            SP_S_temp    =  2.0 - Gf2 * (SP_S_delta1 + SP_S_delta0 - (delta) * SP_S_xi2); \
+            SP_S_temp    =  SP_S_pC * SP_S_pC - 2.0 * (SP_S_qC * SP_S_temp); \
+            sp           =  SP_S_x0 + 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp))); \
+        end \
+    end
+
+//  sp_s_d function: surface potential calculation at drain (subset of function sp_s)
+//  --------------------------------------------------------------------------------------------------------------
+`define sp_s_d(sp,xg,xn,delta) \
+    if (abs(xg) <= margin) begin \
+        SP_S_temp1   =  inv_xi * inv_xi * `oneSixth * `invSqrt2; \
+        sp           =  (xg) * inv_xi * (1.0 + (xg) * (1.0 - (delta)) * Gf * SP_S_temp1); \
+    end else begin \
+        SP_S_bx      =  (xn) + 3.0; \
+        SP_S_eta     = `MINA(SP_S_x1, SP_S_bx, 5.0) - 0.5 * (SP_S_bx - sqrt(SP_S_bx * SP_S_bx + 5.0)); \
+        SP_S_temp    =  (xg) - SP_S_eta; \
+        SP_S_temp1   =  exp(-SP_S_eta); \
+        SP_S_temp2   =  1.0 / (2.0 + SP_S_eta * SP_S_eta); \
+        SP_S_xi0     =  SP_S_eta * SP_S_eta * SP_S_temp2; \
+        SP_S_xi1     =  4.0 * (SP_S_eta * SP_S_temp2 * SP_S_temp2); \
+        SP_S_xi2     =  (8.0 * SP_S_temp2 - 12.0 * SP_S_xi0) * SP_S_temp2 * SP_S_temp2; \
+        SP_S_a       = `MAX(1.0e-40, SP_S_temp * SP_S_temp - Gf2 * (SP_S_temp1 + SP_S_eta - 1.0 - (delta) * (SP_S_eta + 1.0 + SP_S_xi0))); \
+        SP_S_b       =  1.0 - 0.5 * (Gf2 * (SP_S_temp1 - (delta) * SP_S_xi2)); \
+        SP_S_c       =  2.0 * SP_S_temp + Gf2 * (1.0 - SP_S_temp1 - (delta) * (1.0 + SP_S_xi1)); \
+        SP_S_tau     =  (xn) - SP_S_eta + ln(SP_S_a / Gf2); \
+        `sigma2(SP_S_a, SP_S_b, SP_S_c, SP_S_tau, SP_S_eta, SP_S_x0) \
+        if (SP_S_x0 < `se05) begin \
+            SP_S_delta0  =  exp(SP_S_x0); \
+            SP_S_delta1  =  1.0 / SP_S_delta0; \
+            SP_S_delta0  =  (delta) * SP_S_delta0; \
+        end else begin \
+            if (SP_S_x0 > (xn) - `se05) begin \
+                SP_S_delta0  =  exp(SP_S_x0 - (xn)); \
+                SP_S_delta1  =  (delta) / SP_S_delta0; \
+            end else begin \
+                SP_S_delta0  = `ke05 / `P3((xn) - SP_S_x0 - `se05); \
+                SP_S_delta1  = `ke05 / `P3(SP_S_x0 - `se05); \
+            end \
+        end \
+        SP_S_temp    =  1.0 / (2.0 + SP_S_x0 * SP_S_x0); \
+        SP_S_xi0     =  SP_S_x0 * SP_S_x0 * SP_S_temp; \
+        SP_S_xi1     =  4.0 * (SP_S_x0 * SP_S_temp * SP_S_temp); \
+        SP_S_xi2     =  (8.0 * SP_S_temp-12.0 * SP_S_xi0) * SP_S_temp * SP_S_temp; \
+        SP_S_temp    =  (xg) - SP_S_x0; \
+        SP_S_pC      =  2.0 * SP_S_temp + Gf2 * (1.0 - SP_S_delta1 + SP_S_delta0 - (delta) * (1.0 + SP_S_xi1)); \
+        SP_S_qC      =  SP_S_temp * SP_S_temp - Gf2 * (SP_S_delta1 + SP_S_x0 - 1.0 + SP_S_delta0 - (delta) * (SP_S_x0 + 1.0 + SP_S_xi0)); \
+        SP_S_temp    =  2.0 - Gf2 * (SP_S_delta1 + SP_S_delta0 - (delta) * SP_S_xi2); \
+        SP_S_temp    =  SP_S_pC * SP_S_pC - 2.0 * (SP_S_qC * SP_S_temp); \
+        sp           =  SP_S_x0 + 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp))); \
+    end
+
+//  sp_ovInit function: surface potential calculation for the overlap regions initialization
+//  --------------------------------------------------------------------------------------------------------------
+`define sp_ovInit(GOV, GOV2, SP_OV_eps2, SP_OV_a, SP_OV_delta1) \
+    inv_GOV      =  1.0 / (GOV); \
+    SP_OV_eps    =  3.1 * (GOV) + 8.5; \
+    SP_OV_eps2   =  SP_OV_eps * SP_OV_eps; \
+    SP_OV_delta  =  0.5 * SP_OV_eps; \
+    if (inv_GOV < 0.06) begin \
+        SP_OV_a      =  64.0 * inv_GOV; \
+    end else begin \
+        if (inv_GOV <= 0.45) begin \
+            SP_OV_a      =  22.0 * inv_GOV + 3.0; \
+        end else begin \
+            if (inv_GOV <= 1.6) begin \
+                SP_OV_a      = -7.2 * inv_GOV + 15.5; \
+            end else begin \
+                SP_OV_a      =  (GOV); \
+            end \
+        end \
+    end \
+    SP_OV_delta1 =  SP_OV_delta + (GOV2) * 0.5 - (GOV) * sqrt(SP_OV_delta + (GOV2) * 0.25 + SP_OV_a);
+
+//  qi_edge    charge calculation for the edge transistor
+//  --------------------------------------------------------------------------------------------------------------
+`define qi_edge(qieff_edge,xg_edge,xn_edge) \
+    Q_EDGE_xsth  =  xbedge + (xn_edge); \
+    Q_EDGE_xth0  =  Q_EDGE_xsth +  Gfedge * sqrt(Q_EDGE_xsth); \
+    Q_EDGE_xth   =  Q_EDGE_xth0 + dxthedge; \
+    Q_EDGE_n     =  1.0 + Gfedge / (2.0 * sqrt(Q_EDGE_xsth)); \
+    Q_EDGE_n_inv =  1.0 / Q_EDGE_n; \
+    Q_EDGE_xgt   =  (xg_edge) - Q_EDGE_xth; \
+    if (Q_EDGE_xgt > -12.0) begin \
+        Q_EDGE_xgt0  =  Q_EDGE_xgt + lnGfedge2 - 1.0; \
+        Q_EDGE_xgt0e =  0.5 * (Q_EDGE_xgt0 + sqrt(Q_EDGE_xgt0 * Q_EDGE_xgt0 + 10.0)); \
+        Q_EDGE_qi0si =  Q_EDGE_xgt - Q_EDGE_n * ln(Q_EDGE_xgt0e) + lnGfedge2; \
+        Q_EDGE_qi0   =  0.5 * (Q_EDGE_qi0si + sqrt(Q_EDGE_qi0si * Q_EDGE_qi0si + 2.0)); \
+        `expl_high((Q_EDGE_xgt - Q_EDGE_qi0), Q_EDGE_exp_x) \
+        Q_EDGE_d0    =  Gfedge2 * Q_EDGE_exp_x; \
+        Q_EDGE_d0p   =  pow(Q_EDGE_d0, Q_EDGE_n_inv); \
+        Q_EDGE_sqerr =  Q_EDGE_n * Q_EDGE_n + (2.0 * (Q_EDGE_qi0 + Q_EDGE_n) - Q_EDGE_d0p) * Q_EDGE_d0p; \
+        Q_EDGE_errq  =  Q_EDGE_n * ((sqrt(Q_EDGE_sqerr) - Q_EDGE_n) / Q_EDGE_d0p - 1.0); \
+        qieff_edge   =  Q_EDGE_qi0 - Q_EDGE_errq; \
+    end else begin \
+        `expl_low((Q_EDGE_n_inv * (Q_EDGE_xgt + lnGfedge2)), qieff_edge) \
+    end
+
+//  CollapsableR macro: used for parasitic resistances
+//  --------------------------------------------------------------------------------------------------------------
+//  Note: if R=0, the Verilog-A compiler should recognize that the corresponding nodes can be collapsed
+`define CollapsableR(G, R, SN, N1, N2, Rname) \
+    if ((R) > 0.0) begin \
+        I(N1, N2)    <+  MULT_i * (G) * V(N1, N2); \
+        /* line below can be removed if compiler issue occurs */ \
+        I(N1, N2)    <+  white_noise(MULT_i * (SN), Rname); \
+    end else begin \
+        V(N1, N2)    <+  0.0; \
+    end
+
+//  Local variable declaration (used in SPCalculation_s/SPCalculation_d sections, PSP104_SPCalculation.include and SP macro)
+//  --------------------------------------------------------------------------------------------------------------
+`define SPcalcLocalVarDecl \
+    real phib, G_0, Vsbstar, thesatloc, arloc; \
+    real Vgb1, Vsbx, Gf, Gf2, xbct, xsbstar, xgct, xwict, xctmax, xnct, xmict, xsubct, xct, dCTG, ct_fact, phitct; \
+    real dphit1, phit1, inv_phit1, inv_Gf2, Ux, xg, Vdsp, delPhiB, xb, delxb, xno_s, xn_s, nscr, xthscr, xgtscr; \
+    real xgtscr0, qiscr0si, qiscr0, dscr0, qiscr, qbscr, fscr, xi, margin, inv_xi, x_s, delta_ns, xi0s, xi1s, xi2s; \
+    real delta_1s, Es, Ds, Ps, sqs, alphas, Rxcor, xgs, qis, qbs, rhob, rhog, GR, Eeffs, Mutmp, Gmobs, xitsb, wsat, factheta; \
+    real Vdsat_lim, thesat1, asat, x_inf0, midPhi0, qisat, qbsat, alphasat, Gmobmusat, Gmobcssat, GRsat, delta_gmob, x_inf; \
+    real ysat, za, x_0, x_sat, V_dsat, Vdse, Udse, xn_d, k_ds, delta_nd, x_d, x_ds, pC, qC, dps, xi0d, Ed, Pd, sqd, Dd; \
+    real qbd, x_m, Em, D_bar, Dm, Pm, xgm, eta_p, sqm, alpha, d0, x_pm, p_pd, q_pd, xi_pd, u_pd, km, km0, qim, qim1; \
+    real qbm, qeff, qeff1, Eeffm, Gmob, s1, Voxm, thesateff; \
+    real SP_S_temp, SP_S_temp1, SP_S_temp2; \
+    real SP_S_yg, SP_S_ysub, SP_S_eta, SP_S_a, SP_S_c, SP_S_tau, SP_S_y0, SP_S_delta0, SP_S_delta1, SP_S_xi0; \
+    real SP_S_xi1, SP_S_xi2, SP_S_pC, SP_S_qC, SP_xg1, SP_S_A_fac, SP_S_xbar, SP_S_w, SP_S_x1, SP_S_bx, SP_S_b; \
+    real SP_S_x0;
+
+//  TempInitialize macro: initialize the temperature dependent variables
+//  --------------------------------------------------------------------------------------------------------------
+`define TempInitialize \
+    TKD_sq       =  TKD * TKD; \
+    delT         =  TKD - TKR; \
+    rTn          =  TKR / TKD; \
+    ln_rTn       =  ln(rTn); \
+    phit         =  TKD * `KBOL / `QELE; \
+    inv_phit     =  1.0 / phit; \
+    Eg           =  1.179 - 9.025e-05 * TKD - 3.05e-07 * TKD_sq; \
+    phibFac      =  (1.045 + 4.5e-04 * TKD) * (0.523 + 1.4e-03 * TKD - 1.48e-06 * TKD_sq) * TKD_sq / 9.0e04; \
+    phibFac      = `MAX(phibFac, 1.0e-03); \
+    \
+    /*  Parameter for white noise of parasitic resistances */ \
+    nt0          =  4.0 * `KBOL * TKD;
+
+//  TempScaling macro: calculation of temperature dependent variables
+//  --------------------------------------------------------------------------------------------------------------
+`define TempScaling \
+    phib_dc      =  Eg + DPHIB_i + 2.0 * phit * ln(NEFF_i * pow(phibFac, -0.75) * 4.0e-26); \
+    phib_dc      = `MAX(phib_dc, 5.0e-02); \
+    G_0_dc       =  sqrt(2.0 * `QELE * NEFF_i * EPSSI * inv_phit) / CoxPrime; \
+    \
+    /* Poly-silicon depletion */ \
+    kp           =  0.0; \
+    np           =  0.0; \
+    if (NP_i > 0.0) begin \
+        arg2max      =  8.0e07 / tox_sq; \
+        np           = `MAX(NP_i, arg2max); \
+        np           = `MAX(5.0e24, np); \
+        kp           =  2.0 * CoxPrime * CoxPrime * phit / (`QELE * np * EPSSI); \
+    end \
+    \
+    /* QM corrections */ \
+    qlim2        =  100.0 * phit * phit; \
+    if (QMC > 0.0) begin \
+        qb0          =  sqrt(phit * G_0_dc * G_0_dc * phib_dc); \
+        dphibq       =  0.75 * qq * pow(qb0, `twoThirds); \
+        phib_dc      =  phib_dc + dphibq; \
+        G_0_dc       =  G_0_dc * (1.0 + 2.0 * `twoThirds * dphibq / qb0); \
+    end \
+    sqrt_phib_dc =  sqrt(phib_dc); \
+    phix_dc      =  0.95 * phib_dc; \
+    aphi_dc      =  0.0025 * phib_dc * phib_dc; \
+    bphi_dc      =  aphi_dc; \
+    phix2        =  0.5 * sqrt(bphi_dc); \
+    phix1_dc     =  `MINA(phix_dc - phix2, 0.0, aphi_dc); \
+    alpha_b      =  0.5 * (phib_dc + Eg); \
+    us1          =  sqrt(VSBNUD_i + phib_dc) - sqrt_phib_dc; \
+    us21         =  sqrt(VSBNUD_i + DVSBNUD_i + phib_dc) - sqrt_phib_dc - us1; \
+    \
+    /* Additional variables for separate surface potential calculation for CV */ \
+    phib_ac      =  Eg + DPHIB_i + DELVTAC_i + 2.0 * phit * ln(NEFFAC_i * pow(phibFac, -0.75) * 4.0e-26); \
+    phib_ac      = `MAX(phib_ac, 5.0e-02); \
+    G_0_ac       =  sqrt(2.0 * `QELE * NEFFAC_i * EPSSI * inv_phit) / CoxPrime; \
+    \
+    if (QMC > 0.0) begin \
+        qb0          =  sqrt(phit * G_0_ac * G_0_ac * phib_ac); \
+        dphibq       =  0.75 * qq * pow(qb0, `twoThirds); \
+        phib_ac      =  phib_ac + dphibq; \
+        G_0_ac       =  G_0_ac * (1.0 + 2.0 * `twoThirds * dphibq / qb0); \
+    end \
+    \
+    phix_ac      =  0.95 * phib_ac; \
+    aphi_ac      =  0.0025 * phib_ac * phib_ac; \
+    bphi_ac      =  aphi_ac; \
+    phix2        =  0.5 * sqrt(bphi_ac); \
+    phix1_ac     = `MINA(phix_ac - phix2, 0.0, aphi_ac); \
+    \
+    /* Temperature scaling of parameters*/ \
+    VFB_T        =  VFB_i + STVFB_i * delT * (1.0 + ST2VFB_i * delT) + DELVTO_i; \
+    \
+    /* Interface states parameters*/ \
+    tf_ct        =  exp(STCT_i * ln_rTn); \
+    CT_T         =  CT_i * tf_ct; \
+    CTG_T        =  CTG_i / rTn; \
+    \
+    /* Mobility parameters */ \
+    tf_bet       =  exp(STBET_i * ln_rTn); \
+    BETN_T       =  BETN_i * tf_bet; \
+    BET_i        =  FACTUO_i * BETN_T * CoxPrime; \
+    THEMU_T      =  THEMU_i * exp(STTHEMU_i * ln_rTn); \
+    tf_mue       =  exp(STMUE_i * ln_rTn); \
+    MUE_T        =  MUE_i * tf_mue; \
+    THECS_T      =  THECS_i * exp(STTHECS_i * ln_rTn); \
+    tf_cs        =  exp(STCS_i * ln_rTn); \
+    CS_T         =  CS_i * tf_cs; \
+    tf_xcor      =  exp(STXCOR_i * ln_rTn); \
+    XCOR_T       =  XCOR_i * tf_xcor; \
+    \
+    /* Series resistance */ \
+    tf_ther      =  exp(STRS_i * ln_rTn); \
+    RS_T         =  RS_i * tf_ther; \
+    THER_i       =  2.0 * BET_i * RS_T; \
+    \
+    /* Velocity saturation */ \
+    tf_thesat    =  exp(STTHESAT_i * ln_rTn); \
+    THESAT_T     =  THESAT_i * tf_thesat; \
+    THESATAC_T   =  THESATAC_i * tf_thesat; \
+    \
+    /* Impact ionization */ \
+    A2_T         =  A2_i * exp(-STA2_i * ln_rTn); \
+    \
+    /* Noise */ \
+    nt           =  FNT_i * 4.0 * `KBOL * TKD; \
+    Sfl_prefac   =  phit * phit * BET_i / Cox_over_q; \
+    \
+    /* Edge transistor */ \
+    if ((SWEDGE != 0) && (BETNEDGE_i > 0.0)) begin \
+        VFBEDGE_T    =  VFBEDGE_i + STVFBEDGE_i * delT + DELVTOEDGE_i; \
+        tf_betedge   =  exp(STBETEDGE_i * ln_rTn); \
+        BETNEDGE_T   =  BETNEDGE_i * tf_betedge; \
+        BETEDGE_i    =  FACTUOEDGE_i * BETNEDGE_T * CoxPrime; \
+        phit0edge    =  phit * (1.0 + CTEDGE_i * rTn); \
+        phibedge     =  Eg + DPHIBEDGE_i + 2.0 * phit0edge * ln(NEFFEDGE_i * pow(phibFac, -0.75) * 4.0e-26); \
+        phibedge     = `MAX(phibedge, 5.0e-02); \
+        Gfedge       =  sqrt(2.0 * `QELE * NEFFEDGE_i * EPSSI * inv_phit) / CoxPrime; \
+        Gfedge2      =  Gfedge * Gfedge; \
+        lnGfedge2    =  ln(Gfedge2); \
+        phixedge     =  0.95 * phibedge; \
+        aphiedge     =  0.0025 * phibedge * phibedge; \
+        bphiedge     =  aphiedge; \
+        phix2edge    =  0.5 * sqrt(bphiedge); \
+        phix1edge    = `MINA(phixedge - phix2edge, 0.0, aphiedge); \
+        Sfl_prefac_edge =  phit * phit * BETEDGE_i / Cox_over_q; \
+        ntedge       =  FNTEDGE_i * 4.0 * `KBOL * TKD; \
+    end else begin \
+        VFBEDGE_T    =  0.0; \
+        tf_betedge   =  1.0; \
+        BETNEDGE_T   =  0.0; \
+        BETEDGE_i    =  0.0; \
+        phit0edge    =  phit; \
+        phibedge     =  0.0; \
+        Gfedge       =  1.0; \
+        Gfedge2      =  1.0; \
+        lnGfedge2    =  0.0; \
+        phixedge     =  0.0; \
+        aphiedge     =  0.0; \
+        bphiedge     =  0.0; \
+        phix2edge    =  0.0; \
+        phix1edge    =  0.0; \
+        Sfl_prefac_edge =  0.0; \
+        ntedge       =  1.0; \
+    end
+
+//  Model's core for currents and charges calculation (initially into PSP104_SPCalculation.include)
+//  --------------------------------------------------------------------------------------------------------------
+`define SPCalculation_s \
+    \
+    /* Bias definition */  \
+    Vgb1         =  Vgb - VFB_T; \
+    Vsbx         =  Vsbstar + 0.5 * (V_ds - Vdsx); \
+    \
+    /* Bias dependence of interface states */ \
+    dCTG         =  1.0; \
+    if (CTG_i > 0.0) begin \
+        xbct         =  phib * inv_phit; \
+        xsbstar      =  Vsbx * inv_phit; \
+        xgct         =  Vgb1 * inv_phit; \
+        temp1        =  1.0 + 0.5 * G_0 / sqrt(xbct); \
+        temp2        =  xbct + G_0 * sqrt(xbct); \
+        xwict        =  (xgct - temp2) / temp1 + 0.5 * xbct - (1.0 + CTB_i) * xsbstar; \
+        xctmax       =  0.5 * xbct + 2.0; \
+        xnct         =  xbct + xsbstar; \
+        temp1        =  xgct - xnct - G_0 * sqrt(xnct) - 2.0 * ln(xbct / G_0 + sqrt(xbct)); \
+        xmict        =  2.0 * temp1 + xctmax; \
+        temp1        = `MAXA(xwict, xmict, 20.0); \
+        temp2        =  2.0 * (xgct - xsbstar) - xctmax; \
+        xsubct       = `MINA(temp1, temp2, 20.0); \
+        temp1        = `MINA(xsubct, xctmax, 5.0); \
+        xct          = `MAXA(temp1, -xctmax, 20.0); \
+        temp2        =  CTG_T * (xct / xctmax + 1.0); \
+        `expl_low(temp2, dCTG) \
+    end \
+    ct_fact      =  1.0 + CT_T * dCTG; \
+    phitct       =  phit * ct_fact; \
+    \
+    /* Short channel effects */ \
+    dphit1       =  PSCE_i * (1.0 + PSCED_i * Vdsx) * (1.0 + PSCEB_i * Vsbx); \
+    phit1        =  phitct * (1.0 + dphit1); \
+    inv_phit1    =  1.0 / phit1; \
+    Gf           =  G_0 * sqrt(phit * inv_phit1); \
+    Gf2          =  Gf * Gf; \
+    inv_Gf2      =  1.0 / Gf2; \
+    Ux           =  Vsbstar * inv_phit1; \
+    xg           =  Vgb1 * inv_phit1; \
+    Vdsp         =  2.0 * Vdsx / (1.0 + sqrt(1.0 + CFD_i * Vdsx)); \
+    delPhiB      =  CF_i * Vdsp * (1.0 + CFB_i * Vsbx); \
+    xb           =  phib * inv_phit1; \
+    delxb        =  delPhiB * inv_phit1; \
+    xno_s        =  xb + Ux; \
+    xn_s         =  xno_s - delxb; \
+    \
+    /* Screening function in strong inversion */ \
+    fscr         =  1.0; \
+    nscr         =  1.0 + 0.5 * Gf / sqrt(xn_s); \
+    xthscr       =  xn_s + Gf * sqrt(xn_s) - nscr * ln(nscr - 1.0); \
+    xgtscr       =  (xg - xthscr) / nscr; \
+    if (xgtscr > - 20.0) begin \
+        xgtscr0      =  nscr * xgtscr - 1.0; \
+        temp         =  0.5 * (xgtscr0 + sqrt(xgtscr0 * xgtscr0 + 10.0)); \
+        qiscr0si     =  xgtscr - ln(temp); \
+        qiscr0       =  0.5 * (qiscr0si + sqrt(qiscr0si * qiscr0si + 2.0)); \
+        `expl_high((xgtscr - qiscr0), temp) \
+        dscr0        =  temp / nscr; \
+        temp         =  2.0 * (qiscr0 + 1.0) - dscr0; \
+        if (dscr0 > 1.0e-06) begin \
+            qiscr        =  nscr * (qiscr0 - (sqrt(1.0 + dscr0 * temp) - 1.0) / dscr0 + 1.0); \
+        end else begin \
+            qiscr        =  nscr * 0.5 * dscr0 * (1.0 + 0.25 * temp * temp); \
+        end \
+        qbscr        =  0.5 * Gf2 * (sqrt(1.0 + 4.0 / Gf2 * (xg - qiscr)) - 1.0); \
+        fscr         =  qbscr / (qbscr + qiscr); \
+    end \
+    xn_s         =  xno_s - fscr * delxb; \
+    \
+    /* Surface potential at source side */ \
+    xi           =  1.0 + Gf * `invSqrt2; \
+    margin       =  1.0e-05 * xi; \
+    inv_xi       =  1.0 /  xi; \
+    SP_S_x1      =  0.0; \
+    x_s          =  0.0; \
+    if (xn_s < `se) \
+        delta_ns     =  exp(-xn_s); \
+    else \
+        delta_ns     = `ke / `P3(xn_s - `se); \
+    `sp_s(x_s, xg, xn_s, delta_ns) \
+    \
+    /* Initialisation of some variables */ \
+    xi1s         =  0.0; \
+    xi2s         =  0.0; \
+    delta_1s     =  0.0; \
+    Es           =  0.0; \
+    Ds           =  0.0; \
+    Ps           =  0.0; \
+    sqs          =  0.0; \
+    alphas       =  1.0; \
+    Rxcor        =  1.0; \
+    xgs          =  xg - x_s; \
+    qis          =  0.0; \
+    qbs          =  phit1 * xgs; \
+    rhob         =  1.0; \
+    rhog         =  1.0; \
+    Gmobs        =  1.0; \
+    xitsb        =  1.0; \
+    factheta     =  1.0; \
+    \
+    if (xg > 0.0) begin \
+        temp         =  1.0 / (2.0 + x_s * x_s); \
+        xi0s         =  x_s * x_s * temp; \
+        xi1s         =  4.0 * (x_s * temp * temp); \
+        xi2s         =  (8.0 * temp - 12.0 * xi0s) * temp * temp; \
+        delta_1s     =  0.0; \
+        if (x_s < `se05) begin \
+            delta_1s     =  exp(x_s); \
+            Es           =  1.0 / delta_1s; \
+            delta_1s     =  delta_ns * delta_1s; \
+        end else if (x_s > (xn_s - `se05)) begin \
+            delta_1s     =  exp(x_s - xn_s); \
+            Es           =  delta_ns / delta_1s; \
+        end else begin \
+            delta_1s     = `ke05 / `P3(xn_s - x_s - `se05); \
+            Es           = `ke05 / `P3(x_s - `se05); \
+        end \
+        Ds           =  delta_1s - delta_ns * (x_s + 1.0 + xi0s); \
+        if (x_s < 1.0e-05) begin \
+            Ps           =  0.5 * (x_s * x_s * (1.0 - `oneThird * (x_s * (1.0 - 0.25 * x_s)))); \
+            Ds           = `oneSixth * (delta_ns * x_s * x_s * x_s * (1.0 + 1.75 * x_s)); \
+            temp         =  sqrt(1.0 - `oneThird * (x_s * (1.0 - 0.25 * x_s))); \
+            sqs          = `invSqrt2 * (x_s * temp); \
+            alphas       =  1.0 + `invSqrt2 * (Gf * (1.0 - 0.5 * x_s + `oneSixth * (x_s * x_s)) / temp); \
+        end else begin \
+            Ps           =  x_s - 1.0 + Es; \
+            sqs          =  sqrt(Ps); \
+            alphas        =  1.0 + 0.5 * (Gf * (1.0 - Es) / sqs); \
+        end \
+        \
+        /* Variables for calculation of drain saturation voltage */ \
+        Rxcor        =  (1.0 + 0.2 * XCOR_T * Vsbx) / (1.0 + XCOR_T * Vsbx); \
+        if (Ds > `ke05) begin \
+            xgs          =  Gf * sqrt(Ps + Ds); \
+            qis          =  Gf2 * Ds * phit1 / (xgs + Gf * sqs); \
+            qbs          =  sqs * Gf * phit1; \
+            if (RSB_i < 0.0) begin \
+                rhob         =  1.0 / (1.0 - RSB_i * Vsbx); \
+            end else begin \
+                rhob         =  1.0 + RSB_i * Vsbx; \
+            end \
+            if (RSG_i < 0.0) begin \
+                rhog         =  1.0 - RSG_i * qis; \
+            end else begin \
+                rhog         =  1.0 / (1.0 + RSG_i * qis); \
+            end \
+            GR           =  THER_i * rhob * rhog * qis; \
+            Eeffs        =  E_eff0 * (qbs + eta_mu * qis); \
+            temp1        =  ln(Ps / (Ps + Ds + 1.0e-14)); \
+            Mutmp        =  pow(Eeffs * MUE_T, THEMU_T) + CS_T * exp(0.5 * THECS_T * temp1); \
+            Gmobs        =  (1.0 + Mutmp + GR) * Rxcor; \
+            if (THESATB_i < 0.0) begin \
+                xitsb        =  1.0 / (1.0 - THESATB_i * Vsbx); \
+            end else begin \
+                xitsb        =  1.0 + THESATB_i * Vsbx; \
+            end \
+            temp2        =  qis * xitsb; \
+            wsat         =  temp2 / (THESATT_i + temp2); \
+            if (THESATG_i < 0.0) begin \
+                factheta     =  1.0 / (1.0 - THESATG_i * wsat); \
+            end else begin \
+                factheta     =  1.0 + THESATG_i * wsat; \
+            end \
+        end \
+    end /* (xg > 0.0) */
+
+`define SPCalculation_d \
+    /* Initialisation of some variables */ \
+    thesat1      =  0.0; \
+    Vdsat_lim    =  phit1 * `x_dsat_lim; \
+    V_dsat       =  Vdsat_lim; \
+    Vdse         =  V_ds; \
+    Udse         =  V_ds * inv_phit1; \
+    x_d          =  x_s; \
+    x_ds         =  0.0; \
+    dps          =  0.0; \
+    Ed           =  Es; \
+    Pd           =  Ps; \
+    Dd           =  Ds; \
+    qbd          =  qbs; \
+    x_m          =  x_s; \
+    Em           =  Es; \
+    Dm           =  Ds; \
+    Pm           =  Ps; \
+    xgm          =  xg - x_s; \
+    eta_p        =  1.0; \
+    alpha        =  1.0; \
+    sqm          =  0.0; \
+    qim          =  qis; \
+    qeff1        =  xgm * phit1; \
+    qim1         =  0.0; \
+    qbm          =  qbs; \
+    s1           =  0.0; \
+    Gmob         =  1.0; \
+    thesateff    =  thesatloc; \
+    Voxm         =  qeff1; \
+    \
+    if (xg > 0.0) begin \
+        /* Drain saturation voltage */ \
+        if (Ds > `ke05) begin \
+            thesateff    =  thesatloc * factheta; \
+            thesat1      =  thesateff / Gmobs; \
+            asat         =  xgs + 0.5 * Gf2; \
+            temp         =  Gf2 * delta_1s / asat / asat; \
+            if (temp > 1.0e-04) begin \
+                temp1        =  1.0 - temp; \
+                if (temp1 < 1.0e-10) begin \
+                    temp2        =  1.0; \
+                end else begin \
+                    temp2        =  1.0 - sqrt(temp1); \
+                end \
+            end else begin \
+                temp2        =  0.5 * temp; \
+            end \
+            x_inf0       =  temp2 * asat; \
+            midPhi0      =  0.475 * phit1 * x_inf0; \
+            qisat        =  qis - alphas * midPhi0; \
+            qbsat        =  phit1 * xgs - midPhi0 - qisat; \
+            alphasat     =  1.0 + 0.5 * Gf2 * phit1 / qbsat; \
+            temp         =  qbsat + eta_mu * qisat; \
+            Gmobmusat    =  pow(E_eff0 * temp * MUE_T, THEMU_T); \
+            temp1        =  THEMU_T * (alphasat * (1.0 - eta_mu) - 1.0) / temp * Gmobmusat; \
+            temp         =  qisat / qbsat; \
+            Gmobcssat    =  CS_T * pow(1.0 + temp, -THECS_T); \
+            temp2        =  THECS_T * (alphasat - 1.0 + 1.0 / (temp + 1.0)) / qbsat * Gmobcssat; \
+            GRsat        =  THER_i * rhob * rhog * qisat; \
+            delta_gmob   = -midPhi0 * (temp1 + temp2 - THER_i * rhob * rhog * alphasat) / (1.0 + Gmobmusat + Gmobcssat + GRsat); \
+            x_inf        =  (1.0 + delta_gmob) / (1.0 + 0.5 * delta_gmob) * x_inf0; \
+            ysat         =  phit1 * thesat1 * x_inf * `invSqrt2; \
+            if (CHNL_TYPE==`PMOS) begin \
+                ysat         =  ysat / sqrt(1.0 + ysat); \
+            end \
+            za           =  2.0 / (1.0 + sqrt(1.0 + 4.0 * ysat)); \
+            temp         =  za * ysat; \
+            x_0          =  x_inf * za * (1.0 + 0.86 * temp * (1.0 - temp * za) / (1.0 + 4.0 * temp * temp * za)); \
+            x_sat        = `fact_sat * x_0; \
+            temp         =  x_sat * (x_sat - 2.0 * asat) * inv_Gf2 / Ds; \
+            V_dsat       =  phit1 * (x_sat - ln(1.0 + `MAX(temp, -`fact_sat))); \
+        end else begin \
+            V_dsat       =  Vdsat_lim; \
+        end \
+        \
+        /* Effective drain voltage */ \
+        temp         =  1.0 + arloc; \
+        temp1        =  sqrt(temp) * V_ds / V_dsat; \
+        temp2        =  temp1 * temp1 + temp; \
+        temp         =  2.0 * temp1; \
+        Vdse         =  V_dsat * temp / (sqrt(temp2 - temp) + sqrt(temp2 + temp)); \
+        \
+        /* Surface potential at drain side */ \
+        Udse         =  Vdse * inv_phit1; \
+        xn_d         =  xn_s + Udse; \
+        if (Udse < `se) begin \
+            k_ds         =  exp(-Udse); \
+        end else begin \
+            k_ds         = `ke / `P3(Udse - `se); \
+        end \
+        delta_nd     =  delta_ns * k_ds; \
+        \
+        `sp_s_d(x_d, xg, xn_d, delta_nd) \
+        x_ds         =  x_d - x_s; \
+        \
+        /* Approximations for extremely small x_ds: capacitance calculation */ \
+        if (x_ds < 1.0e-10) begin \
+            pC           =  2.0 * (xg - x_s) + Gf2 * (1.0 - Es + delta_1s * k_ds - delta_nd * (1.0 + xi1s)); \
+            qC           =  Gf2 * (1.0 - k_ds) * Ds; \
+            temp         =  2.0 - Gf2 * (Es + delta_1s * k_ds - delta_nd * xi2s); \
+            temp         =  pC * pC - 2.0 * (temp * qC); \
+            x_ds         =  2.0 * (qC / (pC + sqrt(temp))); \
+            x_d          =  x_s + x_ds; \
+        end \
+        dps          =  x_ds * phit1; \
+        \
+        xi0d         =  x_d * x_d / (2.0 + x_d * x_d); \
+        if (x_d < `se05) begin \
+            Ed           =  exp(-x_d); \
+            if (x_d < 1.0e-05) begin \
+                Pd           =  0.5 * (x_d * x_d * (1.0 - `oneThird * (x_d * (1.0 - 0.25 * x_d)))); \
+                temp         =  sqrt(1.0 - `oneThird * (x_d * (1.0 - 0.25 * x_d))); \
+                sqd          = `invSqrt2 * (x_d * temp); \
+                Dd           = `oneSixth * delta_nd * x_d * x_d * x_d * (1.0 + 1.75 * x_d); \
+            end else begin \
+                Pd           =  x_d - 1.0 + Ed; \
+                sqd          =  sqrt(Pd); \
+                Dd           =  delta_nd * (1.0 / Ed - x_d - 1.0 - xi0d); \
+            end \
+        end else begin \
+            if (x_d > (xn_d - `se05)) begin \
+                temp         =  exp(x_d - xn_d); \
+                Ed           =  delta_nd / temp; \
+                Dd           =  temp - delta_nd * (x_d + 1.0 + xi0d); \
+            end else begin \
+                Ed           = `ke05 / `P3(x_d - `se05); \
+                temp         = `ke05 / `P3(xn_d - x_d - `se05); \
+                Dd           =  temp - delta_nd * (x_d + 1.0 + xi0d); \
+            end \
+            Pd           =  x_d - 1.0 + Ed; \
+            sqd          =  sqrt(Pd); \
+        end \
+        qbd          =  sqd * Gf * phit1; \
+        \
+        /* Mid-point surface potential */ \
+        x_m          =  0.5 * (x_s + x_d); \
+        Em           =  0.0; \
+        temp         =  Ed * Es; \
+        if (temp > 0.0) begin \
+            Em           =  sqrt(temp); \
+        end \
+        D_bar        =  0.5 * (Ds + Dd); \
+        Dm           =  D_bar + 0.125 * (x_ds * x_ds * (Em - 2.0 * inv_Gf2)); \
+        \
+        if (x_m < 1.0e-5) begin \
+            Pm           =  0.5 * (x_m * x_m * (1.0 - `oneThird * (x_m * (1.0 - 0.25 * x_m)))); \
+            xgm          =  Gf * sqrt(Dm + Pm); \
+            \
+            /* Polysilicon depletion */ \
+            if (kp > 0.0) begin \
+                eta_p        =  1.0 / sqrt(1.0 + kp * xgm); \
+            end /* (kp > 0.0) */ \
+            temp         =  sqrt(1.0 - `oneThird * (x_m * (1.0 - 0.25 * x_m))); \
+            sqm          = `invSqrt2 * (x_m * temp); \
+            alpha        =  eta_p + `invSqrt2 * (Gf * (1.0 - 0.5 * x_m + `oneSixth * (x_m * x_m)) / temp); \
+        end else begin \
+            Pm           =  x_m - 1.0 + Em; \
+            xgm          =  Gf * sqrt(Dm + Pm); \
+            \
+            /* Polysilicon depletion */ \
+            if (kp > 0.0) begin \
+                d0           =  1.0 - Em + 2.0 * (xgm * inv_Gf2); \
+                eta_p        =  1.0 / sqrt(1.0 + kp * xgm); \
+                temp         =  eta_p / (eta_p + 1.0); \
+                x_pm         =  kp * (temp * temp * Gf2 * Dm); \
+                p_pd         =  2.0 * (xgm - x_pm) + Gf2 * (1.0 - Em + Dm); \
+                q_pd         =  x_pm * (x_pm - 2.0 * xgm); \
+                xi_pd        =  1.0 - 0.5 * (Gf2 * (Em + Dm)); \
+                u_pd         =  q_pd * p_pd / (p_pd * p_pd - xi_pd * q_pd); \
+                x_m          =  x_m + u_pd; \
+                km           =  exp(u_pd); \
+                Em           =  Em / km; \
+                Dm           =  Dm * km; \
+                Pm           =  x_m - 1.0 + Em; \
+                xgm          =  Gf * sqrt(Dm + Pm); \
+                km0          =  1.0 - Em + 2.0 * (xgm * eta_p * inv_Gf2); \
+                x_ds         =  x_ds * km * (d0 + D_bar) / (km0 + km * D_bar); \
+                dps          =  x_ds * phit1; \
+            end /* (kp > 0.0) */ \
+            sqm          =  sqrt(Pm); \
+            alpha        =  eta_p + 0.5 * (Gf * (1.0 - Em) / sqm); \
+        end \
+        \
+        /* Mid-point charges */ \
+        qim          =  phit1 * (Gf2 * Dm / (xgm + Gf * sqm)); \
+        qim1         =  qim + phit1 * alpha; \
+        qbm          =  sqm * Gf * phit1; \
+        \
+        /* Series resistance */ \
+        if (RSG_i < 0.0) begin \
+            rhog         = 1.0 - RSG_i * qim; \
+        end else begin \
+            rhog         = 1.0 / (1.0 + RSG_i * qim); \
+        end \
+        GR           =  THER_i * rhob * rhog * qim; \
+        \
+        /* Mobility reduction */ \
+        qeff         =  qbm + eta_mu * qim; \
+        qeff1        =  qbm + eta_mu1 * qim; \
+        Eeffm        =  E_eff0 * qeff; \
+        temp1        =  ln(Pm / (Pm + Dm + 1.0e-14)); \
+        Mutmp        =  pow(Eeffm * MUE_T, THEMU_T) + CS_T * exp(0.5 * THECS_T * temp1); \
+        Gmob         =  (1.0 + Mutmp + GR) * Rxcor; \
+        \
+        /* Variables for calculation of channel length modulation */ \
+        s1           =  ln((1.0 + (V_ds - dps) * inv_VP) / (1.0 + (Vdse - dps) * inv_VP)); \
+        \
+        /* Variables for calculation of velocity saturation */ \
+        temp2        =  qim * xitsb; \
+        wsat         =  temp2 / (THESATT_i + temp2); \
+        if (THESATG_i < 0.0) begin \
+            factheta     =  1.0 / (1.0 - THESATG_i * wsat); \
+        end else begin \
+            factheta     =  1.0 + THESATG_i * wsat; \
+        end \
+        thesateff    =  thesatloc * factheta; \
+        \
+        /* Variables for calculation of intrinsic charges and gate current */ \
+        Voxm         =  xgm * phit1; \
+        \
+    end /* (xg > 0.0) */

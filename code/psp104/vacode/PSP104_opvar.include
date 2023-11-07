@@ -1,0 +1,629 @@
+//======================================================================================
+//======================================================================================
+// Filename: PSP104_opvar.include
+//======================================================================================
+//======================================================================================
+//
+//  (c) Copyright notice
+//
+//  Since 2015 until today, PSP has been co-developed by NXP Semiconductors and
+//  CEA-Leti. For this part of the model, each claim undivided ownership and copyrights
+//  Since 2012 until 2015, PSP has been co-developed by NXP Semiconductors and
+//  Delft University of Technology. For this part of the model, each claim undivided
+//  ownership and copyrights
+//  Until and including 2011, PSP has been co-developed by NXP Semiconductors and
+//  Arizona State University. For this part of the model, NXP Semiconductors claims
+//  undivided ownership and copyrights.
+//
+//
+//  Version: 104.0.0 (PSP), 200.6.2 (JUNCAP), September 2023
+//
+//======================================================================================
+//======================================================================================
+//
+// Further information can be found in the file releasenotesPSP104.txt
+//
+
+//  Declaration of variables for operating point info
+//  --------------------------------------------------------------------------------------------------------------
+`define OPVarDecl \
+integer CHNL_OP_TYPE; \
+real temp_op; \
+real P_D_op, facvsb0_op, vtho_op, Vsbstar_op, facvsb_op, vth_op, vtho_i, vth_i, vthac_i; \
+\
+/* Device geometry and temperature */ \
+`OPP(weff              ,"m"            ,"Effective channel width for geometrical models") \
+`OPP(leff              ,"m"            ,"Effective channel length for geometrical models") \
+`OPP(tk                ,"K"            ,"Device Temperature") \
+\
+/* Bias convention */ \
+`OPP(ctype             ,""             ,"Flag for channel type") \
+`OPP(sdint             ,""             ,"Flag for source-drain interchange") \
+\
+/* Currents and voltages */ \
+`OPM(id                ,"A"            ,"Total drain current") \
+`OPM(ig                ,"A"            ,"Total gate current") \
+`OPM(is                ,"A"            ,"Total source current") \
+`OPM(ib                ,"A"            ,"Total bulk current") \
+`OPM(idsch             ,"A"            ,"Drain-source channel current incl. edge transistor current") \
+`OPM(ids               ,"A"            ,"Drain-current current, excl. edge transistor currents, avalanche, tunnel, GISL, GIDL, and junction currents") \
+`OPM(igs               ,"A"            ,"Gate-source tunneling current") \
+`OPM(igd               ,"A"            ,"Gate-drain tunneling current") \
+`OPM(igb               ,"A"            ,"Gate-bulk tunneling current") \
+`OPM(idb               ,"A"            ,"Drain to bulk current") \
+`OPM(isb               ,"A"            ,"Source to bulk current") \
+`OPM(igcs              ,"A"            ,"Gate-channel tunneling current (source component)") \
+`OPM(igcd              ,"A"            ,"Gate-channel tunneling current (drain component)") \
+`OPM(iavl              ,"A"            ,"Substrate current due to weak avalanche") \
+`OPM(igisl             ,"A"            ,"Gate-induced source leakage current") \
+`OPM(igidl             ,"A"            ,"Gate-induced drain leakage current") \
+`OPM(ijs               ,"A"            ,"Total source junction current") \
+`OPM(ijd               ,"A"            ,"Total drain junction current") \
+`OPM(idsedge           ,"A"            ,"Drain current of edge transistors") \
+`OPP(vgs               ,"V"            ,"Gate-source voltage") \
+`OPP(vgd               ,"V"            ,"Gate-drain voltage") \
+`OPP(vds               ,"V"            ,"Drain-source voltage") \
+`OPP(vsb               ,"V"            ,"Source-bulk voltage") \
+`OPP(vdb               ,"V"            ,"Drain-bulk voltage") \
+`OPP(vgs_i             ,"V"            ,"Internal gate-source voltage") \
+`OPP(vgd_i             ,"V"            ,"Internal gate-drain voltage") \
+`OPP(vds_i             ,"V"            ,"Internal drain-source voltage") \
+`OPP(vsb_i             ,"V"            ,"Internal source-bulk voltage") \
+`OPP(vdb_i             ,"V"            ,"Internal drain-bulk voltage") \
+`OPP(vtho              ,"V"            ,"Zero-bias threshold voltage") \
+`OPP(vth               ,"V"            ,"Threshold voltage including back bias and drain bias effects") \
+`OPP(vthac             ,"V"            ,"Threshold voltage for charge in case of lateral non-uniform doping profile (SWDELVTAC=1)") \
+`OPP(vgt               ,"V"            ,"Effective gate drive voltage including back bias and drain bias effects") \
+`OPP(vdsat             ,"V"            ,"Drain saturation voltage at actual bias") \
+`OPP(vdsat_marg        ,"V"            ,"Saturation limit") \
+\
+/* Small-signal equivalent circuit */ \
+`OPM(gm_i              ,"S"            ,"Intrinsic transconductance") \
+`OPM(gmb_i             ,"S"            ,"Intrinsic substrate transconductance") \
+`OPM(gds_i             ,"S"            ,"Intrinsic output conductance") \
+`OPM(gm                ,"S"            ,"Transconductance") \
+`OPM(gmb               ,"S"            ,"Substrate transconductance") \
+`OPM(gds               ,"S"            ,"Output conductance") \
+`OPM(gjs               ,"S"            ,"Source junction conductance") \
+`OPM(gjd               ,"S"            ,"Drain junction conductance") \
+`OPM(cdd_i             ,"F"            ,"Intrinsic drain capacitance") \
+`OPM(cdg_i             ,"F"            ,"Intrinsic drain-gate capacitance") \
+`OPM(cds_i             ,"F"            ,"Intrinsic drain-source capacitance") \
+`OPM(cdb_i             ,"F"            ,"Intrinsic drain-bulk capacitance") \
+`OPM(cgd_i             ,"F"            ,"Intrinsic gate-drain capacitance") \
+`OPM(cgg_i             ,"F"            ,"Intrinsic gate capacitance") \
+`OPM(cgs_i             ,"F"            ,"Intrinsic gate-source capacitance") \
+`OPM(cgb_i             ,"F"            ,"Intrinsic gate-bulk capacitance") \
+`OPM(csd_i             ,"F"            ,"Intrinsic source-drain capacitance") \
+`OPM(csg_i             ,"F"            ,"Intrinsic source-gate capacitance") \
+`OPM(css_i             ,"F"            ,"Intrinsic source capacitance") \
+`OPM(csb_i             ,"F"            ,"Intrinsic source-bulk capacitance") \
+`OPM(cbd_i             ,"F"            ,"Intrinsic bulk-drain capacitance") \
+`OPM(cbg_i             ,"F"            ,"Intrinsic bulk-gate capacitance") \
+`OPM(cbs_i             ,"F"            ,"Intrinsic bulk-source capacitance") \
+`OPM(cbb_i             ,"F"            ,"Intrinsic bulk capacitance") \
+`OPM(cgsol             ,"F"            ,"Total gate-source overlap capacitance") \
+`OPM(cgdol             ,"F"            ,"Total gate-drain overlap capacitance") \
+`OPM(cgbol             ,"F"            ,"Total gate-bulk overlap capacitance") \
+`OPM(cjs               ,"F"            ,"Total source junction capacitance") \
+`OPM(cjd               ,"F"            ,"Total drain junction capacitance") \
+`OPD(rgate             ,"Ohm"          ,"Gate resistance") \
+`OPD(rdrain            ,"Ohm"          ,"External drain resistance") \
+`OPD(rsource           ,"Ohm"          ,"External source resistance") \
+`OPD(rbbulk            ,"Ohm"          ,"Bulk resistance") \
+`OPD(rjundrain         ,"Ohm"          ,"Drain-side bulk resistance") \
+`OPD(rjunsource        ,"Ohm"          ,"Source-side bulk resistance") \
+`OPD(rbwell            ,"Ohm"          ,"Well resistance") \
+\
+/* Noise sources and associated FoM */ \
+`OPM(sfl               ,"A^2/Hz"       ,"Flicker noise current spectral density at 1 Hz") \
+`OPM(sid               ,"A^2/Hz"       ,"White noise current spectral density") \
+`OPM(sig               ,"A^2/Hz"       ,"Induced gate noise current spectral density at 1 Hz") \
+`OPP(cigid             ,""             ,"Imaginary part of correlation coefficient between Sig and Sid") \
+`OPP(fknee             ,"Hz"           ,"Cross-over frequency above which white noise is dominant") \
+`OPM(sigs              ,"A^2/Hz"       ,"Gate-source current noise spectral density") \
+`OPM(sigd              ,"A^2/Hz"       ,"Gate-drain current noise spectral density") \
+`OPM(sibs              ,"A^2/Hz"       ,"Bulk-source current noise spectral density") \
+`OPM(sibd              ,"A^2/Hz"       ,"Impact ionization current noise spectral density") \
+`OPM(sijs              ,"A^2/Hz"       ,"Total source junction current noise spectral density") \
+`OPM(sijd              ,"A^2/Hz"       ,"Total drain junction current noise spectral density") \
+`OPM(sirg              ,"A^2/Hz"       ,"Noise spectral density induced by the gate resistance") \
+`OPM(sird              ,"A^2/Hz"       ,"Noise spectral density induced by the external drain resistance") \
+`OPM(sirs              ,"A^2/Hz"       ,"Noise spectral density induced by the external source resistance") \
+`OPM(sirbulk           ,"A^2/Hz"       ,"Noise spectral density induced by the bulk resistance") \
+`OPM(sirjund           ,"A^2/Hz"       ,"Noise spectral density induced by the drain-side bulk resistance") \
+`OPM(sirjuns           ,"A^2/Hz"       ,"Noise spectral density induced by the source-side bulk resistance") \
+`OPM(sirwell           ,"A^2/Hz"       ,"Noise spectral density induced by the well resistance") \
+\
+/* Analog FoM */ \
+`OPP(vgain             ,""             ,"Transistor gain") \
+`OPD(rout              ,"Ohm"          ,"Small-signal output resistance") \
+`OPP(vearly            ,"V"            ,"Equivalent Early voltage") \
+`OPM(beff              ,"A/V^2"        ,"Gain factor") \
+`OPM(gmoverid          ,"S"            ,"Transconductor efficiency") \
+`OPP(ft                ,"Hz"           ,"Unity gain frequency at actual bias")
+
+`define OPVarDecl_she \
+/* Power dissipation and temperature rise induced by SHE */ \
+`OPM(pdiss             ,"W"            ,"Power dissipation") \
+`OPP(dtsh              ,"K"            ,"Temperature rise due to self heating")
+
+
+//  Configuration of variables for operating point info
+//  --------------------------------------------------------------------------------------------------------------
+`define OPConfig \
+if ((SWOPPMOS > 0)&&(CHNL_TYPE == `PMOS)) begin \
+    CHNL_OP_TYPE = -1; \
+end else begin \
+    CHNL_OP_TYPE =  1; \
+end
+
+//  Threshold voltages calculation
+//  --------------------------------------------------------------------------------------------------------------
+`define OPVThvarCalc \
+P_D_op      =  1.0 + 0.25 * (Gf * kp); \
+facvsb0_op  =  phib + 2.0 * phit; \
+temp_op     =  VFB_T + P_D_op * facvsb0_op; \
+vtho_op     =  temp_op + Gf * sqrt(phit1 * facvsb0_op); \
+Vsbstar_op  =  Vsbstar; \
+facvsb_op   =  Vsbstar + facvsb0_op - delPhiB; \
+temp_op     =  VFB_T + P_D_op * facvsb_op; \
+vth_op      =  temp_op - Vsbstar_op + Gf * sqrt(phit1 * facvsb_op);
+
+
+//  S/D-interchange of .dc OP output variables
+//  --------------------------------------------------------------------------------------------------------------
+`define OPVarSDInterFunc(vard,vars) \
+temp_op     =  vard; \
+vard        =  vars; \
+vars        =  temp_op;
+
+
+//  Operating point info: local variables declaration
+//  --------------------------------------------------------------------------------------------------------------
+`define OPLocVarDecl \
+\
+real sdint_op, idsch_op, igcd_op, igcs_op, igisl_op, igidl_op, idsedge_op, iavld_op, iavls_op, igsov_op, igdov_op; \
+real ijs_op, ijd_op, igs_op, igd_op, idb_op, isb_op, id_op, ig_op, is_op, ib_op, ids_op, vgs_op, vds_op, vsb_op; \
+real vgs_i_op, vds_i_op, vsb_i_op, vgt_op, vdsat_marg_op, gmp_op, gmbp_op, gdsp_op, gmsp_op, gmsbp_op, gsdp_op; \
+real gm_ip_op, gmb_ip_op, gds_ip_op, gbsp_op, gbdp_op, gjs_op, gjd_op, fjd, fjs, hjd, hjs, fs, fd, gfact, gm_i_op; \
+real gmb_i_op, gds_i_op, gm_op, gmb_op, gds_op, gms_op, gmsb_op, gsd_op, cdd_ip_op, cdg_ip_op, cdb_ip_op, cgd_ip_op; \
+real cgg_ip_op, cgb_ip_op, cbd_ip_op, cbg_ip_op, cbb_ip_op, cgsol_p_op, cgdol_p_op, cgbol_op, cjs_p_op, cjd_p_op; \
+real cdd_p_op, cdg_p_op, cdb_p_op, cgd_p_op, cgg_p_op, cgb_p_op, cbd_p_op, cbg_p_op, cbb_p_op, cgs_p_op, cbs_p_op; \
+real fcx, fcs, fcd, fcg, Ckg, Ckd, Ckb, Cks, cgsol_op, cgdol_op, cjs_op, cjd_op, fdeld, fdelg, fdelb, cdd_i_op; \
+real cdg_i_op, cdb_i_op, cgd_i_op, cgg_i_op, cgb_i_op, cbd_i_op, cbg_i_op, cbb_i_op, rdrain_op, rsource_op; \
+real rjundrain_op, rjunsource_op, sidp_op, sig1k_op, sigp_op, fknee_op, sigsp_op, sigdp_op, sibsp_op, sibdp_op; \
+real siavld_op, siavls_op, sigcsx_op, sigcdx_op, sigsov_op, sigdov_op, sijd_op, sijs_op, fg, fcx2, wnoi, fsigd; \
+real fsigs, fsigg, sfl_op, sid_op, sig_op, sigs_op, sigd_op, sibs_op, sibd_op, sirjund_op, sirjuns_op, sird_op; \
+real sirs_op, vgain_op, rout_op, vearly_op, gmoverid_op, beff_op, ft_op;
+
+
+//  Operating point info: standard OP-output variables
+//  --------------------------------------------------------------------------------------------------------------
+`define OPVarCalc \
+\
+/* S/D-interchange dependent variables */ \
+sdint_op    =  sigVds; \
+ids_op      =  I_ds; \
+igcd_op     =  I_gcd; \
+igcs_op     =  I_gcs; \
+igisl_op    =  I_gisl; \
+igidl_op    =  I_gidl; \
+idsedge_op  =  I_dsedge; \
+iavld_op    =  Iimpact; \
+iavls_op    =  0.0; \
+vgs_i_op    =  V_gs; \
+vds_i_op    =  V_ds; \
+vsb_i_op    =  V_sb; \
+siavld_op   =  shot_iavl; \
+siavls_op   =  0.0; \
+sigcsx_op   =  shot_igcsx; \
+sigcdx_op   =  shot_igcdx; \
+idsch_op    =  ids_op + idsedge_op; \
+gm_ip_op    =  CHNL_TYPE * ddx(idsch_op, V(gp)); \
+gmb_ip_op   =  CHNL_TYPE * ddx(idsch_op, V(bp)); \
+\
+/* S/D-interchange independent variables */ \
+if (sigVds < 0.0) begin \
+    igsov_op    =  Igdov; \
+    igdov_op    =  Igsov; \
+    ijs_op      =  ijun_d; \
+    ijd_op      =  ijun_s; \
+    igs_op      =  igcs_op + igsov_op; \
+    igd_op      =  igcd_op + igdov_op; \
+    isb_op      =  iavls_op + igisl_op - ijs_op + gmin * V(di, bp); \
+    idb_op      =  iavld_op + igidl_op - ijd_op + gmin * V(si, bp); \
+    id_op       =  idsch_op + idb_op - igd_op; \
+    is_op       = -(ids_op + idsedge_op + igs_op - isb_op); \
+    vgs_op      =  CHNL_TYPE * V(g, d); \
+    vds_op      =  CHNL_TYPE * V(s, d); \
+    vsb_op      =  CHNL_TYPE * V(d, b); \
+    vgt_op      =  vgs_op  - vth_i; \
+    vdsat_marg_op = vds_op - Vdsat_dc; \
+    gds_ip_op   =  CHNL_TYPE * ddx(idsch_op, V(si)); \
+    gdsp_op     =  CHNL_TYPE * ddx(id_op, V(si)); \
+    gsdp_op     = -CHNL_TYPE * ddx(is_op, V(si)); \
+    gbsp_op     =  CHNL_TYPE * ddx(iavls_op + igisl_op, V(di)) + gmin; \
+    gbdp_op     =  CHNL_TYPE * ddx(iavld_op + igidl_op, V(si)) + gmin; \
+    gjs_op      = -CHNL_TYPE * ddx(ijs_op, V(di)); \
+    gjd_op      = -CHNL_TYPE * ddx(ijd_op, V(si)); \
+    cdd_ip_op   =  CHNL_TYPE * ddx(Qs, V(si)); \
+    cgd_ip_op   = -CHNL_TYPE * ddx(Qg, V(si)); \
+    cbd_ip_op   = -CHNL_TYPE * ddx(Qb, V(si)); \
+    cdg_ip_op   = -CHNL_TYPE * ddx(Qs, V(gp)); \
+    cdb_ip_op   = -CHNL_TYPE * ddx(Qs, V(bp)); \
+    cgsol_p_op  =  CHNL_TYPE * ddx(Qfgd, V(gp)); \
+    cgdol_p_op  =  CHNL_TYPE * ddx(Qfgs, V(gp)); \
+    cjs_p_op    = -CHNL_TYPE * ddx(qjun_d, V(di)); \
+    cjd_p_op    = -CHNL_TYPE * ddx(qjun_s, V(si)); \
+    rdrain_op   =  RSE_i; \
+    rsource_op  =  RDE_i; \
+    rjundrain_op =  RJUNS_i; \
+    rjunsource_op =  RJUND_i; \
+    sigsov_op   =  shot_igdov; \
+    sigdov_op   =  shot_igsov; \
+    sijd_op     =  jnoisex_s; \
+    sijs_op     =  jnoisex_d; \
+    sird_op     =  rsourcenoise; \
+    sirs_op     =  rdrainnoise; \
+    sirjund_op  =  rjunsnoise; \
+    sirjuns_op  =  rjundnoise; \
+end else begin \
+    igsov_op    =  Igsov; \
+    igdov_op    =  Igdov; \
+    ijs_op      =  ijun_s; \
+    ijd_op      =  ijun_d; \
+    igs_op      =  igcs_op + igsov_op; \
+    igd_op      =  igcd_op + igdov_op; \
+    isb_op      =  iavls_op + igisl_op - ijs_op + gmin * V(si, bp); \
+    idb_op      =  iavld_op + igidl_op - ijd_op + gmin * V(di, bp); \
+    id_op       =  idsch_op + idb_op - igd_op; \
+    is_op       = -(ids_op + idsedge_op + igs_op - isb_op); \
+    vgs_op      =  CHNL_TYPE * V(g, s); \
+    vds_op      =  CHNL_TYPE * V(d, s); \
+    vsb_op      =  CHNL_TYPE * V(s, b); \
+    vgt_op      =  vgs_op - vth_i; \
+    vdsat_marg_op =  vds_op - Vdsat_dc; \
+    gds_ip_op   =  CHNL_TYPE * ddx(idsch_op, V(di)); \
+    gdsp_op     =  CHNL_TYPE * ddx(id_op, V(di)); \
+    gsdp_op     = -CHNL_TYPE * ddx(is_op, V(di)); \
+    gbsp_op     =  CHNL_TYPE * ddx(iavls_op + igisl_op, V(si)) + gmin; \
+    gbdp_op     =  CHNL_TYPE * ddx(iavld_op + igidl_op, V(di)) + gmin; \
+    gjs_op      = -CHNL_TYPE * ddx(ijs_op, V(si)); \
+    gjd_op      = -CHNL_TYPE * ddx(ijd_op, V(di)); \
+    cdd_ip_op   =  CHNL_TYPE * ddx(Qd, V(di)); \
+    cgd_ip_op   = -CHNL_TYPE * ddx(Qg, V(di)); \
+    cbd_ip_op   = -CHNL_TYPE * ddx(Qb, V(di)); \
+    cdg_ip_op   = -CHNL_TYPE * ddx(Qd, V(gp)); \
+    cdb_ip_op   = -CHNL_TYPE * ddx(Qd, V(bp)); \
+    cgsol_p_op  =  CHNL_TYPE * ddx(Qfgs, V(gp)); \
+    cgdol_p_op  =  CHNL_TYPE * ddx(Qfgd, V(gp)); \
+    cjs_p_op    = -CHNL_TYPE * ddx(qjun_s, V(si)); \
+    cjd_p_op    = -CHNL_TYPE * ddx(qjun_d, V(di)); \
+    rdrain_op   =  RDE_i; \
+    rsource_op  =  RSE_i; \
+    rjundrain_op =  RJUND_i; \
+    rjunsource_op =  RJUNS_i; \
+    sigsov_op   =  shot_igsov; \
+    sigdov_op   =  shot_igdov; \
+    sijd_op     =  jnoisex_d; \
+    sijs_op     =  jnoisex_s; \
+    sird_op     =  rdrainnoise; \
+    sirs_op     =  rsourcenoise; \
+    sirjund_op  =  rjundnoise; \
+    sirjuns_op  =  rjunsnoise; \
+end \
+gmp_op      =  CHNL_TYPE * ddx(id_op, V(gp)); \
+gmbp_op     =  CHNL_TYPE * ddx(id_op, V(bp)); \
+gmsp_op     = -CHNL_TYPE * ddx(is_op, V(gp)); \
+gmsbp_op    = -CHNL_TYPE * ddx(is_op, V(bp)); \
+\
+ig_op       =  igs_op + igd_op + I_gb; \
+ib_op       = -(I_gb + idb_op + isb_op); \
+cgg_ip_op   =  CHNL_TYPE * ddx(Qg, V(gp)); \
+cgb_ip_op   = -CHNL_TYPE * ddx(Qg, V(bp)); \
+cbg_ip_op   = -CHNL_TYPE * ddx(Qb, V(gp)); \
+cbb_ip_op   =  CHNL_TYPE * ddx(Qb, V(bp)); \
+cgbol_op    =  CHNL_TYPE * ddx(Qgb_ov, V(gp)); \
+sidp_op     =  sqid * sqid; \
+temp_op     =  2.0e03 * `PI * CGeff; \
+sig1k_op    =  temp_op * temp_op * mig; \
+sigp_op     =  nt * sig1k_op / (1.0 + sig1k_op * mig); \
+if (sidp_op <= 0.0) begin \
+    fknee_op    =  0.0; \
+end else begin \
+    fknee_op    =  S_fl / sidp_op; \
+end \
+sigsp_op    =  sigcsx_op + sigsov_op; \
+sigdp_op    =  sigcdx_op + sigdov_op; \
+sibsp_op    =  sijs_op + siavls_op; \
+sibdp_op    =  sijd_op + siavld_op;
+
+
+`define OPVarCalcRacc \
+/* Access resistance dependent variables */ \
+if (SWOPREXT > 0.0) begin \
+    fjd         =  rdrain_op * (gbdp_op + gjd_op); \
+    fjs         =  rsource_op * (gbsp_op + gjs_op); \
+    hjd         =  1.0 + fjd; \
+    hjs         =  1.0 + fjs; \
+    fs          =  rsource_op * (gm_ip_op + gmb_ip_op + gds_ip_op); \
+    fd          =  rdrain_op * gds_ip_op; \
+    gfact       =  1.0 / (hjs * hjd + fs * hjd + fd * hjs); \
+    gm_i_op     =  gfact * hjs * gm_ip_op; \
+    gmb_i_op    =  gfact * (gmb_ip_op - fjs * gm_ip_op); \
+    gds_i_op    =  gfact * gds_ip_op; \
+    gm_op       =  gfact * hjs * gmp_op; \
+    gmb_op      =  gfact * (gmbp_op - fjs * gmp_op); \
+    gds_op      =  gfact * gdsp_op; \
+    gms_op      =  gfact * hjd * gmsp_op; \
+    gmsb_op     =  gfact * (gmsbp_op - fjd * gmsp_op); \
+    gsd_op      =  gfact * gsdp_op; \
+    fcx         =  1.0 / (1.0 + fs + fd); \
+    fcs         =  fs * fcx; \
+    fcd         =  fd * fcx; \
+    cgdol_op    =  cgdol_p_op * (1.0 - fcd); \
+    cgsol_op    =  cgsol_p_op * (1.0 - fcs); \
+    cjd_op      =  cjd_p_op * (1.0 - fcd); \
+    cjs_op      =  cjs_p_op * (1.0 - fcs); \
+    cdd_p_op    =  cdd_ip_op + cgdol_p_op + cjd_p_op; \
+    cdg_p_op    =  cdg_ip_op + cgdol_p_op; \
+    cdb_p_op    =  cdb_ip_op + cjd_p_op; \
+    cgd_p_op    =  cgd_ip_op + cgdol_p_op; \
+    cgg_p_op    =  cgg_ip_op + cgsol_p_op + cgdol_p_op + cgbol_op; \
+    cgb_p_op    =  cgb_ip_op + cgbol_op; \
+    cbd_p_op    =  cbd_ip_op + cjd_p_op; \
+    cbg_p_op    =  cbg_ip_op + cgbol_op; \
+    cbb_p_op    =  cbb_ip_op + cgbol_op + cjs_p_op + cjd_p_op; \
+    cgs_p_op    =  cgg_p_op - cgd_p_op - cgb_p_op; \
+    cbs_p_op    =  cbb_p_op - cbd_p_op - cbg_p_op; \
+    fcg         =  fcs + gm_ip_op * RG_i * fcx; \
+    Ckg         =  cdg_p_op * fcx - cbg_p_op * fcs + cgg_p_op * fcg; \
+    Ckd         =  cdd_p_op * fcx + cbd_p_op * fcs + cgd_p_op * fcg; \
+    Ckb         =  cdb_p_op * fcx + cbb_p_op * fcs - cgb_p_op * fcg; \
+    Cks         =  Ckg - Ckd + Ckb; \
+    fdeld       =  (Ckd * rdrain_op - Cks * rsource_op) * fcx; \
+    fdelg       =  (cgd_p_op * rdrain_op - cgs_p_op * rsource_op) * fcx; \
+    fdelb       =  (cbd_p_op * rdrain_op - cbs_p_op * rsource_op) * fcx; \
+    cdd_i_op    =  Ckd - gds_ip_op * fdeld - cgdol_op - cjd_op; \
+    cdg_i_op    =  Ckg + gm_ip_op * fdeld - cgdol_op; \
+    cdb_i_op    =  Ckb + gmb_ip_op * fdeld - cjd_op; \
+    cgd_i_op    =  cgd_p_op - gds_ip_op * fdelg - cgdol_op; \
+    cgg_i_op    =  cgg_p_op + gm_ip_op * fdelg - cgsol_op - cgdol_op - cgbol_op; \
+    cgb_i_op    =  cgb_p_op - gmb_ip_op * fdelg - cgbol_op; \
+    cbd_i_op    =  cbd_p_op - gds_ip_op * fdelb - cjd_op; \
+    cbg_i_op    =  cbg_p_op - gm_ip_op * fdelb - cgbol_op; \
+    cbb_i_op    =  cbb_p_op + gmb_ip_op * fdelb - cgbol_op - cjs_op - cjd_op; \
+    fg          =  RG_i * gm_ip_op; \
+    fcx2        =  fcx * fcx; \
+    wnoi        =  2.0e03 * `PI; \
+    fsigd       =  cgd_p_op * rdrain_op * wnoi; \
+    fsigs       =  cgs_p_op * rsource_op * wnoi; \
+    fsigg       =  cgg_p_op * RG_i * wnoi; \
+    sfl_op      =  fcx2 * S_fl; \
+    sid_op      =  fcx2 * (sidp_op + fs * fs * sirs_op + fd * fd * sird_op + fg * fg * rgatenoise); \
+    sig_op      =  fsigd * fsigd * sird_op + fsigs * fsigs * sirs_op + fsigg * fsigg * rgatenoise + sigp_op; \
+    sigs_op     =  fcx2 * sigsp_op; \
+    sigd_op     =  fcx2 * sigdp_op; \
+    sibs_op     =  fcx2 * sibsp_op; \
+    sibd_op     =  fcx2 * sibdp_op; \
+end else begin \
+    gm_i_op     =  gm_ip_op; \
+    gmb_i_op    =  gmb_ip_op; \
+    gds_i_op    =  gds_ip_op; \
+    gm_op       =  gmp_op; \
+    gmb_op      =  gmbp_op; \
+    gds_op      =  gdsp_op; \
+    gms_op      =  gmsp_op; \
+    gmsb_op     =  gmsbp_op; \
+    gsd_op      =  gsdp_op; \
+    cgdol_op    =  cgdol_p_op; \
+    cgsol_op    =  cgsol_p_op; \
+    cjd_op      =  cjd_p_op; \
+    cjs_op      =  cjs_p_op; \
+    cdd_i_op    =  cdd_ip_op; \
+    cdg_i_op    =  cdg_ip_op; \
+    cdb_i_op    =  cdb_ip_op; \
+    cgd_i_op    =  cgd_ip_op; \
+    cgg_i_op    =  cgg_ip_op; \
+    cgb_i_op    =  cgb_ip_op; \
+    cbd_i_op    =  cbd_ip_op; \
+    cbg_i_op    =  cbg_ip_op; \
+    cbb_i_op    =  cbb_ip_op; \
+    sfl_op      =  S_fl; \
+    sid_op      =  sidp_op; \
+    sig_op      =  sigp_op; \
+    sigs_op     =  sigsp_op; \
+    sigd_op     =  sigdp_op; \
+    sibs_op     =  sibsp_op; \
+    sibd_op     =  sibdp_op; \
+end
+
+
+`define OPVarCalcAnalog \
+/* Analog FoM */ \
+if (abs(gds_i_op) < 1.0e-18) begin \
+    vgain_op    =  0.0; \
+    rout_op     =  0.0; \
+    vearly_op   =  0.0; \
+end else begin \
+    vgain_op    =  gm_i_op / gds_i_op; \
+    rout_op     =  1.0 / gds_i_op; \
+    vearly_op   =  ids_op / gds_i_op; \
+end \
+if (ids_op < 1.0e-18) begin \
+    gmoverid_op =  0.0; \
+end else begin \
+    gmoverid_op =  gm_i_op / ids_op; \
+end \
+if (abs(vgt_op) < 1.0e-12) begin \
+    beff_op     =  0.0; \
+end else begin \
+    beff_op     =  2.0 * ids_op / (vgt_op * vgt_op); \
+end \
+temp_op     =  cgg_i_op + cgsol_op + cgdol_op + cgbol_op; \
+if (abs(temp_op) < 1.0e-30) begin \
+    ft_op       =  0.0; \
+end else begin \
+    ft_op       =  gm_i_op / (2.0 * `PI * temp_op); \
+end
+
+
+`define OPVarSDInter \
+/* S/D Interchange management for SWOPDRAIN=1 */ \
+if ((sigVds < 0.0) && (SWOPDRAIN > 0)) begin \
+    sdint_op    =  1.0; \
+    `OPVarSDInterFunc(id_op, is_op) \
+    idsch_op    = -idsch_op; \
+    ids_op      = -ids_op; \
+    `OPVarSDInterFunc(igd_op, igs_op) \
+    `OPVarSDInterFunc(idb_op, isb_op) \
+    `OPVarSDInterFunc(igcd_op, igcs_op) \
+    `OPVarSDInterFunc(igidl_op, igisl_op) \
+    `OPVarSDInterFunc(ijd_op, ijs_op) \
+    idsedge_op  = -idsedge_op; \
+    vgs_op      =  vgs_op - vds_op; \
+    vsb_op      =  vds_op + vsb_op; \
+    vds_op      = -vds_op; \
+    vgs_i_op    =  vgs_i_op - vds_i_op; \
+    vsb_i_op    =  vds_i_op + vsb_i_op; \
+    vds_i_op    = -vds_i_op; \
+    gm_op       =  gms_op; \
+    gmb_op      =  gmsb_op; \
+    gds_op      =  gsd_op; \
+    `OPVarSDInterFunc(gjd_op, gjs_op) \
+    cgd_i_op    =  cgg_i_op - cgb_i_op - cgd_i_op; \
+    cbd_i_op    =  cbb_i_op - cbg_i_op - cbd_i_op; \
+    cdd_i_op    =  cdd_i_op - cdg_i_op - cdb_i_op + cgd_i_op + cbd_i_op; \
+    cdg_i_op    =  cgg_i_op - cdg_i_op - cbg_i_op; \
+    cdb_i_op    =  cbb_i_op - cgb_i_op - cdb_i_op; \
+    `OPVarSDInterFunc(cgdol_op, cgsol_op) \
+    `OPVarSDInterFunc(cjd_op, cjs_op) \
+    `OPVarSDInterFunc(rdrain_op, rsource_op) \
+    `OPVarSDInterFunc(rjundrain_op, rjunsource_op) \
+    `OPVarSDInterFunc(sigd_op, sigs_op) \
+    `OPVarSDInterFunc(sibd_op, sibs_op) \
+    `OPVarSDInterFunc(sijd_op, sijs_op) \
+    `OPVarSDInterFunc(sird_op, sirs_op) \
+    `OPVarSDInterFunc(sirjund_op, sirjuns_op) \
+end
+
+
+`define OPVarDef \
+\
+/* Device geometry and temperature */ \
+weff        =  WE; \
+leff        =  LE; \
+tk          =  TKD; \
+\
+/* Bias convention */ \
+sdint       =  sdint_op; \
+ctype       =  CHNL_TYPE; \
+\
+/* Currents and voltages */ \
+id          =  CHNL_OP_TYPE * MULT_i * id_op; \
+ig          =  CHNL_OP_TYPE * MULT_i * ig_op; \
+is          =  CHNL_OP_TYPE * MULT_i * is_op; \
+ib          =  CHNL_OP_TYPE * MULT_i * ib_op; \
+idsch       =  CHNL_OP_TYPE * MULT_i * idsch_op; \
+ids         =  CHNL_OP_TYPE * MULT_i * ids_op; \
+igs         =  CHNL_OP_TYPE * MULT_i * igs_op; \
+igd         =  CHNL_OP_TYPE * MULT_i * igd_op; \
+igb         =  CHNL_OP_TYPE * MULT_i * I_gb; \
+idb         =  CHNL_OP_TYPE * MULT_i * idb_op; \
+isb         =  CHNL_OP_TYPE * MULT_i * isb_op; \
+igcs        =  CHNL_OP_TYPE * MULT_i * igcs_op; \
+igcd        =  CHNL_OP_TYPE * MULT_i * igcd_op; \
+iavl        =  CHNL_OP_TYPE * MULT_i * Iimpact; \
+igisl       =  CHNL_OP_TYPE * MULT_i * igisl_op; \
+igidl       =  CHNL_OP_TYPE * MULT_i * igidl_op; \
+ijs         =  CHNL_OP_TYPE * MULT_i * ijs_op; \
+ijd         =  CHNL_OP_TYPE * MULT_i * ijd_op; \
+idsedge     =  CHNL_OP_TYPE * MULT_i * idsedge_op; \
+vgs         =  CHNL_OP_TYPE * vgs_op; \
+vgd         =  CHNL_OP_TYPE * (vgs_op - vds_op); \
+vds         =  CHNL_OP_TYPE * vds_op; \
+vsb         =  CHNL_OP_TYPE * vsb_op; \
+vdb         =  CHNL_OP_TYPE * (vds_op + vsb_op); \
+vgs_i       =  CHNL_OP_TYPE * vgs_i_op; \
+vgd_i       =  CHNL_OP_TYPE * (vgs_i_op - vds_i_op); \
+vds_i       =  CHNL_OP_TYPE * vds_i_op; \
+vsb_i       =  CHNL_OP_TYPE * vsb_i_op; \
+vdb_i       =  CHNL_OP_TYPE * (vds_i_op + vsb_i_op); \
+vtho        =  CHNL_OP_TYPE * vtho_i; \
+vth         =  CHNL_OP_TYPE * vth_i; \
+vthac       =  CHNL_OP_TYPE * vthac_i; \
+vgt         =  CHNL_OP_TYPE * vgt_op; \
+vdsat       =  CHNL_OP_TYPE * Vdsat_dc; \
+vdsat_marg  =  CHNL_OP_TYPE * vdsat_marg_op; \
+\
+/* Small-signal equivalent circuit */ \
+gm_i        =  MULT_i * gm_i_op; \
+gmb_i       =  MULT_i * gmb_i_op; \
+gds_i       =  MULT_i * gds_i_op; \
+gm          =  MULT_i * gm_op; \
+gmb         =  MULT_i * gmb_op; \
+gds         =  MULT_i * gds_op; \
+gjs         =  MULT_i * gjs_op; \
+gjd         =  MULT_i * gjd_op; \
+cdd_i       =  MULT_i * cdd_i_op; \
+cdg_i       =  MULT_i * cdg_i_op; \
+cdb_i       =  MULT_i * cdb_i_op; \
+cds_i       =  cdd_i - cdg_i - cdb_i; \
+cgg_i       =  MULT_i * cgg_i_op; \
+cgd_i       =  MULT_i * cgd_i_op; \
+cgb_i       =  MULT_i * cgb_i_op; \
+cgs_i       =  cgg_i - cgd_i - cgb_i; \
+cbb_i       =  MULT_i * cbb_i_op; \
+cbd_i       =  MULT_i * cbd_i_op; \
+cbg_i       =  MULT_i * cbg_i_op; \
+cbs_i       =  cbb_i - cbd_i - cbg_i; \
+css_i       =  cds_i + cgs_i + cbs_i; \
+csd_i       =  cdd_i - cgd_i - cbd_i; \
+csg_i       =  cgg_i - cdg_i - cbg_i; \
+csb_i       =  cbb_i - cdb_i - cgb_i; \
+cgsol       =  MULT_i * cgsol_op; \
+cgdol       =  MULT_i * cgdol_op; \
+cgbol       =  MULT_i * cgbol_op; \
+cjs         =  MULT_i * cjs_op; \
+cjd         =  MULT_i * cjd_op; \
+rgate       =  RG_i; \
+rdrain      =  rdrain_op; \
+rsource     =  rsource_op; \
+rbbulk      =  RBULK_i; \
+rjundrain   =  rjundrain_op; \
+rjunsource  =  rjunsource_op; \
+rbwell      =  RWELL_i; \
+\
+/* Noise sources and associated FoM */ \
+sfl         =  MULT_i * sfl_op; \
+sid         =  MULT_i * sid_op; \
+sig         =  MULT_i * sig_op; \
+cigid       =  c_igid; \
+fknee       =  fknee_op; \
+sigs        =  MULT_i * sigs_op; \
+sigd        =  MULT_i * sigd_op; \
+sibs        =  MULT_i * sibs_op; \
+sibd        =  MULT_i * sibd_op; \
+sijs        =  MULT_i * sijs_op; \
+sijd        =  MULT_i * sijd_op; \
+sirg        =  rgatenoise; \
+sird        =  sird_op; \
+sirs        =  sirs_op; \
+sirbulk     =  rbulknoise; \
+sirjund     =  sirjund_op; \
+sirjuns     =  sirjuns_op; \
+sirwell     =  rwellnoise; \
+\
+/* Analog FoM */ \
+vgain       =  vgain_op; \
+rout        =  rout_op; \
+vearly      =  vearly_op; \
+beff        =  beff_op; \
+gmoverid    =  gmoverid_op; \
+ft          =  ft_op;
+
+//  Operating point info: Local parameters output for PSP-model including self-heating effect
+`define OPVarDef_she \
+pdiss       =  MULT_i * Pdiss; \
+dtsh        =  TKD - TKA;

@@ -42,6 +42,7 @@ openvaf -D__NGSPICE__ -o psp102.osdi ../psp102/vacode/psp102.va
 openvaf -D__NGSPICE__ -o juncap200.osdi ../psp103/vacode/juncap200.va
 openvaf -D__NGSPICE__ -o psp103.osdi ../psp103/vacode/psp103.va
 openvaf -D__NGSPICE__ -o psp103_nqs.osdi ../psp103/vacode/psp103_nqs.va
+openvaf -D__NGSPICE__ -o psp104.osdi ../psp104/vacode/psp104.va
 openvaf -D__NGSPICE__ -o r2_cmc.osdi ../r2_cmc/vacode/r2_cmc.va
 openvaf -D__NGSPICE__ -o r2_et_cmc.osdi ../r2_cmc/vacode/r2_et_cmc.va
 openvaf -D__NGSPICE__ -o r3_cmc.osdi ../r3_cmc/vacode/r3_cmc.va

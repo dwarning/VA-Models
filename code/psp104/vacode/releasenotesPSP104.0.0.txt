@@ -1,0 +1,209 @@
+﻿
+======================================================================================
+======================================================================================
+                      Silicon Integration Initiative (Si2)
+                    Compact Model Coalition In-Code Statement
+
+  Software is distributed as is, completely without warranty or service support. The
+  Commissariat a l'energie atomique et aux energies alternatives (CEA), NXP
+  Semiconductors, and Delft University of Technology, along with their employees are
+  not liable for the condition or performance of the software.
+
+  NXP Semiconductors, Delft University of Technology, and CEA own the copyright and
+  grant users a perpetual, irrevocable, worldwide, non-exclusive, royalty-free license
+  with respect to the software as set forth below.
+  
+  NXP Semiconductors, Delft University of Technology, and CEA hereby disclaim all
+  implied warranties.
+
+  NXP Semiconductors, Delft University of Technology, and CEA grant the users the right
+  to modify, copy, and redistribute the software and documentation, both within the
+  user's organization and externally, subject to the following restrictions:
+  
+    1. The users agree not to charge for the NXP Semiconductors, Delft University of
+       Technology, and CEA-developed code itself but may charge for additions,
+       extensions, or support.
+
+    2. In any product based on the software, the users agree to acknowledge NXP
+       Semiconductors, Delft University of Technology, and CEA that developed the
+       software. This acknowledgement shall appear in the product documentation.
+
+    3. Redistributions to others of source code and documentation must retain the
+       copyright notice, disclaimer, and list of conditions.
+
+    4. Redistributions to others in binary form must reproduce the copyright notice,
+       disclaimer, and list of conditions in the documentation and/or other materials
+       provided with the distribution.
+
+  CMC In-Code Statement Revision: 104.0.0 (PSP), 2023/09/01
+                                  200.6.2 (JUNCAP), 2021/04/21
+
+======================================================================================
+======================================================================================
+
+  Authors: G.D.J. Smit, A.J. Scholten, and D.B.M. Klaassen (NXP Semiconductors)
+           O. Rozeau, S. Martinie and T. Poiroux (CEA-Leti)
+
+  Former contributers:
+           G. Gildenblat, W. Yao, Z. Zhu, X. Li and W. Wu (Arizona State University)
+           R. van Langevelde (Philips Research)
+           R. van der Toorn (Delft University of Technology)
+           J.C. Barbé (CEA-Leti)
+
+  The most recent version of the model code, the documentation, and contact
+  information can be found on:
+
+       http://www.cea.fr/cea-tech/leti/pspsupport
+       
+======================================================================================
+======================================================================================
+
+This package consists of the following files:
+
+     - releasenotesPSP104.txt         This file
+
+     - psp104.va                      Main file for PSP model
+     - psp104t.va                     Main file for PSP model with self heating
+     - psp104_nqs.va                  Main file for PSP model with NQS-effects
+     - juncap200.va                   Main file for JUNCAP2 stand-alone model
+
+     - Common104_macrodefs.include    Common macro definitions
+     - PSP104_macrodefs.include       Macro definitions for PSP
+     - PSP104_module.include          Actual model code for intrinsic MOS model
+     - PSP104_parlist.include         Model parameter list for PSP model
+     - PSP104_scaling.include         Geometry scaling equations for PSP model
+     - PSP104_opvar.include           Definition and calculation of .DC OP variables
+     - PSP104_nqs_macrodefs.include   All macro definitions for PSP-NQS
+     - JUNCAP200_macrodefs.include    Macro definitions for JUNCAP2 model
+     - JUNCAP200_parlist.include      JUNCAP2 parameter list
+     - JUNCAP200_varlist.include      JUNCAP2 variable declarations
+     - JUNCAP200_InitModel.include    JUNCAP2 model initialization code
+
+     - discipline.h                   Definition of electrical and thermal analog nodes and branches
+
+======================================================================================
+======================================================================================
+
+Usage
+-----
+
+Depending which model one wants to use, one should compile one of the four .va-files
+(psp104.va, psp104t.va, psp104_nqs.va, and juncap200.va). The module names are
+"PSP104VA", "PSP104TVA", and "PSPNQS104VA" (for QS, self heating, and NQS,
+respectively), and "JUNCAP200" for the JUNCAP2-model.
+
+
+======================================================================================
+======================================================================================
+
+Release notes vA-code of PSP 104.0.0 (September 2023)
+----------------------------------------------------
+
+Changes include:
+    -  New DIBL model based on a quasi-Fermi level correction including screening
+       effect in inversion regime.
+    -  Addition of new parameters to improve gm description in saturation regime:
+       THESATT (local model), THESATTO (global model), POTHESATT (binning model).
+    -  Bug-fix on the Cgb-Cbg reciprocity in strong inversion regime when the bias-
+       dependence of interface states model is activated with high value of CTG/CTB
+       parameters.
+    -  New calculation of the drain saturation voltage to improve the drain saturation
+       current of long channel transistors.
+    -  Improvement of S/D symmetry for low value of AX parameter thanks to the
+       introduction of a new mathematical function of linear-saturation transition.
+    -  Bug-fix on the source and drain access resistances should be independent to the
+       number of fingers NF.
+    -  Removal of the effective doping bias-dependence effect in the surface potential
+       equation and its associated parameters VNSUB. VNSUBO. POVNSUB. NSLP, NSLPO,
+       PONSLP, DNSUB, DNSUBO and PODNSUB.
+    -  New binning equations with "hybrid" approach to mix physical scaling rules with
+       binning rules.
+    -  Revisited DC operating point output variables with 2 new switches to configure
+       the conventions: pmos convention with SWOPPMOS and drain configuration with
+       SWOPDRAIN. The effects of access gate, drain and source resistances can be
+       included in the calculation of several OP-output quantities using SWOPREXT.
+
+PSP 104.0.0 is not backward compatible with the previous versions.
+
+======================================================================================
+======================================================================================
+
+Release notes vA-code of JUNCAP 200.6.2 (April 2022)
+----------------------------------------------------
+
+No modifications on JUNCAP 200.6.2
+
+=====================================================================================
+======================================================================================
+The authors want to thank Laurent Lemaitre and Colin McAndrew (Freescale)
+for their help with ADMS and the implementation of the model code. Geoffrey
+Coram (Analog Devices) is acknowledged for input concerning the Verilog-A
+implementation of the model.
+
+=====================================================================================
+=====================================================================================
+=====================================================================================
+=====================================================================================
+
+Vampyre 1.9.0 output on psp104.va (same for psp104_nqs and psp104t.va)
+-----------------------------------------------------------------------
+
+Reading psp104.va
+Reading discipline.h
+Reading Common104_macrodefs.include
+Reading JUNCAP200_macrodefs.include
+Reading PSP104_macrodefs.include
+Reading PSP104_opvar.include
+Reading PSP104_module.include
+Reading PSP104_parlist.include
+Reading JUNCAP200_parlist.include
+Reading JUNCAP200_varlist.include
+Reading JUNCAP200_InitModel.include
+Reading PSP104_scaling.include
+WARNING in file PSP104_parlist.include, line 31: Parameter 'LEVEL' was never used
+STYLE in file psp104.va, line 47: Parameters should be declared in lowercase
+WARNING in file psp104.va, line 47: Variable 'initial_instance.JUNCAPexpressInit.qjungat' was never used
+WARNING in file psp104.va, line 47: Variable 'initial_instance.JUNCAPexpressInit.qjunsti' was never used
+WARNING in file psp104.va, line 47: Variable 'initial_instance.JUNCAPexpressInit.qjunbot' was never used
+
+Module: PSP104VA
+
+Instance parameters (33)
+
+Model parameters (863)
+
+Operating-point variables (100)
+
+
+=====================================================================================
+=====================================================================================
+
+Vampyre 1.9.0 output on juncap200.va
+------------------------------------
+
+Reading juncap200.va
+Reading discipline.h
+Reading Common104_macrodefs.include
+Reading JUNCAP200_macrodefs.include
+Reading JUNCAP200_parlist.include
+Reading JUNCAP200_varlist.include
+Reading JUNCAP200_InitModel.include
+STYLE in file juncap200.va, line 46: Port names should be lowercase ('a' not 'A')
+STYLE in file juncap200.va, line 46: Port names should be lowercase ('k' not 'K')
+WARNING in file juncap200.va, line 57: Parameter 'LEVEL' was never used
+STYLE in file juncap200.va, line 299: Parameters should be declared in lowercase
+WARNING in file juncap200.va, line 299: Variable 'initial_instance.JUNCAPexpressInit.qjunbot' was never used
+WARNING in file juncap200.va, line 299: Variable 'initial_instance.JUNCAPexpressInit.qjungat' was never used
+WARNING in file juncap200.va, line 299: Variable 'initial_instance.JUNCAPexpressInit.qjunsti' was never used
+
+Module: JUNCAP200
+
+Instance parameters (7):
+    AB, CFACTOR, IFACTOR, LG, LS, MULT, TRISE
+
+Model parameters (50)
+
+Operating-point variables (19):
+    cj, cjbot, cjgat, cjosbot, cjosgat, cjossti, cjsti, idsatsbot,
+    idsatsgat, idsatssti, ij, ijbot, ijgat, ijsti, si, vak, vbisbot,
+    vbisgat, vbissti
