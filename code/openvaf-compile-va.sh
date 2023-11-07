@@ -37,7 +37,7 @@ openvaf -D__NGSPICE__ -o bjt504t.osdi ../mextram/vacode504p12p1/bjt504t.va
 openvaf -D__NGSPICE__ -o bjt505.osdi ../mextram/vacode/bjt505.va
 openvaf -D__NGSPICE__ -o bjt505t.osdi ../mextram/vacode/bjt505t.va
 openvaf -D__NGSPICE__ -o mosvar.osdi ../MOSVAR/vacode/mosvar.va
-openvaf -D__NGSPICE__ -o mvsg_cmc.osdi ../mvsg/vacode/mvsg_cmc.va
+openvaf -D__NGSPICE__ -o mvsg_cmc.osdi ../mvsg/vacode/mvsg_cmc_3.2.0.va
 openvaf -D__NGSPICE__ -o psp102.osdi ../psp102/vacode/psp102.va
 openvaf -D__NGSPICE__ -o juncap200.osdi ../psp103/vacode/juncap200.va
 openvaf -D__NGSPICE__ -o psp103.osdi ../psp103/vacode/psp103.va

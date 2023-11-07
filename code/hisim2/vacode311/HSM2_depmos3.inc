@@ -2,14 +2,14 @@
 
  HiSIM (Hiroshima University STARC IGFET Model)
  Copyright (C) 2000-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2019 Hiroshima University
 
  MODEL NAME : HiSIM2
- ( VERSION : 3  SUBVERSION : 2  REVISION : 0 )
- Model Parameter 'VERSION' : 3.20
+ ( VERSION : 3  SUBVERSION : 1  REVISION : 1 )
+ Model Parameter 'VERSION' : 3.11
  FILE : HSM2_depmos3.inc
 
- Date : 2021.10.08
+ Date : 2019.04.04
 
  released by Hiroshima University
 
@@ -33,7 +33,7 @@
 //License.
 //
 //
-//The HiSIM2 standard has been supported by the members of
+//The HiSIM_SOI standard has been supported by the members of
 //Silicon Integration Initiative's Compact Model Coalition. A
 //link to the most recent version of this standard can be found
 //at:
@@ -680,115 +680,115 @@ begin : HSM2_depmos3
             end
         end
 
-        //    if( Tnp == 0 ) begin  //removed to resolve VAMPyRE WARNING (Bias-dependent '==': if (Tnp==0))
-        //      W_res  = 0.0 ;  // Ids_res = 0
-        //      Ps0_res = 0.0 ;
-        //    end else begin
+        if ( Tnp == 0 ) begin
+            W_res  = 0.0 ;  // Ids_res = 0
+            Ps0_res = 0.0 ;
+        end else begin
 
-        Ps0DEP  = Ps0 ;
-        Vgp_ws = Vgp_res;
-        flg_conv = 0 ;
+            Ps0DEP  = Ps0 ;
+            Vgp_ws = Vgp_res;
+            flg_conv = 0 ;
 
-        for ( lp_s0 = 1 ; lp_s0 <= `lp_se_max ; lp_s0 = lp_s0 + 1 ) begin
+            for ( lp_s0 = 1 ; lp_s0 <= `lp_se_max ; lp_s0 = lp_s0 + 1 ) begin
 
-            T1 = beta * Ps0DEP ;
-            T2 = exp(T1) ;
-            if ( Ps0DEP >= 0.0 ) begin
-                Q_s0 = - cnst0 * sqrt(T2 - 1.0 - T1 + 1e-15) ;
-                Q_s0_dPs = 0.5 * cnst0 * cnst0 / Q_s0 * (beta * T2 - beta ) ;
-            end else begin
-                T3 = exp( - beta * (Ps0DEP - DEPRBR*Vbsc )) ;
-                T4 = exp(   beta *           DEPRBR*Vbsc  ) ;
-                Q_s0 = cnst0 * sqrt(T2 - 1.0 - T1 + cnst1 * (T3 - T4) + 1e-15) ;
-                T5 = 0.5 * cnst0 * cnst0 / Q_s0 ;
-                Q_s0_dPs = T5 * (beta * T2 - beta + cnst1 * ( - beta * T3) ) ;
-            end
-
-            if (flg_conv) begin
-                lp_s0 = `lp_se_max + 1 ; // exit Newton Loop
-            end else begin
-                PF1  = Cox * (Vgp_ws - Ps0DEP) + Q_s0 ;
-                PF11 = - Cox + Q_s0_dPs ;
-                dPs  = - PF1 / PF11 ;
-                if (abs(dPs) < `ps_conv2*100) begin
-                    flg_conv = 1 ;
-                end else if (dPs > `dP_max) begin
-                    dPs = `dP_max ;
-                end else if (dPs < - `dP_max) begin
-                    dPs = - `dP_max ;
+                T1 = beta * Ps0DEP ;
+                T2 = exp(T1) ;
+                if ( Ps0DEP >= 0.0 ) begin
+                    Q_s0 = - cnst0 * sqrt(T2 - 1.0 - T1 + 1e-15) ;
+                    Q_s0_dPs = 0.5 * cnst0 * cnst0 / Q_s0 * (beta * T2 - beta ) ;
+                end else begin
+                    T3 = exp( - beta * (Ps0DEP - DEPRBR*Vbsc )) ;
+                    T4 = exp(   beta *           DEPRBR*Vbsc  ) ;
+                    Q_s0 = cnst0 * sqrt(T2 - 1.0 - T1 + cnst1 * (T3 - T4) + 1e-15) ;
+                    T5 = 0.5 * cnst0 * cnst0 / Q_s0 ;
+                    Q_s0_dPs = T5 * (beta * T2 - beta + cnst1 * ( - beta * T3) ) ;
                 end
 
-                Ps0DEP = Ps0DEP + dPs ;
+                if (flg_conv) begin
+                    lp_s0 = `lp_se_max + 1 ; // exit Newton Loop
+                end else begin
+                    PF1  = Cox * (Vgp_ws - Ps0DEP) + Q_s0 ;
+                    PF11 = - Cox + Q_s0_dPs ;
+                    dPs  = - PF1 / PF11 ;
+                    if (abs(dPs) < `ps_conv2*100) begin
+                        flg_conv = 1 ;
+                    end else if (dPs > `dP_max) begin
+                        dPs = `dP_max ;
+                    end else if (dPs < - `dP_max) begin
+                        dPs = - `dP_max ;
+                    end
 
-            end // End of flg_conv=1
+                    Ps0DEP = Ps0DEP + dPs ;
 
-        end // End of Newton Loop
+                end // End of flg_conv=1
+
+            end // End of Newton Loop
 
 
-        if ( flg_conv == 0 ) begin
-            $write( "*** warning(HiSIM2(%m)): Went Over Iteration Maximum(Pres)\n" ) ;
-            $write( " Vbse   = %7.3f Vdse = %7.3f Vgse = %7.3f\n" ,Vbse , Vdse , Vgse ) ;
-        end
+            if ( flg_conv == 0 ) begin
+                $write( "*** warning(HiSIM2(%m)): Went Over Iteration Maximum(Pres)\n" ) ;
+                $write( " Vbse   = %7.3f Vdse = %7.3f Vgse = %7.3f\n" ,Vbse , Vdse , Vgse ) ;
+            end
 
-        Ps0_res = Ps0DEP ; // save to Ps0_res;
-        // As all sorts of charge were taken into account for
-        // the solution of Poisson equation, Ps0_res does not serve right for estimation of Vdssat where mobile carriers
-        // are depleted. A separate iteration loop will be setup for this purpose although it should look alike to the codes for the
-        // Vdssat1d calculation.  Vgp_res and Vgp can be different by a small amount due to Vgs or Vgsz and due to dVth-dPpg.
+            Ps0_res = Ps0DEP ; // save to Ps0_res;
+            // As all sorts of charge were taken into account for
+            // the solution of Poisson equation, Ps0_res does not serve right for estimation of Vdssat where mobile carriers
+            // are depleted. A separate iteration loop will be setup for this purpose although it should look alike to the codes for the
+            // Vdssat1d calculation.  Vgp_res and Vgp can be different by a small amount due to Vgs or Vgsz and due to dVth-dPpg.
 
-        // calc. the pseudo Pb0DEP in FD condition
-        VgpDEP_dlt = `Fn_Max(1E-6,DEPVGPSL) ;
-        //`Fn_SU_CP( Ps0DEP , Ps0_res , 0 , VgpDEP_dlt , VgpDEP_pw , T0 )  // for Wres
-        `Fn_SU_CP( Ps0DEP , Ps0_res , `WK_PS0DEPMAX , VgpDEP_dlt , VgpDEP_pw , T0 )  // for Wres
-        Ps0DEP = - Ps0DEP ;
-        dphi_sb = q_Ndepm * Tnp * Tnp / 2.0 / `C_ESI ;
-        T0 = wDEPSUBSL * sqrt(2.0 * beta * dphi_sb) ;
-        T1 = (exp(T0) + exp(-T0)) / 2 ; //  greater or equal to 1; positive
-        if ( abs(T0) > 1e-4 ) begin
-            c_sb = ln(T1) / dphi_sb ;  // positive
-        end else begin
-            // ln(cosh(T0)) = (1/2)*T0^2-(1/12)*T0^4; dphi_sb
-            //              = (1/2)*(1/beta)*(1/DEPSUBSL)^2 * T0^2; to avoid 0/0 indefinite evaluation
-            c_sb = wDEPSUBSL*wDEPSUBSL*beta*(1-`C_1o6*T0*T0);
-        end
-        TX = c_sb * Ps0DEP ;
-        if ( TX > 500 ) begin // bypass ln(1+exp(big))
-            Pb0DEP = Ps0DEP - dphi_sb;
-        end else begin
-            T0 = exp(- c_sb * dphi_sb) ;
-            if (abs(TX) > 1E-8) begin
-                `Fn_DExp(T1,TX,T3)
-                T1 = T1 * T0 ;
-                T2 = T1 - T0 ;
+            // calc. the pseudo Pb0DEP in FD condition
+            VgpDEP_dlt = `Fn_Max(1E-6,DEPVGPSL) ;
+            //`Fn_SU_CP( Ps0DEP , Ps0_res , 0 , VgpDEP_dlt , VgpDEP_pw , T0 )  // for Wres
+            `Fn_SU_CP( Ps0DEP , Ps0_res , `WK_PS0DEPMAX , VgpDEP_dlt , VgpDEP_pw , T0 )  // for Wres
+            Ps0DEP = - Ps0DEP ;
+            dphi_sb = q_Ndepm * Tnp * Tnp / 2.0 / `C_ESI ;
+            T0 = wDEPSUBSL * sqrt(2.0 * beta * dphi_sb) ;
+            T1 = (exp(T0) + exp(-T0)) / 2 ; //  greater or equal to 1; positive
+            if ( abs(T0) > 1e-4 ) begin
+                c_sb = ln(T1) / dphi_sb ;  // positive
             end else begin
-                T1 = (1 + TX) * T0 ;
-                T2 = TX * (1 + TX / 2) * T0 ;
+                // ln(cosh(T0)) = (1/2)*T0^2-(1/12)*T0^4; dphi_sb
+                //              = (1/2)*(1/beta)*(1/DEPSUBSL)^2 * T0^2; to avoid 0/0 indefinite evaluation
+                c_sb = wDEPSUBSL*wDEPSUBSL*beta*(1-`C_1o6*T0*T0);
             end
-            if (abs(T2) > 1E-8) begin
-                Pb0DEP = ln(1 + T2) / c_sb ;
+            TX = c_sb * Ps0DEP ;
+            if ( TX > 500 ) begin // bypass ln(1+exp(big))
+                Pb0DEP = Ps0DEP - dphi_sb;
             end else begin
-                Pb0DEP = T2 / c_sb ;
+                T0 = exp(- c_sb * dphi_sb) ;
+                if (abs(TX) > 1E-8) begin
+                    `Fn_DExp(T1,TX,T3)
+                    T1 = T1 * T0 ;
+                    T2 = T1 - T0 ;
+                end else begin
+                    T1 = (1 + TX) * T0 ;
+                    T2 = TX * (1 + TX / 2) * T0 ;
+                end
+                if (abs(T2) > 1E-8) begin
+                    Pb0DEP = ln(1 + T2) / c_sb ;
+                end else begin
+                    Pb0DEP = T2 / c_sb ;
+                end
             end
-        end
 
-        // callc. Ws and Wres
-        T2 = Ps0DEP - Pb0DEP ;
-        if (`WK_CO_UWE20171213 == 0) begin  // original implementation as of 20171212
-            Ws = ( T2 < 0 ) ? - sqrt(-C_2ESIpq_Ndepm*T2) : sqrt(C_2ESIpq_Ndepm*T2) ; // Ws
-        end else begin
-            if ( T2 < 0 ) begin
-                T3 = beta * T2;
-                Ws = -sqrt((C_2ESIpq_Ndepm*beta_inv)*(exp(T3)-T3-1.0));
+            // callc. Ws and Wres
+            T2 = Ps0DEP - Pb0DEP ;
+            if (`WK_CO_UWE20171213 == 0) begin  // original implementation as of 20171212
+                Ws = ( T2 < 0 ) ? - sqrt(-C_2ESIpq_Ndepm*T2) : sqrt(C_2ESIpq_Ndepm*T2) ; // Ws
+            end else begin
+                if ( T2 < 0 ) begin
+                    T3 = beta * T2;
+                    Ws = -sqrt((C_2ESIpq_Ndepm*beta_inv)*(exp(T3)-T3-1.0));
+                end
+                else begin
+                    T3 = -beta* T2;
+                    Ws =  sqrt((C_2ESIpq_Ndepm*beta_inv)*(exp(T3)-T3-1.0));
+                end
             end
-            else begin
-                T3 = -beta* T2;
-                Ws =  sqrt((C_2ESIpq_Ndepm*beta_inv)*(exp(T3)-T3-1.0));
-            end
-        end
-        W_res = Tnp - Ws ; // equivalent to Tn - ( W_bsub0 + W_b0_new ) ;
-        `Fn_SL_CP( W_res  , W_res  , 0 , 1e-16 , 2 , T0 )
+            W_res = Tnp - Ws ; // equivalent to Tn - ( W_bsub0 + W_b0_new ) ;
+            `Fn_SL_CP( W_res  , W_res  , 0 , 1e-16 , 2 , T0 )
 
-        //    end // else: !if( Tnp == 0 )
+        end // else: !if( Tnp == 0 )
 
     end // block: Calc_W_res_with_DD_mode
 

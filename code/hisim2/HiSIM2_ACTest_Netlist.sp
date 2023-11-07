@@ -1,10 +1,10 @@
 AC Analysis with Noise Model for HiSIM2
 
 .model MOSFET hisim2_va
-.INCLUDE HiSIM2_3.1.1_Default_Model.txt
+.INCLUDE HiSIM2_3.2.0_Default_Model.txt
 
 NMOS d g 0 0 MOSFET 
-.INCLUDE HiSIM2_3.1.1_Default_Instance.txt
+.INCLUDE HiSIM2_3.2.0_Default_Instance.txt
 
 VDD    dd 0  2
 RLOAD  dd d  120k

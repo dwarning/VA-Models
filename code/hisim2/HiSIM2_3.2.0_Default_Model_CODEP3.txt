@@ -2,8 +2,8 @@
 ** HiSIM2 default model card for n-ch MOSFET **
 *************************************************
 
-* Version : HiSIM2 3.1.1
-* Date    : 2019.04.04
+* Version : HiSIM2 3.2.0
+* Date    : 2021.10.08
 
 
 
@@ -41,7 +41,7 @@
 ****(aging model disabled as default)+ CODEGES0     = 0
 
 *** Parameters ***
-+ VERSION      = 3.11
++ VERSION      = 3.20
 ****(only for VA-code)+ TYPE         = 1
 + VMAX         = 1e+07
 + BGTMP1       = 9.025e-05
@@ -433,3 +433,7 @@
 + MUPT	       = 0.0
 + VFBPT	       = 0.0
 + PSLIMPT      = 0.0 
+
+***** New Parameters *****
++ COPB20COMPAT = 1
++ VBSRFAR      = -30

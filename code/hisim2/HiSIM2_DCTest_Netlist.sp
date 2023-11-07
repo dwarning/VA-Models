@@ -1,10 +1,10 @@
 DC Analysis wthout SHE for HiSIM2
 
 .model MOSFET hisim2_va
-.INCLUDE HiSIM2_3.1.1_Default_Model.txt
+.INCLUDE HiSIM2_3.2.0_Default_Model.txt
 
 NMOS  d g 0 b MOSFET
-.INCLUDE HiSIM2_3.1.1_Default_Instance.txt
+.INCLUDE HiSIM2_3.2.0_Default_Instance.txt
 
 Vds   d 0  dc   0.1
 Vgs   g 0  dc   0.0

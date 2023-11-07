@@ -2,14 +2,14 @@
 
  HiSIM (Hiroshima University STARC IGFET Model)
  Copyright (C) 2000-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
+ Copyright (C) 2016-2019 Hiroshima University
 
  MODEL NAME : HiSIM2
- ( VERSION : 3  SUBVERSION : 2  REVISION : 0 )
- Model Parameter 'VERSION' : 3.20
+ ( VERSION : 3  SUBVERSION : 1  REVISION : 1 )
+ Model Parameter 'VERSION' : 3.11
  FILE : HSM2_depmos2.inc
 
- Date : 2021.10.08
+ Date : 2019.04.04
 
  released by Hiroshima University
 
@@ -23,7 +23,7 @@
 //
 //You may obtain a copy of the License at:
 //
-//      http://opensource.org/licenses/ECL-2.0
+//    http://opensource.org/licenses/ECL-2.0
 //
 //Unless required by applicable law or agreed to in writing,
 //software distributed under the License is distributed on an
@@ -33,7 +33,7 @@
 //License.
 //
 //
-//The HiSIM2 standard has been supported by the members of
+//The HiSIM_SOI standard has been supported by the members of
 //Silicon Integration Initiative's Compact Model Coalition. A
 //link to the most recent version of this standard can be found
 //at:

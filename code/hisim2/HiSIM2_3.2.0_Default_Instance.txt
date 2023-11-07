@@ -2,8 +2,8 @@
 *** HiSIM2 default instance parameter card ***
 *************************************************
 
-* Version : HiSIM2 3.1.1
-* Date    : 2019.04.04
+* Version : HiSIM2 3.2.0
+* Date    : 2021.10.08
 
 
 *** Flags ***
@@ -14,8 +14,8 @@
 ****(aging model disabled as default)+ CODEGES0     = 0
 
 *** Parameters ***
-+ L            = 10e-06
-+ W            = 1e-06
++ L            = 5e-06
++ W            = 5e-06
 + AD           = 0
 + AS           = 0
 + PD           = 0
