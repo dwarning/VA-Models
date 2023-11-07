@@ -1,6 +1,6 @@
 // Model parameters  
    `MPRoz(cg,       4.00e-03, "F/m^2",   "Gate cap/area")    
-   `MPRcz(rsh,      150.0,    "Ohms/Sq", "2-DEG Sheet Resistance")    
+   `MPRoz(rsh,      150.0,    "Ohms/Sq", "2-DEG Sheet Resistance")    
    `MPRcz(rcs,      800e-6,   "Ohms*m",  "Source contact resistance * Width")    
    `MPRcz(rcd,      800e-6,   "Ohms*m",  "Drain contact resistance * Width")    
    `MPRoz(vx0,      3.0e5,    "m/s",     "Source injection velocity")    
@@ -96,7 +96,18 @@
    `MPRcz(vttrap,   230,      "V",       "Trapping stress threshold voltage")   
    `MPRcz(taut,     3e-5,     "s",       "Trap time constant")   
    `MPRcz(alphat1,  1e-4,     "",        "Trap coefficient 1 on bias stress")   
-   `MPRoz(alphat2,  21,       "V",       "Trap coefficient 2 on bias stress") 
+   `MPRoz(alphat2,  21,       "V",       "Trap coefficient 2 on bias stress")
+   `MPRoz(alphat3,  1e-3,     "",        "Input trapping feedback factor")
+   `MPRcz(tempt,    1e-4,     "1/K",     "Temperature coefficient for trapping") 
+   `MPRoz(vgltrapth,10,       "V",       "Trapping Drain-lag stress threshold voltage")
+   `MPRoz(vdltrapth,100,      "V",       "Trapping Gate-lag stress threshold voltage")
+   `MPRoz(rcapture, 10,       "Ohm",     "Trapping capture time constant")
+   `MPRoz(remission,50e-3,    "Ohm",     "Trapping emission time constant")
+   `MPRoz(cdglag,   1e-6,     "F",       "Trapping emission and capture time constant-C")
+   `MPRnb(rct1dl,   -5e-3,    "1/K",     "Linear Drain-lag temperature coefficient")
+   `MPRnb(rct1gl,   5e-3,     "1/K",     "Linear Gate-lag temperature coefficient")
+   `MPRnb(rct2dl,   0.0,      "1/K^2",   "Quadratic Drain-lag temperature coefficient")
+   `MPRnb(rct2gl,   0.0,      "1/K^2",   "Quadratic Gate-lag temperature coefficient")
 
 // Noise model parameters
    `MPRcz(shs,      3.0,     "",         "G-S shot noise parameter")   
