@@ -2,8 +2,8 @@
 *** HiSIM_HV default instance parameter card ***
 *************************************************
 
-* Version : HiSIM_HV 2.5.0
-* Date    : 2019.04.26
+* Version : HiSIM_HV 2.5.1
+* Date    : 2023.02.09
 
 
 
@@ -30,7 +30,7 @@
 + SB           = 0
 + SD           = 0
 + DTEMP        = 0
-*+ M            = 1
++ M            = 1
 ****(used only if specified)+ NSUBCDFM     = 3e+17
 + AD           = 0
 + AS           = 0

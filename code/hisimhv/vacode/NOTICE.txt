@@ -1,0 +1,7 @@
+The HiSIM_HV standard is supported by the members of Silicon Integration Initiative's
+Compact Model Coalition.
+
+CMC Release Date:  February 9, 2023
+Public Release Date:  August 9, 2024
+
+A link to the most recent version of this standard can be found at: http://www.si2.org/cmc

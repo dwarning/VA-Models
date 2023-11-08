@@ -2,8 +2,8 @@
 ** HiSIM_HV model card for n-ch depletion-MOS **
 *************************************************
 
-* Version : HiSIM_HV 2.5.0
-* Date    : 2019.04.26
+* Version : HiSIM_HV 2.5.1
+* Date    : 2023.02.09
 
 
 
@@ -66,7 +66,7 @@
 + FALPH        = 1
 + CGBO         = 0
 + CVDSOVER     = 0
-+ VERSION      = 2.50
++ VERSION      = 2.51
 ****(only for VA-code)+ TYPE         = 1
 + VMAX         = 1e+07
 + VMAXT1       = 0
@@ -283,7 +283,7 @@
 + HBDC         = 100
 + HBDCTMP      = 0
 + HBDF         = 1
-****(depends on other parameters as default)+ CVBK         = 0
+
 
 ***** Model and Instance Parameters *****
 + RBPB         = 50
@@ -594,5 +594,12 @@
 + WI           = 5e-6   
 + DEPNQS       = 0.0    
 + TAUT         = 0.0    
-+ INJT         = 0.0    
++ INJT         = 0.0  
+
+***** New Parameters *****
++ COVBSCL      = 1
++ COQOVCL      = 1
++ VBFWDMX      = 0.8
++ VBFWDBND     = 0.4
++ PS0PT        = 0  
 
