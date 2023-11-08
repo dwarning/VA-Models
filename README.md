@@ -14,6 +14,59 @@ The models covering a wide range of devices :
 * **Passive devices** like diodes, varactors and non-linear resistors
 * **Sensors**
 
+Actual version status:
+
+| Model         | Version       |
+| ------------- | ------------- |
+| Resistor      |               |
+| ------------- | ------------- |
+| r2_cmc        | 1.0.1         |
+| r3_cmc        | 1.1.1         |
+| ------------- | ------------- |
+| Diode         |               |
+| ------------- | ------------- |
+| diode_cmc     | 2.0.0         |
+| ------------- | ------------- |
+| MOSFET        |               |
+| ------------- | ------------- |
+| bsim4         | 4.8           |
+| bsim6         | 6.1.1         |
+| bsimbulk      | 107.1.0       |
+| hisim2        | 3.2.0         |
+| psp102        | 102.5.0       |
+| psp103        | 103.8.0       |
+| psp104        | 104.0.0       |
+| ------------- | ------------- |
+| SOI MOSFET    |               |
+| ------------- | ------------- |
+| l-lutsoi      | 102.7.0       |
+| bsim-soi      | 4.6.1         |
+| hisim-soi     | 1.5.0         |
+| hisim-sotb    | 1.3.0         |
+| ------------- | ------------- |
+| MG MOSFET     |               |
+| ------------- | ------------- |
+| bsim-img      | 102.9.6       |
+| bsim-cmg      | 111.2.1       |
+| ------------- | ------------- |
+| HV-MOS        |               |
+| ------------- | ------------- |
+| hisim_hv      | 2.5.1         |
+| psphv         | 1.0.6         |
+| ------------- | ------------- |
+| BJT           |               |
+| ------------- | ------------- |
+| hicum0        | 2.1.0         |
+| hicum2        | 3.0.0         |
+| mextram       | 505.4.0       |
+| vbic          | 1.3           |
+| ------------- | ------------- |
+| HEMT          |               |
+| ------------- | ------------- |
+| asmhemt       | 101.4.0       |
+| epfl-hemt     | 3.0.0         |
+| mvsg_cmc      | 3.2.0         |
+
 All models are checked for syntax belong Verilog-AMS Language Reference Manual Version 2.4.0. https://accellera.org/downloads/standards/v-ams
 The models are modified mostly for convergence improvements. Equations are untouched.
 So few parameter limits are changed to prevent division by zero and especially bipolar models lacks suitable limit function to prevent divergence in Newton-Raphson iteration process. Changes are noticed in Changelog.
