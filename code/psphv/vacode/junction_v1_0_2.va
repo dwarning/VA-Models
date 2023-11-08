@@ -1,0 +1,890 @@
+
+//
+//  Copyright (c) 2018 NXP Semiconductors N.V.
+//
+
+//
+//======================================================================================
+//======================================================================================
+//                    In-Code Statement
+//
+//  Software is distributed as is, completely without warranty or service support.
+//  NXP Semiconductors, along with its employees are not liable for the condition
+//  or performance of the software.
+//
+//  NXP Semiconductors owns the copyright and grants users a perpetual, irrevocable,
+//  worldwide, non-exclusive, royalty-free license with respect to the software as
+//  set forth below.
+//
+//  NXP Semiconductors hereby disclaims all implied warranties.
+//
+//  NXP Semiconductors grants the users the right to modify, copy, and redistribute
+//  the software and documentation, both within the user's organization and externally,
+//  subject to the following restrictions:
+//
+//    1. The users agree not to charge for the NXP Semiconductors developed code
+//       but may charge for additions, extensions, or support.
+//
+//    2. In any product based on the software, the users agree to acknowledge that
+//       NXP Semiconductors developed the software. This acknowledgment shall appear
+//       in the product documentation.
+//
+//    2. Redistributions to others of source code and documentation must retain the
+//       copyright notice, disclaimer, and list of conditions.
+//
+//    4. Redistributions to others in binary form must reproduce the copyright notice,
+//       disclaimer, and list of conditions in the documentation and/or other materials
+//       provided with the distribution.
+//
+//  In-Code Statement Revision: 1.0.2, September 5, 2018
+//
+//======================================================================================
+//======================================================================================
+//
+
+//
+//  junction_vV_S_R.va: pn-junction building block Verilog-A primitives for compact models
+//
+//  Version: 1.0.2
+//  Date:    September 5, 2018
+//  Author:  Colin McAndrew
+//
+//  - renamed pnjIbkd to pnjIbr, and changed "bv" and "bkd" to "br" for consistency
+//  - used tRefK and tDevK rather than Tnom and T, gets rid of "nom" ambiguity/linkage
+//    to simulator tnom, and makes what things are more obvious
+//  - added analog functions for JUNCAP2 calculations, including phibi limiting to
+//    0.05 instead of the physical Booth approach
+//
+//  Version: 1.0.1
+//  Date:    August 10, 2017
+//  Author:  Colin McAndrew
+//
+//  - added the sgpIce analog function for the core SGP npn bipolar transistor model
+//
+//  Version: 1.0.0
+//  Date:    March 22, 2017
+//  Author:  Colin McAndrew
+//
+
+//
+//  This file contains primitives for aspects of pn junctions:
+//  - normalized depletion charge (derivative of which gives capacitance)
+//  - depletion charge with area and perimeter components
+//  - simple breakdown
+//  - junction current with area and perimeter components
+//  - core SGP npn bipolar transistor model
+//  - built-in potential temperature mapping (that does not become negative at high T)
+//  - junction shot noise, including ideal and nonideal components
+//  As pn junctions, either intentional or parasitic, are found in many
+//  semiconductor devices these primitives can help simplify writing full
+//  device level models by providing standard "building blocks" for
+//  those junctions.
+//
+//  NOTE: some compilers have not yet implemented the IEEE std 1364-2005
+//        Verilog HDL style calls for mathematical functions; this is why
+//         ln(),  log()  ,  exp(),  sqrt(),  pow(), etc. are used instead of
+//        $ln(), $log10(), $exp(), $sqrt(), $pow(), etc.
+//        (the second forms are those "encouraged" to be used since LRM2.3)
+//
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Basic normalized depletion charge models, that include the standard
+//  regional SPICE model (selected if aj<=0.0) and a smooth, single-piece
+//  version (selected if aj>0). The basic normalized depletion capacitance is
+//    cj(v)=1/(1-v/pj)^mj
+//  and the normalized depletion charge qj(v) is the integral of this.
+//
+//  Outputs:
+//    qj         junction depletion charge (normalized, so cj(0)=1)
+//  Inputs:
+//    v          voltage across the junction (V)
+//    pj         built-in voltage of the junction (V)
+//    mj         grading coefficient of the junction
+//    fc         linearization factor, model is linearized for v>fc*pj
+//    aj         smoothing parameter, if aj<=0 the model is regional
+//
+//  There are 6 variants of the (aj>0) depletion charge model. Physically,
+//  for high forward bias the depletion region does not exist as it is swamped by
+//  mobile carriers, hence the depletion charge (and capacitance) should
+//  go to zero. This gives a cj(v) characteristic that peaks and then drops
+//  to zero as v increases. This characteristic can cause convergence problems
+//  and has to be carefully matched with a diffusion charge model so that the
+//  total (depletion+diffusion) charge and capacitance are modeled accurately.
+//  A less radical version of this is provided, that smoothly approaches the
+//  constant capacitance at v=fc*pj. This also needs to be carefully integrated
+//  with a diffusion charge model to give correct total (depletion+diffusion)
+//  charge and capacitance modeling. A smooth version of the standard SPICE
+//  model, where the capacitance linearly increases with voltage for v>fc*pj,
+//  is also provided. In the absence of a diffusion charge model, which is
+//  often the case for parasitic junction models which are not expected to be
+//  driven to high forward bias and so for which diffusion charge can be ignored,
+//  the version that gives a linear cj(v) form for v>fc*pj should be used.
+//
+//  Each of these 3 models has 2 variants, one that has qj(v=0)=0 and another
+//  that does not. For capacitance modeling it does not matter which is used,
+//  as only the derivative is important. For modeling base-charge in BJTs
+//  it is the change in depletion charge w.r.t. zero bias that is used to
+//  model the Early effect, hence qj(v=0)=0 is required. This requires
+//  additional calculations that are not needed if only capacitance modeling
+//  is of interest. Hence versions that do not force qj(v=0)=0 are provided
+//  as they are more efficient to evaluate.
+//
+//                         cj(v) for
+//  Name       qj(v=0)=0   v->+inf
+//  =========  ==========  ========
+//  qj         no          linear in v
+//  qj_z       yes         linear in v
+//  qjCnst     no          constant 1/(1-fc)^mj
+//  qjCnst_z   yes         constant 1/(1-fc)^mj
+//  qjPeak     no          zero
+//  qjPeak_z   yes         zero
+//
+
+analog function real qj;
+    input v, pj, mj, fc, aj;
+    real  v, pj, mj, fc, aj;
+    real  dv0, dvh, pwq, qlo, qhi, mv0, vl0, dv, mv, vl;
+    begin
+        dv0      = -pj*fc;
+        if (aj<=0.0) begin
+            dvh      =  v+dv0;
+            if (dvh>0.0) begin
+                pwq      =  pow(1.0-fc, -mj);
+                qlo      =  pj*(1.0-pwq*(1.0-fc))/(1.0-mj);
+                qhi      =  dvh*(1.0+0.5*mj*dvh/(pj*(1.0-fc)))*pwq;
+            end else begin
+                qlo      =  pj*(1.0-pow(1.0-v/pj, 1.0-mj))/(1.0-mj);
+                qhi      =  0.0;
+            end
+            qj       =  qlo+qhi;
+        end else begin
+            mv0      =  sqrt(dv0*dv0+4.0*aj*aj);
+            vl0      = -0.5*(dv0+mv0);
+            dv       =  v+dv0;
+            mv       =  sqrt(dv*dv+4.0*aj*aj);
+            vl       =  0.5*(dv-mv)-dv0;
+            qlo      = -pj*pow((1.0-vl/pj), 1.0-mj)/(1.0-mj);
+            qj       =  qlo+pow(1.0-fc, -mj)*(v-vl+vl0)*(1.0+0.5*mj*(v-vl+vl0)/(pj*(1.0-fc)));
+        end
+    end
+endfunction
+
+analog function real qj_z;
+    input v, pj, mj, fc, aj;
+    real  v, pj, mj, fc, aj;
+    real dv0, dvh, pwq, qlo, qhi, mv0, vl0, q0, dv, mv, vl;
+    begin
+        dv0      = -pj*fc;
+        if (aj<=0.0) begin
+            dvh      =  v+dv0;
+            if (dvh>0.0) begin
+                pwq      =  pow(1.0-fc, -mj);
+                qlo      =  pj*(1.0-pwq*(1.0-fc))/(1.0-mj);
+                qhi      =  dvh*(1.0+0.5*mj*dvh/(pj*(1.0-fc)))*pwq;
+            end else begin
+                qlo      =  pj*(1.0-pow(1.0-v/pj, 1.0-mj))/(1.0-mj);
+                qhi      =  0.0;
+            end
+            qj_z     =  qlo+qhi;
+        end else begin
+            mv0      =  sqrt(dv0*dv0+4.0*aj*aj);
+            vl0      = -0.5*(dv0+mv0);
+            q0       = -pj*pow((1.0-vl0/pj), 1.0-mj)/(1.0-mj);
+            dv       =  v+dv0;
+            mv       =  sqrt(dv*dv+4.0*aj*aj);
+            vl       =  0.5*(dv-mv)-dv0;
+            qlo      = -pj*pow((1.0-vl/pj), 1.0-mj)/(1.0-mj);
+            qj_z     =  qlo+pow(1.0-fc, -mj)*(v-vl+vl0)*(1.0+0.5*mj*(v-vl+vl0)/(pj*(1.0-fc)))-q0;
+        end
+    end
+endfunction
+
+analog function real qjCnst;
+    input v, pj, mj, fc, aj;
+    real  v, pj, mj, fc, aj;
+    real  dv0, dvh, pwq, qlo, qhi, mv0, vl0, dv, mv, vl;
+    begin
+        dv0      = -pj*fc;
+        if (aj<=0.0) begin
+            dvh      =  v+dv0;
+            if (dvh>0.0) begin
+                pwq      =  pow(1.0-fc, -mj);
+                qlo      =  pj*(1.0-pwq*(1.0-fc))/(1.0-mj);
+                qhi      =  dvh*pwq;
+            end else begin
+                qlo      =  pj*(1.0-pow(1.0-v/pj, 1.0-mj))/(1.0-mj);
+                qhi      =  0.0;
+            end
+            qjCnst   =  qlo+qhi;
+        end else begin
+            mv0      =  sqrt(dv0*dv0+4.0*aj*aj);
+            vl0      = -0.5*(dv0+mv0);
+            dv       =  v+dv0;
+            mv       =  sqrt(dv*dv+4.0*aj*aj);
+            vl       =  0.5*(dv-mv)-dv0;
+            qlo      = -pj*pow((1.0-vl/pj), 1.0-mj)/(1.0-mj);
+            qjCnst   =  qlo+pow(1.0-fc, -mj)*(v-vl+vl0);
+        end
+    end
+endfunction
+
+analog function real qjCnst_z;
+    input v, pj, mj, fc, aj;
+    real  v, pj, mj, fc, aj;
+    real  dv0, dvh, pwq, qlo, qhi, mv0, vl0, q0, dv, mv, vl;
+    begin
+        dv0      = -pj*fc;
+        if (aj<=0.0) begin
+            dvh      =  v+dv0;
+            if (dvh>0.0) begin
+                pwq      =  pow(1.0-fc, -mj);
+                qlo      =  pj*(1.0-pwq*(1.0-fc))/(1.0-mj);
+                qhi      =  dvh*pwq;
+            end else begin
+                qlo      =  pj*(1.0-pow(1.0-v/pj, 1.0-mj))/(1.0-mj);
+                qhi      =  0.0;
+            end
+            qjCnst_z =  qlo+qhi;
+        end else begin
+            mv0      =  sqrt(dv0*dv0+4.0*aj*aj);
+            vl0      = -0.5*(dv0+mv0);
+            q0       = -pj*pow((1.0-vl0/pj), 1.0-mj)/(1.0-mj);
+            dv       =  v+dv0;
+            mv       =  sqrt(dv*dv+4.0*aj*aj);
+            vl       =  0.5*(dv-mv)-dv0;
+            qlo      = -pj*pow((1.0-vl/pj), 1.0-mj)/(1.0-mj);
+            qjCnst_z =  qlo+pow(1.0-fc, -mj)*(v-vl+vl0)-q0;
+        end
+    end
+endfunction
+
+analog function real qjPeak;
+    input v, pj, mj, fc, aj;
+    real  v, pj, mj, fc, aj;
+    real dv0, dvh, pwq, dv, mv, vl;
+    begin
+        dv0      = -pj*fc;
+        if (aj<=0.0) begin
+            dvh      =  v+dv0;
+            if (dvh>0.0) begin
+                pwq      =  pow(1.0-fc, -mj);
+                qjPeak   =  pj*(1.0-pwq*(1.0-fc))/(1.0-mj);
+            end else begin
+                qjPeak   =  pj*(1.0-pow(1.0-v/pj, 1.0-mj))/(1.0-mj);
+            end
+        end else begin
+            dv       =  v+dv0;
+            mv       =  sqrt(dv*dv+4.0*aj*aj);
+            vl       =  0.5*(dv-mv)-dv0;
+            qjPeak   = -pj*pow((1.0-vl/pj), 1.0-mj)/(1.0-mj);
+        end
+    end
+endfunction
+
+analog function real qjPeak_z;
+    input v, pj, mj, fc, aj;
+    real  v, pj, mj, fc, aj;
+    real dv0, dvh, pwq, mv0, vl0, q0, dv, mv, vl;
+    begin
+        dv0      = -pj*fc;
+        if (aj<=0.0) begin
+            dvh      =  v+dv0;
+            if (dvh>0.0) begin
+                pwq      =  pow(1.0-fc, -mj);
+                qjPeak_z =  pj*(1.0-pwq*(1.0-fc))/(1.0-mj);
+            end else begin
+                qjPeak_z =  pj*(1.0-pow(1.0-v/pj, 1.0-mj))/(1.0-mj);
+            end
+        end else begin
+            mv0      =  sqrt(dv0*dv0+4.0*aj*aj);
+            vl0      = -0.5*(dv0+mv0);
+            q0       = -pj*pow((1.0-vl0/pj), 1.0-mj)/(1.0-mj);
+            dv       =  v+dv0;
+            mv       =  sqrt(dv*dv+4.0*aj*aj);
+            vl       =  0.5*(dv-mv)-dv0;
+            qjPeak_z = -pj*pow((1.0-vl/pj), 1.0-mj)/(1.0-mj)-q0;
+        end
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  pn junction depletion charge, includes area and perimeter components
+//
+//  Based on the basic depletion charge model with a linear increase
+//  in c(v) at high forward bias, qj(v=0)=0 is not enforced.
+//
+//  Outputs:
+//    pnjQap     junction charge
+//  Inputs:
+//    v          voltage across the junction (V)
+//    a          area of junction (x^2)
+//    cja        zero-bias capacitance per unit area (F/x^2)
+//    pja        built-in voltage of the area component (V)
+//    mja        grading coefficient of the area component
+//    fca        linearization factor of the are component
+//    aja        smoothing parameter of the area component
+//    p          perimeter of junction (x)
+//    cjp        zero-bias capacitance per unit perimeter (F/x)
+//    pjp        built-in voltage of the perimeter component (V)
+//    mjp        grading coefficient of the perimeter component
+//    fcp        linearization factor of the perimeter component
+//    ajp        smoothing parameter of the perimeter component
+//
+
+analog function real pnjQap;
+    input v, a, cja, pja, mja, fca, aja, p, cjp, pjp, mjp, fcp, ajp;
+    real  v, a, cja, pja, mja, fca, aja, p, cjp, pjp, mjp, fcp, ajp;
+    real  acja, pcjp, arga, argp;
+    begin
+        acja     =  a*cja;
+        pcjp     =  p*cjp;
+        if (acja>0.0) begin
+            arga     =  qj(v, pja, mja, fca, aja);
+        end else begin
+            arga     =  0.0;
+        end
+        if (pcjp>0.0) begin
+            argp     =  qj(v, pjp, mjp, fcp, ajp);
+        end else begin
+            argp     =  0.0;
+        end
+        pnjQap   =  acja*arga+pcjp*argp;
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  simple junction breakdown current model
+//
+//  Outputs:
+//    pnjIbr     breakdown current
+//  Inputs:
+//    v          voltage across the junction (V)
+//    Ibr        current at Vbr (A)
+//    Vbr        breakdown voltage, pnjIbr=-Ibr at v=-Vbr (V)
+//    phi_t      the thermal voltage (V)
+//    nb         ideality factor of the breakdown exponential
+//    vmax       linearization voltage (V)
+//
+//  This model is based on the simple exponential breakdown model
+//  for SPICE diodes. The model has current -Ibr at voltage -Vbr,
+//  and varies exponentially with voltage. The nb parameter controls
+//  the steepness of the exponential. The current is linearized for
+//  for high bias and has value zero at zero bias across the junction.
+//  Note that Vbr and Ibr should be positive.
+//
+
+analog function real pnjIbr;
+    input v, Ibr, Vbr, phi_t, nb, vmax;
+    real  v, Ibr, Vbr, phi_t, nb, vmax;
+    real  Vbkd, argx, expx;
+    begin
+        if (Vbr>0.0) begin
+            Vbkd     = -Vbr-v;
+            argx     =  1.0/(nb*phi_t);
+            expx     = `expLinA(Vbkd, vmax, argx);
+            pnjIbr   = -Ibr*(expx-exp(-Vbr*argx));
+        end else begin
+            pnjIbr   =  0.0;
+        end
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  pn junction current, includes ideal area and ideal perimeter components
+//
+//  Outputs:
+//    pnjIap     junction current
+//  Inputs:
+//    v          voltage across the junction (V)
+//    phi_t      the thermal voltage (V)
+//    a          area of junction (x^2)
+//    isa        saturation current per unit area (A/x^2)
+//    na         ideality factor of the area component
+//    vmaxa      linearization voltage for the area component (V)
+//    p          perimeter of junction (x)
+//    isp        saturation current per unit perimeter (A/x)
+//    np         ideality factor of the perimeter component
+//    vmaxp      linearization voltage for the perimeter component (V)
+//
+
+analog function real pnjIap;
+    input v, phi_t, a, isa, na, vmaxa, p, isp, np, vmaxp;
+    real  v, phi_t, a, isa, na, vmaxa, p, isp, np, vmaxp;
+    real  aisa, pisp, argx, expx, pnjIa, pnjIp;
+    begin
+        aisa     =  a*isa;
+        pisp     =  p*isp;
+        if (aisa>0.0) begin
+            argx     =  1.0/(na*phi_t);
+            expx     = `expLinA(v, vmaxa, argx);
+            pnjIa    =  aisa*(expx-1.0);
+        end else begin
+            pnjIa    =  0.0;
+        end
+        if (pisp>0.0) begin
+            argx     =  1.0/(np*phi_t);
+            expx     = `expLinA(v, vmaxp, argx);
+            pnjIp    =  pisp*(expx-1.0);
+        end else begin
+            pnjIp    =  0.0;
+        end
+        pnjIap  =  pnjIa+pnjIp;
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  SGP intrinsic current calculation function for npn BJTs
+//
+//  Outputs:
+//    sgpIce     c-e transport current
+//    qb         normalized base charge
+//    Ifi        forward transport current (no qb scaling)
+//    Iri        reverse transport current (no qb scaling)
+//    Ibe        b-e current
+//    Ibc        b-c current
+//  Inputs:
+//    Vbei       intrinsic b-e voltage (V)
+//    Vbci       intrinsic b-c voltage (V)
+//    phi_t      the thermal voltage k*tDevK/q (V)
+//    IS         transport saturation current
+//    NF         forward transport current ideality factor
+//    NR         reverse transport current ideality factor
+//    IVEF       inverse of the forward Early voltage
+//    IVER       inverse of the reverse Early voltage
+//    IIKF       inverse of the forward knee current
+//    IIKR       inverse of the reverse knee current
+//    NK         high-level injection roll-off exponent
+//    IBEI       ideal     b-e saturation current
+//    NEI        ideal     b-e emission coefficient
+//    IBEN       non-ideal b-e saturation current
+//    NEN        non-ideal b-e emission coefficient
+//    IBCI       ideal     b-c saturation current
+//    NCI        ideal     b-c emission coefficient
+//    IBCN       non-ideal b-c saturation current
+//    NCN        non-ideal b-c emission coefficient
+//    vLinF      linearization voltage, forward transport
+//    vLinR      linearization voltage, reverse transport
+//    vLinBei    linearization voltage, Ibei b-e calculation
+//    vLinBen    linearization voltage, Iben b-e calculation
+//    vLinBci    linearization voltage, Ibci b-c calculation
+//    vLinBcn    linearization voltage, Ibcn b-c calculation
+//
+//  Note: all parameter values must be calculated at the device temperature
+//  Note: the b-e and b-c currents are parameterized in terms of saturation
+//        currents rather than empirical current gain (BETA) values
+//
+
+analog function real sgpIce;
+    input  Vbei, Vbci, phi_t;
+    input  IS, NF, NR, IVEF, IVER, IIKF, IIKR, NK;
+    input  IBEI, NEI, IBEN, NEN, IBCI, NCI, IBCN, NCN;
+    input  vLinF, vLinR, vLinBei, vLinBen, vLinBci, vLinBcn;
+    output qb, Ifi, Iri, Ibe, Ibc;
+    real   Vbei, Vbci, phi_t;
+    real   IS, NF, NR, IVEF, IVER, IIKF, IIKR, NK;
+    real   IBEI, NEI, IBEN, NEN, IBCI, NCI, IBCN, NCN;
+    real   vLinF, vLinR, vLinBei, vLinBen, vLinBci, vLinBcn;
+    real   qb, Ifi, Iri, Ibe, Ibc;
+    real   a, expVal, q1z, q1, q2;
+    begin
+        a        =  1.0/(NF*phi_t);
+        expVal   = `expLinA(Vbei, vLinF, a);
+        Ifi      =  IS*(expVal-1.0);
+        if (NF!=NEI) begin
+            a        =  1.0/(NEI*phi_t);
+            expVal   = `expLinA(Vbei, vLinBei, a);
+        end
+        Ibe      =  IBEI*(expVal-1.0);
+        a        =  1.0/(NR*phi_t);
+        expVal   = `expLinA(Vbci, vLinR, a);
+        Iri      =  IS*(expVal-1.0);
+        if (NR!=NCI) begin
+            a        =  1.0/(NCI*phi_t);
+            expVal   = `expLinA(Vbci, vLinBci, a);
+        end
+        Ibc      =  IBCI*(expVal-1.0);
+        q1z      =  1.0-Vbei*IVER-Vbci*IVEF;
+        q1       = `MAXA(q1z, 1.0e-04, 1.0e-08);
+        q1       =  1.0/q1;
+        q2       =  Ifi*IIKF+Iri*IIKR;
+        qb       =  0.5*q1*(1.0+pow((1.0+4.0*q2),NK));
+        a        =  1.0/(NEN*phi_t);
+        expVal   = `expLinA(Vbei, vLinBen, a);
+        Ibe      =  Ibe+IBEN*(expVal-1.0);
+        a        =  1.0/(NCN*phi_t);
+        expVal   = `expLinA(Vbci, vLinBcn, a);
+        Ibc      =  Ibc+IBCN*(expVal-1.0);
+        sgpIce   =  (Ifi-Iri)/qb;
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Built-in potential temperature mapping (smoothly goes to zero for high T).
+//
+//  This is originally from R. V. H. Booth (AT&T Bell Laboratories, c. 1994),
+//  and is physically based on the built-in potential being
+//    (k*tDevK/q)*ln(ppo*nno/ni^2)
+//  whereas the standard SPICE model is based on
+//    (k*tDevK/q)*ln(NA*ND/ni^2)
+//  which assumes ppo=NA and nno=ND and does not take into account that at high
+//  temperatures material becomes intrinsic and ppo and nno approach ni.
+//  The intrinsic carrier concentration temperature dependence is
+//    ni^2(*tDevK)=ni^2(TrefK)*exp(-(q/k)*(Eg(tDevK)/tDevK-Eg(TrefK)/TrefK))*(tDevK/TrefK)^3
+//  where the temperatures tDevK and TrefK are in Kelvin.
+//
+//  A derivation is provided in the documentation.
+//
+//  Outputs:
+//    phibi      built-in potential at temperature tDevK (V)
+//  Inputs:
+//    phibiRef   built-in potential at reference temperature tRefK (V)
+//    egRef      bandgap at tRefK (V)
+//    egDev      bandgap at tDevK (V)
+//    phi_t      thermal voltage k*tDevK/q at temperature tDevK (V)
+//    rT         tDevK/tRefK, ratio of Kelvin temperatures
+//
+
+analog function real phibi;
+    input phibiRef, egRef, egDev, phi_t, rT;
+    real  phibiRef, egRef, egDev, phi_t, rT;
+    real  phi_tRef, pbiRef, pbi;
+    begin
+        phi_tRef =  phi_t/rT;
+        pbiRef   =  phibiRef+2.0*phi_tRef*ln(1.0-exp(-phibiRef/phi_tRef));
+        pbi      =  pbiRef*rT-3.0*phi_t*ln(rT)+egDev-egRef*rT;
+        phibi    =  pbi+2.0*phi_t*ln(0.5+sqrt(0.25+exp(-pbi/phi_t)));
+    end
+endfunction
+
+///////////////////////////////////////////////////////////////////////////////f
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Built-in potential temperature mapping (smoothly goes to 0.05 for high T).
+//
+//  This is the JUNCAP2 clipping approach.
+//
+//  Outputs:
+//    phibicl    built-in potential at temperature tDevK (V)
+//  Inputs:
+//    phibiRef   built-in potential at reference temperature tRefK (V)
+//    egRef      bandgap at tRefK (V)
+//    egDev      bandgap at tDevK (V)
+//    phi_t      thermal voltage k*tDevK/q at temperature tDevK (V)
+//    rT         tDevK/tRefK, ratio of Kelvin temperatures
+//
+
+analog function real phibicl;
+    input phibiRef, egRef, egDev, phi_t, rT;
+    real  phibiRef, egRef, egDev, phi_t, rT;
+    real  pbi;
+    begin
+        pbi      =  phibiRef*rT-3.0*phi_t*ln(rT)+egDev-egRef*rT;
+        phibicl  = `MAXE(pbi, 0.05, 1.0/phi_t);
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  pn junction current, single geometry component, physical components:
+//  ideal with high-level injection; SRH; TAT; BTB; breakdown
+//
+//  Outputs:
+//    pnjI       A        junction current
+//    iIdeal     A        ideal component of current (for Qdiff calculation)
+//    i4Noise    A        effective current for 2qI shot noise calculation
+//  Inputs:
+//    vak        V        voltage across the junction
+//    idSat      A        saturation current (at tDevK)
+//    invnPhit   1/V      precomputed 1.0/(n*phi_t)
+//    vLin       V        voltage at which to linearize exp(vak*invnPhit)
+//    iIk        1/A      inverse of the knee current
+//    nk         -        knee current rolloff coefficient
+//    csrh       A/m      SRH current component prefactor (at tDevK)
+//    vbi        V        junction built-in voltage (at tDevK)
+//    vbiLim     V        junction built-in voltage for limiting for SRH/TAT (at tDevK)
+//    p          -        junction grading coefficient
+//    phi_t      V        thermal voltage k*tDevK/q
+//    inv2Phit   1/V      precomputed 1.0/(2*phi_t)
+//    sq2Phit    V^2      precomputed (2.0*phi_t)^2
+//    sq2Phitr   V^2      precomputed (2.0*phi_t)^2 (at tRefK)
+//    wdep0v     m        zero-bias depletion region width divided by vbir^p
+//    ctat       A/m      TAT current component prefactor (at tDevK)
+//    aTAT       -        precomputed TAT alpha
+//    bTATfctr   V/m      precomputed bias independent part of TAT beta
+//    pd1mp      -        precomputed p/(1-p)
+//    cbbt       Am^2/V^3 BBT current component prefactor
+//    fbbt       V/m      BBT normalization field (at tDevK)
+//    vbir       V        built-in potential (at tRefK)
+//    vbbtLim    V        vbir-0.05
+//    vbrLim     V        precomputed -alphabr*vbr
+//    invVbr     1/V      precomputed 1.0/vbr
+//    pbr        -        breakdown onset tuning parameter
+//    fbrLim     -        precomputed fbr value at vbrLim
+//    fbrDer    1/V      precomputed fbr slope at vbrLim
+//
+//  Because of the conditional blocks, will have to ensure there are no
+//  "hidden state" issues. Also, have all of the calculations been checked
+//  for numerical robustness for whacky bias and parameter values?
+//
+//  The [abcp]erfc constants are used for evaluation of erfc().
+//
+
+`define aerfc 0.29214664
+`define berfc 0.26992878119627849963
+`define cerfc 0.43792457880372150037
+`define perfc 0.51781643709710746484
+analog function real pnjI;
+    input  vak, idSat, invnPhit, vLin, iIk, nk, csrh, vbi, vbiLim, p, phi_t, inv2Phit, sq2Phit, sq2Phitr, wdep0v;
+    input  ctat, aTAT, bTATfctr, pd1mp, cbbt, fbbt, vbir, vbbtLim, vbrLim, invVbr, pbr, fbrLim, fbrDer;
+    output iIdeal, i4Noise;
+    real   vak, idSat, invnPhit, vLin, iIk, nk, csrh, vbi, vbiLim, p, phi_t, inv2Phit, sq2Phit, sq2Phitr, wdep0v;
+    real   ctat, aTAT, bTATfctr, pd1mp, cbbt, fbbt, vbir, vbbtLim, vbrLim, invVbr, pbr, fbrLim, fbrDer;
+    real   iIdeal, i4Noise;
+    real   expx, hcFactor;
+    real   iSRH, expVak_2, invVak_2, twoPsiSt, dvSRH, wSRH, wdep;
+    real   iTAT, bTAT, iBBT, abratio, umax, sqrtumax, wG, wTAT, kTAT, lTAT, mTAT, erfcArg, tErfc, expmerfc;
+    real   vbbt, fMaxr, fbr, v4br;
+    real   tmp;
+    begin
+        iIdeal   =  0.0;
+        i4Noise  =  0.0;
+        iSRH     =  0.0;
+        iTAT     =  0.0;
+        iBBT     =  0.0;
+        fbr      =  1.0;
+        if (idSat > 0.0) begin
+            expx     = `expLinA(vak, vLin, invnPhit);
+            iIdeal   =  idSat*(expx-1.0);
+            if (iIk > 0.0) begin
+                hcFactor =  nk==0.5 ? 0.5*(1.0+sqrt(1.0+4.0*iIdeal*iIk)): 0.5*(1.0+pow(1.0+4.0*iIdeal*iIk, nk));
+                iIdeal   =  iIdeal/hcFactor;
+            end
+            i4Noise  =  abs(iIdeal+2.0*idSat);
+        end
+        if ((csrh > 0.0) || (ctat > 0.0)) begin
+            expVak_2 = `expLinA(vak, vLin, inv2Phit);
+            if (vak > 0.0) begin
+                invVak_2 =  1.0/expVak_2;
+                twoPsiSt =  2.0*phi_t*ln(2.0+invVak_2+sqrt((invVak_2+1.0)*(invVak_2+3.0)));
+            end else begin
+                twoPsiSt = -vak+2.0*phi_t*ln(1.0+2.0*expVak_2+sqrt((1.0+expVak_2)*(1.0+3.0*expVak_2)));
+            end
+            dvSRH    = `MINA(vak, (vbiLim-twoPsiSt), sq2Phit);
+            dvSRH    =  vbi-dvSRH;
+            wSRH     =  1.0-sqrt(1.0-twoPsiSt/dvSRH);
+            if (p != 0.5) begin
+                wSRH     =  wSRH+((wSRH*wSRH*ln(wSRH)/(1.0-wSRH))+wSRH)*(1.0-2.0*p);
+            end
+            wdep     =  p==0.5 ? wdep0v*sqrt(dvSRH) : wdep0v*pow(dvSRH, p);
+            expVak_2 =  (expVak_2-1.0)*wdep;
+            if (csrh > 0.0) begin
+                iSRH     =  csrh*expVak_2*wSRH;
+            end
+            if (ctat > 0.0) begin
+                bTAT     =  bTATfctr*wdep/dvSRH;
+                abratio  = `twoThirds*aTAT/bTAT;
+                umax     =  abratio*abratio;
+                umax     =  umax*umax;
+                umax     =  sqrt(umax/(umax+1.0));
+                sqrtumax =  sqrt(umax);
+                wG       =  p==0.5 ? 1.0/(1.0+bTAT*umax*sqrtumax) : pow((1.0+bTAT*umax*sqrtumax), -pd1mp);
+                wTAT     =  wSRH*wG/(wSRH+wG);
+                kTAT     =  sqrt(0.375*(bTAT/sqrtumax));
+                lTAT     =  2.0*abratio*sqrtumax-umax;
+                mTAT     =  aTAT*abratio*sqrtumax-aTAT*umax+0.5*bTAT*umax*sqrtumax;
+                erfcArg  =  kTAT*(lTAT-1.0);
+                tErfc    =  1.0/(1.0+`perfc*abs(erfcArg));
+                expmerfc =  tErfc*(`aerfc+tErfc*(`berfc+tErfc*`cerfc));
+                tmp      = -erfcArg*erfcArg;
+                expmerfc =  erfcArg>0 ? expmerfc*`expl_low(tmp+mTAT) : `expl_low(mTAT)*(2.0-expmerfc*`expl_low(tmp));
+                iTAT     =  0.5*`M_SQRTPI*ctat*expVak_2*wTAT*aTAT*expmerfc/kTAT;
+            end
+        end
+        if (cbbt > 0.0) begin
+            vbbt     = `MINA(vak, vbbtLim, sq2Phitr);
+            tmp      =  vbir-vbbt;
+            wdep     =  p==0.5 ? wdep0v*sqrt(tmp) : wdep0v*pow(tmp, p);
+            fMaxr    =  pd1mp*tmp/(wdep*p);
+            tmp      = `expl(-fbbt/fMaxr);
+            iBBT     =  cbbt*vak*fMaxr*fMaxr*tmp;
+        end
+        if (invVbr > 0.0) begin
+            v4br     = `MINA(vak, 0.0, 4.0e-12);
+            fbr      =  v4br>vbrLim ? 1.0/(1.0-pow(-v4br*invVbr, pbr)) : fbrLim+fbrDer*v4br;
+        end
+        i4Noise =  fbr*(i4Noise+abs(iSRH+iTAT+iBBT));
+        pnjI    =  (iIdeal+iSRH+iTAT+iBBT)*fbr;
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  pn junction variable precalculations that do NOT depend on temperature
+//
+//  Outputs:
+//    wdep0v     m    zero-bias depletion width divided by vbir^p
+//    pd1mp      -    p/(1.0-p)
+//    vbbtLim    V    limiting voltage for BBT calculations
+//  Inputs:
+//    p          -    junction grading coefficient
+//    vbir       V    junction built-in voltage (at tRefK)
+//    EPS        F/m  permittivity
+//    P_Q        C    elementary charge
+//    neff       /m^3 effective junction doping
+//
+
+analog function real pnjVarsC;
+    input  p, vbir, EPS, P_Q, neff;
+    output pd1mp, vbbtLim;
+    real   p, vbir, EPS, P_Q, neff;
+    real   pd1mp, vbbtLim;
+    begin
+        pd1mp    =  p/(1.0-p);
+        vbbtLim  =  vbir-0.05;
+        pnjVarsC =  sqrt(4.0*EPS/(P_Q*neff)); // zero-bias depletion width divided by vbir^p
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  pn junction variable precalculations that depend on temperature
+//  NOTE: besides temperature scaling, geometry scaling is also applied
+//        (to cjo, idsat, ik, csrh, , ctat, and cbbt), this is necessary
+//        to calculate vLin properly; the units of the quantities just
+//        listed must be consistent with the unit of geomScale
+//        (/m^2 when geomScale is area, /m when geomScale is perimeter),
+//        and note that imax must be in A. The * below notes inputs
+//        that are scaled by geomScale.
+//
+//  Outputs:
+//    vLin       V         voltage at which to linearize exp(vak*invnPhit)
+//    invnPhit   1/V       precomputed 1.0/(n*phi_t)
+//    iIk        1/A       inverse of the knee current (at tDevK)
+//    vbi        V         junction built-in voltage (at tDevK)
+//    cjo        F         zero-bias depletion capacitance (at tDevK)
+//    idSat      A         saturation current (at tDevK)
+//    csrh       A/m       SRH current component prefactor (at tDevK)
+//    ctat       A/m       TAT current component prefactor (at tDevK)
+//    aTAT       -         precomputed TAT alpha
+//    bTATfctr   V/m       precomputed bias independent part of TAT beta
+//    cbbt       Am^2/V^3  BBT prefactor
+//    fbbt       V/m       BBT normalization field (at tDevK)
+//    invVbr     /V        1/vbr
+//    vbrLim     /V        limiting voltage for BKD calculations
+//    fbrLim     -         fbr at vbrLim
+//    fbrDer     V         derivative d(fbr)/d(V) at vbrLim
+//  Inputs:
+//    geomScale  -         geometry to scale capacitance/current factors by
+//    phi_t      V         thermal voltage k*tDevK/q
+//    rT         -         ratio tDevK/tRefK
+//    dT         K         difference tDevK-tRefK
+//    inv2phit   1/V       1.0/(2.0*phi_t)
+//    egTdev     eV        bandgap (at tDevK)
+//    egTref     eV        bandgap (at tRefK)
+// *  ikr        A         knee current (at tRefK)
+//    nk         -         knee current rolloff coefficient
+//    xik        -         temperature exponent of ik
+// *  cjor       F         zero-bias depletion capacitance (at tRefK)
+//    vbir       V         junction built-in voltage (at tRefK)
+//    p          -         junction grading coefficient
+// *  idSatr     A         ideal saturation current (at tRefK)
+//    n          -         ideality factor for ideal component of current
+//    xis        -         exponent for temperature dependence of idSat
+//    imax       A         current at which to linearize ideal diode current
+// *  csrhr      A/m       SRH current component prefactor (at tRefK)
+// *  ctatr      A/m       TAT current component prefactor (at tRefK)
+//    mefftat    -         TAT meff/m0 ratio
+// *  cbbtr      Am^2/V^3  BBT prefactor (at tRefK)
+//    fbbtr      V/m       BBT normalization field (at tRefK)
+//    stfbbt     /K        fbbt linear TC
+//    vbrr       V         breakdown voltage (at tRefK)
+//    abr        -         breakdown linearization factor (at -abr*vbr)
+//    pbr        -         breakdown onset tuning parameter
+//    stvbr      /K        vbr linear TC
+//    P_ME       kg        electron rest mass
+//    P_Q        C         elementary charge
+//    P_HBAR     Js        reduced Planck constant
+//
+
+analog function real pnjVarsT;
+    input  geomScale, phi_t, rT, dT, inv2Phit, egTdev, egTref, ikr, nk, xik, cjor, vbir, p;
+    input  idSatr, n, xis, imax, csrhr, ctatr, mefftat, cbbtr, fbbtr, stfbbt, vbrr, abr, pbr, stvbr, P_ME, P_Q, P_HBAR;
+    output invnPhit, iIk, vbi, cjo, idSat, csrh, ctat, aTAT, bTATfctr, cbbt, fbbt, invVbr, vbrLim, fbrLim, fbrDer;
+    real   geomScale, phi_t, rT, dT, inv2Phit, egTdev, egTref, ikr, nk, xik, cjor, vbir, p;
+    real   idSatr, n, xis, imax, csrhr, ctatr, mefftat, cbbtr, fbbtr, stfbbt, vbrr, abr, pbr, stvbr, P_ME, P_Q, P_HBAR;
+    real   invnPhit, iIk, vbi, cjo, idSat, csrh, ctat, aTAT, bTATfctr, cbbt, fbbt, invVbr, vbrLim, fbrLim, fbrDer;
+    real   niRatio, twoDelE, vLin, vbr;
+    begin
+        invnPhit =  1.0/(n*phi_t);
+        iIk      =  ikr > 0.0 ? 1.0/(geomScale*ikr*pow(rT, xik)) : 0.0;  // inverse knee current
+        vbi      =  phibicl(vbir, egTref, egTdev, phi_t, rT);            // built-in potential at tDevK
+        cjo      =  geomScale*cjor*pow((vbir/vbi), p);                   // zero-bias depletion capacitance at tDevK
+        idSat    =  geomScale*idSatr*exp(((egTref*rT-egTdev)/phi_t+xis*ln(rT))/n);
+        niRatio  =  rT*sqrt(rT)*exp(0.5*(egTref*rT-egTdev)/phi_t); // ni(tDevK)/ni(tRefK)
+        csrh     =  geomScale*csrhr*niRatio;
+        ctat     =  geomScale*ctatr*niRatio;
+        twoDelE  =  max(egTdev, 2.0*phi_t);
+        aTAT     =  twoDelE*inv2Phit;
+        bTATfctr =  sqrt(4.0*mefftat*P_ME*P_Q*twoDelE*twoDelE*twoDelE)*(1.0-p)/(3.0*P_HBAR);
+        cbbt     =  geomScale*cbbtr;
+        fbbt     =  fbbtr*(1.0+dT*stfbbt);
+        vLin     =  1.0e+08;
+        if (idSat > 0.0) begin                                     // linearization voltage for iIdeal
+            if (iIk > 0.0) begin                                   // must account for ik
+                vLin     = (n*phi_t/(1.0-nk))*ln(0.5*(imax/idSat)*pow(4.0*idSat*iIk, nk));
+            end else begin
+                vLin     =  n*phi_t*ln(imax/idSat);
+            end
+        end
+        invVbr   =  0.0;
+        vbrLim   =  0.0;
+        fbrLim   =  0.0;
+        fbrDer   =  0.0;
+        vbr      =  vbrr*(1.0+dT*stvbr);
+        if ((vbr >= 0.1) && (vbr <= 1000.0)) begin
+            invVbr   =  1.0/vbr;
+            vbrLim   =  pow(abr, pbr-1.0); // use as temporary variable to save one pow()
+            fbrLim   =  1.0/(1.0-abr*vbrLim);
+            fbrDer   = -fbrLim*fbrLim*vbrLim*pbr*invVbr;
+            vbrLim   = -abr*vbr;
+            fbrLim   =  fbrLim+abr*vbr*fbrDer;
+        end
+        pnjVarsT =  vLin;                                          // returned value must match function name
+    end
+endfunction
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Junction shot noise (including ideal and nonideal components of current)
+//
+//  The commonly used shot noise model 2q|I| is inaccurate for voltages less
+//  than a few phi_t, and for pn junctions with nonideal components of current
+//  can underpredict the noise. This formulation overcomes those limitations
+//  and, for zero nonideal component, matches the van der Ziel result.
+//
+//  Inputs:
+//    b_j        branch defined for the intrinsic pn junction
+//    iSat       ideal saturation current (A)
+//    iIdeal     ideal component of current (A)
+//    iNonideal  nonideal component of current (A)
+//    label      string that identifies the noise component (must be in "")
+//
+
+`define pnjShotNoise(b_j, iSat, iIdeal, iNonideal, P_Q, label) \
+    I(b_j) <+ white_noise(2.0*P_Q*(abs(iIdeal+2.0*iSat)+abs(iNonideal)), label);

@@ -1,0 +1,14 @@
+
+//
+//  Some simulators/Verilog-A compilers:
+//  - flag as errors the noise contribution switch inside conditionals for `collapsibleR
+//  - do not handle $simparam() in a parameter specification
+//  - do not handle $mfactor properly
+//  If the simulator/Verilog-A compiler you use has any of those issues uncomment the
+//  associated line below.
+//
+
+//`define compilerDoesNotHandleSimparamProperly // uncomment this definition if true
+`define compilerDoesNotHandleNoiseProperly    // uncomment this definition if true
+//`define compilerDoesNotHandleMfactorProperly  // uncomment this definition if true
+//`define compilerNeedsAskAttribute             // uncomment this definition if true

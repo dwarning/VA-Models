@@ -1,0 +1,176 @@
+
+//
+//  sp_s: PSP standard surface potential calculation
+//
+//  Outputs:
+//    sp_s         the surface potential
+//    SP_S_x1      x0 variable, used by sp_s_d
+//  Inputs:
+//    xg           effective Vgb/phi_t
+//    xn           effective (phiB+Vsb)/phi_t
+//    delta        exp(-xn)
+//    Gf           gamma/sqrt(phi_t) where gamma is the body effect coefficient
+//    Gf2          Gf*Gf
+//    inv_Gf2      1.0/Gf2
+//    xi           1.0+Gf/sqrt(2)
+//    inv_xi       1.0/xi
+//    margin       1.0e-5*xi
+//
+
+analog function real sp_s;
+    input  xg, xn, delta, Gf, Gf2, inv_Gf2, xi, inv_xi, margin;
+    output SP_S_x1;
+    real   xg, xn, delta, Gf, Gf2, inv_Gf2, xi, inv_xi, margin;
+    real   SP_S_x1;
+    real   SP_S_temp1, SP_S_yg, SP_S_ysub, SP_S_eta, SP_S_temp, SP_S_a, SP_S_c;
+    real   SP_S_tau, SP_S_y0, SP_S_delta0, SP_S_delta1, SP_S_xi0, SP_S_xi1, SP_S_xi2;
+    real   SP_S_pC, SP_S_qC, SP_xg1, SP_S_A_fac, SP_S_xbar, SP_S_w, SP_S_bx;
+    real   SP_S_temp2, SP_S_b, SP_S_x0, nu, mutau;
+    begin
+        if (abs(xg) <= margin) begin
+            SP_S_x1     =  0.0;
+            SP_S_temp1  =  inv_xi * inv_xi * `oneSixth * `M_SQRT1_2;
+            sp_s        =  xg * inv_xi * (1.0 + xg * (1.0 - (delta)) * Gf * SP_S_temp1);
+        end else begin
+            if (xg < -margin) begin
+                SP_S_x1     =  0.0;
+                SP_S_yg     = -xg;
+                SP_S_ysub   = 1.25 * (SP_S_yg * inv_xi);
+                SP_S_eta    = 0.5 * (SP_S_ysub + 10 - sqrt((SP_S_ysub - 6.0) * (SP_S_ysub - 6.0) + 64.0));
+                SP_S_temp   = SP_S_yg - SP_S_eta;
+                SP_S_a      = SP_S_temp * SP_S_temp + Gf2*(SP_S_eta + 1.0);
+                SP_S_c      = 2.0 * SP_S_temp - Gf2;
+                SP_S_tau    = -SP_S_eta + ln(SP_S_a * inv_Gf2);
+                nu          = SP_S_a+SP_S_c;
+                mutau       = nu*nu+SP_S_tau*(0.5*SP_S_c*SP_S_c-SP_S_a);
+                SP_S_y0     = SP_S_eta+SP_S_a*nu*SP_S_tau/(mutau+(nu/mutau)*SP_S_tau*SP_S_tau*SP_S_c*(`oneThird*SP_S_c*SP_S_c-SP_S_a));
+                SP_S_delta0 = `expl_high(SP_S_y0);
+                SP_S_delta1 = 1.0 / SP_S_delta0;
+                SP_S_temp   = 1.0 / (2.0 + SP_S_y0 * SP_S_y0);
+                SP_S_xi0    = SP_S_y0 * SP_S_y0 * SP_S_temp;
+                SP_S_xi1    = 4.0 * (SP_S_y0 * SP_S_temp * SP_S_temp);
+                SP_S_xi2    = (8.0 * SP_S_temp - 12.0 * SP_S_xi0) * SP_S_temp * SP_S_temp;
+                SP_S_temp   = SP_S_yg - SP_S_y0;
+                SP_S_temp1  = (delta) * SP_S_delta1;
+                SP_S_pC     = 2.0 * SP_S_temp + Gf2 * (SP_S_delta0 - 1.0 - SP_S_temp1 + (delta) * (1.0 - SP_S_xi1));
+                SP_S_qC     = SP_S_temp * SP_S_temp - Gf2 * (SP_S_delta0 - SP_S_y0 - 1.0 + SP_S_temp1 + (delta) * (SP_S_y0 - 1.0 - SP_S_xi0));
+                SP_S_temp   = 2.0 - Gf2 * (SP_S_delta0 + SP_S_temp1 - (delta) * SP_S_xi2);
+                SP_S_temp   = SP_S_pC * SP_S_pC - 2.0 * (SP_S_qC * SP_S_temp);
+                sp_s        = -SP_S_y0 - 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp)));
+            end else begin
+                SP_xg1      = 1.0 / (1.25 + Gf * 7.324648775608221e-001);
+                SP_S_A_fac  = (xi * 1.25 * SP_xg1 - 1.0) * SP_xg1;
+                SP_S_xbar   = xg * inv_xi * (1.0 + SP_S_A_fac * xg);
+                SP_S_temp   = `expl_low(-SP_S_xbar);
+                SP_S_w      = 1.0 - SP_S_temp;
+                SP_S_x1     = xg + Gf2 * 0.5 - Gf * sqrt(xg + Gf2 * 0.25 - SP_S_w);
+                SP_S_bx     = (xn) + 3.0;
+                SP_S_eta    = `MINA(SP_S_x1, SP_S_bx, 5.0) - 0.5 * (SP_S_bx - sqrt(SP_S_bx * SP_S_bx + 5.0));
+                SP_S_temp   = xg - SP_S_eta;
+                SP_S_temp1  = exp(-SP_S_eta);
+                SP_S_temp2  = 1.0 / (2.0 + SP_S_eta * SP_S_eta);
+                SP_S_xi0    = SP_S_eta * SP_S_eta * SP_S_temp2;
+                SP_S_xi1    = 4.0 * (SP_S_eta * SP_S_temp2 * SP_S_temp2);
+                SP_S_xi2    = (8.0 * SP_S_temp2 - 12.0 * SP_S_xi0) * SP_S_temp2 * SP_S_temp2;
+                SP_S_a      = max(1.0e-40, SP_S_temp * SP_S_temp - Gf2 * (SP_S_temp1 + SP_S_eta - 1.0 - (delta) * (SP_S_eta + 1.0 + SP_S_xi0)));
+                SP_S_b      = 1.0 - 0.5 * (Gf2 * (SP_S_temp1 - (delta) * SP_S_xi2));
+                SP_S_c      = 2.0 * SP_S_temp + Gf2 * (1.0 - SP_S_temp1 - (delta) * (1.0 + SP_S_xi1));
+                SP_S_tau    = (xn) - SP_S_eta + ln(SP_S_a / Gf2);
+                nu          = SP_S_a+SP_S_c;
+                mutau       = nu*nu+SP_S_tau*(0.5*SP_S_c*SP_S_c-SP_S_a*SP_S_b);
+                SP_S_x0     = SP_S_eta+SP_S_a*nu*SP_S_tau/(mutau+(nu/mutau)*SP_S_tau*SP_S_tau*SP_S_c*(`oneThird*SP_S_c*SP_S_c-SP_S_a*SP_S_b));
+                if (SP_S_x0 < `se05) begin
+                    SP_S_delta0 = exp(SP_S_x0);
+                    SP_S_delta1 = 1.0 / SP_S_delta0;
+                    SP_S_delta0 = (delta) * SP_S_delta0;
+                end else begin
+                    if (SP_S_x0 > (xn) - `se05) begin
+                        SP_S_delta0 = exp(SP_S_x0 - (xn));
+                        SP_S_delta1 = (delta) / SP_S_delta0;
+                    end else begin
+                        SP_S_delta0 = `ke05 / `P3((xn) - SP_S_x0 - `se05);
+                        SP_S_delta1 = `ke05 / `P3(SP_S_x0 - `se05);
+                    end
+                end
+                SP_S_temp   = 1.0 / (2.0 + SP_S_x0 * SP_S_x0);
+                SP_S_xi0    = SP_S_x0 * SP_S_x0 * SP_S_temp;
+                SP_S_xi1    = 4.0 * (SP_S_x0 * SP_S_temp * SP_S_temp);
+                SP_S_xi2    = (8.0 * SP_S_temp - 12.0 * SP_S_xi0) * SP_S_temp * SP_S_temp;
+                SP_S_temp   = xg - SP_S_x0;
+                SP_S_pC     = 2.0 * SP_S_temp + Gf2 * (1.0 - SP_S_delta1 + SP_S_delta0 - (delta) * (1.0 + SP_S_xi1));
+                SP_S_qC     = SP_S_temp * SP_S_temp - Gf2 * (SP_S_delta1 + SP_S_x0 - 1.0 + SP_S_delta0 - (delta) * (SP_S_x0 + 1.0 + SP_S_xi0));
+                SP_S_temp   = 2.0 - Gf2 * (SP_S_delta1 + SP_S_delta0 - (delta) * SP_S_xi2);
+                SP_S_temp   = SP_S_pC * SP_S_pC - 2.0 * (SP_S_qC * SP_S_temp);
+                sp_s        = SP_S_x0 + 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp)));
+            end
+        end
+    end
+endfunction
+
+//
+//  sp_s_d: PSP surface potential calculation for drain side
+//
+//  Outputs:
+//    sp_s_d       the surface potential
+//  Inputs:
+//    xg           effective Vgb/phi_t
+//    xn           effective (phiB+Vsb+Vdse)/phi_t
+//    delta        exp(-xn)
+//    Gf           gamma/sqrt(phi_t) where gamma is the body effect coefficient
+//    Gf2          Gf*Gf
+//    inv_xi       1.0/xi (xi as defined for sp_s)
+//    margin       1.0e-5*xi
+//
+
+analog function real sp_s_d;
+    input  xg, xn, delta, Gf, Gf2, inv_xi, margin, SP_S_x1;
+    real   xg, xn, delta, Gf, Gf2, inv_xi, margin, SP_S_x1;
+    real   SP_S_temp1, SP_S_bx, SP_S_eta, SP_S_temp, SP_S_temp2, SP_S_xi0, SP_S_xi1;
+    real   SP_S_xi2, SP_S_a, SP_S_b, SP_S_c, SP_S_tau, SP_S_x0, SP_S_delta0, SP_S_delta1;
+    real   SP_S_pC, SP_S_qC, nu, mutau;
+    begin
+        if (abs(xg) <= margin) begin
+            SP_S_temp1  =  inv_xi * inv_xi * `oneSixth * `M_SQRT1_2;
+            sp_s_d      =  xg * inv_xi * (1.0 + xg * (1.0 - (delta)) * Gf * SP_S_temp1);
+        end else begin
+            SP_S_bx     = (xn) + 3.0;
+            SP_S_eta    = `MINA(SP_S_x1, SP_S_bx, 5.0) - 0.5 * (SP_S_bx - sqrt(SP_S_bx * SP_S_bx + 5.0));
+            SP_S_temp   = xg - SP_S_eta;
+            SP_S_temp1  = exp(-SP_S_eta);
+            SP_S_temp2  = 1.0 / (2.0 + SP_S_eta * SP_S_eta);
+            SP_S_xi0    = SP_S_eta * SP_S_eta * SP_S_temp2;
+            SP_S_xi1    = 4.0 * (SP_S_eta * SP_S_temp2 * SP_S_temp2);
+            SP_S_xi2    = (8.0 * SP_S_temp2 - 12.0 * SP_S_xi0) * SP_S_temp2 * SP_S_temp2;
+            SP_S_a      = max(1.0e-40, SP_S_temp * SP_S_temp - Gf2 * (SP_S_temp1 + SP_S_eta - 1.0 - (delta) * (SP_S_eta + 1.0 + SP_S_xi0)));
+            SP_S_b      = 1.0 - 0.5 * (Gf2 * (SP_S_temp1 - (delta) * SP_S_xi2));
+            SP_S_c      = 2.0 * SP_S_temp + Gf2 * (1.0 - SP_S_temp1 - (delta) * (1.0 + SP_S_xi1));
+            SP_S_tau    = (xn) - SP_S_eta + ln(SP_S_a / Gf2);
+            nu          = SP_S_a+SP_S_c;
+            mutau       = nu*nu+SP_S_tau*(0.5*SP_S_c*SP_S_c-SP_S_a*SP_S_b);
+            SP_S_x0     = SP_S_eta+SP_S_a*nu*SP_S_tau/(mutau+(nu/mutau)*SP_S_tau*SP_S_tau*SP_S_c*(`oneThird*SP_S_c*SP_S_c-SP_S_a*SP_S_b));
+            if (SP_S_x0 < `se05) begin
+                SP_S_delta0 = exp(SP_S_x0);
+                SP_S_delta1 = 1.0 / SP_S_delta0;
+                SP_S_delta0 = (delta) * SP_S_delta0;
+            end else begin
+                if (SP_S_x0 > (xn) - `se05) begin
+                    SP_S_delta0 = exp(SP_S_x0 - (xn));
+                    SP_S_delta1 = (delta) / SP_S_delta0;
+                end else begin
+                    SP_S_delta0 = `ke05 / `P3((xn) - SP_S_x0 - `se05);
+                    SP_S_delta1 = `ke05 / `P3(SP_S_x0 - `se05);
+                end
+            end
+            SP_S_temp   = 1.0 / (2.0 + SP_S_x0 * SP_S_x0);
+            SP_S_xi0    = SP_S_x0 * SP_S_x0 * SP_S_temp;
+            SP_S_xi1    = 4.0 * (SP_S_x0 * SP_S_temp * SP_S_temp);
+            SP_S_xi2    = (8.0 * SP_S_temp-12.0 * SP_S_xi0) * SP_S_temp * SP_S_temp;
+            SP_S_temp   = xg - SP_S_x0;
+            SP_S_pC     = 2.0 * SP_S_temp + Gf2 * (1.0 - SP_S_delta1 + SP_S_delta0 - (delta) * (1.0 + SP_S_xi1));
+            SP_S_qC     = SP_S_temp * SP_S_temp - Gf2 * (SP_S_delta1 + SP_S_x0 - 1.0 + SP_S_delta0 - (delta) * (SP_S_x0 + 1.0 + SP_S_xi0));
+            SP_S_temp   = 2.0 - Gf2*(SP_S_delta1+SP_S_delta0-(delta)*SP_S_xi2);
+            SP_S_temp   = SP_S_pC * SP_S_pC - 2.0 * (SP_S_qC * SP_S_temp);
+            sp_s_d      = SP_S_x0 + 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp)));
+        end
+    end
+endfunction

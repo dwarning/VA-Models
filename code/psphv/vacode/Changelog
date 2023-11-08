@@ -1,0 +1,8 @@
+openVAF: Substitute repeat() loop with for() loop in jfetidgIds_v1_0_1.va
+
+Use simulator gmin for inner drain-source branch instead constant value.
+
+Included disciplines.vams and constants.vams
+
+Origin of the model:
+https://nanohub.org/publications/475/1

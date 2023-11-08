@@ -1,0 +1,414 @@
+
+//
+//  Copyright (c) 2017 NXP Semiconductors N.V.
+//
+
+//
+//======================================================================================
+//======================================================================================
+//                    In-Code Statement
+//
+//  Software is distributed as is, completely without warranty or service support.
+//  NXP Semiconductors, along with its employees are not liable for the condition
+//  or performance of the software.
+//
+//  NXP Semiconductors owns the copyright and grants users a perpetual, irrevocable,
+//  worldwide, non-exclusive, royalty-free license with respect to the software as
+//  set forth below.
+//
+//  NXP Semiconductors hereby disclaims all implied warranties.
+//
+//  NXP Semiconductors grants the users the right to modify, copy, and redistribute
+//  the software and documentation, both within the user's organization and externally,
+//  subject to the following restrictions:
+//
+//    1. The users agree not to charge for the NXP Semiconductors developed code
+//       but may charge for additions, extensions, or support.
+//
+//    2. In any product based on the software, the users agree to acknowledge that
+//       NXP Semiconductors developed the software. This acknowledgment shall appear
+//       in the product documentation.
+//
+//    3. Redistributions to others of source code and documentation must retain the
+//       copyright notice, disclaimer, and list of conditions.
+//
+//    4. Redistributions to others in binary form must reproduce the copyright notice,
+//       disclaimer, and list of conditions in the documentation and/or other materials
+//       provided with the distribution.
+//
+//  In-Code Statement Revision: 1.0.1 (JFETIDG), May 25, 2017
+//
+//======================================================================================
+//======================================================================================
+//
+
+//
+//  jfetidgIds.va: Verilog-A analog functions for Ids(Vds,Vgbs,Vgts) calculation for the JFETIDG model.
+//
+//  Version: 1.0.1
+//  Date:    May 25, 2017
+//  Author:  Colin McAndrew and Kejun Xia
+//
+//  - fixed hidden state issue with Vsp and Vse
+//  - changed jfetidgIds to return the core model current as the
+//    function name output rather than as an argument (the LRM
+//    example did not show this)
+//  - added return of Vsp and Vdsat as outputs, for printing
+//    as part of the operating point information.
+//
+//  Version: 1.0.0
+//  Date:    March 22, 2017
+//  Author:  Colin McAndrew and Kejun Xia
+//
+
+//
+//  Vdsat calculation, as documented in paper I.
+//  This should be called using potentials based on
+//  limiting to Vsp-phi_t.
+//
+//  Outputs:
+//    jfetidgVdsat drain-source saturation voltage
+//  Inputs:
+//    dfb          depletion factor for bottom gate
+//    dft          depletion factor for top    gate
+//    psib         psi+2.0*Vsgb     for bottom gate
+//    psit         psi+2.0*Vsgt     for top    gate
+//    k            1.0/(L*(Ecr-Eco)), (13) of paper I
+//
+
+analog function real jfetidgVdsat;
+    input dfb, dft, psib, psit, k;
+    real  dfb, dft, psib, psit, k;
+    real  dfbsq, dftsq, dfbtsq4;
+    real  vdsp;
+    real  aa, bb, cc;
+    real  fb, ft, fb_p1, ft_p1, fb_p2, ft_p2, Pi, Qi, Pi_p1, Qi_p1;
+    real  thetab, thetat, inv1pthb, inv1ptht;
+    real  c_fb, c_ft, c_fb_p1, c_ft_p1, c_fb_p2, c_ft_p2;
+    real  c_vdsb, c_vdst;
+    integer i;
+    begin
+        if ((dfb>0.0)||(dft>0.0)) begin
+            if (dft==0.0) begin
+                dfbsq       =  dfb*dfb;
+                vdsp        =  0.5*(1.0/dfbsq-psib);
+            end else if (dfb==0.0) begin
+                dftsq       =  dft*dft;
+                vdsp        =  0.5*(1.0/dftsq-psit);
+            end else begin
+                dfbsq       =  dfb*dfb;  // cannot pass in precomputed values
+                dftsq       =  dft*dft;  // as df[bt] are really df[bt]/U
+                dfbtsq4     =  4.0*dfbsq*dftsq;
+                aa          =  dfbsq-dftsq;
+                aa          =  aa*aa;
+                cc          =  1.0-dfbsq*psib-dftsq*psit;
+                bb          =  2.0*cc*(dfbsq+dftsq)+dfbtsq4*(psib+psit);
+                cc          =  cc*cc-dfbtsq4*psib*psit;
+                vdsp        =  cc/(bb+sqrt(bb*bb-4.0*aa*cc));           // drain-source pinchoff voltage, (25) of paper I
+            end
+            if (k==0.0) begin                                           // when there is no velocity saturation the
+                jfetidgVdsat=  vdsp;                                    // exact 3/2 power model has Vsat=Vdsp
+            end else begin
+                jfetidgVdsat=  16.0*vdsp/(9.0+sqrt(81.0+288.0*k*vdsp)); // initial value, (30) of paper I
+                c_fb        = `twoThirds*dfb*sqrt(psib);
+                c_fb_p1     =  c_fb/psib;
+                c_fb_p2     =  c_fb_p1/psib;
+                c_ft        = `twoThirds*dft*sqrt(psit);
+                c_ft_p1     =  c_ft/psit;
+                c_ft_p2     =  c_ft_p1/psit;
+                c_vdsb      =  2.0/psib;
+                c_vdst      =  2.0/psit;
+//                repeat (3) begin // 3 iterations of (20) of paper I
+                for (i = 1; i <= 3; i = i + 1) begin
+                    thetab      =  sqrt(1.0+c_vdsb*jfetidgVdsat);
+                    inv1pthb    =  1.0/(1.0+thetab);
+                    aa          =  inv1pthb*inv1pthb;
+                    thetat      =  sqrt(1.0+c_vdst*jfetidgVdsat);
+                    inv1ptht    =  1.0/(1.0+thetat);
+                    bb          =  inv1ptht*inv1ptht;
+                    fb          =  c_fb*(thetab+inv1pthb);
+                    fb_p1       =  c_fb_p1*(2.0+thetab)*aa;
+                    fb_p2       = -c_fb_p2*(3.0+thetab)*aa*inv1pthb/thetab;
+                    ft          =  c_ft*(thetat+inv1ptht);
+                    ft_p1       =  c_ft_p1*(2.0+thetat)*bb;
+                    ft_p2       = -c_ft_p2*(3.0+thetat)*bb*inv1ptht/thetat;
+                    Pi          =  1.0-fb-ft;                             // (15) of paper I
+                    Pi_p1       = -fb_p1-ft_p1;
+                    Qi          =  jfetidgVdsat*(fb_p1+ft_p1);            // (15) of paper I
+                    Qi_p1       = -Pi_p1+jfetidgVdsat*(fb_p2+ft_p2);
+                    aa          =  k*Qi_p1;                               // (21) of paper I
+                    bb          =  k*(Qi-Qi_p1*jfetidgVdsat)+Qi_p1-Pi_p1; // (21) of paper I
+                    cc          =  Qi-Pi-jfetidgVdsat*(Qi_p1-Pi_p1);      // (21) of paper I
+                    jfetidgVdsat= -2.0*cc/(bb+sqrt(bb*bb-4.0*aa*cc));     // (20) of paper I
+                end
+            end
+        end else begin
+            jfetidgVdsat=  0.5e12; // negligible depletion pinching, set to a large value
+        end
+    end
+endfunction
+
+//
+//  Core Ids calculation, as documented in paper II.
+//
+//  Outputs:
+//    Ids        drain-source current of the dual-gate JFET
+//    geff       effective DC conductance (used in noise calculation)
+//    iiFac      impact ionization factor
+//  Inputs:
+//    Vds_x      drain-source       voltage
+//    Vgbs_x     bottom gate-source voltage
+//    Vgts_x     top    gate-source voltage
+//    swlin      switch to force linearity, 0=no and 1=yes
+//    phi_t      thermal voltage k*T/q
+//    psirb      bottom gate depletion pinching potential
+//    dfb_xdibl  bottom gate depletion pinching factor
+//    psirt      top    gate depletion pinching potential
+//    dft_xdibl  top    gate depletion pinching factor
+//    ats        drain pinch-off smoothing parameter
+//    atspo      drain pinch-off smoothing parameter limit in source pinch-off
+//    axs        aternative drain pinch-off model smoothing parameter
+//    nspofac    source pinch-off slope factor 1.0/(nspo*phi_t0)
+//    gf         conductance factor
+//    grpo       minimum conductance ratio in pinch-off
+//    invDv      1.0/(delta_voltage) for velocity saturation
+//    vcrneff    effective corner voltage for velocity saturation
+//    ivcrit     inverse of the velocity saturation critical voltage
+//    dufctr     du factor, precomputed
+//    uoff       du offset, precomputed
+//    diblb      bottom gate dibl coefficient
+//    diblt      top    gate dibl coefficient
+//    diblv      dibl voltage offset
+//    dible      dibl voltage exponent
+//    diblo      dibl offset (precomputed)
+//    clm1       clm     linear component coefficient
+//    clm1c      clm     linear component V(nc) dependence coefficient
+//    clm2       clm  nonlinear component coefficient
+//    clm2v      clm  nonlinear component voltage offset
+//    clm2e      clm  nonlinear component voltage exponent
+//    clm2o      clm  nonlinear component offset (precomputed)
+//    expmvoff   exponential of the negative of the source pinchoff offset
+//    moff       source pinchoff smoothing factor
+//    mumb       bottom gate mobility modulation coefficient
+//    mumboff    bottom gate mobility modulation offset
+//    mumbs      bottom gate mobility modulation smoothing parameter
+//    mumbe      bottom gate mobility modulation exponent
+//    mumt       top    gate mobility modulation coefficient
+//    mumtoff    top    gate mobility modulation offset
+//    mumts      top    gate mobility modulation smoothing parameter
+//    mumte      top    gate mobility modulation exponent
+//    alphab     bottom gate impact ionization prefactor
+//    alphat     top    gate impact ionization prefactor
+//    beta       impact ionization exponent
+//    mumii1     linear    impact ionization mobility modulation coefficient
+//    mumii2     quadratic impact ionization mobility modulation coefficient
+//
+//  Some of the above arguments are, to reduce model evaluation time,
+//  pre-computed quantities.
+//
+//  Terminology:
+//  non-pinch-off    is when neither source nor drain are in pinch-off      ("nonsaturation")
+//  drain  pinch-off is when the drain is pinched off but the source is not ("saturation")
+//  source pinch-off is when both the source and drain are in pinch-off     ("subthreshold")
+//
+//  NOTE: some compilers have not yet implemented the IEEE std 1364-2005
+//        Verilog HDL style calls for mathematical functions; this is why
+//         ln(),  log()  ,  exp(),  sqrt(),  pow(), etc. are used instead of
+//        $ln(), $log10(), $exp(), $sqrt(), $pow(), etc.
+//        (the second forms are those "encouraged" to be used since LRM2.3)
+//
+
+`define VCL_JFETIDG 1.0e-12
+`define ECL_JFETIDG 0.001
+
+analog function real jfetidgIds;
+    input   Vds_x, Vgbs_x, Vgts_x, swlin;
+    input   phi_t, psirb, dfb_xdibl, psirt, dft_xdibl, ats, atspo, axs, nspofac;
+    input   gf, grpo, invDv, vcrneff, ivcrit, dufctr, uoff;
+    input   diblb, diblt, diblv, dible, diblo;
+    input   clm1, clm1c, clm2, clm2v, clm2e, clm2o;
+    input   expmvoff, moff;
+    input   mumb, mumboff, mumbs, mumbe, mumt, mumtoff, mumts, mumte;
+    input   alphab, alphat, beta, mumii1, mumii2, jhc, mhc, gf_w;
+    output  geff, iiFac, Vsp, Vdsat;
+    real    Vds_x, Vgbs_x, Vgts_x;
+    integer swlin;
+    real    phi_t, psirb, dfb_xdibl, psirt, dft_xdibl, ats, atspo, axs, nspofac;
+    real    gf, grpo, invDv, vcrneff, ivcrit, dufctr, uoff;
+    real    diblb, diblt, diblv, dible, diblo, diblfac;
+    real    clm1, clm1c, clm2, clm2v, clm2e, clm2o;
+    real    expmvoff, moff;
+    real    mumb, mumboff, mumbs, mumbe, mumt, mumtoff, mumts, mumte;
+    real    alphab, alphat, beta, mumii1, mumii2, jhc, mhc, gf_w;
+    real    Ids, geff, iiFac;
+    real    sdFlip, Vds, Vgbs, Vgts, dfb, dfbsq, dft, dftsq;
+    real    arg1, arg2, aa, bb, cc, vbm, vtm, uu, gg, dd, hh, Vsp, atseff;
+    real    psib_, psit_, U, Vse, Vsphi, psib_phi, psit_phi;
+    real    Pl, Ps, Ph, fb, ft;
+    real    Vdsat, Vdseff, fctrm, fctrp, sqrtp, sqrtm, rmu;
+    real    Vdss, thetab, thetat;
+    real    mum, iiMod, Vds_ii, geff_w;
+    begin
+        iiFac    =  0.0;
+        Vsp      =  0.0;    // explicitly set here to avoid hidden states
+        Vse      =  0.0;
+        Vdsat    =  0.5e12; // for linear mode, return a large value
+        if (Vds_x<0.0) begin
+            sdFlip   = -1.0;
+            Vds      = -Vds_x;
+            Vgbs     =  Vgbs_x-Vds_x;
+            Vgts     =  Vgts_x-Vds_x;
+        end else begin
+            sdFlip   =  1.0;
+            Vds      =  Vds_x;
+            Vgbs     =  Vgbs_x;
+            Vgts     =  Vgts_x;
+        end
+        diblfac  =  0.0;
+        if ((diblb>0.0)||(diblt>0.0)) begin
+            diblfac  =  pow((Vds+diblv),dible)-diblo;
+        end
+        if (diblb>0.0) begin
+            dfb      =  dfb_xdibl-diblb*diblfac;
+            if (dfb<1.0e-08) begin
+                dfb      =  0.0;
+            end
+        end else begin
+            dfb      =  dfb_xdibl;
+        end
+        if (diblt>0.0) begin
+            dft      =  dft_xdibl-diblt*diblfac;
+            if (dft<1.0e-08) begin
+                dft      =  0.0;
+            end
+        end else begin
+            dft      =  dft_xdibl;
+        end
+        if ((!swlin)&&((dfb>0.0)||(dft>0.0))) begin
+            dfbsq    =  dfb*dfb;
+            dftsq    =  dft*dft;
+            aa       =  Vgbs-0.5*psirb;                          // Vb- prior to limiting, (4) of paper II
+            bb       =  Vgts-0.5*psirt;                          // Vt- prior to limiting, (4) of paper II
+            if (dft>0.0) begin
+                vbm      = `MINA(aa, bb+0.5/dftsq, phi_t);       // clamped Vb-, (7) of paper II
+            end else begin
+                vbm      = aa;
+            end
+            if (dfb>0.0) begin
+                vtm      = `MINA(bb, aa+0.5/dfbsq, phi_t);       // clamped Vt-, (7) of paper II
+            end else begin
+                vtm      = bb;
+            end
+            if (dft<1.0e-08) begin
+                Vsp      =  vbm+0.5/dfbsq;                       // pinch-off voltage only for bottom gate
+            end else if (dfb<1.0e-08) begin
+                Vsp      =  vtm+0.5/dftsq;                       // pinch-off voltage only for top gate
+            end else begin
+                uu       =  (dfbsq-dftsq)*(vbm-vtm);            // compute pinch-off voltage, (6) and (5) of paper II
+                cc       =  dfbsq+dftsq;                        // precompute to save repeated calculation
+                gg       =  4.0*cc*(1.0+uu);
+                uu       =  1.0+2.0*uu;                         // 1+2*uhat of (6) of paper II
+                dd       =  64.0*dfbsq*dftsq*uu;
+                hh       =  uu+cc*cc*(vbm-vtm)*(vbm-vtm);
+                Vsp      =  2.0*hh/(gg+sqrt(dd))+0.5*(vbm+vtm); // channel pinch-off voltage (5) of paper II, w.r.t. source (not ground)
+            end
+            arg1     =  psirb+2.0*(Vsp-Vgbs);
+            psib_    = `MAXA(arg1, `VCL_JFETIDG, `ECL_JFETIDG);  // clamped psib+2.0*(Vsp-Vgbs), (10) of paper II
+            arg1     =  psirt+2.0*(Vsp-Vgts);
+            psit_    = `MAXA(arg1, `VCL_JFETIDG, `ECL_JFETIDG);  // clamped psit+2.0*(Vsp-Vgts), (10) of paper II
+            U        =  dfb*sqrt(psib_)+dft*sqrt(psit_);         // (13) of paper II
+            if ((moff==1.0)&&(expmvoff==1.0)) begin
+                Vse      = `MINE(Vsp, 0.0, nspofac);             // 1st line of (16) of paper II, with Vs=0
+            end else begin                                       // modification for flexibility of source pinchoff modeling
+                if (Vsp>=0.0) begin
+                    arg1     =  exp(-nspofac*moff*Vsp);
+                    arg2     =  exp(-nspofac*Vsp);
+                    Vse      =  Vsp-(nspofac*moff*Vsp+ln(1.0+arg1))*(expmvoff+arg1)/(nspofac*expmvoff*(moff+arg2));
+                end else begin
+                    arg1     =  exp(nspofac*moff*Vsp);
+                    arg2     =  exp(nspofac*Vsp);
+                    Vse      =  Vsp-ln(1.0+arg1)*(expmvoff*arg1+1.0)*arg2/(nspofac*expmvoff*arg1*(moff*arg2+1.0));
+                end
+            end
+            Vsphi    = `MINE(Vsp-phi_t, 0.0, nspofac);           // 2nd line of (16) of paper II, with Vs=0
+            arg1     =  psirb+2.0*(Vsphi-Vgbs);
+            psib_phi = `MAXA(arg1, `VCL_JFETIDG, `ECL_JFETIDG);  // clamped psib+2.0*(Vsphi-Vgbs)
+            arg1     =  psirt+2.0*(Vsphi-Vgts);
+            psit_phi = `MAXA(arg1, `VCL_JFETIDG, `ECL_JFETIDG);  // clamped psit+2.0*(Vsphi-Vgts)
+            Vdsat    =  jfetidgVdsat(dfb/U, dft/U, psib_phi, psit_phi, invDv);
+            if (axs>0.0) begin
+                Vdseff   =  Vds/pow(1.0+pow(Vds/Vdsat,axs),1.0/axs);   // PSP form of limiting
+            end else begin
+                atseff   =  ((Vsp-Vse)+atspo)*(ats+atspo)/((Vsp-Vse)+(ats+atspo));   // smoothly selects atspo in source pinch-off, ats+atspo otherwise
+                atseff   =  atseff*atseff;
+                Vdseff   =  2.0*Vds*Vdsat/(sqrt((Vds-Vdsat)*(Vds-Vdsat)+atseff)+sqrt((Vds+Vdsat)*(Vds+Vdsat)+atseff));
+            end
+            arg1     =  psirb+2.0*(Vse-Vgbs);
+            psib_    = `MAXA(arg1, `VCL_JFETIDG, `ECL_JFETIDG);  // clamped psib+2.0*(Vse-Vgbs), (10) of paper II
+            arg1     =  psirt+2.0*(Vse-Vgts);
+            psit_    = `MAXA(arg1, `VCL_JFETIDG, `ECL_JFETIDG);  // clamped psit+2.0*(Vse-Vgts), (10) of paper II
+            thetab   =  sqrt(1.0+2.0*Vdseff/psib_phi);           // 3rd line of (9) of paper I
+            fb       = `twoThirds*dfb*sqrt(psib_phi)*(thetab+1.0/(1.0+thetab)); // 1st line of (9) of paper I
+            thetat   =  sqrt(1.0+2.0*Vdseff/psit_phi);           // 3rd line of (9) of paper I
+            ft       = `twoThirds*dft*sqrt(psit_phi)*(thetat+1.0/(1.0+thetat)); // 2nd line of (9) of paper I
+            Pl       =  U-dfb*sqrt(psib_)-dft*sqrt(psit_);       // 1st line of (15) of paper II
+            Ps       =  U-dfb*sqrt(psib_phi)-dft*sqrt(psit_phi); // 2nd line of (15) of paper II
+            Ph       =  U-fb-ft;                                 // 3rd line of (15) of paper II
+            if (ivcrit>0.0) begin
+                fctrm    =  0.5*(Vdseff-vcrneff)*ivcrit;
+                fctrp    =  0.5*(Vdseff+vcrneff)*ivcrit;
+                sqrtm    =  sqrt(fctrm*fctrm+dufctr);
+                sqrtp    =  sqrt(fctrp*fctrp+dufctr);
+                rmu      =  sqrtm+sqrtp-uoff;
+            end else begin
+                rmu      =  0.0;
+            end
+            mum      =  1.0;
+            if (mumt>0.0) begin
+                mum      =  mum*(1.0+mumt*pow(`MAXA(Vgts-mumtoff, 0.0, mumts), mumte));
+            end else if (mumt<0.0) begin
+                mum      =  mum/(1.0-mumt*pow(`MAXA(Vgts-mumtoff, 0.0, mumts), mumte));
+            end
+            if (mumb>0.0) begin
+                mum      =  mum*(1.0+mumb*pow(`MAXA(Vgbs-mumboff, 0.0, mumbs), mumbe));
+            end else if (mumt<0.0) begin
+                mum      =  mum/(1.0-mumb*pow(`MAXA(Vgbs-mumboff, 0.0, mumbs), mumbe));
+            end
+            geff     =  Pl*Ph*mum/(Ps*(1.0+rmu));
+            geff_w   =  geff*gf_w;
+            geff     =  geff*gf;
+            if ((alphab>0.0)||(alphat>0.0)) begin
+                Vds_ii   =  pow(`MAXA(geff_w*Vdseff-jhc, 0, jhc*1.0e-3)*Vds,mhc); // Kirk effect
+                iiFac    =  Vds_ii*exp(-beta/(Vds_ii+1.0e-30));
+                if ((mumii1>0.0)||(mumii2>0.0)) begin
+                    iiMod    =  iiFac*(alphab+alphat)*Vdseff;
+                    geff     =  geff*(1.0+iiMod*(mumii1+iiMod*mumii2));
+                end
+            end
+        end else if (!swlin) begin // both dfb and dft must be zero (depletion pinching is turned off)
+            Vdseff   =  Vds;
+            if (ivcrit>0.0) begin
+                fctrm    =  0.5*(Vdseff-vcrneff)*ivcrit;
+                fctrp    =  0.5*(Vdseff+vcrneff)*ivcrit;
+                sqrtm    =  sqrt(fctrm*fctrm+dufctr);
+                sqrtp    =  sqrt(fctrp*fctrp+dufctr);
+                rmu      =  sqrtm+sqrtp-uoff;
+            end else begin
+                rmu      =  0.0;
+            end
+            geff     =  gf/(1.0+rmu);
+        end else begin
+            Vdseff   =  Vds;
+            geff     =  gf;
+        end
+        Ids      =  sdFlip*(geff*Vdseff+grpo*gf*Vdseff);
+        Vdss     =  sqrt(Vds*Vds+0.01)-0.1;
+        if (clm1>0.0) begin
+            Ids      =  Ids*(1.0+clm1*(1.0+clm1c*(Vsp-Vse))*Vdss);
+        end
+        if (clm2>0.0) begin
+            Ids      =  Ids*(1.0+clm2*(pow((Vdss+clm2v),clm2e)-clm2o));
+        end
+        jfetidgIds = Ids;
+    end
+endfunction
