@@ -1,4 +1,4 @@
-// r3_cmc version 1.1.1
+// r3_cmc version 1.1.0
 
 /*
 Copyright (c) 2020 Silicon Integration Initiative, Inc.
@@ -24,14 +24,20 @@ http://www.si2.org/cmc
 
 `define VERSION     1
 `define SUBVERSION  1
-`define REVISION    1
+`define REVISION    0
 `define LEVEL       1003
 
 //
 //  Verilog-A definition of the CMC 3-terminal resistor model, r3_cmc.
 //
 //  See the file r3_cmc.txt for a quick description of the model,
-//  and see the r3_cmc_v111.pdf file for complete documentation.
+//  and see the r3_cmc_release1.1.0_2020MONDY.pdf file for complete documentation.
+//
+
+//
+//  Release:  1.1.0_beta2
+//  Date:     2020 April 13
+//  Comments: Beta2 release
 //
 
 `include "discipline.h"
@@ -44,7 +50,7 @@ http://www.si2.org/cmc
 module r3_cmc(n1,nc,n2,dt);
 
 //
-//  Node definitions
+//  Node definitions (the local temperature rise is, for now, internal)
 //
 
 inout      n1,n2,nc,dt;
@@ -82,7 +88,9 @@ branch (dt   )   b_rth;   // local thermal branch
 `IPRnb( nsmm_rsh  ,   0.0     ,""                        , "number of standard deviations of local variation for rsh")
 `IPRnb( nsmm_w    ,   0.0     ,""                        , "number of standard deviations of local variation for w")
 `IPRnb( nsmm_l    ,   0.0     ,""                        , "number of standard deviations of local variation for l")
-
+`ifdef __XYCE__
+    `IPIcz(mult           ,1          ,""                                   ,"Number of devices in parallel")
+`endif
 //
 // Parameters that can be instance and/or model (the former overrides the latter)
 //
@@ -258,7 +266,7 @@ aliasparam dpinf = dp;
 
 `OPP( v       ,"V"    ,"voltage across resistor")
 `OPM( ibody   ,"A"    ,"current through resistor body")
-`OPM( power   ,"W"    ,"dissipated power")
+`OPM( power_dis   ,"W"    ,"dissipated power")
 `OPP( leff_um ,"um"   ,"effective electrical length in um")
 `OPP( weff_um ,"um"   ,"effective electrical width  in um")
 `OPD( r0      ,"Ohm"  ,"zero-bias resistance (per segment)")
@@ -300,7 +308,11 @@ analog begin : analog_block
         if (`SUBVERSION<subversion) begin
             `ERROR("ERROR: r3_cmc model subversion is less than required for the parameter set")
         end
+`ifdef __XYCE__
+        mMod    = mult;
+`else
         mMod    = $mfactor;
+`endif
         gmin    = $simparam("gmin", 0.0);
         lFactor  =  (1.0-0.01*shrink)*scale*1.0e6;      // linear dimension conversion factor
         aFactor  =  lFactor*lFactor;                    // area conversion factor
@@ -618,8 +630,8 @@ analog begin : analog_block
 //
 
         if ((gth>0.0)&&(sw_et)&&(!sw_lin)) begin
-            power    =  (Irb*Vrb+Ip1*Vc1+Ip2*Vc2)+I(b_re1)*V(b_re1)+I(b_re2)*V(b_re2);
-            Ith      = -power;         // negative as it flows dt->0
+            power_dis    =  (Irb*Vrb+Ip1*Vc1+Ip2*Vc2)+I(b_re1)*V(b_re1)+I(b_re2)*V(b_re2);
+            Ith      = -power_dis;         // negative as it flows dt->0
             if (tegth==0.0) begin
                 Irth     =  gth*dt_et;
             end else begin
@@ -633,7 +645,7 @@ analog begin : analog_block
                 end
             end
         end else begin                 // treat gth=0 as gth=inf
-            power    =  0.0;
+            power_dis    =  0.0;
             Ith      =  0.0;
             Irth     =  1.0e6*dt_et;   // becomes singular without this
         end
