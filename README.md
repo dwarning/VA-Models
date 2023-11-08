@@ -18,17 +18,12 @@ Actual version status:
 
 | Model         | Version       |
 | ------------- | ------------- |
-| Resistor      |               |
-| ------------- | ------------- |
+| **Resistor**  |               |
 | r2_cmc        | 1.0.1         |
 | r3_cmc        | 1.1.1         |
-| ------------- | ------------- |
-| Diode         |               |
-| ------------- | ------------- |
+| **Diode**     |               |
 | diode_cmc     | 2.0.0         |
-| ------------- | ------------- |
-| MOSFET        |               |
-| ------------- | ------------- |
+| **MOSFET**    |               |
 | bsim4         | 4.8           |
 | bsim6         | 6.1.1         |
 | bsimbulk      | 107.1.0       |
@@ -36,36 +31,28 @@ Actual version status:
 | psp102        | 102.5.0       |
 | psp103        | 103.8.0       |
 | psp104        | 104.0.0       |
-| ------------- | ------------- |
-| SOI MOSFET    |               |
-| ------------- | ------------- |
+| **SOI MOSFET**|               |
 | l-lutsoi      | 102.7.0       |
 | bsim-soi      | 4.6.1         |
 | hisim-soi     | 1.5.0         |
 | hisim-sotb    | 1.3.0         |
-| ------------- | ------------- |
-| MG MOSFET     |               |
-| ------------- | ------------- |
+| **MG MOSFET** |               |
 | bsim-img      | 102.9.6       |
 | bsim-cmg      | 111.2.1       |
-| ------------- | ------------- |
-| HV-MOS        |               |
-| ------------- | ------------- |
+| **HV-MOS**    |               |
 | hisim_hv      | 2.5.1         |
 | psphv         | 1.0.6         |
-| ------------- | ------------- |
-| BJT           |               |
-| ------------- | ------------- |
+| **BJT**       |               |
 | hicum0        | 2.1.0         |
 | hicum2        | 3.0.0         |
 | mextram       | 505.4.0       |
 | vbic          | 1.3           |
-| ------------- | ------------- |
-| HEMT          |               |
-| ------------- | ------------- |
+| **HEMT**      |               |
 | asmhemt       | 101.4.0       |
 | epfl-hemt     | 3.0.0         |
 | mvsg_cmc      | 3.2.0         |
+| **IGBT**      |               |
+| nigbt         | 1.0           |
 
 All models are checked for syntax belong Verilog-AMS Language Reference Manual Version 2.4.0. https://accellera.org/downloads/standards/v-ams
 The models are modified mostly for convergence improvements. Equations are untouched.
