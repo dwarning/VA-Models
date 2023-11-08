@@ -1,56 +1,62 @@
-/***********************************************************************
+//************************************************************************
+//
+// HiSIM (Hiroshima University STARC IGFET Model)
+// Copyright(C) 2016 Hiroshima University
+//
+// MODEL NAME : HiSIM_SOTB (HiSIM Silicon-On-Thin-Buried-Oxide)
+// ( VERSION : 1  SUBVERSION : 2  REVISION : 0 )
+// Model Parameter 'VERSION' : 1.20
+// FILE : hisimsotb.va
+//
+// DATE : 2018.2.21
+//
+// Released by Hiroshima University
+//
+//***********************************************************************/
+//
+//***********************************************************************
+//
+// The following source code, and all copyrights, trade secrets or other
+// intellectual property rights in and to the source code in its entirety,
+// are owned by Hiroshima University.
+//
+// All users need to follow the "HISIM-SOTB Distribution Statement and
+// Copyright Notice" attached to HiSIM_SOTB model.
+//
+//-----HISIM-SOTB Distribution Statement and Copyright Notice--------------
+//
+// Software is distributed as is, completely without warranty or service
+// support. Hiroshima University and its employees are not liable
+// for the condition or performance of the software.
+//
+// Hiroshima University owns the copyright and grants users a perpetual,
+// irrevocable, worldwide, non-exclusive, royalty-free license with respect
+// to the software as set forth below.
+//
+// Hiroshima University hereby disclaims all implied warranties.
+//
+// Hiroshima University grants the users the right to modify, copy,
+// and redistribute the software and documentation, both within the user's
+// organization and externally, subject to the following restrictions
+//
+// 1. The users agree not to charge for Hiroshima University code
+// itself but may charge for additions, extensions, or support.
+//
+// 2. In any product based on the software, the users agree to acknowledge
+// Hiroshima University that developed the software. This
+// acknowledgment shall appear in the product documentation.
+//
+// 3. The users agree to reproduce any copyright notice which appears on
+// the software on any copy or modification of such made available
+// to others.
+//
+// Toshimasa Asahara, President, Hiroshima University
+// Hans Juergen Mattausch, Professor, Hiroshima University
+// December 2014
+//*************************************************************************/
 
- HiSIM (Hiroshima University STARC IGFET Model)
- Copyright (C) 2000-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
- HiSIM_SOTB (HiSIM Silicon-On-Thin-Buried-Oxide Model)
- Copyright (C) 2014-2016 Hiroshima University and STARC
- Copyright (C) 2016-2021 Hiroshima University
-
- MODEL NAME : HiSIM_SOTB
- ( VERSION : 1  SUBVERSION : 3  REVISION : 0 )
- Model Parameter 'VERSION' : 1.30
- FILE : hisimsotb.va
-
- Date : 2021.11.16
-
- released by Hiroshima University
-
-***********************************************************************/
 //
-////////////////////////////////////////////////////////////////
-//
-//
-//
-//
-//Licensed under the Educational Community License, Version 2.0
-//(the "License"); you may not use this file except in
-//compliance with the License.
-//
-//You may obtain a copy of the License at:
-//
-//      http://opensource.org/licenses/ECL-2.0
-//
-//Unless required by applicable law or agreed to in writing,
-//software distributed under the License is distributed on an
-//"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-//either express or implied. See the License for the specific
-//language governing permissions and limitations under the
-//License.
-//
-//
-//The HiSIM_SOTB standard has been supported by the members of
-//Silicon Integration Initiative's Compact Model Coalition. A
-//link to the most recent version of this standard can be found
-//at:
-//
-//http://www.si2.org/cmc
-//
-////////////////////////////////////////////////////////////////
-//
-
-
-`include "disciplines.vams"
+`include "discipline.h"
 
 // Disable COPPRV flag that cause issues in RF simulation.
 `define DISABLE_COPPRV
@@ -76,8 +82,6 @@
 //
 `define ALIAS(alias,paramName) aliasparam alias = paramName ;
 `define OPP(nam,uni,des)               (*units=uni,                   desc=des*)           real    nam ;
-`define OPM(nam,uni,des)               (*units=uni, multiplicity="multiply",    desc=des*) real    nam ;
-`define OPD(nam,uni,des)               (*units=uni, multiplicity="divide",      desc=des*) real    nam ;
 `define MPRnb(nam,def,uni,        des) (*units=uni,                   desc=des*) parameter real    nam=def ;
 `define MPRcc(nam,def,uni,lwr,upr,des) (*units=uni,                   desc=des*) parameter real    nam=def from[lwr:upr] ;
 `define MPRoo(nam,def,uni,lwr,upr,des) (*units=uni,                   desc=des*) parameter real    nam=def from(lwr:upr) ;
@@ -87,13 +91,13 @@
 `define MPInb(nam,def,uni,        des) (*units=uni,                   desc=des*) parameter integer nam=def ;
 `define MPIsw(nam,def,uni,        des) (*units=uni,                   desc=des*) parameter integer nam=def from[  0:  1] ;
 `define MPIty(nam,def,uni,        des) (*units=uni,                   desc=des*) parameter integer nam=def from[ -1:  1] exclude 0 ;
-`define BPRco(nam,def,uni,lwr,upr,des) (*units=uni, type="instance",  desc=des*) parameter real    nam=def from[lwr:upr) ;
 `define IPRnb(nam,def,uni,        des) (*units=uni, type="instance",  desc=des*) parameter real    nam=def ;
 `define IPRcc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance",  desc=des*) parameter real    nam=def from[lwr:upr] ;
 `define IPRoo(nam,def,uni,lwr,upr,des) (*units=uni, type="instance",  desc=des*) parameter real    nam=def from(lwr:upr) ;
 `define IPRco(nam,def,uni,lwr,upr,des) (*units=uni, type="instance",  desc=des*) parameter real    nam=def from[lwr:upr) ;
 `define IPRoc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance",  desc=des*) parameter real    nam=def from(lwr:upr] ;
 `define IPInb(nam,def,uni,        des) (*units=uni, type="instance",  desc=des*) parameter integer nam=def ;
+`define EXPLICIT_MFACTOR
 `ifdef EXPLICIT_MFACTOR
     `define IPM                        (*units="" , type="instance",  desc="multiplicity factor"*) parameter real m=1.0 from(0.0:inf) ;
     `define MFACTOR_USE m
@@ -221,10 +225,7 @@
 //* Sigmoid function
 //*=================*/
 `define Fn_Sigmoid( y , x ) y = 1.0 / ( 1.0 + exp(-x) );
-`define Fn_Sigmoidx( y , x , dx ) begin \
-    y = 1.0 / ( 1.0 + exp(-x) ); \
-    dx = y*y*exp(-x); \
-end
+`define Fn_Sigmoidx( y , x , dx ) begin y = 1.0 / ( 1.0 + exp(-x) ); dx = y*y*exp(-x); end
 
 //Start of HiSIM_SOTB model code
 
@@ -235,24 +236,26 @@ module hisimsotb_va(d, g, s, e) ;
     thermal    t ;
     electrical gp, bp ;
     electrical n, nqs_qi, nqs_qb, nqs_qhs ;  // Internal Nodes
-    electrical dp, sp ;                      // D/S Internal Nodes
 
     // Branch Definitions
 
-    branch(g ,gp) BRggp  ; //Rg
-    branch(gp,s ) BRgps  ; //Vgsei
-    branch(gp,bp) BRgpbp ; //Igb
-    branch(d ,s ) BRds   ; //Vdsei
-    branch(bp,s ) BRbps  ; //Vbsei
-    branch( e,bp) BRebp  ; //always shorted
-
-    branch(dp,sp) BRdpsp ; //Vdsi
-    branch(sp,dp) BRspdp ; //Igisl
-    branch(gp,sp) BRgpsp ; //Vgsi
-    branch(gp,dp) BRgpdp ; //Igd
-    branch(d ,dp) BRddp  ; //Rdd
-    branch(sp,s ) BRsps  ; //Rsd
-    branch(bp,sp) BRbpsp ; //Vbsi
+    branch(g ,gp) BRggp  ;
+    branch(gp,s ) BRgps  ;
+    branch(gp,d ) BRgpd  ;
+    branch(gp,bp) BRgpbp ;
+    branch(d ,s ) BRds   ;
+    branch(s ,d ) BRsd   ;
+    branch(d ,g ) BRdg   ;
+    branch(g ,d ) BRgd   ;
+    branch(s ,g ) BRsg   ;
+    branch(g ,s ) BRgs   ;
+    branch(bp,d ) BRbpd  ;
+    branch(d ,bp) BRdbp  ;
+    branch(bp,s ) BRbps  ;
+    branch(s ,bp) BRsbp  ;
+    branch(bp,g ) BRbpg  ;
+    branch(g ,bp) BRgbp  ;
+    branch( e,bp) BRebp  ;
 
     //
     // Parameter definitions
@@ -275,9 +278,7 @@ module hisimsotb_va(d, g, s, e) ;
     `IPRnb( SCC       , 0.0       , "-"                     , "Layout characterization factor" )
 
     //******* Model Flags *******//
-`ifndef DISABLE_COPPRV
-        `MPIsw( COPPRV    , 1         , ""                      , "Previous phi_s flag" )
-`endif
+    `MPIsw( COPPRV    , 1         , ""                      , "Previous phi_s flag" )
     `MPIsw( COADOV    , 1         , ""                      , "Lateral field induced and overlap capacitances are added to intrinsic" )
     `MPIsw( COISUB    , 0         , ""                      , "Substrate current flag" )
     `MPIsw( COFBE     , 0         , ""                      , "Floating-Body Effect flag" )
@@ -296,11 +297,12 @@ module hisimsotb_va(d, g, s, e) ;
     `MPIsw( COVBSBIZ  , 0         , ""                      , "Symmetry treatment flag" )
     `MPIcc( COQOVSM   , 1         , ""              , 0,  2 , "Qover capacitance model selector" )
     `MPInb( INFO      , 0         , ""                      , "print information selector" )
-    `MPIsw( CONEWMUB  , 0         , ""                      , "New mobility model flag" )
+    `MPIsw( COMUUNSZ  , 1         , ""                      , "Mobility smoothing flag" )
+    `MPIsw( CONEWMUB  , 1         , ""                      , "New mobility model flag" )
 
     //******* Technology Model Parameters *******//
     `MPIty( TYPE      , 1         , ""                      , "1 for nMOS and -1 for pMOS" )
-    //`MPRnb( VERSION   , 1.30      , "-"                     , "model version selector" )
+    `MPRnb( VERSION   , 1.10      , "-"                     , "model version selector" )
     `MPRoo( VMAX      , 7.00E+6   , "cm*s^-1"     , 0, inf  , "maximum saturation velocity" )
     `MPRnb( BGTMP1    , 90.25E-6  , "eV*K^-1"               , "temperature dependence of bandgap" )
     `MPRnb( BGTMP2    , 100.0E-9  , "eV*K^-2"               , "temperature dependence of bandgap" )
@@ -355,8 +357,8 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( NINVDP    , 1.0       , "V^-1"                  , "reduced resistance effect for small Vds" )
     `MPRnb( MUECB0    , 300.0     , "cm^2V^-1s^-1"          , "Coulomb scattering for current" )
     `MPRnb( MUECB1    , 30.0      , "cm^2V^-1s^-1"          , "Coulomb scattering for current" )
-    `MPRnb( MUECB0LP  , 0.0       , ""                      , "length dependence of Coulomb scattering for current" )
-    `MPRnb( MUECB1LP  , 0.0       , ""                      , "length dependence of Coulomb scattering for current" )
+    `MPRnb( MUECB0LP  , 1.0       , ""                      , "length dependence of Coulomb scattering for current" )
+    `MPRnb( MUECB1LP  , 1.0       , ""                      , "length dependence of Coulomb scattering for current" )
     `MPRnb( MUECB0L2  , 0.0       , ""                      , "length dependence of Coulomb scattering for current" )
     `MPRnb( MUECB0L2P , 1.0       , ""                      , "length dependence of Coulomb scattering for current" )
     `MPRnb( MUECB1L2  , 0.0       , ""                      , "length dependence of Coulomb scattering for current" )
@@ -371,8 +373,8 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( VTMP      , 0.0       , ""                      , "temperature-dependence of saturation velocity" )
     `MPRnb( VTMPL     , 0.0       , ""                      , "temperature-dependence of saturation velocity" )
     `MPRnb( VTMPLP    , 1.0       , ""                      , "temperature-dependence of saturation velocity" )
-    `MPRnb( WVTH0     , 0.0       , "Vum"                   , "threshold voltage shift" )
-    //`MPRnb( WVTHP     , 1.0       , ""                      , "threshold voltage shift" )
+    `MPRnb( WVTH0     , 0.0       , "Vum^WVTHP"             , "threshold voltage shift" )
+    `MPRnb( WVTHP     , 1.0       , ""                      , "threshold voltage shift" )
     `MPRoo( MUESR1    , 2.0E15    , "cm^2V^-1s^-1" , 0, inf , "surface-roughness scattering for current" )
     `MPRnb( MUESR0    , 2.0       , ""                      , "surface-roughness scattering for current" )
     `MPRnb( MUESRL    , 0.0       , "um^MUESLP"             , "length dependence of surface roughness mobility reduction for current" )
@@ -475,7 +477,7 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( GLEAK2    , 20.0E6    , "V^-1/2*m^-1"           , "gate-to-channel current coefficient" )
     `MPRnb( GLEAK3    , 300.0E-3  , ""                      , "gate-to-channel current coefficient" )
     `MPRnb( GLEAK4    , 0.0       , "m^-1"                  , "gate-to-channel current coefficient" )
-    `MPRoo( GLEAK5    , 7.5E3     , "V*m^-1"       , 0, inf , "G-t-C short channel correction" )
+    `MPRoo( GLEAK5    , 7.5E3     , "V*m^-1",    0.0, inf   , "G-t-C short channel correction" )
     `MPRnb( GLEAK6    , 250E-3    , "V"                     , "G-t-C Vds-dependence correction" )
     `MPRnb( GLEAK7    , 1E-6      , "m^2"                   , "G-t-C L and W dependence correction" )
     `MPRnb( GLKSD1    , 1.0E-15   , "A*m*V^-2"              , "G-t-S/D current coefficient" )
@@ -484,8 +486,8 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( GLKB1     , 5E-16     , "A*V^-2"                , "G-t-S/D current coefficient" )
     `MPRnb( GLKB2     , 1E0       , "m*V^-1"                , "G-t-S/D current coefficient" )
     `MPRnb( GLKB3     , 0E0       , "V"                     , "G-t-S/D current coefficient" )
-    `MPRoo( VZADD0    , 10.0E-3   , "V"            , 0, inf , "symmetry conservation coefficient" )
-    `MPRoo( PZADD0    , 5.0E-3    , "V"            , 0, inf , "symmetry conservation coefficient" )
+    `MPRoo( VZADD0    , 10.0E-3   , "V",    0.0, inf        , "symmetry conservation coefficient" )
+    `MPRoo( PZADD0    , 5.0E-3    , "V",    0.0, inf        , "symmetry conservation coefficient" )
     `MPRnb( NFTRP     , 10E9      , "V^-1"                  , "ratio of trap density to attenuation coefficient" )
     `MPRnb( NFALP     , 1.0E-16   , "cm*s"                  , "contribution of mobility fluctuation" )
     `MPRnb( CIT       , 0.0       , "F*cm^-2"               , "cap caused by the interface trapped carriers" )
@@ -496,7 +498,7 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( DLY3      , 0.8E-6    , "Ohm"                   , "coefficient for RC delay of bulk carriers" )
     `MPRoo( TFOX      , 3.5E-9    , "m"            , 0, inf , "front oxide thickness" )
     `MPRoo( TSOI      , 10E-9     , "m"            , 0, inf , "silicon film thickness" )
-    `MPRoo( TFOXGIDL  , TFOX      , "m"            , 0, inf , "TFOX for GIDL" )
+    `MPRoo( TFOXGIDL  , TFOX      , "m",    0.0, inf        , "TFOX for GIDL" )
     `MPRoo( TBOX      , 10E-9     , "m"            , 0, inf , "buried oxide thickness" )
     `MPRoo( NSUBS     , 1E+17     , "cm^-3"        , 0, inf , "SOI layer impurity concentration" )
     `MPRoo( NSUBB     , 1E+18     , "cm^-3"        , 0, inf , "substrate impurity concentration" )
@@ -522,9 +524,9 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRoo( XLDL      , 20.0e-9   , "m"            , 0, inf , "channel-length dependence of XLD" )
     `MPRoo( XLDLMIN   , 10.0e-9   , "m"            , 0, inf , "minimum value of XLDL" )
     `MPRnb( MUETMP1   , 0.0       , "um^MUEPLP"             , "temperature-dependence of phonon scattering" )
-    //`MPRnb( VOTMP     , 0.0       , ""                      , "temperature-dependence coefficient" )
-    `MPRnb( VBSBND    , 3.0       , "V"                     , "Vbs for smoothing" )
-    `MPRnb( VBSMAX    , 3.5       , "V"                     , "Maximum Vbs" )
+    `MPRnb( VOTMP     , 0.0       , ""                      , "temperature-dependence coefficient" )
+    `MPRnb( VBSBND    , 1.0       , "V"                     , "Vbs for smoothing" )
+    `MPRnb( VBSMAX    , 1.2       , "V"                     , "Maximum Vbs" )
     `MPRnb( GLEAK8    , 1.0E0     , "m^2"                   , "gate-to-channel current coefficient" )
     `MPRnb( GLEAK9    , 5.0E-1    , "m^2"                   , "gate-to-channel current coefficient" )
     `MPRnb( GLEAK10   , 0.0E0     , "m^2"                   , "gate-to-channel current coefficient" )
@@ -544,10 +546,10 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( GLKB27    , 10E-12    , ""                      , "G-t-S/D current coefficient" )
     `MPRnb( GLKB28    , 15E-12    , ""                      , "G-t-S/D current coefficient" )
     `MPRnb( PTMUEPH   , 1.0       , ""                      , "front side mobility of punch-through" )
-    //`MPRnb( VOTMP2    , 0.0       , ""                      , "temperature-dependence coefficient" )
+    `MPRnb( VOTMP2    , 0.0       , ""                      , "temperature-dependence coefficient" )
 
     `MPRnb( MUEPH0B   , MUEPH0    , ""                      , "phonon scattering for current" )
-    `MPRnb( MUEPH1B   , MUEPH1    , "cm^2V^-1s^-1"          , "phonon scattering for current" )
+    `MPRnb( MUEPH1B   , MUEPH1    , ""                      , "phonon scattering for current" )
     `MPRnb( MUEPHWB   , MUEPHW    , "um^MUEPHP"             , "phonon-related mobility reduction" )
     `MPRnb( MUEPWPB   , MUEPWP    , ""                      , "phonon-related mobility reduction" )
     `MPRnb( MUEPHSB   , MUEPHS    , "um^MUEPSP"             , "mobility change due to small size" )
@@ -555,13 +557,13 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( MUEPHLB   , MUEPHL    , ""                      , "length dependence of phonon mobility for current" )
     `MPRnb( MUEPLPB   , MUEPLP    , ""                      , "length dependence of phonon mobility for current" )
     `MPRnb( MUESR0B   , MUESR0    , ""                      , "surface-roughness scattering for current" )
-    `MPRoo( MUESR1B   , MUESR1    , "cm^2V^-1s^-1" , 0, inf , "surface-roughness scattering for current" )
-    `MPRnb( MUESRLB   , MUESRL    , "um^MUESLP"             , "length dependence of surface roughness mobility for current" )
+    `MPRoo( MUESR1B   , MUESR1    , ""             , 0, inf , "surface-roughness scattering for current" )
+    `MPRnb( MUESRLB   , MUESRL    , ""                      , "length dependence of surface roughness mobility for current" )
     `MPRnb( MUESLPB   , MUESLP    , ""                      , "length dependence of surface roughness mobility for current" )
     `MPRnb( MUESRWB   , MUESRW    , "um^MUESWP"             , "surface roughness-related mobility change" )
     `MPRnb( MUESWPB   , MUESWP    , ""                      , "surface roughness-related mobility change" )
-    `MPRnb( MUECB0B   , MUECB0    , "cm^2V^-1s^-1"          , "Coulomb scattering for current" )
-    `MPRnb( MUECB1B   , MUECB1    , "cm^2V^-1s^-1"          , "Coulomb scattering for back current" )
+    `MPRnb( MUECB0B   , MUECB0    , ""                      , "Coulomb scattering for current" )
+    `MPRnb( MUECB1B   , MUECB1    , ""                      , "Coulomb scattering for back current" )
     `MPRnb( MUECB0LPB , MUECB0LP  , ""                      , "length dependence of Coulomb scattering for back current" )
     `MPRnb( MUECB1LPB , MUECB1LP  , ""                      , "length dependence of Coulomb scattering for back current" )
     `MPRnb( MUECB0L2B  , MUECB0L2  , ""                     , "length dependence of Coulomb scattering for back current" )
@@ -570,7 +572,7 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( MUECB1L2PB , MUECB1L2P , ""                     , "length dependence of Coulomb scattering for back current" )
     `MPRnb( PTHROU    , 0.0       , ""                      , "Modify subthreshold slope" )
     `MPRnb( VFBSHIFT  , 0.0       , ""                      , "Scaling factor for Vfb shift" )
-    `MPRnb( MUEQB     , 0.0       , ""                      , "magnitude of QbL for front side mobility" )
+    `MPRnb( MUEQB     , 1.0       , ""                      , "magnitude of QbL for front side mobility" )
     `MPRnb( MUEQBL    , 0.0       , ""                      , "length dependence of MUEQB and MUEQBB" )
     `MPRnb( MUEQBLP   , 1.0       , ""                      , "length dependence of MUEQB and MUEQBB" )
     `MPRnb( MUEQBB    , MUEQB     , ""                      , "magnitude of QbL for back side mobility" )
@@ -581,82 +583,42 @@ module hisimsotb_va(d, g, s, e) ;
     `MPRnb( NSUBSWPE  , 0.0       , "1/cm^3"                , "Channel concentration change due to WPE" )
     `MPRnb( NSUBPWPE  , 0.0       , "1/cm^3"                , "Pocket concentration change due to WPE" )
 
-
-
-    // Definitions for the resistance effect
-
-    //******* Instance parameters *******//
-    `IPRco( NRS       , 1.0        , ""                  ,   0 , inf , "Number of squares in source ")
-    `IPRco( NRD       , 1.0        , ""                  ,   0 , inf , "Number of squares in drain ")
-    `BPRco( LDRIFT    , 1.0E-6     , "m"                 ,   0 , inf , "Parameter for drift region length (drain) ")
-    `BPRco( LDRIFTS   , 1.0E-6     , "m"                 ,   0 , inf , "Parameter for drift region length (source) ")
-
-    //******* Model Flags *******//
-    `MPIcc( CORS      , 0          , ""                  ,   0 ,   1 , "source side resistance OFF(0)/ON(1)")
-    `MPIcc( CORD      , 0          , ""                  ,   0 ,   1 , "drain side resistance OFF(0)/ON(1)")
-
-    //******* Model parameters *******//
-    `MPRco( RSH       , 0.0        , "ohm"               ,   0 , inf , "Drain diffusion sheet resistance ")
-    `MPRnb( NOVERS    , 1E19       , "cm^-3"                         , "impurity concentration in overlap region" )
-    `MPRoo( RDRMUED   , 1.0E3      , ""                  ,   0 , inf , "Mobility in drift region (drain)")
-    `MPRoo( RDRMUES   , 1.0E3      , ""                  ,   0 , inf , "Mobility in drift region (source)")
-    `MPRoo( RDRVMAXD  , 3.0E7      , ""                  ,   0 , inf , "Saturation velocity in drift region (drain)")
-    `MPRoo( RDRVMAXS  , 3.0E7      , ""                  ,   0 , inf , "Saturation velocity in drift region (source)")
-    `MPRnb( RDRMUETMP , 0.0        , ""                              , "Temperature dependence of resistance ")
-    `MPRnb( RDRVTMP   , 0.0        , ""                              , "Temperature dependence of resistance ")
-    `MPRoo( RDRDJUNC  , 1.0E-6     , ""                  ,   0 , inf , "Junction depth at channel/drift region ")
-    `MPRco( RDRBBD    , 1          , ""                  , 0.1 , inf , "Degradation of the mobility in drift region (drain)")
-    `MPRco( RDRBBS    , 1          , ""                  , 0.1 , inf , "degradation of the mobility in drift region (source)")
-    `MPRnb( RDRBBTMP  , 0          , ""                              , "Temperature coefficient of RDRBB ")
-    `MPRnb( RDRVMAXW  , 0.0        , ""                              , "Wgate dependence of the saturation velocity in drift region")
-    `MPRnb( RDRVMAXWP , 1.0        , ""                              , "Wgate dependence of the saturation velocity in drift region")
-    `MPRnb( RDRVMAXL  , 0.0        , ""                              , "Lgate dependence of the saturation velocity in drift region")
-    `MPRnb( RDRVMAXLP , 1.0        , ""                              , "Lgate dependence of the saturation velocity in drift region")
-    `MPRnb( RDRMUEL   , 0.0        , ""                              , "Lgate dependence of the mobility in drift region ")
-    `MPRnb( RDRMUELP  , 1.0        , ""                              , "Lgate dependence of the mobility in drift region ")
-
-
-
     // alias parameters for older version.
     `ALIAS( NSUBCW    , NSUBSW    )
     `ALIAS( NSUBCWP   , NSUBSWP   )
     `ALIAS( NSUBCMAX  , NSUBSMAX  )
 
     // Output Physical Values in operating point analysis //
-    `OPM( idse      , "A"   , "Drain-Source current")
-    `OPM( isuba     , "A"   , "Substrate current")
-    `OPM( igidle    , "A"   , "Gate-Induced Drain Leakage current")
-    `OPM( igisle    , "A"   , "Gate-Induced Source Leakage current")
-    `OPM( igde      , "A"   , "Gate-Drain current")
-    `OPM( igse      , "A"   , "Gate-Source current")
-    `OPM( igbe      , "A"   , "Gate-Substrate current")
-    `OPM( ggm       , "S"   , "Transconductance")
-    `OPM( ggds      , "S"   , "Channel conductance")
-    `OPM( ggmbs     , "S"   , "Body effect(Back gate) transconductance")
-    `OPM( ggmt      , "S"   , "Temperature transconductance")
+    `OPP( idse      , "A"   , "Drain-Source current")
+    `OPP( isuba     , "A"   , "Substrate current")
+    `OPP( igidle    , "A"   , "Gate-Induced Drain Leakage current")
+    `OPP( igisle    , "A"   , "Gate-Induced Source Leakage current")
+    `OPP( igde      , "A"   , "Gate-Drain current")
+    `OPP( igse      , "A"   , "Gate-Source current")
+    `OPP( igbe      , "A"   , "Gate-Substrate current")
+    `OPP( ggm       , "S"   , "Transconductance")
+    `OPP( ggds      , "S"   , "Channel conductance")
+    `OPP( ggmbs     , "S"   , "Body effect(Back gate) transconductance")
+    `OPP( ggmt      , "S"   , "Temperature transconductance")
     `OPP( deltemp   , "K"   , "Temperature ")
     `OPP( vone      , "V"   , "Threshold voltage")
     `OPP( vdsate    , "V"   , "Saturation voltage")
-    `OPM( qge       , "C"   , "Gate charge")
-    `OPM( qde       , "C"   , "Drain charge")
-    `OPM( qse       , "C"   , "Bulk charge")
-    `OPM( cggbd     , "F"   , " g-g MOSFET capacitance")
-    `OPM( cgdbd     , "F"   , " g-d MOSFET capacitance")
-    `OPM( cgsbd     , "F"   , " g-s MOSFET capacitance")
-    `OPM( cbgbd     , "F"   , " b-g MOSFET capacitance")
-    `OPM( cbsbd     , "F"   , " b-s MOSFET capacitance")
-    `OPM( cbdbd     , "F"   , " b-d MOSFET capacitance")
-    `OPM( cdgbd     , "F"   , " d-g MOSFET capacitance")
-    `OPM( cddbd     , "F"   , " d-d MOSFET capacitance")
-    `OPM( cdsbd     , "F"   , " d-s MOSFET capacitance")
-    `OPD( Rdd       , "Ohm" , " Drift Resistance on Drain side")
-    `OPD( Rsd       , "Ohm" , " Drift Resistance on Source side")
+    `OPP( qge       , "C"   , "Gate charge")
+    `OPP( qde       , "C"   , "Drain charge")
+    `OPP( qse       , "C"   , "Bulk charge")
+    `OPP( cggbd     , "F"   , " g-g MOSFET capacitance")
+    `OPP( cgdbd     , "F"   , " g-d MOSFET capacitance")
+    `OPP( cgsbd     , "F"   , " g-s MOSFET capacitance")
+    `OPP( cbgbd     , "F"   , " b-g MOSFET capacitance")
+    `OPP( cbsbd     , "F"   , " b-s MOSFET capacitance")
+    `OPP( cbdbd     , "F"   , " b-d MOSFET capacitance")
+    `OPP( cdgbd     , "F"   , " d-g MOSFET capacitance")
+    `OPP( cddbd     , "F"   , " d-d MOSFET capacitance")
+    `OPP( cdsbd     , "F"   , " d-s MOSFET capacitance")
     // End of Output Physical Values //
 
     // Local Parameters for Model Control
     localparam real TN = 2 ;
-    localparam real QN = 0.1 ;
-    localparam real QB = 0.1 ;
 
     //--------------------------------------------------
     //  Local Variables
@@ -681,9 +643,8 @@ module hisimsotb_va(d, g, s, e) ;
     // external bias //
     real Vbse, Vdse, Vgse ;
     // confine bias //
-    real Vbsc, Vdsc, Vgsc, Vbsc_dVbs ;
+    real Vbsc, Vdsc, Vgsc, Vbsc_dVbse ;
     // internal bias //
-    real Vbs_mos, Vds_mos, Vgs_mos ;
     real Vbs, Vds, Vgs, Vgp, Vgs_fb ;
     real Vgs_shift ;
     // Ps0 : surface potential at the source side //
@@ -799,7 +760,6 @@ module hisimsotb_va(d, g, s, e) ;
     real phi_bL_SOI_ini, phi_sL_bulk_ini, phi_s0_SOI, phi_b0_SOI, phi_s0_bulk ;
     real phi_sL_SOI, phi_bL_SOI, phi_sL_bulk, Q_n0, Q_s0_bulk ;
     real Q_nL, Q_sL_bulk ;
-    real ps_conv_ini , Q_s0_bulk_dep ;
     // Idd parameters. //
     real Ps0s, PsLs, Ps0_iniA, Ps0_iniB, Ps0_ini ;
     real Pb0s , PbLs;
@@ -835,8 +795,7 @@ module hisimsotb_va(d, g, s, e) ;
     real Vdseff, Vdsorg ;
     // G/S and G/D Overlap Charges: Qovs/Qovd //
     real Qovd, Qovs ;
-    real flg_ovloops, flg_ovloopd;
-    integer lcover, flg_overs, flg_overd ;
+    integer lcover, flg_ovloops, flg_ovloopd, flg_overs, flg_overd ;
     real VgpLD, QbdLD, QbsLD, QbuLD, QsuLD, QiuLD, Ps0LD ;
     integer flg_ovzone ;
     // Mode flag (=0 | 1 ) //
@@ -870,8 +829,6 @@ module hisimsotb_va(d, g, s, e) ;
     real xgate  , xsub1  , xsub2  , cqyb0  , UC_SVGS;
     real qbe    , cgsb   , isube  , noiigate;
     real noicross ;
-    real MUEqb , MUEqbb, CGS_ESI, CGS_Q_nL, CGS_Q_bL, CGS_Qiu, CGS_Qibu, CGS_Q_b0_dep, CGS_Q_bL_dep, CGS_Qdepu;
-    real CGS_TBOX, CGS_Qbdepu;
     // Vars for capacitance fitting
     real dW , dWCV , dWSTI , weff_cv , weffcv_nf ;
     // Local Vars. for eval.c
@@ -883,13 +840,13 @@ module hisimsotb_va(d, g, s, e) ;
     real Q_b0   , Q_b0_dPbs , Q_b0_dPbsP , Q_b0_dep , Q_b0_dep_dPbs , Q_b0_dep_dPbsP;
     real phi_b0_SOIP_ini , C_soi, C_soi_inv ;
     real T4_dPss , T4_dPbsP , T4_dPbs ;
-    real Vgsi , Vdsi , Vbsi , Vgsei , Vdsei , Vbsei ;
+    real Vgsi   ;
     real Isubs  , Rpower  ;
     real Qb_nqs , Iqi_nqs , Iqb_nqs , Qi_nqs , Qd_nqs , Qs_nqs , Qg_nqs;
     real Qi_qs  , Qb_qs   , Gth    ;
     // Local Definition Vars. by User
     real Iqh_nqs , vfbsub0 , Nsubb0  ,  Qg     , Qhs_hist;
-    real noiflick , noithrml , ggdss ;
+    real noiflick , noithrml , Vdsei   , Vgsei   , Vbsei   , ggdss ;
     real cgbbd  , cdbbd  , csgbd  , csdbd  , cssbd  , csbbd  , cbbbd  , whi_noise ;
     // Others
     integer flg_brk10 ;
@@ -902,13 +859,9 @@ module hisimsotb_va(d, g, s, e) ;
     real Q_bL, Q_bL_dPbs, Q_bL_dPbsP ;
 
     //
-`ifndef DISABLE_COPPRV
+`ifdef DISABLE_COPPRV
+`else
         integer flg_conv_0, flg_conv_L;
-`endif
-`ifdef dbgprn3
-        real flg_fbcase_0 , pfi_case_0 ;
-        real psb_iniA_0 , psb_iniB_0 ;
-        real Isub_fbe ;
 `endif
 
     real Ninv, Ndep , Vbs_prime;
@@ -916,7 +869,7 @@ module hisimsotb_va(d, g, s, e) ;
     real Pb0Ls , Ps0Lb , Pdsz ;
     real T1_gamma, T2_gamma, T1_alpha, T1_delta, T1_beta, T1_dPsb, T2_dPsb ;
     real scale_fac , PSCONV_3D ;
-    real sid , ci, sigrat, sigrat_s, sigrat_d ; // Noise
+    real sid , ci, sigrat ; // Noise
 
     real MKS_VMAX , MKS_NSUBP , MKS_VTMP  , MKS_NSUBSMAX , MKS_NFALP , MKS_NFTRP ;
     real MKS_CIT  , MKS_NSUBS , MKS_NSUBB , MKS_RTH0 , MKS_CTH0 , MKS_NOVER ;
@@ -925,14 +878,6 @@ module hisimsotb_va(d, g, s, e) ;
 
     // WPE
     real MKS_NSUBSWPE , MKS_NSUBPWPE ;
-
-
-
-    // Resistance Effect:
-    real Rdde , Rsde , Conductance , drainConductance , sourceConductance ;
-    `define Res_min       ( 1e-4 )
-
-
 
     //*-----------------*/
     real TMF0, TMF1 , TMF2 , TMF3 , TMF4   ;
@@ -945,21 +890,20 @@ module hisimsotb_va(d, g, s, e) ;
     //* Exp() for PGD.
     //* - ExpLim(-3)=0
     //*=================*/
-    `define Fn_ExpLim( y , x , dx ) \
-        begin \
-            if ((x) < -3.0 ) begin \
-                dx = 0.0 ; \
-                y = 0.0 ; \
-            end else if ((x) < 0.0 ) begin \
-                dx =  1.0 + (x) * ( 2 * (1.0/3.0) + (x) * 3 * (1.0/27.0) )  ; \
-                y = 1.0 + (x) * ( 1.0 + (x) * ( (1.0/3.0) + (x) * (1.0/27.0) ) ) ; \
-            end else begin \
-                dx =  1.0 + (x) * ( 2 * (1.0/3.0) + (x) * ( 3 * 0.0402052934513951 \
+    `define Fn_ExpLim( y , x , dx ) begin \
+    if ((x) < -3.0 ) begin \
+        dx = 0.0 ; \
+        y = 0.0 ; \
+    end else if ((x) < 0.0 ) begin \
+        dx =  1.0 + (x) * ( 2 * (1.0/3.0) + (x) * 3 * (1.0/27.0) )  ; \
+        y = 1.0 + (x) * ( 1.0 + (x) * ( (1.0/3.0) + (x) * (1.0/27.0) ) ) ; \
+    end else begin \
+        dx =  1.0 + (x) * ( 2 * (1.0/3.0) + (x) * ( 3 * 0.0402052934513951 \
                 + (x) * 4 * 0.148148111111111 ) ) ; \
-                y = 1.0 + (x) * ( 1.0 + (x) * ( (1.0/3.0) + (x) * ( 0.0402052934513951 \
-                + (x) * 0.148148111111111 ) ) ) ; \
-            end \
-        end
+        y = 1.0 + (x) * ( 1.0 + (x) * ( (1.0/3.0) + (x) * ( 0.0402052934513951 \
+              + (x) * 0.148148111111111 ) ) ) ; \
+    end \
+end
     //===========================================================*
     //* Macro Functions for ceiling/flooring/symmetrization.
     //*=================*/
@@ -969,89 +913,76 @@ module hisimsotb_va(d, g, s, e) ;
     //*      y = xmax - 0.5 ( arg + sqrt( arg^2 + 4 xmax delta ) )
     //*    arg = xmax - x - delta
     //*-----------------*/
-    `define Fn_SU( y , x , xmax , delta , dx ) \
-        begin \
-            TMF1 = ( xmax ) - ( x ) - ( delta ) ; \
-            TMF2 = 4.0 * ( xmax ) * ( delta) ; \
-            TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
-            TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
-            dx = 0.5 * ( 1.0 + TMF1 / TMF2 ) ; \
-            y = ( xmax ) - 0.5 * ( TMF1 + TMF2 ) ; \
-        end
-    `define Fn_SUtemp( y , x , xmax , delta ) \
-        begin \
-            TMF1 = ( xmax ) - ( x ) - ( delta ) ; \
-            TMF2 = 4.0 * ( xmax ) * ( delta) ; \
-            TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
-            TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
-            y = ( xmax ) - 0.5 * ( TMF1 + TMF2 ) ; \
-        end
-    `define Fn_SU2( y , x , xmax , delta , dy_dx , dy_dxmax ) \
-        begin \
-            TMF1 = ( xmax ) - ( x ) - ( delta ) ; \
-            TMF2 = 4.0 * ( xmax ) * ( delta) ; \
-            TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
-            TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
-            dy_dx = 0.5 * ( 1.0 + TMF1 / TMF2 ) ; \
-            dy_dxmax = 0.5 * ( 1.0 - ( TMF1 + 2.0 * delta ) / TMF2 ) ; \
-            y = ( xmax ) - 0.5 * ( TMF1 + TMF2 ) ; \
-        end
+    `define Fn_SU( y , x , xmax , delta , dx ) begin \
+    TMF1 = ( xmax ) - ( x ) - ( delta ) ; \
+    TMF2 = 4.0 * ( xmax ) * ( delta) ; \
+    TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
+    TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
+    dx = 0.5 * ( 1.0 + TMF1 / TMF2 ) ; \
+    y = ( xmax ) - 0.5 * ( TMF1 + TMF2 ) ; \
+end
+    `define Fn_SUtemp( y , x , xmax , delta ) begin \
+    TMF1 = ( xmax ) - ( x ) - ( delta ) ; \
+    TMF2 = 4.0 * ( xmax ) * ( delta) ; \
+    TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
+    TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
+    y = ( xmax ) - 0.5 * ( TMF1 + TMF2 ) ; \
+end
+    `define Fn_SU2( y , x , xmax , delta , dy_dx , dy_dxmax ) begin \
+    TMF1 = ( xmax ) - ( x ) - ( delta ) ; \
+    TMF2 = 4.0 * ( xmax ) * ( delta) ; \
+    TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
+    TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
+    dy_dx = 0.5 * ( 1.0 + TMF1 / TMF2 ) ; \
+    dy_dxmax = 0.5 * ( 1.0 - ( TMF1 + 2.0 * delta ) / TMF2 ) ; \
+    y = ( xmax ) - 0.5 * ( TMF1 + TMF2 ) ; \
+end
 
     //---------------------------------------------------*
     //* smoothLower: flooring.
     //*      y = xmin + 0.5 ( arg + sqrt( arg^2 + 4 xmin delta ) )
     //*    arg = x - xmin - delta
     //*-----------------*/
-    `define Fn_SL( y , x , xmin , delta , dx ) \
-        begin \
-            TMF1 = ( x ) - ( xmin ) - ( delta ) ; \
-            TMF2 = 4.0 * ( xmin ) * ( delta ) ; \
-            TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
-            TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
-            dx = 0.5 * ( 1.0 + TMF1 / TMF2 ) ; \
-            y = ( xmin ) + 0.5 * ( TMF1 + TMF2 ) ; \
-        end
-    `define Fn_SLtemp( y , x , xmin , delta ) \
-        begin \
-            TMF1 = ( x ) - ( xmin ) - ( delta ) ; \
-            TMF2 = 4.0 * ( xmin ) * ( delta ) ; \
-            TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
-            TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
-            y = ( xmin ) + 0.5 * ( TMF1 + TMF2 ) ; \
-        end
-    `define Fn_SL2( y , x , xmin , delta , dy_dx, dy_dxmin ) \
-        begin \
-            TMF1 = ( x ) - ( xmin ) - ( delta ) ; \
-            TMF2 = 4.0 * ( xmin ) * ( delta ) ; \
-            TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
-            TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
-            dy_dx = 0.5 * ( 1.0 + TMF1 / TMF2 ) ; \
-            dy_dxmin = 0.5 * ( 1.0 - ( TMF1 - 2.0 * delta ) / TMF2 ) ; \
-            y = ( xmin ) + 0.5 * ( TMF1 + TMF2 ) ; \
-        end
+    `define Fn_SL( y , x , xmin , delta , dx ) begin \
+    TMF1 = ( x ) - ( xmin ) - ( delta ) ; \
+    TMF2 = 4.0 * ( xmin ) * ( delta ) ; \
+    TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
+    TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
+    dx = 0.5 * ( 1.0 + TMF1 / TMF2 ) ; \
+    y = ( xmin ) + 0.5 * ( TMF1 + TMF2 ) ; \
+end
+    `define Fn_SLtemp( y , x , xmin , delta ) begin \
+    TMF1 = ( x ) - ( xmin ) - ( delta ) ; \
+    TMF2 = 4.0 * ( xmin ) * ( delta ) ; \
+    TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
+    TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
+    y = ( xmin ) + 0.5 * ( TMF1 + TMF2 ) ; \
+end
+    `define Fn_SL2( y , x , xmin , delta , dy_dx, dy_dxmin ) begin \
+    TMF1 = ( x ) - ( xmin ) - ( delta ) ; \
+    TMF2 = 4.0 * ( xmin ) * ( delta ) ; \
+    TMF2 = TMF2 > 0.0 ?  TMF2 : - ( TMF2 ) ; \
+    TMF2 = sqrt ( TMF1 * TMF1 + TMF2 ) ; \
+    dy_dx = 0.5 * ( 1.0 + TMF1 / TMF2 ) ; \
+    dy_dxmin = 0.5 * ( 1.0 - ( TMF1 - 2.0 * delta ) / TMF2 ) ; \
+    y = ( xmin ) + 0.5 * ( TMF1 + TMF2 ) ; \
+end
 
     //---------------------------------------------------*
     //* smoothZero: flooring to zero.
     //*      y = 0.5 ( x + sqrt( x^2 + 4 delta^2 ) )
     //*-----------------*/
-    `define Fn_SZ( y , x , delta , dx ) \
-        begin \
-            TMF2 = sqrt ( ( x ) *  ( x ) + 4.0 * ( delta ) * ( delta) ) ; \
-            dx = 0.5 * ( 1.0 + ( x ) / TMF2 ) ; \
-            y = 0.5 * ( ( x ) + TMF2 ) + 1e-10 * delta ; \
-            if ( y < 0.0 ) begin \
-                y=0.0; \
-                dx=0.0; \
-            end \
-        end
-    `define Fn_SZtemp( y , x , delta ) \
-        begin \
-            TMF2 = sqrt ( ( x ) *  ( x ) + 4.0 * ( delta ) * ( delta) ) ; \
-            y = 0.5 * ( ( x ) + TMF2 ) + 1e-10 * delta ; \
-            if ( y < 0.0 ) begin \
-                y=0.0; \
-            end \
-        end
+    `define Fn_SZ( y , x , delta , dx ) begin \
+    TMF2 = sqrt ( ( x ) *  ( x ) + 4.0 * ( delta ) * ( delta) ) ; \
+    dx = 0.5 * ( 1.0 + ( x ) / TMF2 ) ; \
+    y = 0.5 * ( ( x ) + TMF2 ) + 1e-10 * delta ; \
+    if ( y < 0.0 ) begin y=0.0; dx=0.0; end \
+end
+    `define Fn_SZtemp( y , x , delta ) begin \
+    TMF2 = sqrt ( ( x ) *  ( x ) + 4.0 * ( delta ) * ( delta) ) ; \
+    y = 0.5 * ( ( x ) + TMF2 ) + 1e-10 * delta ; \
+    if ( y < 0.0 ) begin y=0.0; end \
+end
 
     //---------------------------------------------------*
     //* CeilingPow: ceiling for positive x, flooring for negative x.
@@ -1061,100 +992,83 @@ module hisimsotb_va(d, g, s, e) ;
     //*   - -xmax < y < xmax.
     //*   - dy/dx|_beginx=0end = 1.
     //*-----------------*/
-    `define Fn_CP( y , x , xmax , pw , dx ) \
-        begin \
-            x2 = (x) * (x) ; \
-            xmax2 = (xmax) * (xmax) ; \
-            xp = 1.0  ;\
-            xmp = 1.0 ; \
-            m0 = 0 ;\
-            mm =0 ; \
-            arg = 0.0 ;\
-            dnm =0.0 ; \
-            for ( m0 = 0 ; m0 < pw ; m0 = m0 + 1 ) begin \
-                xp = xp * x2 ; \
-                xmp = xmp * xmax2 ; \
-            end \
-            arg = xp + xmp ; \
-            dnm = arg ; \
-            if ( pw == 1 || pw == 2 || pw == 4 || pw == 8 ) begin \
-                if ( pw == 1 ) begin \
-                    mm = 1 ; \
-                end else if ( pw == 2 ) begin \
-                    mm = 2 ; \
-                end else if ( pw == 4 ) begin \
-                    mm = 3 ; \
-                end else if ( pw == 8 ) begin \
-                    mm = 4 ; \
-                end \
-                for ( m0 = 0 ; m0 < mm ; m0 = m0 + 1 ) begin \
-                    dnm = sqrt( dnm ) ; \
-                end \
-            end else begin \
-                dnm = `Fn_Pow( dnm , 1.0 / ( 2.0 * pw ) ) ; \
-            end \
-            dnm = 1.0 / (dnm+`Small); \
-            y = (x) * (xmax) * dnm ; \
-            dx = (xmax) * xmp * dnm / (arg+`Small) ; \
-        end
+    `define Fn_CP( y , x , xmax , pw , dx ) begin \
+    x2 = (x) * (x) ; \
+    xmax2 = (xmax) * (xmax) ; \
+    xp = 1.0  ; \
+    xmp = 1.0 ; \
+    m0 = 0 ; \
+    mm =0 ; \
+    arg = 0.0 ; \
+    dnm =0.0 ; \
+    for ( m0 = 0 ; m0 < pw ; m0 = m0 + 1 ) begin xp = xp * x2 ; xmp = xmp * xmax2 ; end \
+    arg = xp + xmp ; \
+    dnm = arg ; \
+    if ( pw == 1 || pw == 2 || pw == 4 || pw == 8 ) begin \
+        if ( pw == 1 ) begin mm = 1 ; \
+        end else if ( pw == 2 ) begin mm = 2 ; \
+        end else if ( pw == 4 ) begin mm = 3 ; \
+        end else if ( pw == 8 ) begin mm = 4 ; end \
+            for ( m0 = 0 ; m0 < mm ; m0 = m0 + 1 ) begin dnm = sqrt( dnm ) ; end \
+        end else begin dnm = `Fn_Pow( dnm , 1.0 / ( 2.0 * pw ) ) ; end \
+dnm = 1.0 / (dnm+`Small); \
+y = (x) * (xmax) * dnm ; \
+dx = (xmax) * xmp * dnm / (arg+`Small) ; \
+end
 
-    `define Fn_SU_CP( y , x , xmax , delta , pw , dx ) \
-        begin \
-            if (x > xmax - delta && delta >= 0.0) begin \
-                TMF1 = x - xmax + delta ; \
-                `Fn_CP( TMF0 , TMF1 , delta , pw , dx )  \
-                y = xmax - delta + TMF0 ; \
-                dx = dx ; \
-            end else begin \
-                y = x ; \
-                dx = 1.0 ; \
-            end \
-        end
+    `define Fn_SU_CP( y , x , xmax , delta , pw , dx ) begin \
+    if (x > xmax - delta && delta >= 0.0) begin \
+        TMF1 = x - xmax + delta ; \
+        `Fn_CP( TMF0 , TMF1 , delta , pw , dx )  \
+        y = xmax - delta + TMF0 ; \
+        dx = dx ; \
+    end else begin \
+        y = x ; \
+        dx = 1.0 ; \
+    end \
+end
 
-    `define Fn_SL_CP( y , x , xmin , delta , pw , dx ) \
-        begin \
-            if (x < xmin + delta && delta >= 0.0) begin \
-                TMF1 = xmin + delta - x ; \
-                `Fn_CP( TMF0 , TMF1 , delta , pw , dx )  \
-                y = xmin + delta - TMF0 ; \
-                dx = dx ; \
-            end else begin \
-                y = x ; \
-                dx = 1.0 ; \
-            end \
-        end
+    `define Fn_SL_CP( y , x , xmin , delta , pw , dx ) begin \
+    if (x < xmin + delta && delta >= 0.0) begin \
+        TMF1 = xmin + delta - x ; \
+        `Fn_CP( TMF0 , TMF1 , delta , pw , dx )  \
+        y = xmin + delta - TMF0 ; \
+        dx = dx ; \
+    end else begin \
+        y = x ; \
+        dx = 1.0 ; \
+    end \
+end
 
 
     //---------------------------------------------------*
     //* "flatUpper" using a polynomial
     //*-----------------*/
     //`Fn_DclPoly4( y , TMF1 , dx ) ;
-    `define Fn_SUPoly4( y , x , xmax , dx ) \
-        begin \
-            TMF1 = (x) / xmax ; \
-            TMF2 = TMF1 * TMF1 ; \
-            TMF3 = TMF2 * TMF1 ; \
-            TMF4 = TMF2 * TMF2 ; \
-            y = 1.0 / ( 1.0 + (TMF1) + TMF2 + TMF3 + TMF4 ) ; \
-            dx = - ( 1.0 + 2.0 * (TMF1) + 3.0 * TMF2 + 4.0 * TMF3 )  * y * y  ; \
-            y = xmax * ( 1.0 - y ) ; \
-            dx = - dx ; \
-        end
+    `define Fn_SUPoly4( y , x , xmax , dx ) begin \
+    TMF1 = (x) / xmax ; \
+    TMF2 = TMF1 * TMF1 ; \
+    TMF3 = TMF2 * TMF1 ; \
+    TMF4 = TMF2 * TMF2 ; \
+    y = 1.0 / ( 1.0 + (TMF1) + TMF2 + TMF3 + TMF4 ) ; \
+    dx = - ( 1.0 + 2.0 * (TMF1) + 3.0 * TMF2 + 4.0 * TMF3 )  * y * y  ; \
+    y = xmax * ( 1.0 - y ) ; \
+    dx = - dx ; \
+end
     //---------------------------------------------------*
     //* SymAdd: evaluate additional term for symmetry.
     //*-----------------*/
-    `define Fn_SymAdd( y , x , add0 , dx ) \
-        begin \
-            TMF1 = 2.0 * ( x ) / ( add0 ) ; \
-            TMF2 = 1.0 + TMF1 * ( (1.0/2) + TMF1 * ( (1.0/6) \
+    `define Fn_SymAdd( y , x , add0 , dx ) begin \
+    TMF1 = 2.0 * ( x ) / ( add0 ) ; \
+    TMF2 = 1.0 + TMF1 * ( (1.0/2) + TMF1 * ( (1.0/6) \
              + TMF1 * ( (1.0/24) + TMF1 * ( (1.0/120) \
              + TMF1 * ( (1.0/720) + TMF1 * (1.0/5040) ) ) ) ) ) ; \
-            TMF3 = (1.0/2) + TMF1 * ( (1.0/3) \
+    TMF3 = (1.0/2) + TMF1 * ( (1.0/3) \
              + TMF1 * ( (1.0/8) + TMF1 * ( (1.0/30) \
              + TMF1 * ( (1.0/144) + TMF1 * (1.0/840) ) ) ) ) ; \
-            y = add0 / TMF2 ; \
-            dx = - 2.0 * TMF3 / ( TMF2 * TMF2 ) ; \
-        end
+    y = add0 / TMF2 ; \
+    dx = - 2.0 * TMF3 / ( TMF2 * TMF2 ) ; \
+end
 
     `define Fn_Sqr(x)   ( (x)*(x) ) // x^2 */
     `define Fn_Max(x,y) ( (x) >= (y) ? (x) : (y) ) // max[x,y] */
@@ -1162,45 +1076,44 @@ module hisimsotb_va(d, g, s, e) ;
     `define Fn_Sgn(x)   ( (x) >= 0  ?  (1) : (-1) )    // sign[x] */
 
     `define EXP_LIMIT(y, x, dx) \
-        begin \
-            if (x >= `EXP_THRES) begin \
-                y  = `MAX_EXP * (1.0 + x - `EXP_THRES) ; \
-                dx = `MAX_EXP ; \
-            end else begin \
-                y  = exp(x) ; \
-                dx = y ; \
-            end \
-        end
+    begin \
+        if (x >= `EXP_THRES) begin \
+            y  = `MAX_EXP * (1.0 + x - `EXP_THRES) ; \
+            dx = `MAX_EXP ; \
+        end else begin \
+            y  = exp(x) ; \
+            dx = y ; \
+        end \
+    end
     // End of eval.c for definition
 
     // Begin: temp.c for definition
     `define BINNING(UC_PARAM, PARAM, LPARAM, WPARAM, PPARAM) UC_PARAM = PARAM \
-        + LPARAM / Lbin + WPARAM / Wbin \
-        + PPARAM / LWbin ;
-    `define RANGECHECK(param, min, max, pname) \
-        begin \
-            if ((param) <(min) ||(param) >(max) ) begin \
-                $write("warning(HiSIM_SOTB): (%M) The model/instance parameter %s (= %g) must be in the range [%g , %g].\n", \
-                pname, (param), (min), (max) ) ; \
-            end \
-        end
+    + LPARAM / Lbin + WPARAM / Wbin \
+    + PPARAM / LWbin ;
+    `define RANGECHECK(param, min, max, pname) begin \
+    if ((param) <(min) ||(param) >(max) ) begin \
+        $write("warning(HiSIM_SOTB): (%M) The model/instance parameter %s (= %g) must be in the range [%g , %g].\n", \
+           pname, (param), (min), (max) ) ; \
+    end \
+end
     `define MINCHECK(param, min, pname) \
-        if ((param) <= (min) ) begin \
-            $write("warning(HiSIM_SOTB): (%M) The model/instance parameter %s (= %g) must be greater than %g.\n", \
-            pname, (param), (min) ) ;                     \
-        end
+    if ((param) <= (min) ) begin \
+        $write("warning(HiSIM_SOTB): (%M) The model/instance parameter %s (= %g) must be greater than %g.\n", \
+           pname, (param), (min) ) ;                     \
+    end
     `define MINCHECKF(param, min, pname) \
-        if ((param) <= (min) ) begin \
-            $write(" *** Fatal(HiSIM_SOTB): (%M) The model/instance parameter %s (= %g) must be greater than %g.\n", \
-            pname, (param), (min) ) ;                     \
-            FATAL_flag = 1; \
-        end
+    if ((param) <= (min) ) begin \
+        $write(" *** Fatal(HiSIM_SOTB): (%M) The model/instance parameter %s (= %g) must be greater than %g.\n", \
+           pname, (param), (min) ) ;                     \
+        FATAL_flag = 1; \
+    end
 
     `define PMINCHECK(param, min, mesg) \
-        if ( (param) < (min) ) begin \
-            $write(" *** Fatal(HiSIM_SOTB): (%M) %s\n",mesg ); \
-            FATAL_flag = 1; \
-        end
+    if ( (param) < (min) ) begin \
+        $write(" *** Fatal(HiSIM_SOTB): (%M) %s\n",mesg ); \
+        FATAL_flag = 1; \
+    end
 
     `define  Nsubmin     (1e15 / `C_cm2m_p3)
     `define  Nsubmin_dlt (0.01 / `C_cm2m_p3)
@@ -1232,11 +1145,11 @@ module hisimsotb_va(d, g, s, e) ;
         i          = 0 ;
         flg_brk10  = 0 ;
         gds0_ign   = 1e-12 ;
-        lp_s0_max  = 500 ;
+        lp_s0_max  = 200 ;
         lp_sl_max  = 200 ;
         sti2_dlt   = 2.0e-3 ;
         flg_nqs    = CONQS ;
-        Vbsc_dVbs = 1.0 ;
+        Vbsc_dVbse = 1.0 ;
         flg_dPpg   = 1 ;
 
         // for hidden states
@@ -1316,11 +1229,6 @@ module hisimsotb_va(d, g, s, e) ;
         Vgs_shift  = 0.0 ;
         Chi        = 0.0 ;
 
-        Ps0_isub   = 0.0 ;
-        Vgpsub     = 0.0 ;
-        pfi_case   = 0.0 ;
-        Q_s0_bulk_dep = 0.0 ;
-
 
         begin : initializeModel
 
@@ -1350,7 +1258,7 @@ module hisimsotb_va(d, g, s, e) ;
                     $write(" *** Fatal(HiSIM_SOTB): (MUESTI1 == 0 && MUESTI3 < 0) is not allowed.\n");
                     FATAL_flag = 1;
                 end
-                if (FATAL_flag) $error(" *** Fatal(HiSIM_SOTB): Internal parameter range check failed."); //$finish(0);
+                if (FATAL_flag) $finish(0);
 
                 // Change the CLM2 depends on NSUBS
                 UC_CLM2 = ($param_given(CLM2)) ? CLM2 : 5.0e9/(TSOI * NSUBS) ;
@@ -1492,7 +1400,7 @@ module hisimsotb_va(d, g, s, e) ;
             T3 = MKS_NSUBSMAX / MKS_NSUBS ;
             `Fn_SUtemp( T1, T2, T3, 0.01 )
             UC_NSUBS = MKS_NSUBS * T1 ;
-            if (Lgate > LP || LP <= 0.0) begin
+            if (Lgate > LP) begin
                 Nsub = (UC_NSUBS * (Lgate - LP) + Nsubps * LP) / Lgate ;
             end else begin
                 Nsub = Nsubps + (Nsubps - UC_NSUBS) * (LP - Lgate) / LP ;
@@ -1509,7 +1417,7 @@ module hisimsotb_va(d, g, s, e) ;
             gdl0 = GDL * pow(LG + GDLD, -GDLP) ;
 
             // Pocket Overlap(temperature-independent part) //
-            if (Lgate <= 2.0e0 * LP && LP > 0) begin
+            if (Lgate <= 2.0e0 * LP) begin
                 Nsubb0 = 2.0e0 * Nsubps - (Nsubps - UC_NSUBS) * Lgate / LP - UC_NSUBS ;
                 ptovr0 = ln (Nsubb0 / UC_NSUBS) ;
                 // ptovr0 will be divided by beta later. //
@@ -1569,11 +1477,9 @@ module hisimsotb_va(d, g, s, e) ;
         end // initializeInstance
 
         //   get biases from CKT //
-        Vgsi  = TYPE * V(BRgpsp) ;
-        Vdsi = TYPE * V(BRdpsp) ;
-        Vbsi = TYPE * V(BRbpsp) ;
-        Vgsei = TYPE * V(BRgps) ;
-        Vdsei = TYPE * V(BRds) ;
+        Vgsi  = TYPE * V(BRgps) ;
+        Vdsei = TYPE * V(BRds ) ;
+        Vgsei = TYPE * V(BRgs) ;
         Vbsei = TYPE * V(BRbps) ;
         //-------------SHE------------------//
         if (COSELFHEAT && RTH0 > 0.0) begin
@@ -1586,29 +1492,24 @@ module hisimsotb_va(d, g, s, e) ;
             Qi_nqs = `NQS_CAP * V(nqs_qi) ;
             Qb_nqs = `NQS_CAP * V(nqs_qb) ;
         end else begin
-            Qi_nqs = 0.0 ;
-            Qb_nqs = 0.0 ;
+            Qi_nqs = 0.0 ; Qb_nqs = 0.0 ;
         end
         //
-        if (Vdsi >= 0) begin  // normal mode //
+        if (Vdsei >= 0) begin  // normal mode //
             mode = 1 ;
             ModeNML = 1.0 ;
             ModeRVS = 0.0 ;
-            Vgs_mos = Vgsi ;
-            Vds_mos = Vdsi ;
-            Vbs_mos = Vbsi ;
-            Vgse = Vgsei ;
+            Vgs  = Vgsi ;
             Vdse = Vdsei ;
+            Vgse = Vgsei ;
             Vbse = Vbsei ;
         end  else  begin     // reverse mode //
             mode = -1 ;
             ModeNML = 0.0 ;
             ModeRVS = 1.0 ;
-            Vgs_mos = Vgsi - Vdsi ;
-            Vds_mos = -Vdsi ;
-            Vbs_mos = Vbsi - Vdsi ;
+            Vgs  =  Vgsi - Vdsei ;
+            Vdse = -Vdsei ;
             Vgse = Vgsei - Vdsei ;
-            Vdse = - Vdsei ;
             Vbse = Vbsei - Vdsei ;
         end
 
@@ -1616,8 +1517,8 @@ module hisimsotb_va(d, g, s, e) ;
             $write( "--- variables given to HSMSOTBevaluate() ----\n" ) ;
             $write( "TYPE   = %d\n" , TYPE ) ;
             $write( "mode   = %d\n" , mode ) ;
-            $write( "Vbsei Vbsi    = %5.10e %5.10e\n" , Vbsei, Vbsi ) ;
-            $write( "Vdsei Vdsi    = %5.10e %5.10e\n" , Vdsei, Vdsi ) ;
+            $write( "Vbsei  = %5.10e \n" , Vbsei ) ;
+            $write( "Vdsei  = %5.10e \n" , Vdsei ) ;
             $write( "Vgsei Vgsi    = %5.10e %5.10e\n" , Vgsei, Vgsi ) ;
         end
 
@@ -1780,7 +1681,7 @@ module hisimsotb_va(d, g, s, e) ;
             `PMINCHECK(Weff   ,1e-9,"An effective channel width  < 1nm ")
             `PMINCHECK(weff_cv,1e-9,"An effective channel width for C-V < 1nm")
             `PMINCHECK(Leff   ,1e-9,"An effective channel length < 1nm")
-            if (FATAL_flag) $error(" *** Fatal(HiSIM_SOTB): An effective channel width/length < 1nm"); //$finish(0);
+            if (FATAL_flag) $finish(0);
 
         end // paramCheck
 
@@ -1796,19 +1697,19 @@ module hisimsotb_va(d, g, s, e) ;
         if (Vbs_bnd > Vbs_max * 0.5) begin
             Vbs_bnd = 0.5 * Vbs_max ;
         end
-        if (Vbs_mos > Vbs_bnd) begin
-            T2 = Vbs_mos - Vbs_bnd ;
+        if (Vbse > Vbs_bnd) begin
+            T2 = Vbse - Vbs_bnd ;
             T3 = Vbs_max - Vbs_bnd ;
             `Fn_CP(T4, T2, T3, 4, T8)
             Vbsc = Vbs_bnd + T4 ;
-            Vbsc_dVbs = T8 ;
+            Vbsc_dVbse = T8 ;
         end else begin
-            Vbsc = Vbs_mos ;
-            Vbsc_dVbs = 1.0 ;
+            Vbsc = Vbse ;
+            Vbsc_dVbse = 1.0 ;
         end
 
-        Vdsc = Vds_mos ;
-        Vgsc = Vgs_mos ;
+        Vdsc = Vdse ;
+        Vgsc = Vgs ;
 
 
         begin : COPPRV_model // (copprv = 1)
@@ -1818,7 +1719,8 @@ module hisimsotb_va(d, g, s, e) ;
             real Pss0_ini, Pbs0_ini, Psb0_ini ;
             real Pssl_ini, Pbsl_ini, Psbl_ini ;
 
-`ifndef DISABLE_COPPRV
+`ifdef DISABLE_COPPRV
+`else
                 integer called , mode_prv , mode_prv2 ;
                 real vtol_pprv ;
                 real vbsc_prv  , vdsc_prv  , vgsc_prv ;
@@ -1852,40 +1754,39 @@ module hisimsotb_va(d, g, s, e) ;
                 /* Initialization for hidden states */
                 Pss0_ini=0.0; Pbs0_ini=0.0; Psb0_ini=0.0;
                 Pssl_ini=0.0; Pbsl_ini=0.0; Psbl_ini=0.0;
-`endif
-`ifndef DISABLE_COPPRV
+`else
                 `define calPhis0_ini( Ps_ini, ps_prv, ps_dvbs_prv, ps_dvgs_prv, ps_dvbs_prv2, ps_dvgs_prv2 ) \
-                    begin \
-                        if ( flg_pprv >= 1) begin \
-                            T1 = dVbs * ps_dvbs_prv + dVgs * ps_dvgs_prv ; \
-                            Ps_ini = ps_prv + T1 ; \
-                            if (flg_pprv == 2) begin \
-                                TXdvbs = ( Vbsc_dif2 > `epsm10 ) ? ((ps_dvbs_prv-ps_dvbs_prv2)/Vbsc_dif2) : 0.0 ; \
-                                TXdvgs = ( Vgsc_dif2 > `epsm10 ) ? ((ps_dvgs_prv-ps_dvgs_prv2)/Vgsc_dif2) : 0.0 ; \
-                                T2     = ddVbs * TXdvbs + ddVgs * TXdvgs ; \
-                                if ( abs(T2) < abs(0.5*T1) ) Ps_ini = Ps_ini + T2 ; else flg_pprv = 1 ; \
-                                T1 = Ps_ini - ps_prv ; \
-                                if ( T1 < - `dP_max || T1 > `dP_max ) flg_pprv = 0 ; \
-                            end \
-                        end \
-                    end
+    begin \
+        if ( flg_pprv >= 1) begin \
+            T1 = dVbs * ps_dvbs_prv + dVgs * ps_dvgs_prv ; \
+            Ps_ini = ps_prv + T1 ; \
+            if (flg_pprv == 2) begin \
+                TXdvbs = ( Vbsc_dif2 > `epsm10 ) ? ((ps_dvbs_prv-ps_dvbs_prv2)/Vbsc_dif2) : 0.0 ; \
+                TXdvgs = ( Vgsc_dif2 > `epsm10 ) ? ((ps_dvgs_prv-ps_dvgs_prv2)/Vgsc_dif2) : 0.0 ; \
+                T2     = ddVbs * TXdvbs + ddVgs * TXdvgs ; \
+                if ( abs(T2) < abs(0.5*T1) ) Ps_ini = Ps_ini + T2 ; else flg_pprv = 1 ; \
+                T1 = Ps_ini - ps_prv ; \
+                if ( T1 < - `dP_max || T1 > `dP_max ) flg_pprv = 0 ; \
+            end \
+        end \
+    end
 
                 `define calPhis_ini( Ps_ini, ps_prv, ps_dvbs_prv, ps_dvds_prv, ps_dvgs_prv, ps_dvbs_prv2, ps_dvds_prv2, ps_dvgs_prv2 ) \
-                    begin \
-                        if ( flg_pprv >= 1) begin \
-                            T1 = dVbs * ps_dvbs_prv + dVds * ps_dvds_prv + dVgs * ps_dvgs_prv ; \
-                            Ps_ini = ps_prv + T1 ; \
-                            if (flg_pprv == 2) begin \
-                                TXdvbs = ( Vbsc_dif2 > `epsm10 ) ? ((ps_dvbs_prv-ps_dvbs_prv2)/Vbsc_dif2) : 0.0 ; \
-                                TXdvds = ( Vdsc_dif2 > `epsm10 ) ? ((ps_dvds_prv-ps_dvds_prv2)/Vdsc_dif2) : 0.0 ; \
-                                TXdvgs = ( Vgsc_dif2 > `epsm10 ) ? ((ps_dvgs_prv-ps_dvgs_prv2)/Vgsc_dif2) : 0.0 ; \
-                                T2     = ddVbs * TXdvbs + ddVds * TXdvds + ddVgs * TXdvgs ; \
-                                if ( abs(T2) < abs(0.5*T1) ) Ps_ini = Ps_ini + T2 ; else flg_pprv = 1 ; \
-                                T1 = Ps_ini - ps_prv ; \
-                                if ( T1 < - `dP_max || T1 > `dP_max ) flg_pprv = 0 ; \
-                            end \
-                        end \
-                    end
+    begin \
+        if ( flg_pprv >= 1) begin \
+            T1 = dVbs * ps_dvbs_prv + dVds * ps_dvds_prv + dVgs * ps_dvgs_prv ; \
+            Ps_ini = ps_prv + T1 ; \
+            if (flg_pprv == 2) begin \
+                TXdvbs = ( Vbsc_dif2 > `epsm10 ) ? ((ps_dvbs_prv-ps_dvbs_prv2)/Vbsc_dif2) : 0.0 ; \
+                TXdvds = ( Vdsc_dif2 > `epsm10 ) ? ((ps_dvds_prv-ps_dvds_prv2)/Vdsc_dif2) : 0.0 ; \
+                TXdvgs = ( Vgsc_dif2 > `epsm10 ) ? ((ps_dvgs_prv-ps_dvgs_prv2)/Vgsc_dif2) : 0.0 ; \
+                T2     = ddVbs * TXdvbs + ddVds * TXdvds + ddVgs * TXdvgs ; \
+                if ( abs(T2) < abs(0.5*T1) ) Ps_ini = Ps_ini + T2 ; else flg_pprv = 1 ; \
+                T1 = Ps_ini - ps_prv ; \
+                if ( T1 < - `dP_max || T1 > `dP_max ) flg_pprv = 0 ; \
+            end \
+        end \
+    end
 
                 //-------------------------------------------------------------------*
                 // Update initial potential values by previous values
@@ -1943,7 +1844,7 @@ module hisimsotb_va(d, g, s, e) ;
             //-----------------------------------------------------------*
             //    Vxsz: Modified bias introduced to realize symmetry at Vds=0.
             //    ----------------  from HiSIM 2.5.1 //
-            T1 = Vbsc_dVbs * Vds / 2 ;
+            T1 = Vbsc_dVbse * Vds / 2 ;
             `Fn_SymAdd(Vzadd, T1, VZADD0, T2)
             if (Vzadd < `ps_conv) begin
                 Vzadd = `ps_conv ;
@@ -1989,9 +1890,7 @@ module hisimsotb_va(d, g, s, e) ;
                 T3 = 1.0 /  T2 ;
                 T4 = 2.0 * abs(Vthq) ;
                 T6 = Vfb - Vthq + QME2 ;
-                if (T6 > T4) begin
-                    T4 = T6 ;
-                end
+                if (T6 > T4) begin T4 = T6 ; end
                 `Fn_SU( T2 , T3 , 1.0 / T4  , `qme_dlt, T6 )
                 dTfox = QME1 * T2 + QME3 ;
                 if ( dTfox * 1.0e12 < Tfox0 ) begin
@@ -2154,8 +2053,7 @@ module hisimsotb_va(d, g, s, e) ;
 
                 // new phi_s0_bulk_0
                 if ( Vbsbiz < 0.0 ) begin
-                    T0 = N_subbl / `N_sub_SOI ;
-                    T1 = T0 + 1.0 ; // n, n'
+                    T0 = N_subbl / `N_sub_SOI ; T1 = T0 + 1.0 ; // n, n'
                     T2 = beta_inv - Vbsbiz + T0 * (beta_inv + Vbsbiz) ; // A
                     T3 = cnst0bulk * cnst0bulk * C_box_inv * C_box_inv ; // B
                     T4 = 2.0 * T2 * T1 - T3 * beta  ;
@@ -2328,8 +2226,6 @@ module hisimsotb_va(d, g, s, e) ;
                                 `Fn_SU(phi_s0_bulk, psb_iniA, psb_iniB, `c_ps0ini_2, T1)
                             end
                         end
-                        //     psb_iniA_0 = psb_iniA ;
-                        //     psb_iniB_0 = psb_iniB ;
 
                         // initial guess for phi_s0_bulk calculation(end) //
 
@@ -2366,6 +2262,8 @@ module hisimsotb_va(d, g, s, e) ;
                                 phi_s0_bulk = T6 ;
                                 Q_s0_bulk = T4 ;
                             end
+                            phi_s0_bulk = Vbsbiz + phi_s0_bulk ;
+                            phi_b0_SOI = phi_s0_bulk - Q_s0_bulk / C_box ;
                         end else begin
                             for (lp_s0 = 0 ; lp_s0 < lp_s0_max ;  lp_s0 = lp_s0 + 1 ) begin
                                 T1 = cnst0bulk ;
@@ -2397,9 +2295,9 @@ module hisimsotb_va(d, g, s, e) ;
                                 phi_s0_bulk = T6 ;
                                 Q_s0_bulk = T4 ;
                             end
+                            phi_s0_bulk = Vbsbiz + phi_s0_bulk ;
+                            phi_b0_SOI = phi_s0_bulk - Q_s0_bulk / C_box ;
                         end
-                        phi_s0_bulk = Vbsbiz + phi_s0_bulk ;
-                        phi_b0_SOI = phi_s0_bulk - Q_s0_bulk / C_box ;
                         // newton loop for phi_s0_bulk(end) //
 
                         // Initial Guess for SOI Accumulation case(end). //
@@ -2423,31 +2321,34 @@ module hisimsotb_va(d, g, s, e) ;
                     //---------------------------------------------------*
                     //* Ps0_iniA: solution of subthreshold equation assuming zone-D1/D2.
                     //*-----------------//
-                    T0 = 1 / C_fox ;
-                    T1 = `t_SOI / `C_ESI ;
-                    T2 = 1 / C_box ;
-                    T3 = 1 / (T0 + T1 + T2) ;
                     if ( Vgs - shift <= Vth ) begin
                         //-----------------------------------*
                         //* Accumulation & Weak inversion zone.
                         //*-----------------//
+                        T0 = 1 / C_fox ;
+                        T1 = `t_SOI / `C_ESI ;
+                        T2 = 1 / C_box ;
+                        T3 = 1 / (T0 + T1 + T2) ;
                         T5 = (Ps0_iniA > 0.0) ? sqrt(`C_QE * `N_sub_SOI * 2 * `C_ESI * Ps0_iniA) : 0.0 ;
                         T5 = `Fn_Min(Q_FD_SOI, T5) ;
                         T4 = T3 * (Vgpz - Vbsbiz + (T2 + 0.5 * T1) * (-T5)) ;
+                        Ps0_iniA = Vgpz - T4 / C_fox ;
+                        Ps0_ini = Ps0_iniA ;
                     end else begin
+                        T0 = 1 / C_fox ;
+                        T1 = `t_SOI / `C_ESI ;
+                        T2 = 1 / C_box ;
+                        T3 = 1 / (T0 + T1 + T2) ;
                         T4 = T3 * (Vgpz - Vbsbiz + (T2 + 0.5 * T1) * (-Q_FD_SOI)) ;
-                    end
-                    Ps0_iniA = Vgpz - T4 / C_fox ;
-                    Ps0_ini  = Ps0_iniA ;
+                        Ps0_iniA = Vgpz - T4 / C_fox ;
+                        Ps0_ini=Ps0_iniA;
 
-                    if (Vgs - shift > Vth) begin // for smoothing
                         T1 = 1.0 / cnst1SOI / cnstC_foxi ;
                         T2 = T1 * (Vgpz - shift) * (Vgpz - shift) ;
                         T3 = beta + 2.0 / (Vgpz - shift) ;
                         Ps0_iniB = ln (T2) / T3 ;
-                        `Fn_SU_CP(Ps0_ini, Ps0_iniA, Ps0_iniB , 0.15 , 1, T1)
+                        `Fn_SU_CP(Ps0_ini, Ps0_iniA, Ps0_iniB * 0.98 , 0.5 , 2, T1)
                     end
-
                     WdSOI = (Ps0_ini > 0.0) ? sqrt(`cnst_2esi_q * Ps0_ini / `N_sub_SOI) : 0.0 ;
                     if (WdSOI < `t_SOI) begin
                         flg_depmode = 1 ; /* PD mode */
@@ -2533,52 +2434,37 @@ module hisimsotb_va(d, g, s, e) ;
                     // PD case(end) //
                     else begin
                         // FD case(start) //
-                        flg_depmode = 2 ;
-                        for (lp_sl = 0 ; lp_sl < 2 ;  lp_sl = lp_sl + 1 ) begin
-                            if (lp_sl == 0) begin
-                                ps_conv_ini = `ps_conv*100 ;
-                                Ps0 = Ps0_iniA ;
+                        flg_depmode = 2 ;        // 20100528 //
+                        for (lp_s0 = 0 ; lp_s0 < lp_s0_max ;  lp_s0 = lp_s0 + 1 ) begin
+                            T1 = cnst0bulk ;
+                            T2 = beta * phi_s0_bulk ;
+                            T3 = exp(-T2) ;
+                            if (phi_s0_bulk > `C_PHI_1_MINIMUM) begin
+                                T0 = exp(beta * phi_s0_bulk) ;
+                                T4 = -T1 * sqrt(T3 + T2 - 1 + cnst1bulk * (T0 - 1)) ;        //Qbulk
+                                T5 = c0bulk / T4 * (-T3 + 1 + cnst1bulk * T0) ;      //dQbulk_dPsb
+                            end else if (phi_s0_bulk < -`C_PHI_1_MINIMUM) begin
+                                T4 = T1 * sqrt(T3 + T2 - 1) ;        //Qbulk
+                                T5 = c0bulk / T4 * (-T3 + 1) ;       //dQbulk_dPsb
                             end else begin
-                                ps_conv_ini = `ps_conv_ini ;
-                                Ps0 = phi_s0_SOI ;
+                                T4 = -sqrt(c0bulk / beta) * beta * phi_s0_bulk ;     //Qbulk
+                                T5 = -sqrt(c0bulk * beta) ;  //dQbulk_dPsb
                             end
-                            for (lp_s0 = 0 ; lp_s0 < lp_s0_max ;  lp_s0 = lp_s0 + 1 ) begin
-                                T1 = cnst0bulk ;
-                                T2 = beta * phi_s0_bulk ;
-                                T3 = exp(-T2) ;
-                                if (phi_s0_bulk > `C_PHI_1_MINIMUM) begin
-                                    T0 = exp(beta * phi_s0_bulk) ;
-                                    T4 = -T1 * sqrt(T3 + T2 - 1 + cnst1bulk * (T0 - 1)) ;        //Qbulk
-                                    T5 = c0bulk / T4 * (-T3 + 1 + cnst1bulk * T0) ;      //dQbulk_dPsb
-                                end else if (phi_s0_bulk < -`C_PHI_1_MINIMUM) begin
-                                    T4 = T1 * sqrt(T3 + T2 - 1) ;        //Qbulk
-                                    T5 = c0bulk / T4 * (-T3 + 1) ;       //dQbulk_dPsb
-                                end else begin
-                                    T4 = -sqrt(c0bulk / beta) * beta * phi_s0_bulk ;     //Qbulk
-                                    T5 = -sqrt(c0bulk * beta) ;  //dQbulk_dPsb
-                                end
-                                T6 = (phi_s0_bulk -
-                                (Ps0 - phi_s0_bulk + T4 / C_box + (T4 + Q_FD_SOI / 2) * `t_SOI / `C_ESI - Vbsbiz )
-                                / (-1 + T5 / C_box + T5 * `t_SOI / `C_ESI )) ;
-                                if (abs(T6 - phi_s0_bulk) <  ps_conv_ini) begin
-                                    T7 = lp_s0 ;
-                                    lp_s0 = lp_s0_max ;
-                                end
-                                phi_s0_bulk = T6 ;
-                                Q_s0_bulk = T4 ;
-                            end // lp_s0
-                            if (lp_sl == 0) begin
-                                Q_s0_bulk_dep = Q_s0_bulk ;
+                            T6 = (phi_s0_bulk -
+                            (phi_s0_SOI - phi_s0_bulk + T4 / C_box + (T4 + Q_FD_SOI / 2) * `t_SOI / `C_ESI - Vbsbiz )
+                            / (-1 + T5 / C_box + T5 * `t_SOI / `C_ESI )) ;
+                            if (abs(T6 - phi_s0_bulk) < `ps_conv_ini) begin
+                                T7 = lp_s0 ;
+                                lp_s0 = lp_s0_max ;
                             end
-                        end // lp_sl
-                        lp_sl = 0 ;
+                            phi_s0_bulk = T6 ;
+                            Q_s0_bulk = T4 ;
+                        end
+                        phi_s0_bulk = Vbsbiz + phi_s0_bulk ;
+                        phi_b0_SOI = phi_s0_bulk - Q_s0_bulk / C_box ;
                     end
                     // FD case(end) //
                     // newton loop for phi_s0_bulk(end) //
-                    phi_s0_bulk = Vbsbiz + phi_s0_bulk - 0.01 ;
-                    phi_b0_SOI = phi_s0_bulk - Q_s0_bulk / C_box ;
-
-                    `Fn_SU_CP( phi_b0_SOI, phi_b0_SOI, phi_s0_SOI, 0.15, 1, T0 )
 
                 end  // HSOTB_calc_ini_for_phi_s0_bulk
 
@@ -2675,9 +2561,7 @@ module hisimsotb_va(d, g, s, e) ;
                             EVB1_QE_WL_p_Egp12 = EVB1_QE_WL / Egp12 ;
                             Eevb_wo_Vox = -(FVBS * Vbsz + dVthSC + dVthLP + Eg + EVB3) / CGS_Tfox0 ;
                             for (i = 0 ; i <= `N - 1 ; i= i + 1) begin
-                                reali = i ;
-                                realN = `N ;
-                                r =  reali / realN ;
+                                reali = i ;  realN = `N ; r =  reali / realN ;
                                 Vox = Vgp + Vzadd - (Pds_qwe * r + Ps0_isub) ;
                                 d0 = 1.0 - Vox / phib ;
 
@@ -2723,9 +2607,9 @@ module hisimsotb_va(d, g, s, e) ;
                     end else begin
                         T1 = Vgpsub ;        //ina_fin //
                         T7 = C_fox * C_fox ;
-                        T4 = (2.0 / qnsub_esi) * T7 ;
+                        T4 = 1.0 + (2.0 / qnsub_esi) * T7 ;
                         T5 = T1 - beta_inv - `X_vbs * Vbsz ;
-                        T6 = 1.0 + T4 * T5 ;
+                        T6 = T4 * T5 ;
                         `Fn_SZ(T6, T6, 1.0e-3, T9)
                         T6 = T6 + `Small ;
                         Psislsat = T1 * `X_vgs + (qnsub_esi / T7) * (1.0 - sqrt(T6)) ;
@@ -2736,10 +2620,6 @@ module hisimsotb_va(d, g, s, e) ;
                         Isub = `X_sub1 * Psisubsat * Ids_isub * T2 ;
 
                     end            // end of !if( sub1 < 0 || vmax < 0 )  //
-
-`ifdef dbgprn3
-                        Isub_fbe = Isub ;
-`endif
 
                     // @@@  Qh vs Isub Calculation //
                     if (COFBE == 1) begin
@@ -2963,20 +2843,15 @@ module hisimsotb_va(d, g, s, e) ;
                             T1 = 0.0 ;
                             T1_dPsb = 0.0 ;
                         end
-                        T3 = -Q_s0_bulk_dep/Q_FD_SOI * QN ;
-                        `Fn_Sigmoidx( T2 , T3 , T0 )
-                        T2 = T2 * T2_gamma ;
-                        T1 = -(Q_FD_SOI + T2) ;
-                        T1_dPsb = 0.0 ;
                         PF2  = (Q_s0_dep + T1)/C_soi ;
                         PF21 = Q_s0_dep_dPss/C_soi ;
                         PF22 = Q_s0_dep_dPbsP/C_soi ;
                         PF23 = T1_dPsb/C_soi ;
 
-                        T3 = -Q_s0_bulk_dep/Q_FD_SOI * QB ;
+                        T3 = -Q_s0_bulk/Q_FD_SOI ;
                         `Fn_Sigmoidx( T2 , T3 , T0 )
                         T2 = T2 * T2_gamma ;
-                        T2_dPsb = 0.0 ;
+                        T2_dPsb = -Q_s0_bulk_dPsb/Q_FD_SOI * T0 * T2_gamma ;
                         PF3  = (Q_b0_dep+T2)/C_soi ;
                         PF32 = (Q_b0_dep_dPbsP)/C_soi ;
                         PF33 = (Q_b0_dep_dPbs*phi_b0_SOI_dPsb + T2_dPsb)/C_soi ;
@@ -3006,9 +2881,9 @@ module hisimsotb_va(d, g, s, e) ;
                         if (T1 < abs(dPsb) ) T1 = abs(dPsb ) ;
                         scale_fac=1.0 ;
                         if (lp_s0 > 80) begin
-                            scale_fac = 25.0 ;
+                            scale_fac = 125.0 ;
                         end else if (lp_s0 > 40) begin
-                            scale_fac = 25.0 ;
+                            scale_fac = 125.0 ;
                         end else if (lp_s0 > 20) begin
                             scale_fac = 25.0 ;
                         end else if (lp_s0 > 10) begin
@@ -3031,10 +2906,7 @@ module hisimsotb_va(d, g, s, e) ;
                         end
                     end
                 end
-                if (flg_brk10 > 0) begin
-                    lp_s0 = flg_brk10;
-                    flg_brk10 = 0;
-                end
+                if (flg_brk10 > 0) begin lp_s0 = flg_brk10; flg_brk10 = 0; end
                 //  ******************************
                 //  end of 3D-Newton loop
                 //  ******************************
@@ -3064,7 +2936,8 @@ module hisimsotb_va(d, g, s, e) ;
 
             end // HSOTB_Eval_Solve_Ps0_flat_phiBP
 
-`ifndef DISABLE_COPPRV
+`ifdef DISABLE_COPPRV
+`else
                 flg_conv_0 = flg_conv ;
 `endif
 
@@ -3267,7 +3140,7 @@ module hisimsotb_va(d, g, s, e) ;
 
             end // start_of_loopl
 
-            //   flg_fbcase_0 = flg_fbcase ;
+            //  flg_fbcase_0 = flg_fbcase ;
 
             begin : HSOTB_Eval_Solve_Psl_flat_phiBP
                 //-----------------------------------------------------------*
@@ -3435,20 +3308,15 @@ module hisimsotb_va(d, g, s, e) ;
                             T1 = 0.0 ;
                             T1_dPsb = 0.0 ;
                         end
-                        T3 = -Q_s0_bulk_dep/Q_FD_SOI * QN ;
-                        `Fn_Sigmoidx( T2 , T3 , T0 )
-                        T2 = T2 * T2_gamma ;
-                        T1 = -(Q_FD_SOI + T2) ;
-                        T1_dPsb = 0.0 ;
                         PF2  = (Q_sL_dep + T1)/C_soi ;
                         PF21 = Q_sL_dep_dPss/C_soi ;
                         PF22 = Q_sL_dep_dPbsP/C_soi ;
                         PF23 = T1_dPsb/C_soi ;
 
-                        T3 = -Q_s0_bulk_dep/Q_FD_SOI * QB ;
+                        T3 = -Q_sL_bulk/Q_FD_SOI ;
                         `Fn_Sigmoidx( T2 , T3 , T0 )
                         T2 = T2 * T2_gamma ;
-                        T2_dPsb = 0 ;
+                        T2_dPsb = -Q_sL_bulk_dPsb/Q_FD_SOI * T0 * T2_gamma  ;
                         PF3  = (Q_bL_dep+T2)/C_soi ;
                         PF32 = (Q_bL_dep_dPbsP)/C_soi ;
                         PF33 = (Q_bL_dep_dPbs*phi_bL_SOI_dPsb + T2_dPsb)/C_soi ;
@@ -3478,11 +3346,9 @@ module hisimsotb_va(d, g, s, e) ;
                         if (T1 < abs(dPsb) ) T1 = abs(dPsb ) ;
                         scale_fac=1.0 ;
                         if (lp_sl > 80) begin
-                            //          scale_fac = 125.0 ;
-                            scale_fac = 25.0 ;
+                            scale_fac = 125.0 ;
                         end else if (lp_sl > 40) begin
-                            //          scale_fac = 125.0 ;
-                            scale_fac = 25.0 ;
+                            scale_fac = 125.0 ;
                         end else if (lp_sl > 20) begin
                             scale_fac = 25.0 ;
                         end else if (lp_sl > 10) begin
@@ -3505,10 +3371,7 @@ module hisimsotb_va(d, g, s, e) ;
                         end
                     end
                 end
-                if (flg_brk10 > 0) begin
-                    lp_sl = flg_brk10;
-                    flg_brk10 = 0;
-                end
+                if (flg_brk10 > 0) begin lp_sl = flg_brk10; flg_brk10 = 0; end
 
                 //  ******************************
                 //  end of 3D-Newton loop
@@ -3548,7 +3411,8 @@ module hisimsotb_va(d, g, s, e) ;
             // Vdseff //
             Vds = Vdsorg ;
 
-`ifndef DISABLE_COPPRV
+`ifdef DISABLE_COPPRV
+`else
                 flg_conv_L = flg_conv ;
                 //-----------------------------------------------------------*
                 //Restore values for next calculation.
@@ -3596,13 +3460,13 @@ module hisimsotb_va(d, g, s, e) ;
                     pbsl_prv = phi_bL_SOI ;
                     psbl_prv = phi_sL_bulk ;
                     pssl_dvbs_prv = ddx(phi_sL_SOI,V(bp));
-                    pssl_dvds_prv = (mode>0) ? ddx(phi_sL_SOI,V(dp)) : ddx(phi_sL_SOI,V(sp));
+                    pssl_dvds_prv = (mode>0) ? ddx(phi_sL_SOI,V(d )) : ddx(phi_sL_SOI,V(s ));
                     pssl_dvgs_prv = ddx(phi_sL_SOI,V(gp));
                     pbsl_dvbs_prv = ddx(phi_bL_SOI,V(bp));
-                    pbsl_dvds_prv = (mode>0) ? ddx(phi_bL_SOI,V(dp)) : ddx(phi_bL_SOI,V(sp));
+                    pbsl_dvds_prv = (mode>0) ? ddx(phi_bL_SOI,V(d )) : ddx(phi_bL_SOI,V(s ));
                     pbsl_dvgs_prv = ddx(phi_bL_SOI,V(gp));
                     psbl_dvbs_prv = ddx(phi_sL_bulk,V(bp));
-                    psbl_dvds_prv = (mode>0) ? ddx(phi_sL_bulk,V(dp)) : ddx(phi_sL_bulk,V(sp));
+                    psbl_dvds_prv = (mode>0) ? ddx(phi_sL_bulk,V(d )) : ddx(phi_sL_bulk,V(s ));
                     psbl_dvgs_prv = ddx(phi_sL_bulk,V(gp));
 
                 end // (COPPRV)
@@ -3751,6 +3615,8 @@ module hisimsotb_va(d, g, s, e) ;
 
             begin : HSOTB_Muunb
 
+                real MUEqb , MUEqbb, CGS_ESI, CGS_Q_nL, CGS_Q_bL, CGS_Qiu, CGS_Qibu, CGS_Q_b0_dep, CGS_Q_bL_dep, CGS_Qdepu;
+                real CGS_TBOX, CGS_Qbdepu;
                 CGS_ESI      = `C_ESI   / `C_m2cm;
                 CGS_Q_nL     = Q_nL     / `C_m2cm_p2;
                 CGS_Q_bL     = Q_bL     / `C_m2cm_p2;
@@ -3762,7 +3628,6 @@ module hisimsotb_va(d, g, s, e) ;
                 CGS_Q_bL_dep = Q_bL_dep / `C_m2cm_p2;
                 CGS_Qdepu    = Qdepu    / `C_m2cm_p2;
                 CGS_TBOX= `t_box * `C_m2cm;
-
                 //-----------------------------------------------------------*
                 //Evaluate universal mobility.
                 //----------------//
@@ -3784,15 +3649,20 @@ module hisimsotb_va(d, g, s, e) ;
                     Pb0Ls = (phi_b0_SOI  + phi_bL_SOI)  * 0.5 ;
                     Ps0Lb = (phi_s0_bulk + phi_sL_bulk) * 0.5 ;
                     Eeffb = ( 3.9 * (Pb0Ls-Ps0Lb-Vbsbiz) ) / (11.7 * CGS_TBOX);
-                    Eeff  = Eeff + Eeffb  ;
+                    Eeff= Eeff + Eeffb  ;
                 end else begin
                     Pb0Ls = 0.0 ; Ps0Lb = 0.0 ; Eeffb = 0.0 ;
                 end
 
-                `Fn_SZ(Eeff, Eeff, 3E3, T1)
+                if (COMUUNSZ) begin
+                    `Fn_SZ(T0, Eeff, 3E3, T1)
+                end else begin
+                    `Fn_SZ(T0, Eeff, 1e-2 , T1)
+                end
+                Eeff = T0 ;
 
-                T8 = pow(Eeff, MUEPH0 ) ;
-                T6 = pow(Eeff, muesr ) ;
+                T8 = pow(T0, MUEPH0 ) ;
+                T6 = pow(T0, muesr ) ;
 
                 Rns = CGS_Qiu / `C_QE ;
 
@@ -3817,10 +3687,15 @@ module hisimsotb_va(d, g, s, e) ;
                     Eeffb = T5 / T4 ;
                 end
 
-                `Fn_SZ(Eeffb, Eeffb, 3E1, T1)
+                if (COMUUNSZ) begin
+                    `Fn_SZ(T0, Eeffb, 3E1, T1)
+                end else begin
+                    `Fn_SZ(T0, Eeffb, 1e-2 , T1)
+                end
+                Eeffb = T0 ;
 
-                T8 = pow(Eeffb, MUEPH0B ) ;
-                T6 = pow(Eeffb, muesrb ) ;
+                T8 = pow(T0, MUEPH0B ) ;
+                T6 = pow(T0, muesrb ) ;
 
                 Rns = CGS_Qibu / `C_QE ;
 
@@ -4044,7 +3919,8 @@ module hisimsotb_va(d, g, s, e) ;
             // end_of_part_1:
 
 
-`ifndef DISABLE_COPPRV
+`ifdef DISABLE_COPPRV
+`else
                 called = called + 1 ;
 `endif
 
@@ -4054,28 +3930,6 @@ module hisimsotb_va(d, g, s, e) ;
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //* PART-2: Substrate / gate / leak currents
         //*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-
-        //---------------------------------------------------*
-        //Update Substrate current.
-        //----------------//
-        if (Isub > 0) begin
-            //-------------------------------------------*
-            //* Conductive case.
-            //*-----------------//
-            T1 = Vgpsub ;        //ina_fin //
-            T7 = C_fox * C_fox ;
-            T4 = (2.0 / qnsub_esi) * T7 ;  // fixed 2019.06.06
-            T5 = T1 - beta_inv - `X_vbs * Vbsz ;
-            T6 = 1.0 + T4 * T5 ;           // fixed 2019.06.06
-            `Fn_SZ(T6, T6, 1.0e-3, T9)
-            T6 = T6 + `Small ;
-            Psislsat = T1 * `X_vgs + (qnsub_esi / T7) * (1.0 - sqrt(T6)) ;
-            Psisubsat = `X_vds * Vdsz + Ps0_isub - `X_slg * `Z_vgs * Psislsat ;  //ina_fin //
-            `Fn_SZ(Psisubsat, Psisubsat, 1.0e-2, T9)     // @@@ //
-            Psisubsat = Psisubsat + `Small ; // @@@ //
-            T2 = exp(-`X_sub2 / Psisubsat) ;
-            Isub = `X_sub1 * Psisubsat * Ids * T2 ;
-        end
 
         //---------------------------------------------------*
         //* Impact-Ionization Induced Bulk Potential Change(IBPC)
@@ -4310,8 +4164,8 @@ module hisimsotb_va(d, g, s, e) ;
             cnst0over = cnst0SOI * sqrt(MKS_NOVER / Nsub ) ;
 
             for ( lcover = -1 ; lcover <= +1 ; lcover = lcover + 2 ) begin
-                flg_ovloops = ( 1 - lcover ) / 2.0 ; // 1 in Source overlap calc. //
-                flg_ovloopd = ( 1 + lcover ) / 2.0 ; // 1 in Drain overlap calc.  //
+                flg_ovloops = ( 1 - lcover ) / 2 ; // 1 in Source overlap calc. //
+                flg_ovloopd = ( 1 + lcover ) / 2 ; // 1 in Drain overlap calc.  //
                 flg_overs = flg_ovloops * ModeNML + flg_ovloopd * ModeRVS ; // geometrical source //
                 flg_overd = flg_ovloops * ModeRVS + flg_ovloopd * ModeNML ; // geometrical drain //
                 //-------------------------------------------*
@@ -4681,7 +4535,7 @@ module hisimsotb_va(d, g, s, e) ;
             T1 = Qn0 / `C_QE ;
             T2 = (C_fox + Qn0 / (Ps0 - Vbs) + Cite) * beta_inv / `C_QE ;
             T3 = -2.0E0 * Qi / `C_QE / Lch / weffcv_nf - T1 ;
-            if ( abs(T3 - T1) > `epsm10 ) begin
+            if (T3 != T1) begin
                 T4 = 1.0E0 / (T1 + T2) / (T3 + T2) + 2.0E0 * NFalpe * Ey * Mu / (T3 - T1)
                 * ln((T3 + T2) /(T1 + T2)) + NFalpe * Ey * Mu * NFalpe * Ey * Mu ;
             end else begin
@@ -4849,7 +4703,11 @@ module hisimsotb_va(d, g, s, e) ;
         //---------------------------------------------------*
         //Substrate current.
         //----------------//
-        isube = Mfactor * Isub ;
+        if (COISUB != 1) begin
+            isube = 0.0 ;
+        end else begin
+            isube = Mfactor * Isub ;
+        end
 
         //---------------------------------------------------*
         //Von, Vdsat,
@@ -4880,15 +4738,11 @@ module hisimsotb_va(d, g, s, e) ;
         //-----------------------------------------------------------*
         //* Noise.
         //*-----------------//
-        // Noise coeff. calculation
-        whi_noise = 4.0 * `C_KB* TTEMP * `Kwhite ;
         noiflick = Mfactor * Nflic ;
         noithrml = Mfactor * Nthrml ;
 
-        cgdbd = ddx(qge,V(dp)) ;
-        cgdbd = TYPE * cgdbd ;
-        cgsbd = ddx(qge,V(sp)) ;
-        cgsbd = TYPE * cgsbd ;
+        cgdbd = ddx(qge,V(d)) ; cgdbd = TYPE * cgdbd ;
+        cgsbd = ddx(qge,V(s)) ; cgsbd = TYPE * cgsbd ;
         cgsb  = (mode > 0) ? cgsbd : cgdbd ;
 
         //----------------------------------------------------------*
@@ -4896,8 +4750,8 @@ module hisimsotb_va(d, g, s, e) ;
         //*---------------------- from HiSIM 2.5.1 2010.05.21 //
         if (COIGN != 0 && COTHRML != 0 && flg_ign == 1 && !flg_noqi) begin
             T0 = `C_fox_Small * C_fox * weffcv_nf * Leff ;
-            T10 = cgsb / Mfactor ;
-            Nign0 = `c_16o135 * `C_QE * beta_inv * T10 * T10 / gds0_ign ;
+            T1 = cgsb / Mfactor ;
+            Nign0 = `c_16o135 * `C_QE * beta_inv * T1 * T1 / gds0_ign ;
             if (kusai00L > `epsm10 && Vds > `epsm10) begin
                 MuModA = Muun / Mu ;
                 MuModB = (Muun / Mud_hoso - MuModA) / Vds ;
@@ -4909,268 +4763,12 @@ module hisimsotb_va(d, g, s, e) ;
             noiigate = Mfactor * Nign0 * kusai_ig * correct_w1 ;
             noicross = crl_f ;
             noiigate = (noiigate < 0.0) ? 0.0 : noiigate ;
-            noiigate = ( - T10 > T0 ) ? noiigate : 0.0 ;
-            noicross = ( - T10 > T0 ) ? noicross : 0.0 ;
+            noiigate = ( - T1 > T0 ) ? noiigate : 0.0 ;
+            noicross = ( - T1 > T0 ) ? noicross : 0.0 ;
         end else begin
             noiigate = 0.0e0 ;
             noicross = 0.0e0 ;
         end
-        // Thermal noise and induced gate noise:
-        sid    = whi_noise * noithrml;
-        ci     = noicross;
-        sigrat = (sid > 0.0 && noiigate > 0.0) ? sqrt(noiigate/sid) : 0.0 ;
-        sigrat_s  = (mode > 0) ? sigrat*(1-Qdrat) : sigrat*   Qdrat ;
-        sigrat_d  = (mode > 0) ? sigrat*   Qdrat  : sigrat*(1-Qdrat) ;
-
-        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        //* Resistance Effect.
-        //*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-        // Input instance parameters : NRD , NRS , NF ;
-        // Input model parameters : RSH , XLD , LDRIFT , LDRIFTS ;
-        // -- RDRMUED , RDRVMAXD , RDRMUETMP , RDRVTMP  , RDRDJUNC ;
-        // -- RDRMUES , RDRVMAXS ;
-        // Input variables : Weff , TTEMP , UC_TNOM , NOVER , NOVERS ;
-        Rdde = 0.0 ;
-        Rsde = 0.0 ;
-        drainConductance = 0.0 ;
-        sourceConductance = 0.0 ;
-        //=============================================================================================================================//
-        if ( CORS == 1 ) begin
-            begin : HSMSOTB_eval_rdrifrs
-
-                real Rdrmuele , Rdrvmaxwe , Rdrvmaxle ;
-                real MKS_RDRMUE , MKS_RDRVMAX , RRDRBB ;
-                real Rsd0 , Vrdr , Tratio ;
-                real Ldrifte, Nover, Mu0, Vmaxe, Edri, Vdri;
-                real Mu, Xov, GD, Weff_nf ;
-
-                // source resistance
-                Nover = NOVERS   / `C_cm2m_p3; //"cm^-3"
-                MKS_RDRMUE  = RDRMUES ;
-                MKS_RDRVMAX = RDRVMAXS ;
-                RRDRBB      = RDRBBS ;
-                Rsd0 = (RSH > 0.0 ) ? RSH * NRS : 0.0 ;
-                Ldrifte = LDRIFTS ;
-                Vrdr  = TYPE * V(BRsps);  // get bias
-                Xov  = sqrt( RDRDJUNC * RDRDJUNC + XLD * XLD ) ;
-                Weff_nf = Weff * NF ;
-
-                //-----------------------------------------------------------*
-                //* Change units into MKS.
-                //*-----------------//
-                MKS_RDRMUE  = MKS_RDRMUE   / `C_m2cm_p2 ;
-                MKS_RDRVMAX = MKS_RDRVMAX  / `C_m2cm ;
-
-                //-----------------------------------------------------------*
-                //* Temperature dependent constants.
-                //*-----------------//
-                Tratio = TTEMP / UC_TNOM ;
-
-                // Phonon Scattering(temperature-dependent part) //
-                T1 =  `Fn_Pow( Tratio, RDRMUETMP ) ;
-                Mu0 = MKS_RDRMUE / T1 ;
-
-                // Velocity Temperature Dependence //
-                T0 = 1.8 + 0.4 * Tratio + 0.1 * Tratio * Tratio - RDRVTMP * ( 1.0 - Tratio ) ;
-                Vmaxe = MKS_RDRVMAX / T0 ;
-
-                //Toshiba model //
-                RRDRBB = RRDRBB + RDRBBTMP * (TTEMP-UC_TNOM) ;
-
-                // LW dependence of RDRMUE and RDRVMAX
-                Rdrmuele  = 1.0e0 + (RDRMUEL  / pow( LG, RDRMUELP )) ;
-                Rdrvmaxle = 1.0e0 + (RDRVMAXL / pow( LG, RDRVMAXLP)) ;
-                Rdrvmaxwe = 1.0e0 + (RDRVMAXW / pow( WG  , RDRVMAXWP)) ;
-                Mu0   = Mu0   * Rdrmuele ;
-                Vmaxe = Vmaxe * Rdrvmaxwe * Rdrvmaxle + `Small ;
-
-
-                Edri  = Vrdr / Ldrifte ;
-                Vdri  = Mu0 * Edri ;
-                //-----------------------------------------------------------*
-                //* Mu : mobility
-                //*-----------------//
-                if ( Vrdr >= 0 ) begin
-                    T1    =   Vdri / Vmaxe ;
-                end else  begin
-                    T1    = - Vdri / Vmaxe ;
-                end
-                if ( 1.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 1.0e0 + `epsm10 ) begin
-                    T3 = 1.0e0 ;
-                end else if ( 2.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 2.0e0 + `epsm10 ) begin
-                    T3 = T1 ;
-                end else  begin
-                    T3 = `Fn_Pow( T1 , RRDRBB - 1.0e0 ) ;
-                end
-                T2 = T1 * T3 ;
-                T4 = 1.0e0 + T2 ;
-                if ( 1.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 1.0e0 + `epsm10 ) begin
-                    T5 = 1.0 / T4 ;
-                end else if ( 2.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 2.0e0 + `epsm10 ) begin
-                    T5 = 1.0 / sqrt( T4 ) ;
-                end else  begin
-                    T6 = `Fn_Pow( T4 , ( - 1.0e0 / RRDRBB - 1.0e0 ) ) ;
-                    T5 = T4 * T6 ;
-                end
-                Mu   = Mu0 * T5 ;  // velocity saturation accounted
-
-                //-----------------------------------------------------------*
-                //* Rd : drift resistance
-                //*-----------------//
-                T1 = `C_QE / ( Ldrifte );
-                GD = T1 * Xov * Mu * Nover ;
-
-`ifdef REPLACE_CLIPPING_WITH_SMOOTHING //revised for continuity (Rsd)
-                    `Fn_SL_CP(GD, GD, 0, `Small, 2)
-`else
-                    if ( GD <= 0 ) begin
-                        GD = `Small ;
-                    end
-`endif
-
-                Rsd = 1.0 / GD ;
-                // Weff dependence of the resistances //
-                Rsd = Rsd  /  Weff_nf ;
-
-                // Sheet resistances are added. //
-                Rsd = Rsd + Rsd0 ;
-
-                // Re-stamps for hsmhvnoi.c //
-                Conductance =  ( Rsd > `Res_min && COTHRML != 0 ) ? Mfactor / Rsd : 0.0 ;
-
-                // Clamping to Res_min //
-                if (Rsd < `Res_min) begin
-                    Rsd = `Res_min ;
-                end
-
-
-            end //  HSMSOTB_eval_rdrifrs
-            Rsde = Rsd / Mfactor ;
-            sourceConductance = Conductance ;
-
-
-        end // if( CORS == 1 )
-        //=============================================================================================================================//
-        if ( CORD == 1 ) begin
-            begin : HSMSOTB_eval_rdrifrd
-
-                real Rdrmuele , Rdrvmaxwe , Rdrvmaxle ;
-                real MKS_RDRMUE , MKS_RDRVMAX , RRDRBB ;
-                real Rsd0 , Vrdr , Tratio ;
-                real Ldrifte, Nover, Mu0, Vmaxe, Edri, Vdri;
-                real Mu, Xov, GD, Weff_nf ;
-
-                // drain resistance
-                Nover = NOVER    / `C_cm2m_p3; //"cm^-3"
-                MKS_RDRMUE  = RDRMUED ;
-                MKS_RDRVMAX = RDRVMAXD ;
-                RRDRBB      = RDRBBD ;
-                Rsd0 = (RSH > 0.0 ) ? RSH  * NRD : 0.0 ;
-                Ldrifte = LDRIFT  ;
-                Vrdr  = TYPE * V(BRddp);  // get bias
-                Xov  = sqrt( RDRDJUNC * RDRDJUNC + XLD * XLD ) ;
-                Weff_nf = Weff * NF ;
-
-                //-----------------------------------------------------------*
-                //* Change units into MKS.
-                //*-----------------//
-                MKS_RDRMUE  = MKS_RDRMUE   / `C_m2cm_p2 ;
-                MKS_RDRVMAX = MKS_RDRVMAX  / `C_m2cm ;
-
-                //-----------------------------------------------------------*
-                //* Temperature dependent constants.
-                //*-----------------//
-                Tratio = TTEMP / UC_TNOM ;
-
-                // Phonon Scattering(temperature-dependent part) //
-                T1 =  `Fn_Pow( Tratio, RDRMUETMP ) ;
-                Mu0 = MKS_RDRMUE / T1 ;
-
-                // Velocity Temperature Dependence //
-                T0 = 1.8 + 0.4 * Tratio + 0.1 * Tratio * Tratio - RDRVTMP * ( 1.0 - Tratio ) ;
-                Vmaxe = MKS_RDRVMAX / T0 ;
-
-                //Toshiba model //
-                RRDRBB = RRDRBB + RDRBBTMP * (TTEMP-UC_TNOM) ;
-
-                // LW dependence of RDRMUE and RDRVMAX
-                Rdrmuele  = 1.0e0 + (RDRMUEL  / pow( LG, RDRMUELP )) ;
-                Rdrvmaxle = 1.0e0 + (RDRVMAXL / pow( LG, RDRVMAXLP)) ;
-                Rdrvmaxwe = 1.0e0 + (RDRVMAXW / pow( WG  , RDRVMAXWP)) ;
-                Mu0   = Mu0   * Rdrmuele ;
-                Vmaxe = Vmaxe * Rdrvmaxwe * Rdrvmaxle + `Small ;
-
-
-                Edri  = Vrdr / Ldrifte ;
-                Vdri  = Mu0 * Edri ;
-                //-----------------------------------------------------------*
-                //* Mu : mobility
-                //*-----------------//
-                if ( Vrdr >= 0 ) begin
-                    T1    =   Vdri / Vmaxe ;
-                end else  begin
-                    T1    = - Vdri / Vmaxe ;
-                end
-                if ( 1.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 1.0e0 + `epsm10 ) begin
-                    T3 = 1.0e0 ;
-                end else if ( 2.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 2.0e0 + `epsm10 ) begin
-                    T3 = T1 ;
-                end else  begin
-                    T3 = `Fn_Pow( T1 , RRDRBB - 1.0e0 ) ;
-                end
-                T2 = T1 * T3 ;
-                T4 = 1.0e0 + T2 ;
-                if ( 1.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 1.0e0 + `epsm10 ) begin
-                    T5 = 1.0 / T4 ;
-                end else if ( 2.0e0 - `epsm10 <= RRDRBB && RRDRBB <= 2.0e0 + `epsm10 ) begin
-                    T5 = 1.0 / sqrt( T4 ) ;
-                end else  begin
-                    T6 = `Fn_Pow( T4 , ( - 1.0e0 / RRDRBB - 1.0e0 ) ) ;
-                    T5 = T4 * T6 ;
-                end
-                Mu   = Mu0 * T5 ;  // velocity saturation accounted
-
-                //-----------------------------------------------------------*
-                //* Rd : drift resistance
-                //*-----------------//
-                T1 = `C_QE / ( Ldrifte );
-                GD = T1 * Xov * Mu * Nover ;
-
-`ifdef REPLACE_CLIPPING_WITH_SMOOTHING //revised for continuity (Rsd)
-                    `Fn_SL_CP(GD, GD, 0, `Small, 2)
-`else
-                    if ( GD <= 0 ) begin
-                        GD = `Small ;
-                    end
-`endif
-
-                Rsd = 1.0 / GD ;
-                // Weff dependence of the resistances //
-                Rsd = Rsd  /  Weff_nf ;
-
-                // Sheet resistances are added. //
-                Rsd = Rsd + Rsd0 ;
-
-                // Re-stamps for hsmhvnoi.c //
-                Conductance =  ( Rsd > `Res_min && COTHRML != 0 ) ? Mfactor / Rsd : 0.0 ;
-
-                // Clamping to Res_min //
-                if (Rsd < `Res_min) begin
-                    Rsd = `Res_min ;
-                end
-
-
-            end //  HSMSOTB_eval_rdrifrd
-            Rdde = Rsd / Mfactor ;
-            drainConductance = Conductance ;
-
-
-        end // if( CORD == 1 )
-        //=============================================================================================================================//
-        //-----------------------------------------------------------*
-        //* End of New Drift Resistance Model.
-        //*-----------------//
-
 
         // *-------------------------------------------------------------
         // * Actually load the device currents
@@ -5193,16 +4791,11 @@ module hisimsotb_va(d, g, s, e) ;
             Qd_nqs  = Qi_nqs * Qdrat ;
             Qs_nqs  = Qi_nqs * (1.0 - Qdrat) ;
         end else begin
-            Iqi_nqs = 0.0 ;
-            Iqb_nqs = 0.0 ;
-            Qd_nqs  = 0.0 ;
-            Qs_nqs = 0.0 ;
-            Qg_nqs = 0.0 ;
+            Iqi_nqs = 0.0 ; Iqb_nqs = 0.0 ;
+            Qd_nqs  = 0.0 ;  Qs_nqs = 0.0 ;  Qg_nqs = 0.0 ;
             Qb_nqs  = 0.0 ;
         end
 
-        Rdd = Rdde ;
-        Rsd = Rsde ;
         if (mode == 1) begin
             Ids = idse ;
             Isub = isube ;
@@ -5254,63 +4847,43 @@ module hisimsotb_va(d, g, s, e) ;
         idse    =  Ids  ;
         isuba   =  TYPE * (Isub + Isubs) ;
 
-        ggds    =  ddx(idse,V(dp)) ;
-        ggds  = TYPE * ggds  ;
-        ggdss   =  ddx(idse,V(sp)) ;
-        ggdss = TYPE * ggdss ;
+        ggds    =  ddx(idse,V(d)) ;  ggds  = TYPE * ggds  ;
+        ggdss   =  ddx(idse,V(s)) ;  ggdss = TYPE * ggdss ;
 
         if (mode != `HiSIM_NORMAL_MODE) begin
             ggds    = ggdss ;
         end
 
-        ggm     =  ddx(idse,V(gp)) ;
-        ggm  = TYPE * ggm   ;
-        ggmbs   =  ddx(idse,V(bp)) ;
-        ggmbs = TYPE * ggmbs ;
+        ggm     =  ddx(idse,V(gp)) ;   ggm  = TYPE * ggm   ;
+        ggmbs   =  ddx(idse,V(bp)) ;  ggmbs = TYPE * ggmbs ;
         ggmt    =  ddx(idse,Temp(t)) ;
 
-        cggbd   =  ddx(qge,V(gp)) ;
-        cggbd = TYPE * cggbd ;
-        cgdbd   =  ddx(qge,V(dp)) ;
-        cgdbd = TYPE * cgdbd ;
-        cgsbd   =  ddx(qge,V(sp)) ;
-        cgsbd = TYPE * cgsbd ;
-        cgbbd   =  ddx(qge,V(bp)) ;
-        cgbbd = TYPE * cgbbd ;
+        cggbd   =  ddx(qge,V(gp)) ; cggbd = TYPE * cggbd ;
+        cgdbd   =  ddx(qge,V(d)) ;  cgdbd = TYPE * cgdbd ;
+        cgsbd   =  ddx(qge,V(s)) ;  cgsbd = TYPE * cgsbd ;
+        cgbbd   =  ddx(qge,V(bp)) ; cgbbd = TYPE * cgbbd ;
 
-        cdgbd   =  ddx(qde,V(gp)) ;
-        cdgbd = TYPE * cdgbd ;
-        cddbd   =  ddx(qde,V(dp)) ;
-        cddbd = TYPE * cddbd ;
-        cdsbd   =  ddx(qde,V(sp)) ;
-        cdsbd = TYPE * cdsbd ;
-        cdbbd   =  ddx(qde,V(bp)) ;
-        cdbbd = TYPE * cdbbd ;
+        cdgbd   =  ddx(qde,V(gp)) ; cdgbd = TYPE * cdgbd ;
+        cddbd   =  ddx(qde,V(d)) ;  cddbd = TYPE * cddbd ;
+        cdsbd   =  ddx(qde,V(s)) ;  cdsbd = TYPE * cdsbd ;
+        cdbbd   =  ddx(qde,V(bp)) ; cdbbd = TYPE * cdbbd ;
 
-        cbgbd   =  ddx(qbe,V(gp)) ;
-        cbgbd = TYPE * cbgbd ;
-        cbdbd   =  ddx(qbe,V(dp)) ;
-        cbdbd = TYPE * cbdbd ;
-        cbsbd   =  ddx(qbe,V(sp)) ;
-        cbsbd = TYPE * cbsbd ;
-        cbbbd   =  ddx(qbe,V(bp)) ;
-        cbbbd = TYPE * cbbbd ;
+        cbgbd   =  ddx(qbe,V(gp)) ; cbgbd = TYPE * cbgbd ;
+        cbdbd   =  ddx(qbe,V(d)) ;  cbdbd = TYPE * cbdbd ;
+        cbsbd   =  ddx(qbe,V(s)) ;  cbsbd = TYPE * cbsbd ;
+        cbbbd   =  ddx(qbe,V(bp)) ; cbbbd = TYPE * cbbbd ;
 
-        csgbd   =  ddx(qse,V(gp)) ;
-        csgbd = TYPE * csgbd ;
-        csdbd   =  ddx(qse,V(dp)) ;
-        csdbd = TYPE * csdbd ;
-        cssbd   =  ddx(qse,V(sp)) ;
-        cssbd = TYPE * cssbd ;
-        csbbd   =  ddx(qse,V(bp)) ;
-        csbbd = TYPE * csbbd ;
+        csgbd   =  ddx(qse,V(gp)) ; csgbd = TYPE * csgbd ;
+        csdbd   =  ddx(qse,V(d)) ;  csdbd = TYPE * csdbd ;
+        cssbd   =  ddx(qse,V(s)) ;  cssbd = TYPE * cssbd ;
+        csbbd   =  ddx(qse,V(bp)) ; csbbd = TYPE * csbbd ;
 
 
         begin : Print_INFO
             real ggbbs , ggbds , ggbgs ;
 
             ggbgs   =  ddx(isuba,V(gp)) ;
-            ggbds   =  ddx(isuba,V(dp)) ;
+            ggbds   =  ddx(isuba,V(d)) ;
             ggbbs   =  ddx(isuba,V(bp)) ;
 
             // print all outputs ------------VV //
@@ -5350,44 +4923,41 @@ module hisimsotb_va(d, g, s, e) ;
         end // Print_INFO
 
 
+        // Noise coeff. calculation
+        whi_noise = 4.0 * `C_KB* TTEMP * `Kwhite ;
 
         // Drain , Substrate ,  GIDL and GISL Currents
-        I(BRdpsp) <+  TYPE * Ids ;
-        I(BRdpsp) <+  TYPE * (Igidl + Isub ) ;
-        I(BRspdp) <+  TYPE * (Igisl + Isubs) ;
+        I(BRds)  <+  TYPE * Ids ;
+        I(BRds)  <+  TYPE * (Igidl + Isub ) ;
+        I(BRsd)  <+  TYPE * (Igisl + Isubs) ;
 
         // Gate Leakage Currents
-        I(BRgpsp) <+  TYPE * Igs ;
-        I(BRgpdp) <+  TYPE * Igd ;
+        I(BRgps)  <+  TYPE * Igs ;
+        I(BRgpd)  <+  TYPE * Igd ;
         I(BRgpbp) <+  TYPE * Igb ;
 
-        // Source & Drain Resistance Currents
-        if (CORS) I(BRsps ) <+ V(BRsps ) / Rsd; else V(BRsps ) <+ 0.0 ;
-        if (CORD) I(BRddp ) <+ V(BRddp ) / Rdd; else V(BRddp ) <+ 0.0 ;
-
         // Inner Capacitance Currents
-        I(BRgpsp) <+  TYPE * ddt(Qg + Qg_nqs) ;
-        I(BRdpsp) <+  TYPE * ddt(Qd + Qd_nqs) ;
-        I(BRbpsp) <+  TYPE * ddt(Qb + Qb_nqs) ;
+        I(BRgps) <+  TYPE * ddt(Qg + Qg_nqs) ;
+        I(BRds)  <+  TYPE * ddt(Qd + Qd_nqs) ;
+        I(BRbps) <+  TYPE * ddt(Qb + Qb_nqs) ;
 
         // Noise Currents
         // 1/F Noise
-        I(BRdpsp) <+ flicker_noise(mode * noiflick * `Kflic , FALPH  , "iflick"); //updated for Pnoise
+        I(BRds) <+ flicker_noise(noiflick * `Kflic , FALPH  , "iflick");
         // Induced Gate Noise
+        sid    = whi_noise * noithrml;
+        ci     = noicross;
+        sigrat = (sid > 0.0 && noiigate > 0.0) ? sqrt(noiigate/sid) : 0.0 ;
         I(n)     <+ 1*V(n) ;
-        I(n)     <+ white_noise(sid , "internal") ;
-        I(BRdpsp) <+ white_noise((1.0-ci*ci)*sid , "ids") ;
-        I(BRdpsp) <+ ci*V(n) ;
-        I(BRgpsp) <+ ddt(V(n)*sigrat_s) ;
-        I(BRgpdp) <+ ddt(V(n)*sigrat_d) ;
-        //
-        if (CORS) I(BRsps ) <+ white_noise(whi_noise * sourceConductance , "isource");
-        if (CORD) I(BRddp ) <+ white_noise(whi_noise * drainConductance  , "idrain");
-
+        I(n)     <+ white_noise(sid) ;
+        I(BRds)  <+ white_noise((1.0-ci*ci)*sid) ;
+        I(BRds)  <+ ci*V(n) ;
+        I(BRgps) <+ ddt(V(n)*sigrat*(1-Qdrat)) ;
+        I(BRgpd) <+ ddt(V(n)*sigrat*Qdrat) ;
         // Shot Noise
-        `define C_QE2     2.0 * `C_QE      //
-        I(BRgpdp) <+ white_noise(`C_QE2 * Igd , "iigd") ;
-        I(BRgpsp) <+ white_noise(`C_QE2 * Igs , "iigs") ;
+     `define C_QE2     2.0 * `C_QE      //
+        I(BRgpd)  <+ white_noise(`C_QE2 * Igd , "iigd") ;
+        I(BRgps)  <+ white_noise(`C_QE2 * Igs , "iigs") ;
         I(BRgpbp) <+ white_noise(`C_QE2 * Igb , "iigb") ;
 
         // Gate Resistance Currents

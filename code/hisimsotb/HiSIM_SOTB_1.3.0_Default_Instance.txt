@@ -2,8 +2,8 @@
 *** HiSIM_SOTB default instance parameter card ***
 *************************************************
 
-* Version : HiSIM_SOTB 1.2.0
-* Date    : 2018.2.21
+* Version : HiSIM_SOTB 1.3.0
+* Date    : 2021.11.16
 
 + L        = 5e-06 
 + W        = 5e-06 
@@ -20,3 +20,7 @@
 + SCA      = 0 
 + SCB      = 0 
 + SCC      = 0 
++ NRS      = 1.0
++ NRD      = 1.0
++ LDRIFT   = 1.0E-6
++ LDRIFTS  = 1.0E-6

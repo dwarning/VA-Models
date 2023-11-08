@@ -1,0 +1,7 @@
+The HiSIM_SOTB standard is supported by the members of Silicon Integration Initiative's
+Compact Model Coalition.
+
+CMC Release Date:  November 16, 2021
+Public Release Date:  May 16, 2023
+
+A link to the most recent version of this standard can be found at: http://www.si2.org/cmc

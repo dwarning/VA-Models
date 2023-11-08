@@ -1,10 +1,10 @@
 DC Analysis for HiSIM_SOTB
 
 .model MOSFET hisimsotb_va
-.INCLUDE HiSIM_SOTB_1.2.0_Default_Model.txt
+.INCLUDE HiSIM_SOTB_1.3.0_Default_Model.txt
 
 NMdev d g 0 0 MOSFET
-.INCLUDE HiSIM_SOTB_1.2.0_Default_Instance.txt
+.INCLUDE HiSIM_SOTB_1.3.0_Default_Instance.txt
 
 Vds   d 0  dc   0.0
 Vgs   g 0  dc   0.0

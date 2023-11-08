@@ -2,8 +2,8 @@
 ** HiSIM_SOTB default model card for n-ch MOSFET **
 ***************************************************
 
-* Version : HiSIM_SOTB 1.2.0
-* Date    : 2018.2.21
+* Version : HiSIM_SOTB 1.3.0
+* Date    : 2021.11.16
 
 *** Model Flags ***
 + COPPRV       =  1 
@@ -25,8 +25,7 @@
 + COVBSBIZ     =  0 
 + COQOVSM      =  1 
 + INFO         =  0 
-+ COMUUNSZ     =  1 
-+ CONEWMUB     =  1 
++ CONEWMUB     =  0 
 
 *** Model Parameters ***
 + TYPE         =  1 
@@ -84,8 +83,8 @@
 + NINVDP       =  1 
 + MUECB0       =  300 
 + MUECB1       =  30 
-+ MUECB0LP     =  1 
-+ MUECB1LP     =  1 
++ MUECB0LP     =  0 
++ MUECB1LP     =  0 
 + MUECB0L2     =  0 
 + MUECB0L2P    =  1 
 + MUECB1L2     =  0 
@@ -248,8 +247,8 @@
 + XLDLMIN      =  1e-08 
 + MUETMP1      =  0 
 + VOTMP        =  0 
-+ VBSBND       =  1 
-+ VBSMAX       =  1.2 
++ VBSBND       =  3 
++ VBSMAX       =  3.5 
 + GLEAK8       =  1 
 + GLEAK9       =  0.5 
 + GLEAK10      =  0 
@@ -294,7 +293,7 @@
 + MUECB1L2PB   =  1 
 + PTHROU       =  0 
 + VFBSHIFT     =  0 
-+ MUEQB        =  1 
++ MUEQB        =  0 
 + MUEQBL       =  0 
 + MUEQBLP      =  1 
 + MUEQBB       =  1 
@@ -303,3 +302,25 @@
 + WEC          =  0
 + NSUBSWPE     =  0
 + NSUBPWPE     =  0
++ LDRIFT       =  1.0E-6
++ LDRIFTS      =  1.0E-6
++ CORS         =  0
++ CORD         =  0
++ RSH          =  0.0
++ NOVERS       =  1E19
++ RDRMUED      =  1.0E3
++ RDRMUES      =  1.0E3
++ RDRVMAXD     =  3.0E7
++ RDRVMAXS     =  3.0E7
++ RDRMUETMP    =  0.0
++ RDRVTMP      =  0.0
++ RDRDJUNC     =  1.0E-6
++ RDRBBD       =  1
++ RDRBBS       =  1
++ RDRBBTMP     =  0
++ RDRVMAXW     =  0.0
++ RDRVMAXWP    =  1.0
++ RDRVMAXL     =  0.0
++ RDRVMAXLP    =  1.0
++ RDRMUEL      =  0.0
++ RDRMUELP     =  1.0
