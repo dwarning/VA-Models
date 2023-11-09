@@ -1,7 +1,7 @@
 OSDI BSIMCMG Test
 
 VD d 0 -0.05
-VG g 0 -1
+VG g 0 -1.0
 VS s 0 0
 VB e 0 0
 
@@ -12,6 +12,8 @@ N1 d g s e pmos L=0.2u NF=20
 
 .control
 pre_osdi ../../osdilibs/bsimcmg.osdi
+op
+show all
 dc Vg 0.0 -1.0 -0.01
 plot -i(VD)
 dc Vd 0 -1.0 -0.01 VG -0.5 -1.0 -0.1
