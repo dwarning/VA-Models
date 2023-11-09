@@ -24,7 +24,7 @@ Actual version status:
 | **Diode**     |               | hisim-soi     | 1.5.0         |
 | diode_cmc     | 2.0.0         | hisim-sotb    | 1.3.0         |
 | juncap        | 200.6.1       | **MG MOSFET** |               |
-| **MOSVAR**    |               | bsim-img      | 102.9.6       |
+| **Varactor**  |               | bsim-img      | 102.9.6       |
 | mosvar        | 1.3.0         | bsim-cmg      | 111.2.1       |
 | **MOSFET**    |               | **HV-MOS**    |               |
 | bsim4         | 4.8.0         | hisim_hv      | 2.5.1         |
