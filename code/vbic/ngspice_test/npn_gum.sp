@@ -9,6 +9,8 @@ XQ1 C B 0 S T qnva le=20.02 m=2 par1=1
 
 .control
 pre_osdi ../../osdilibs/vbic_1p3.osdi
+op
+show all
 options gmin=1e-15
 dc vb 0.2 1.2 0.01
 plot abs(i(vc)) abs(i(vb)) abs(i(vs)) ylimit 0.1e-12 100e-3 ylog

@@ -28,7 +28,7 @@ nq1 c b 0 0 VBIC_EXAMPLE sw_noise=1
 +tnom=25 tref=25 vef=10 ver=4 vo=2
 +vtf=0 wbe=1 wsp=1
 +xii=3 xin=3 xis=3 xrb=0 xrc=0 xre=0 xrs=0 xtf=20 xvo=0
-+kfn=.3e-16 afn=1 bfn=1
++kfn=.3e-15 afn=1 bfn=1
 
 .control
 pre_osdi ../../osdilibs/vbic_1p3.osdi
