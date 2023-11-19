@@ -40,7 +40,7 @@ Actual version status:
 | bsim-soi      | 4.6.1         | epfl-hemt     | 3.0.0         |
 | hisim-soi     | 1.5.0         | mvsg_cmc      | 3.2.0         |
 | hisim-sotb    | 1.3.0         | **IGBT**      |               |
-|               |               | nigbt         | 1.0.0         |
+|               |               | igbt3         | 1.0.0         |
 
 All models are checked for syntax belong Verilog-AMS Language Reference Manual Version 2.4.0. https://accellera.org/downloads/standards/v-ams
 The models are modified mostly for convergence improvements. Equations are untouched.

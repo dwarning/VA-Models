@@ -29,7 +29,7 @@ openvaf -D__NGSPICE__ -o hisim2.osdi ../hisim2/vacode/hisim2.va
 openvaf -D__NGSPICE__ -o hisimhv.osdi ../hisimhv/vacode/hisimhv.va
 openvaf -D__NGSPICE__ -o hisimsoi.osdi ../hisimsoi/vacode/hisimsoi.va
 openvaf -D__NGSPICE__ -o hisimsotb.osdi ../hisimsotb/vacode/hisimsotb.va
-openvaf -D__NGSPICE__ -o nigbt.osdi ../IGBT/vacode/nigbt.va
+openvaf -D__NGSPICE__ -o igbt3.osdi ../IGBT/vacode/igbt3.va
 openvaf -D__NGSPICE__ -o L_UTSOI_102.osdi ../L-UTSOI/vacode/L_UTSOI_102.va
 openvaf -D__NGSPICE__ -o bjt504.osdi ../mextram/vacode504p12p1/bjt504.va
 openvaf -D__NGSPICE__ -o bjt504t.osdi ../mextram/vacode504p12p1/bjt504t.va

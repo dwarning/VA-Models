@@ -63,7 +63,7 @@ cd ../..
 #buildxyceplugin ../hisimsoi/vacode/hisimsoi.va .
 #buildxyceplugin ../hisimsotb/vacode/hisimsotb.va .
 cd ./IGBT/vacode
-buildxyceplugin nigbt.va ../../admslibs
+buildxyceplugin igbt3.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..

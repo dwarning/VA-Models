@@ -1,5 +1,5 @@
 //
-// NIGBT Verilog-A model
+// IGBT Verilog-A model
 //
 // based upon Allen R. Hefner and Daniel M. Diebold's model for IGBTs
 //
@@ -119,7 +119,7 @@
     end
 
 // module implementation
-module nigbt (a, g, c);
+module igbt3 (a, g, c);
 
     inout a, g, c;
     // external nodes
@@ -486,7 +486,7 @@ module nigbt (a, g, c);
         I(b_bg) <+ Vdg*`GMIN;                //          b |/   |
         I(b_bg) <+ ddt(Qgd);                 //      |-----|    | It
         I(b_bc) <+ Imos + Imult + Vds*`GMIN; // gate||     |\   v
-        I(b_bc) <+ ddt(Qds);                 //  ---||Imos   \
+        I(b_bc) <+ ddt(Qds);                 //  ---||Imos   |
         I(b_bc) <+ ddt(Qmult);               //     ||_ |   e_|_
         I(b_ec) <+ Icss + Vec*`GMIN;         //        ||   /   \ |
         I(b_ec) <+ ddt(Qcer);                //        |v   \ – / | Icss
