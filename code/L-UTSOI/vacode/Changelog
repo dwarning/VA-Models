@@ -1,0 +1,5 @@
+Changes for ADMS/Xyce:
+Rename module to l_utsoi_va - not to come in conflict with Xyce build-in code
+
+Origin of the model version 102.7.0:
+https://si2.org/download-links/ 

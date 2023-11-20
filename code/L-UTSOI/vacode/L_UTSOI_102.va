@@ -78,7 +78,11 @@
 // Model Calculation
 // *************************************************************************************************************************
 
+`ifdef __XYCE__
+module l_utsoi_va(d,g,s,b,Tnode);
+`else
 module l_utsoi(d,g,s,b,Tnode);
+`endif
 
 `include "L_UTSOI_102_module.include"
 

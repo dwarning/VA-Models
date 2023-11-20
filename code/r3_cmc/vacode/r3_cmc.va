@@ -82,6 +82,9 @@ branch (dt   )   b_rth;   // local thermal branch
 `IPRnb( nsmm_rsh  ,   0.0     ,""                        , "number of standard deviations of local variation for rsh")
 `IPRnb( nsmm_w    ,   0.0     ,""                        , "number of standard deviations of local variation for w")
 `IPRnb( nsmm_l    ,   0.0     ,""                        , "number of standard deviations of local variation for l")
+`ifdef __XYCE__
+    `IPIcz(mult           ,1          ,""                                   ,"Number of devices in parallel")
+`endif
 
 //
 // Parameters that can be instance and/or model (the former overrides the latter)
@@ -300,7 +303,11 @@ analog begin : analog_block
         if (`SUBVERSION<subversion) begin
             `ERROR("ERROR: r3_cmc model subversion is less than required for the parameter set")
         end
+`ifdef __XYCE__
+        mMod    = mult;
+`else
         mMod    = $mfactor;
+`endif
         gmin    = $simparam("gmin", 0.0);
         lFactor  =  (1.0-0.01*shrink)*scale*1.0e6;      // linear dimension conversion factor
         aFactor  =  lFactor*lFactor;                    // area conversion factor
