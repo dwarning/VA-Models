@@ -5,7 +5,7 @@ transient test circuit for igbt model
 va Vaa 0 dc 300
 LL Vaa 1 80u
 RL 1 a 30
-Yigbt igbt1 a g 0 my_igbt
+Yigbt3 igbt1 a g 0 my_igbt
 vg gg 0 PULSE(0 20 20us 100ns 100ns 50us 100us)
 Rg gg g 100
 
