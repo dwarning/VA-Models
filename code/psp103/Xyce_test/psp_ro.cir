@@ -6,8 +6,8 @@
 .include ../Modelcards/psp103_pmos-2.mod
 
 * the voltage sources: 
-Vdd vdd gnd DC 1.2
-*V1 in gnd pulse(0 1.2 0p 200p 100p 1n 20n)
+Vdd vdd 0 DC 1.2
+*V1 in 0 pulse(0 1.2 0p 200p 100p 1n 20n)
 Vmeas vss 0 0
 
 Xnot1 in vdd vss in2 not1
@@ -49,8 +49,9 @@ c3  a     vss   0.384f
 c2  z     vss   0.576f
 .ends
 
+.ic v(in5)=1.2
 * simulation command: 
-.tran 1p 20n uic
+.tran 1p 2n uic
 
 .print tran v(in) 
 

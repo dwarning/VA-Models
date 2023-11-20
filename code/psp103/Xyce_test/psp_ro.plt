@@ -1,7 +1,7 @@
 #set terminal postscript eps color
 #set output "psp_ro.eps"
 
-set title "ringosc_17"
+set title "ringosc 5 stages"
 
 set grid
 set key left top
