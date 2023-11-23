@@ -24,9 +24,6 @@ $RCSfile: ekv.va,v $ $Revision: 2.6.15 $ $Date: 2020/05/29 11:50:10 $
 `include "disciplines.vams"
 `include "constants.vams"
 `include "generalMacrosAndDefines.va"
-/*
-`include "compact.vams"
-*/
 
 `ifdef insideADMS
     `define INITIAL_MODEL @(initial_model)
@@ -41,6 +38,9 @@ $RCSfile: ekv.va,v $ $Revision: 2.6.15 $ $Date: 2020/05/29 11:50:10 $
 `define REV -1
 // AB 040902
 `define DEFAULT_TNOM 27
+
+//`define GMIN        1.0e-12
+`define GMIN        $simparam("gmin",1e-12)  //suggested by L.L
 
 `define y_fv(tmp1,yk) \
     if (tmp1 > -0.35) begin \
@@ -110,7 +110,7 @@ module ekv26_va(d,g,s,b);
     real VDSS_sqrt, sqrt_VDSS_deltaV, sqrt_Vds_VDSS_deltaV;
     real VDSSprime_sqrt, sqrt_VDSSprime_deltaV, sqrt_Vds_VDSSprime_deltaV;
     real if_ir;
-    real sqrt_if, sqrt_ir, sqrt_irprime;
+    real sqrt_if; // sqrt_ir, sqrt_irprime;
     real dif_dv, dir_dv, dirprime_dv;
     //  Charge related variables
     real sif, sir, sif2, sir2, sif3, sir3;
@@ -247,7 +247,6 @@ module ekv26_va(d,g,s,b);
     `MPRco( cj         ,  1.0E-09  , "" ,      0.0 , inf  , "")
     `MPRco( cjsw       ,  1.0E-12  , "" ,      0.0 , inf  , "")
     `MPRco( cjswg      ,  1.0E-12  , "" ,      0.0 , inf  , "")
-    `MPRco( gmin       ,  0.0      , "" ,      0.0 , inf  , "")
     `MPRco( xjbv       ,  0.0      , "" ,      0.0 , inf  , "")
     `MPRco( bv         ,  10.0     , "" ,      0.0 , inf  , "")
     `MPRco( njts       ,  1.0      , "" ,      0.0 , inf  , "")
@@ -439,7 +438,7 @@ module ekv26_va(d,g,s,b);
         `y_fv(tmp1,yk)
 
         irprime       = yk*(1.0 + yk);
-        sqrt_irprime  = sqrt(irprime);
+//        sqrt_irprime  = sqrt(irprime);
         dirprime_dv   = yk;
         /* Channel length modulation & mobility reduction due
          * to longitudinal field */
@@ -457,7 +456,7 @@ module ekv26_va(d,g,s,b);
         `y_fv(tmp1,yk)
 
         ir      = yk*(1.0 + yk);
-        sqrt_ir = sqrt(ir);
+//        sqrt_ir = sqrt(ir);
         dir_dv  = yk;
         sif2 = 0.25+if_;
         sir2 = 0.25+ir;
@@ -746,7 +745,7 @@ module ekv26_va(d,g,s,b);
         idb_tun = -Weff*jswg_t*(limexp(v_di_b*ratioT/(Vt*njtsswg_t) * vtsswg/max(vtsswg+v_di_b,1.0e-3))-1.0);
         idb_tun = idb_tun - pd_i*jsw_t*(limexp(v_di_b*ratioT/(Vt*njtssw_t) * vtssw/max(vtssw+v_di_b,1.0e-3))-1.0);
         idb_tun = idb_tun - ad_i*js_t*(limexp(v_di_b*ratioT/(Vt*njts_t) * vts/max(vts+v_di_b,1.0e-3))-1.0);
-        I(d,b) <+ (is_d * (1.0 - limexp(arg_d))*f_breakdown_d+v_di_b*gmin + idb_tun)*TYPE*M;
+        I(d,b) <+ (is_d * (1.0 - limexp(arg_d))*f_breakdown_d+v_di_b*`GMIN + idb_tun)*TYPE*M;
     //SOURCE - BULK
         is_s = js_t*as_i+jsw_t*ps_i+jswg_t*Weff;
 `ifdef __NGSPICE__
@@ -767,7 +766,7 @@ module ekv26_va(d,g,s,b);
         isb_tun = -Weff*jswg_t*(limexp(v_si_b*ratioT/(Vt*njtsswg_t) * vtsswg/max(vtsswg+v_si_b,1.0e-3))-1.0);
         isb_tun = isb_tun - ps_i*jsw_t*(limexp(v_si_b*ratioT/(Vt*njtssw_t) * vtssw/max(vtssw+v_si_b,1.0e-3))-1.0);
         isb_tun = isb_tun - as_i*js_t*(limexp(v_si_b*ratioT/(Vt*njts_t) * vts/max(vts+v_si_b,1.0e-3))-1.0);
-        I(s,b) <+ (is_s * (1.0 - limexp(arg_s))*f_breakdown_s+v_si_b*gmin + isb_tun)*TYPE*M;
+        I(s,b) <+ (is_s * (1.0 - limexp(arg_s))*f_breakdown_s+v_si_b*`GMIN + isb_tun)*TYPE*M;
     //AC
 
     //DRAIN - BULK
