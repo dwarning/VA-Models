@@ -28,6 +28,5 @@ Vb B 0 0
 .include ../Modelcards/ekv26_0u5.par
 
 .print tran v(A) v(B) v(9) v(8)
-.endc
 
 .end
