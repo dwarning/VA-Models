@@ -807,17 +807,18 @@ real iavl;
 analog begin
 
     // Branch Voltages of the Model
+    VT = `P_K * $temperature /`P_Q; // Need start value for limiting - will be corrected later by TMPUPDATE
 `ifdef __NGSPICE__
     if (type == 1) begin
-        Vbiei = $limit(V(bi,ei), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis_t)));
-        Vbici = $limit(V(bi,ci), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)));
+        Vbiei = $limit(V(bi,ei), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis)));
+        Vbici = $limit(V(bi,ci), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis)));
     end else begin
-        Vbiei = $limit(V(ei,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis_t)));
-        Vbici = $limit(V(ci,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)));
+        Vbiei = $limit(V(ei,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis)));
+        Vbici = $limit(V(ci,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis)));
     end
 `elsif __XYCE__
-    Vbiei = $limit(V(br_biei),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibeis_t)));
-    Vbici = $limit(V(br_bici),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibcis_t)));
+    Vbiei = $limit(V(br_biei),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibeis)));
+    Vbici = $limit(V(br_bici),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibcis)));
 `else
     Vbiei = type*V(br_biei);
     Vbici = type*V(br_bici);
