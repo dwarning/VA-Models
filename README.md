@@ -160,7 +160,7 @@ The NGSPICE development team https://ngspice.sourceforge.io/ .
 
 The Xyce development team https://xyce.sandia.gov/ .
 
-Geoffrey Coram for his excellent tool VAMPyRE https://si2.org/download-links/ .
+Geoffrey Coram for his excellent tool VAMPyRE https://github.com/analogdevicesinc/vampyre .
 
 And last but not least: All the model authors for their elaborate and complex work.
 
