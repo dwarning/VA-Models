@@ -1434,7 +1434,7 @@ module bsim4va(d, g, s, b);
     `MPRcc( vddeot  ,1.5              ,"V"            ,-10.0           ,10.0     ,"")
     `MPRcc( eot  ,1.5e-9              ,""            ,0.0           ,1.0e-6  ,"")
     `MPRcc( epsrgate  ,11.7              ,""            ,0.0           ,30.0   ,"")
-    `MPRcc( ni0sub  ,1.45e16              ,"cm-3"            ,0.0           ,1.0e20     ,"")
+    `MPRcc( ni0sub  ,1.45e10              ,"cm-3"            ,0.0           ,1.0e20     ,"")
     `MPRcc( bg0sub  ,1.16              ,"eV"            ,0.0           ,10.0     ,"")
     `MPRcc( tbgasub  ,7.02e-4              ,"ev/K"            ,0.0           ,1.0    ,"")
     `MPRcc( tbgbsub  ,1108.0              ,"K"            ,0.0           ,1.0e6    ,"")
