@@ -1,3 +1,6 @@
+Correct NI0SUB default parameter for new material mode (mtrlmod=1)
+Remove initial block pseudo event for other compiler then adms
+
 General update in parameter handling inline with common Verilog-A compact model code of practice.
 
 Change contributions to flow.

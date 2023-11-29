@@ -47,7 +47,7 @@ Attribution-NonCommercial 4.0 International (CC-BY-NC 4.0)
 `ifdef insideADMS
     `define INITIAL_INSTANCE @(initial_instance)
 `else
-    `define INITIAL_INSTANCE @(initial_step)
+    `define INITIAL_INSTANCE
 `endif
 
 `define Gmin $simparam("gmin",1e-12) // Only for pseudo-body network nodes, tiny one to avoid accuracy issue
