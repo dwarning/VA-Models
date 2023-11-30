@@ -1259,12 +1259,14 @@ analog begin
         Vbiei = $limit(V(ei,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis_t)));
         Vbici = $limit(V(ci,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)));
     end
-`elsif __XYCE__
-    Vbiei = $limit(V(bi,ei),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibeis_t)));
-    Vbici = $limit(V(bi,ci),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibcis_t)));
 `else
+//`ifdef __XYCE__
+//    Vbiei = $limit(V(bi,ei),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibeis_t)),type);
+//    Vbici = $limit(V(bi,ci),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibcis_t)),type);
+//`else
     Vbiei = type*V(br_biei);
     Vbici = type*V(br_bici);
+//`endif
 `endif
     Vciei = Vbiei-Vbici;
     Vbpei = type*V(br_bpei);

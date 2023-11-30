@@ -244,7 +244,8 @@ module igbt3 (a, g, c);
         Vgs = $limit(V(g,c), "fetlim", 1.0);
         Veb = $limit(V(e,b), "pnjlim", vt, 0.6);
         Vec = $limit(V(e,c), "pnjlim", vt, 0.6);
-`elsif __XYCE__
+`else
+`ifdef __XYCE__
         Vdg = $limit(V(b,g), "pnjlim_new", vt, 0.7);
         Vgs = $limit(V(g,c), "pnjlim_new", vt, 0.7);
         Veb = $limit(V(e,b), "pnjlim_new", vt, 0.7);
@@ -254,6 +255,7 @@ module igbt3 (a, g, c);
         Vgs = V(g,c);
         Veb = V(e,b);
         Vec = V(e,c);
+`endif
 `endif
         Vds = V(b,c);
         Vae = V(a,e);

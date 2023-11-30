@@ -7,21 +7,23 @@
 
 // The excess transistor temperature due to the self-heating
 `ifdef SELFHEATING
-    `ifdef __NGSPICE__
-        Tki = $limit(Temp(dt), "limitlog", 100.0);
-        Vdt = Tki;
-    `elsif __XYCE__
-        Tki = $limit(Temp(dt), "limRTH");
-        Vdt = Tki;
-    `else
-        Tki = Temp(dt);
-        // *** Convergence related smoothing ***
-        if (Tki < 0.0) begin
-            Tki = - ln(1.0 - Tki);
-        end
-        `linLog(Vdt, Tki, 200.0)
-    //  `min_logexp(Vdt, Tki, 200.0, 10.0)
-    `endif
+`ifdef __NGSPICE__
+    Tki = $limit(Temp(dt), "limitlog", 100.0);
+    Vdt = Tki;
+`else
+`ifdef __XYCE__
+    Tki = $limit(Temp(dt), "limRTH");
+    Vdt = Tki;
+`else
+    Tki = Temp(dt);
+    // *** Convergence related smoothing ***
+    if (Tki < 0.0) begin
+        Tki = - ln(1.0 - Tki);
+    end
+    `linLog(Vdt, Tki, 200.0)
+//  `min_logexp(Vdt, Tki, 200.0, 10.0)
+`endif
+`endif
 `else
     Vdt = 0.0;
 `endif

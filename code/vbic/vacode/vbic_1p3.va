@@ -685,11 +685,13 @@ analog begin : analogBlock
         //  and not the initializeInstance block)
         //
 `ifdef __NGSPICE__
-            dt_et    = $limit(Temp(b_rth),"limitlog",100);
-`elsif __XYCE__
-            dt_et    = $limit(Temp(b_rth),"limRTH");
+        dt_et    = $limit(Temp(b_rth),"limitlog",100);
 `else
-            dt_et    =  Temp(b_rth);
+`ifdef __XYCE__
+        dt_et    = $limit(Temp(b_rth),"limRTH");
+`else
+        dt_et    =  Temp(b_rth);
+`endif
 `endif
         tdevC    = $temperature+trise+dt_et-`TABS_NIST2004;
         `CLIPB1p0(tdevC,tdevC,tminclip,tmaxclip)
@@ -799,9 +801,10 @@ analog begin : analogBlock
             Vbep     =  $limit(V(bp,bx), "pnjlim", vtv, tVCrit);
         end
         Vbe      =  $limit(V(b_be), "pnjlim", vtv, tVCrit);
-`elsif __XYCE__
+`else
+`ifdef __XYCE__
         Vbei     =  $limit(V(b_bei),"typedpnjlim_new",$vt,tVCrit,VBICtype);
-        Vbex     =  $limit(V(b_bex),"typedpnjlim_new",$vt,tVCrit,VBICtype);;
+        Vbex     =  $limit(V(b_bex),"typedpnjlim_new",$vt,tVCrit,VBICtype);
         Vbci     =  $limit(V(b_bci),"typedpnjlim_new",$vt,tVCrit,VBICtype);
         Vbcx     =  $limit(V(b_bcx),"typedpnjlim_new",$vt,tVCrit,VBICtype);
         Vbxcx    =  $limit(V(b_bxcx),"typedpnjlim_new",$vt,tVCrit,VBICtype);
@@ -815,6 +818,7 @@ analog begin : analogBlock
         Vbxcx    =  VBICtype*V(b_bxcx);
         Vbep     =  VBICtype*V(b_bep);
         Vbe      =           V(b_be);
+`endif
 `endif
         Vcei     =  VBICtype*V(b_cei);
         Vbc      =           V(b_bc);

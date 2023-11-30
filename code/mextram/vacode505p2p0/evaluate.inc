@@ -27,7 +27,8 @@
             Vsc1 = $limit(V(c1, s), "pnjlim", Vt, tVCrit);
         `endif
     end
-`elsif __XYCE__
+`else
+`ifdef __XYCE__
     Vb2c1 = $limit(V(b2, c1), "typedpnjlim_new", $vt, tVCrit, type);
     Vb2c2 = $limit(V(b2, c2), "typedpnjlim_new", $vt, tVCrit, type);
     Vb2e1 = $limit(V(b2, e1), "typedpnjlim_new", $vt, tVCrit, type);
@@ -45,6 +46,7 @@
     `ifdef SUBSTRATE
         Vsc1  = type * V(s,  c1);
     `endif
+`endif
 `endif
 Vc1c2 = type * V(c1, c2);
 Vee1  = type * V(e,  e1);
