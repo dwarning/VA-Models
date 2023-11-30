@@ -927,6 +927,9 @@ real hjei0_t, ahjei_t, hf0_t, hfe_t, hfc_t;
 real i_re;
 
 real Vbiei, Vbici, Vciei, Vbpei, Vbpci, Vbci, Vsici, Vsc;
+`ifdef __XYCE__
+    real Vcrit1, Vcrit2;
+`endif
 
 // Model flags
 integer use_aval;
@@ -1260,13 +1263,15 @@ analog begin
         Vbici = $limit(V(ci,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis_t)));
     end
 `else
-//`ifdef __XYCE__
-//    Vbiei = $limit(V(bi,ei),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibeis_t)),type);
-//    Vbici = $limit(V(bi,ci),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibcis_t)),type);
-//`else
+`ifdef __XYCE__
+    Vcrit1 = VT*ln(VT/(`M_SQRT2*ibeis_t));
+    Vbiei = $limit(V(bi,ei),"typedpnjlim_new",VT,Vcrit1,type);
+    Vcrit2 = VT*ln(VT/(`M_SQRT2*ibcis_t));
+    Vbici = $limit(V(bi,ci),"typedpnjlim_new",VT,Vcrit2,type);
+`else
     Vbiei = type*V(br_biei);
     Vbici = type*V(br_bici);
-//`endif
+`endif
 `endif
     Vciei = Vbiei-Vbici;
     Vbpei = type*V(br_bpei);
