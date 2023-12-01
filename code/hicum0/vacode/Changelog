@@ -1,9 +1,17 @@
-Add Gmin to branch sci.
+Xyce:
+- no node collapsing for thermal node
+- no port currents in operating point calculation
 
-Use alternative ngspice specific limit function pnjlim for inner base-emitter and base-collector junctions
+Use simulator specific limit function for inner base-emitter and base-collector junctions
+Shifted the branch voltage access block down behind temperature update macro TMPUPDATE
+
+Origin of the model version 2.1.0:
+https://si2.org/download-links/ 
+
+Add Gmin to branch sci.
 
 Use disciplines.vams
 Use constants.vams
 
 Origin of the model version 1.32:
-https://www.iee.et.tu-dresden.de/iee/eb/hic_new/hic_source.html#hicumL0
+https://www.iee.et.tu-dresden.de/iee/eb/hic_new/hic_source.html#hicumL0 

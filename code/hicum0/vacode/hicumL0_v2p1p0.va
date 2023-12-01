@@ -13,6 +13,9 @@
 
 // Comment this line, if calculation of operating point values should be omitted:
 `define CALC_OP
+`ifndef __XYCE__
+`define PORT_CURR
+`endif
 
 `define VPT_thresh  1.0e2
 `define Dexp_lim    80.0
@@ -436,13 +439,13 @@ branch    (nd_itf_nqs )  br_b_itf_nqs;
 `MPRcc( ahq      ,0.0         ,""        ,-0.9 ,`LRG ,"Smoothing factor for the d.c. injection width")
 
 //Base-Emitter diode currents
-`MPRcc( ibes     ,1.0e-18     ,"A"       ,0    ,1    ,"BE saturation current")
+`MPRoc( ibes     ,1.0e-18     ,"A"       ,0    ,1    ,"BE saturation current")
 `MPRoc( mbe      ,1.0         ,""        ,0    ,10   ,"BE non-ideality factor")
 `MPRcc( ires     ,0.0         ,"A"       ,0    ,1    ,"BE recombination saturation current")
 `MPRoc( mre      ,2.0         ,""        ,0    ,10   ,"BE recombination non-ideality factor")
 
 //Base-Collector diode current
-`MPRcc( ibcs     ,(flcomp<=200) ? 0.0 : 1e-16  ,"A"       ,0    ,1    ,"BC saturation current")
+`MPRoc( ibcs     ,(flcomp<=200) ? 0.0 : 1e-16  ,"A"       ,0    ,1    ,"BC saturation current")
 `MPRoc( mbc      ,1.0         ,""        ,0    ,10   ,"BC non-ideality factor")
 
 //Base-Collector avalanche current
@@ -675,11 +678,13 @@ real itf_nqs,Da_itf,Db_itf;
     `OPP( VCE    , "V"  ,  "External CE voltage"                                )
     `OPP( VSC    , "V"  ,  "External SC voltage"                                )
 
+`ifdef PORT_CURR
     `OPM( I_B    , "A"  ,  "Base terminal current"                              )
     `OPM( I_C    , "A"  ,  "Collector terminal current"                         )
     `OPM( I_S    , "A"  ,  "Substrate terminal current"                         )
-    `OPM( I_AVL  , "A"  ,  "Avalanche current"                                  )
     `OPP( BETA_DC, ""   ,  "Common emitter DC forward current gain"             )
+`endif
+    `OPM( I_AVL  , "A"  ,  "Avalanche current"                                  )
 
     `OPD( R_PIi  , "Ohm",  "Internal BE (input) resistance (pi equiv. circuit)" )
     `OPM( G_Mi   , "A/V",  "Internal transconductance (pi equiv. circuit)"      )
@@ -720,17 +725,6 @@ real itf_nqs,Da_itf,Db_itf;
 
 analog begin
 
-    // Branch Voltages of the Model
-    Vbci  = type * V(br_bci);
-    Vbici = type * V(br_bici);
-    Vbiei = type * V(br_biei);
-    Vciei = Vbiei-Vbici; //was: Vciei = type * V(br_ciei);
-    Vsci  = type * V(br_sci);
-    Vbe   = type * V(br_be);
-    Veie  =        V(br_eie_v);
-    Vcic  =        V(br_cic_v);
-    Vbbi  =        V(br_bbi_v);
-
     `INSTANCE begin : Model_initialization
 
         Tnom  = tnom + `P_CELSIUS0;
@@ -766,6 +760,32 @@ analog begin
     if (flsh!=0 && rth >= minr) begin : Thermal_update_with_self_heating
         `TMPUPDATE(V(br_sht))
     end //of Thermal_update_with_self_heating
+
+    // Branch Voltages of the Model
+`ifdef __NGSPICE__
+    if (type == 1) begin
+        Vbici = $limit(V(bi,ci), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcs)));
+        Vbiei = $limit(V(bi,ei), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibes)));
+    end else begin
+        Vbici = $limit(V(ci,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcs)));
+        Vbiei = $limit(V(ei,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibes)));
+    end
+`else
+`ifdef __XYCE__
+    Vbici = $limit(V(br_bici), "typedpnjlim_new", VT, VT*ln(VT/(`M_SQRT2*ibcs)), type);
+    Vbiei = $limit(V(br_biei), "typedpnjlim_new", VT, VT*ln(VT/(`M_SQRT2*ibes)), type);
+`else
+    Vbici = type*V(br_bici);
+    Vbiei = type*V(br_biei);
+`endif
+`endif
+    Vbci  = type * V(br_bci);
+    Vciei = Vbiei-Vbici; //was: Vciei = type * V(br_ciei);
+    Vsci  = type*V(br_sci);
+    Vbe   = type * V(br_be);
+    Veie  =        V(br_eie_v);
+    Vcic  =        V(br_cic_v);
+    Vbbi  =        V(br_bbi_v);
 
     begin : Model_evaluation
 
@@ -1137,7 +1157,7 @@ analog begin
         I(br_biei) <+ ijbe;
         I(br_biei) <+ ddt(Qbiei);
         I(br_ciei) <+ it;
-
+`ifndef __XYCE__
         // For simulators having no problem with V(br_sht) <+ 0.0 with external thermal
         // node, following code may be used.
         // Note that external thermal node should remain accessible even without self-heating.
@@ -1152,7 +1172,16 @@ analog begin
             I(br_sht) <+ V(br_sht)/rth_t-pterm;
             I(br_sht) <+ I_cth;
         end
-
+`else
+        // Following code is a solution if branch contribution is not supported
+        // ******************************************
+        if (flsh == 0 || rth < minr) begin
+            I(br_sht)   <+ V(br_sht)/minr;
+        end else begin
+            I(br_sht)   <+ V(br_sht)/rth-pterm;
+            I(br_sht)   <+ ddt(cth*V(br_sht));
+        end
+`endif
         // vertical NQS effects
         // qf_nqs:
         I(br_a_qf_nqs) <+ Da_qf;
@@ -1193,9 +1222,9 @@ analog begin
     `ifdef CALC_OP
         `ifdef OP_STATIC
             if (analysis("static")) begin: OPERATING_POINT
-            `else
+        `else
             begin: OPERATING_POINT
-            `endif
+        `endif
             real gPIi, gMUi, g_bei, g_avf, g_mT, g_bci, g_avr, g_oT;
             real C_dEf, C_dCr, C_mu, R_tot;
 
@@ -1205,16 +1234,20 @@ analog begin
             VCE = V(c,e);
             VSC = V(s,c);
 
+`ifdef PORT_CURR
             I_B  = I(<b>);
             I_C  = I(<c>);
             I_S  = I(<s>);
+`endif
             I_AVL= iavl;
 
+`ifdef PORT_CURR
             if (I_B != 0.0) begin
                 BETA_DC = I_C/I_B;
             end else begin
                 BETA_DC = 1e9;
             end
+`endif
 
             //intrinsic forward base conductance
             g_bei = -ddx(ijbe,V(ei));
