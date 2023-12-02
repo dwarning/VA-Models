@@ -71,13 +71,13 @@ Furthermore, some Verilog-A language features are currently not supported by ope
 
 ### NGSPICE
 
-**NGSPICE [website](https://ngspice.sourceforge.io/)** is a open source simulator for electronic circuit simulation. Source code, examples and precompiled binaries of all release are available on the **[website](https://sourceforge.net/projects/ngspice/)**.
+**[NGSPICE](https://ngspice.sourceforge.io/)** is a open source simulator for electronic circuit simulation. Source code, examples and precompiled binaries of all release are available on the **[website](https://sourceforge.net/projects/ngspice/)**.
 
 NGSPICE is stable and in an regulary update process.
 
 ### Xyce
 
-**Xyce [website](https://xyce.sandia.gov/)** is a open source simulator for electronic circuit simulation. Source code, documentation and precompiled binaries of all release are available on the **[website](https://xyce.sandia.gov/sign-in/)**.
+**[Xyce](https://xyce.sandia.gov/)** is a open source simulator for electronic circuit simulation. Source code, documentation and precompiled binaries of all release are available on the **[website](https://xyce.sandia.gov/sign-in/)**.
 
 Xyce is stable and in an regulary update process. Xyce/ADMS is supporting small signal noise analysis.
 
@@ -147,7 +147,7 @@ This ekv example will use the compiled shared library and simulate the simple MO
 Xyce -plugin ekv26.so mosamp2.cir
 ```
 
-The results are written into ASCII file and can plotted with gnuplot:
+The results are written into ASCII file and can plotted with gnuplot in persist mode:
 ``` shell
 gnuplot -p mosamp2.plt
 ```
