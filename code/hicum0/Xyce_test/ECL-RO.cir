@@ -1,21 +1,21 @@
-.title KiCad schematic
+.title ECL OR/NOR Gate MC10102
 .include "../Modelcards/model-card-hicumL0V1p11_mod_X.lib"
-V2 IN1 GND dc -1.75 pulse(-1.75 -0.9 0 1n 1n 5u 10u)
 V1 VEE GND -5.2
-Ra1 A1 VEE 510
-XQ5 GND Net-_Q1-Pad1_ A2 VEE DT hicumL0V1p1_c_sbt
-XQ4 GND Net-_Q3-Pad1_ A1 VEE DT hicumL0V1p1_c_sbt
-R4 Net-_Q3-Pad2_ VEE 1.92k
-XQ2 Net-_Q1-Pad1_ IN2 Net-_Q1-Pad3_ VEE DT hicumL0V1p1_c_sbt
-XQ1 Net-_Q1-Pad1_ IN1 Net-_Q1-Pad3_ VEE DT hicumL0V1p1_c_sbt
-R5 Net-_Q1-Pad3_ VEE 780
-XQ3 Net-_Q3-Pad1_ Net-_Q3-Pad2_ Net-_Q1-Pad3_ VEE DT hicumL0V1p1_c_sbt
-R2 GND Net-_Q3-Pad1_ 220
-R1 GND Net-_Q1-Pad1_ 220
-R3 GND Net-_Q3-Pad2_ 575
-Ra2 A2 VEE 510
-V3 In2 GND dc -1.75 pulse(-1.75 -0.9 0 1n 1n 2.5u 5u)
+V2 IN1 GND dc -1.75 pulse(-1.75 -0.9 0 1n 1n 5u 10u)
+V3 IN2 GND dc -1.75 pulse(-1.75 -0.9 0 1n 1n 2.5u 5u)
+R1 GND Q1-Pad1 220
+R2 GND Q3-Pad1 220
+XQ1 Q1-Pad1 IN1 Q1-Pad3 VEE DT hicumL0V1p1_c_sbt
+XQ2 Q1-Pad1 IN2 Q1-Pad3 VEE DT hicumL0V1p1_c_sbt
+R5 Q1-Pad3 VEE 780
+R3 GND Q3-Pad2 575
+R4 Q3-Pad2 VEE 1.92k
+XQ3 Q3-Pad1 Q3-Pad2 Q1-Pad3 VEE DT hicumL0V1p1_c_sbt
+XQ4 GND Q3-Pad1 A1_OR VEE DT hicumL0V1p1_c_sbt
+Ra1 A1_OR VEE 510
+XQ5 GND Q1-Pad1 A2_NOR VEE DT hicumL0V1p1_c_sbt
+Ra2 A2_NOR VEE 510
 Rt1 DT GND 1G
 .tran 0.1n 100u
-.print tran format=gnuplot v(a1) v(a2) v(in1) v(in2)
+.print tran format=gnuplot v(a1_or) v(a2_nor) v(in1) v(in2)
 .end
