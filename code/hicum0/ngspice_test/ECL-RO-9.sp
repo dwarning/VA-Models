@@ -2,19 +2,19 @@
 .include "../Modelcards/model-card-hicumL0V1p11_mod.lib"
 
 .subckt nor in1 in2 a1 a2 vee GND
-XQ1 Net-_R1-Pad2_ IN1 Net-_Q1-Pad3_ VEE DT1 hicumL0V1p1_c_sbt
-XQ2 Net-_R1-Pad2_ IN2 Net-_Q1-Pad3_ VEE DT1 hicumL0V1p1_c_sbt
-XQ3 Net-_R2-Pad2_ Net-_R3-Pad2_ Net-_Q1-Pad3_ VEE DT1 hicumL0V1p1_c_sbt
-XQ4 GND Net-_R2-Pad2_ A1 VEE DT1 hicumL0V1p1_c_sbt
-XQ5 GND Net-_R1-Pad2_ A2 VEE DT1 hicumL0V1p1_c_sbt
+XQ1 R1-Pad2 IN1 Q1-Pad3 VEE DT1 hicumL0V1p1_c_sbt
+XQ2 R1-Pad2 IN2 Q1-Pad3 VEE DT1 hicumL0V1p1_c_sbt
+XQ3 R2-Pad2 R3-Pad2 Q1-Pad3 VEE DT1 hicumL0V1p1_c_sbt
+XQ4 GND R2-Pad2 A1 VEE DT1 hicumL0V1p1_c_sbt
+XQ5 GND R1-Pad2 A2 VEE DT1 hicumL0V1p1_c_sbt
 
 Rt1 DT1 0 1G
 
-R1 GND Net-_R1-Pad2_ 220
-R2 GND Net-_R2-Pad2_ 220
-R3 GND Net-_R3-Pad2_ 575
-R4 Net-_R3-Pad2_ VEE 1.92k
-R5 Net-_Q1-Pad3_ VEE 780
+R1 GND R1-Pad2 220
+R2 GND R2-Pad2 220
+R3 GND R3-Pad2 575
+R4 R3-Pad2 VEE 1.92k
+R5 Q1-Pad3 VEE 780
 
 Ra1 A1 VEE 510
 Ra2 A2 VEE 510
