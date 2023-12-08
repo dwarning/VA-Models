@@ -3860,7 +3860,7 @@ analog begin
             T6     = Weff * NF * Leffnoi * 1.0e10 * Nstar * Nstar;
             Swi_ch = T0e / T6 * ids * ids;
             T7 = Swi_ch + Ssi_ch;
-            if (T7 > 0.0)  begin
+            if (T7 > 0.0) begin
                 FNPowerAt1Hz_ch = (Ssi_ch * Swi_ch) / T7;
             end else begin
                 FNPowerAt1Hz_ch = 0.0;

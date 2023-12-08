@@ -3427,7 +3427,7 @@ module bsim4va(d, g, s, b);
             //         BSIM4w, BSIM4sheetResistance, DMCGeff, DMCIeff, DMDGeff, 1, Rtot)
             //end
 
-            if (BSIM4SbulkJctPotential < 0.1)  begin
+            if (BSIM4SbulkJctPotential < 0.1) begin
                 BSIM4SbulkJctPotential = 0.1;
                 $strobe("Given pbs is less than 0.1. Pbs is set to 0.1.\n");
             end
