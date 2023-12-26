@@ -1,3 +1,6 @@
+BSIM6.1.1.va
+Use real declaration for proximity parameter SCA, SCB, SCC and SC instead integer
+
 Changes for ADMS/Xyce:
 Rename module to bsim6_va - not to come in conflict with Xyce build-in code
 Use @(initial_instance) to separate bias-dependent variables
