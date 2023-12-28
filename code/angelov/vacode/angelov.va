@@ -23,6 +23,8 @@
 // - Self-heating effect
 // - Generation-Recombination (GRN) flicker noise
 // - scaling effects
+//
+// Version: 1.0
 
 `include "disciplines.vams"
 `include "constants.vams"
