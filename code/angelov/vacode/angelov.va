@@ -1,0 +1,240 @@
+// This is the Angelov (Chalmers) HEMT and MESFET model original developed by Prof. Itcho Angelov.
+//
+// The Verilog-A code was developed with regards of following references:
+//
+// (1) I. Angelov, H. Zirath, N. Rorsmann, "A New Empirical Nonlinear Model for HEMT and MESFET Devices,"
+// IEEE MTT Vol. 40, No. 12, December 1992.
+// (2) I. Angelov, L. Bengtsson, M. Garcia, "Extensions of the Chalmers Nonlinear HEMT and MESFET Model,"
+// IEEE MTT Vol. 44, No. 10, October 1996.
+// (3) I. Angelov, H.Zierath, R. Kozhuharov, "A simple bias dependant LF FET noise model for CAD"
+// IEEE MTT-S International Microwave Symposium digest. IEEE MTT-S International Microwave Symposium February 2001
+// (4) M. E. Brinson and V. Kuznetsov, "Extended behavioural device modelling and circuit simulation with Qucs-S"
+// INTERNATIONAL JOURNAL OF ELECTRONICS Published online on 29 July 2017
+// (5) Y. Wang "An Angelov Large Signal Model and its Parametr Extraction Strategy for GaAs HEMT",
+// http://www.mos-ak.org/beijing_2018/presentations/Yan_Wang_MOS-AK_Beijing_2018.pdf
+//
+// The model and its code are made available 'as is' is, without any
+// warranty regarding its functionality or fitness of performance.
+//
+// Following effects are not considered in this code:
+// - selectable model variants for drain-source, gate-source and gate-drain currents
+// - selectable model variants for gate-source and gate-drain capacitances
+// - selectable model variants for noise calculation
+// - Self-heating effect
+// - Generation-Recombination (GRN) flicker noise
+// - scaling effects
+
+`include "disciplines.vams"
+`include "constants.vams"
+
+module angelov(drain,gate,source);
+
+    inout drain, gate, source;
+    electrical drain, gate, source;
+    electrical di, gi, si, gi1, di1, si1, gi2, gi3;
+
+    (* desc="device temperature", units="degC" *) parameter real temp=25;
+    (* desc="saturation parametr", units="" *) parameter real alphas=1.0 from [0:inf);
+    (* desc="saturation parametr", units="" *) parameter real alphar=0.1 from [0:inf);
+    (* desc="channel length modulation", units="" *) parameter real lambda=0.01 from [0:inf);
+    (* desc="gate voltage max. transconductance", units="V" *) parameter real vpks=-0.2 from (-inf:inf);
+    (* desc="current max. transconductance", units="A" *) parameter real ipk0=0.05 from [0:inf);
+    (* desc="polynomial coefficient Ids", units="" *) parameter real p1=0.8 from [0:inf);
+    (* desc="polynomial coefficient Ids", units="" *) parameter real p2=0.0 from [0:inf);
+    (* desc="polynomial coefficient Ids", units="" *) parameter real p3=0.0 from [0:inf);
+    (* desc="unsaturated coefficient for P1", units="" *) parameter real b1=0.1 from [0:inf);
+    (* desc="unsaturated coefficient for P2", units="" *) parameter real b2=4.0 from [0:inf);
+
+    (* desc="delta gate voltage at peak Gm", units="V" *) parameter real dvpks=0.2;
+    (* desc="soft breakdown model parametr", units="" *) parameter real lsb0=0.0;
+    (* desc="threshold voltage for breakdown", units="V" *) parameter real vtr=50;
+    (* desc="surface breakdown model parametr", units="" *) parameter real vsb2=0.0;
+
+    (* desc="gate fwd saturation current", units="A" *) parameter real ij=5e-4 from [0:inf);
+    (* desc="gate current parametr", units="" *) parameter real pg=15 from [0:inf);
+    (* desc="gate current parametr", units="V" *) parameter real vjg=0.7 from [0:inf);
+    (* desc="gate brkdwn current parametr", units="" *) parameter real kbdg=1.0 from [0:inf);
+    (* desc="gate brkdwn voltage gs", units="V" *) parameter real vbdgs=100 from [0:inf);
+    (* desc="gate brkdwn voltage gd", units="V" *) parameter real vbdgd=100 from [0:inf);
+    (* desc="gate brkdwn exponent", units="" *) parameter real pbdg=0.5 from [0:inf);
+
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p111=0.008 from [0:inf);
+
+    (* desc="gate-source pinch-off capacitance", units="F" *) parameter real cgspi=15e-15 from [0:inf);
+    (* desc="gate-source capacitance", units="F" *) parameter real cgs0=3500e-15 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p10=0.48 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p11=0.2 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p20=0.03 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p21=0.2 from [0:inf);
+
+    (* desc="gate-drain pinch-off capacitance", units="F" *) parameter real cgdpi=200e-15 from [0:inf);
+    (* desc="gate-drain capacitance", units="F" *) parameter real cgd0=378e-15 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p30=0.0 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p31=0.2 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p40=0.48 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p41=0.2 from [0:inf);
+
+    (* desc="drain lead inductance", units="H" *) parameter real ld=0.1e-9;
+    (* desc="gate lead inductance", units="H" *) parameter real lg=0.1e-9;
+    (* desc="source lead inductance", units="H" *) parameter real ls=0.1e-9;
+    (* desc="drain resistance", units="Ohm" *) parameter real rd=50e-3 from [1e-3:inf);
+    (* desc="gate resistance", units="Ohm" *) parameter real rg=50e-3 from [1e-3:inf);
+    (* desc="source resistance", units="Ohm" *) parameter real rs=50e-3 from [1e-3:inf);
+    (* desc="inner gate resistance", units="Ohm" *) parameter real rgd=10e-3 from [1e-3:inf);
+    (* desc="inner gate resistance", units="Ohm" *) parameter real ri=1.0 from [1e-3:inf);
+    (* desc="drain-source capacitance", units="F" *) parameter real cds=800e-15;
+    (* desc="minimal resistance", units="Ohm" *) parameter real minr=1e-3;
+
+    (* desc="nominal temperature", units="degC" *) parameter real tnom=25;
+    (* desc="linear coefficient ipk0", units="1/degC" *) parameter real tcipk0=0.0;
+    (* desc="linear coefficient p1", units="1/degC" *) parameter real tcp1=0.0;
+    (* desc="linear coefficient lsb0", units="1/degC" *) parameter real tclsb0=0.0;
+    (* desc="linear coefficient cgs0", units="1/degC" *) parameter real tcgs0=0.0;
+    (* desc="linear coefficient cgd0", units="1/degC" *) parameter real tcgd0=0.0;
+
+    (* desc="flicker noise coefficient", units="" *) parameter real kf=0.0;
+    (* desc="flicker noise exponent", units="" *) parameter real af=1.0;
+
+    (* desc="flicker noise frequency exponent", units="" *) parameter real ffe=1.0;
+    (* desc="drain equivalent temperature coefficient", units="degC" *) parameter real td=25.0;
+    (* desc="drain equivalent temperature coefficient", units="" *) parameter real td1=0.1;
+    (* desc="noise coefficient", units="" *) parameter real tmn=1.0;
+    (* desc="flicker noise coefficient", units="" *) parameter real klf=0.0;
+    (* desc="noise frequency exponent", units="" *) parameter real np=1.0;
+    (* desc="eff. gate width", units="mm" *) parameter real lw=0.1;
+
+    real Vgs, Vds, Phi, P1m, Alpha;
+    real Vgsi, Vgdi;
+    real Qgs, phi1, phi2;
+    real Qgd, phi3, phi4;
+    real Vpkm;
+    real fourkt, Ipk0T, P1T, Cgs0T, Cgd0T, Lsb0T;
+    real Idtn, Tds, Sid, Sidfl;
+
+    // OP variables
+    (* desc="gm" *) real gm;
+    (* desc="gds" *) real gds;
+    (* desc="Ids" *) real Ids;
+    (* desc="Igs" *) real Igs;
+    (* desc="Igd" *) real Igd;
+    (* desc="Cgs" *) real Cgs;
+    (* desc="Cgd" *) real Cgd;
+
+    // Model branches
+    branch (gi, di) gd;
+    branch (gi, si) gs;
+    branch (di, si) ds;
+    branch (gi2, di) gdi;
+    branch (gi3, si) gsi;
+
+    analog begin
+
+        Vgs = V(gs);
+        Vds = V(ds);
+        Vgsi = V(gsi);
+        Vgdi = V(gdi);
+
+        // temperature equations
+
+        fourkt = 4.0 * `P_K * temp;
+        Ipk0T = ipk0 * (1 + tcipk0 * (temp - tnom));
+        P1T = p1 * (1 + tcp1 * (temp - tnom));
+        Lsb0T = lsb0 * (1 + tclsb0 * (temp - tnom));
+        Cgs0T = cgs0 * (1 + tcgs0 * (temp - tnom));
+        Cgd0T = cgd0 * (1 + tcgd0 * (temp - tnom));
+
+        // current equations
+
+        P1m = P1T*(1+b1/pow(cosh(b2*Vds),2));
+        Vpkm = vpks - dvpks + dvpks*tanh(alphas*Vds) - vsb2*(-Vgdi-vtr);
+        Phi = P1m*(Vgs-Vpkm)+p2*pow((Vgs-Vpkm),2)+p3*pow((Vgs-Vpkm),3);
+        Alpha = alphar + alphas*(1+tanh(Phi));
+        Ids = Ipk0T*(1+tanh(Phi))*tanh(Alpha*Vds)*(1+lambda*Vds+Lsb0T*exp(-Vgdi-vtr));
+
+        I(ds) <+ Ids;
+
+
+        Igs = ij*(exp(pg*tanh(Vgsi-vjg))-exp(-pg*vjg)-1e-06*kbdg*exp(pbdg*tanh(-Vgsi-vbdgs)));
+
+        I(gs) <+ Igs;
+
+        Igd = ij*(exp(pg*tanh(Vgdi-vjg))-exp(-pg*vjg)-1e-06*kbdg*exp(pbdg*tanh(-Vgdi-vbdgd)));
+
+        I(gd) <+ Igd;
+
+
+        // charge equations
+
+        phi1 = p10 + p11*Vgsi + p111*Vds;
+        phi2 = p20 + p21*Vds;
+        Cgs = cgspi+Cgs0T*(1+tanh(phi1))*(1+tanh(phi2));
+        Qgs = Vgsi*Cgs;
+
+        I(gs) <+ ddt(Qgs);
+
+        phi3 = p30 - p31*Vds;
+        phi4 = p40 + p41*Vgdi - p111*Vds;
+        Cgd = cgdpi+Cgd0T*((1-p111+tanh(phi3))*(1+tanh(phi4))+2*p111);
+        Qgd = Vgdi*Cgd;
+
+        I(gd) <+ ddt(Qgd);
+
+        // parasitics
+
+        V(gate,gi1) <+ ddt(lg*I(gate,gi1));
+        if (rg < minr) begin
+            V(gi1,gi) <+ 0;
+        end else begin
+            I(gi1,gi) <+ V(gi1,gi) / rg;
+            I(gi1,gi) <+ white_noise(fourkt / rg, "rg thermal noise");
+        end
+        if (rgd < minr) begin
+            V(gi,gi2) <+ 0;
+        end else begin
+            I(gi,gi2) <+ V(gi,gi2) / rgd;
+            I(gi,gi2) <+ white_noise(fourkt / rgd, "rgd thermal noise");
+        end
+        if (ri < minr) begin
+            V(gi,gi3) <+ 0;
+        end else begin
+            I(gi,gi3) <+ V(gi,gi3) / ri;
+            I(gi,gi3) <+ white_noise(fourkt / ri, "ri thermal noise");
+        end
+
+        V(drain,di1) <+ ddt(ld*I(drain,di1));
+        if (rd < minr) begin
+            V(di1,di) <+ 0;
+        end else begin
+            I(di1,di) <+ V(di1,di) / rd;
+            I(di1,di) <+ white_noise(fourkt / rd, "rd thermal noise");
+        end
+
+        V(source,si1) <+ ddt(ls*I(source,si1));
+        if (rs < minr) begin
+            V(si1,si) <+ 0;
+        end else begin
+            I(si1,si) <+ V(si1,si) / rs;
+            I(si1,si) <+ white_noise(fourkt / rs, "rs thermal noise");
+        end
+
+        I(ds) <+ cds*ddt(Vds);
+
+        gm = ddx(Ids, V(gi));
+        gds = ddx(Ids, V(di));
+
+        I(gd) <+ white_noise(2*`P_Q*Igd , "igd shot");
+        I(gd) <+ flicker_noise(kf*pow(abs(Igd),af), ffe, "igd flicker noise");
+        I(gs) <+ white_noise(2*`P_Q*Igs , "igs shot");
+        I(gs) <+ flicker_noise(kf*pow(abs(Igs),af), ffe, "igs flicker noise");
+
+        Idtn = abs(Ids) + abs(Igd);
+        Tds = td*(1+tmn*(1+tanh(Phi))*abs(tanh(Alpha*Vds))*(1+lambda*Vds));
+        Sid = fourkt * lw*1e-2 * sqrt(Tds/(temp+1e-12)*Idtn+td1*pow(Idtn,2));
+        I(ds) <+ white_noise(Sid, "ids shot noise");
+
+        Sidfl = klf * Sid;
+        I(ds) <+ flicker_noise(Sidfl, np, "ids flicker noise");
+
+    end
+
+endmodule

@@ -1,0 +1,17 @@
+Sample netlist angelov hemt: Id plot hemt
+
+.model nfet angelov
+
+vd drain 0 dc 3.0
+vg gate 0 dc 1
+vs source 0 dc 0
+
+Yangelov m1 drain gate source nfet
+
+.dc vg -2 1 0.01
+.print dc v(gate) i(vd)
+*.dc vd 0 1.2 0.01 vg 0.5 1.2 0.1
+*.print dc i(vd)
+*.print dc v(t)
+
+.end

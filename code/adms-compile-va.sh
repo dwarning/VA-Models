@@ -6,6 +6,11 @@
 
 mkdir -p admslibs
 
+cd ./angelov/vacode
+buildxyceplugin angelov.va ../../admslibs
+rm *.la *.log
+rm -rfd .libs/
+cd ../..
 #buildxyceplugin ../ASMHEMT/vacode/asmhemt.va .
 cd ./bsim4/vacode
 buildxyceplugin bsim4.va ../../admslibs
