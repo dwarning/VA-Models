@@ -20,8 +20,8 @@
 // - selectable model variants for drain-source, gate-source and gate-drain currents
 // - selectable model variants for gate-source and gate-drain capacitances
 // - selectable model variants for noise calculation
-// - Self-heating effect
 // - Generation-Recombination (GRN) flicker noise
+// - Self-heating effect
 // - scaling effects
 //
 // Version: 1.0
@@ -35,22 +35,23 @@ module angelov(drain,gate,source);
     electrical drain, gate, source;
     electrical di, gi, si, gi1, di1, si1, gi2, gi3;
 
-    (* desc="device temperature", units="degC" *) parameter real temp=25;
-    (* desc="saturation parametr", units="" *) parameter real alphas=1.0 from [0:inf);
-    (* desc="saturation parametr", units="" *) parameter real alphar=0.1 from [0:inf);
+    (* desc="device temperature", type="instance", units="degC" *) parameter real temp=25.0;
+    (* desc="temperature rise over ambient", type="instance", units="degC" *) parameter real trise=0.0;
+    (* desc="saturation parametr", units="1/V" *) parameter real alphas=1.0 from [0:inf);
+    (* desc="saturation parametr", units="1/V" *) parameter real alphar=0.1 from [0:inf);
     (* desc="channel length modulation", units="" *) parameter real lambda=0.01 from [0:inf);
     (* desc="gate voltage max. transconductance", units="V" *) parameter real vpks=-0.2 from (-inf:inf);
     (* desc="current max. transconductance", units="A" *) parameter real ipk0=0.05 from [0:inf);
-    (* desc="polynomial coefficient Ids", units="" *) parameter real p1=0.8 from [0:inf);
-    (* desc="polynomial coefficient Ids", units="" *) parameter real p2=0.0 from [0:inf);
-    (* desc="polynomial coefficient Ids", units="" *) parameter real p3=0.0 from [0:inf);
+    (* desc="polynomial coefficient Ids", units="1/V" *) parameter real p1=0.8 from [0:inf);
+    (* desc="polynomial coefficient Ids", units="1/V**2" *) parameter real p2=0.0 from [0:inf);
+    (* desc="polynomial coefficient Ids", units="1/V**3" *) parameter real p3=0.0 from [0:inf);
     (* desc="unsaturated coefficient for P1", units="" *) parameter real b1=0.1 from [0:inf);
-    (* desc="unsaturated coefficient for P2", units="" *) parameter real b2=4.0 from [0:inf);
+    (* desc="unsaturated coefficient for P2", units="1/V" *) parameter real b2=4.0 from [0:inf);
 
     (* desc="delta gate voltage at peak Gm", units="V" *) parameter real dvpks=0.2;
     (* desc="soft breakdown model parametr", units="" *) parameter real lsb0=0.0;
     (* desc="threshold voltage for breakdown", units="V" *) parameter real vtr=50;
-    (* desc="surface breakdown model parametr", units="" *) parameter real vsb2=0.0;
+    (* desc="surface breakdown model parametr", units="V" *) parameter real vsb2=0.0;
 
     (* desc="gate fwd saturation current", units="A" *) parameter real ij=5e-4 from [0:inf);
     (* desc="gate current parametr", units="" *) parameter real pg=15 from [0:inf);
@@ -101,7 +102,7 @@ module angelov(drain,gate,source);
     (* desc="drain equivalent temperature coefficient", units="degC" *) parameter real td=25.0;
     (* desc="drain equivalent temperature coefficient", units="" *) parameter real td1=0.1;
     (* desc="noise coefficient", units="" *) parameter real tmn=1.0;
-    (* desc="flicker noise coefficient", units="" *) parameter real klf=0.0;
+    (* desc="flicker noise coefficient", units="" *) parameter real klf=1e-14;
     (* desc="noise frequency exponent", units="" *) parameter real np=1.0;
     (* desc="eff. gate width", units="mm" *) parameter real lw=0.1;
 
@@ -109,7 +110,7 @@ module angelov(drain,gate,source);
     real Vgsi, Vgdi;
     real Qgs, phi1, phi2;
     real Qgd, phi3, phi4;
-    real Vpkm;
+    real Vpkm, Tdev;
     real fourkt, Ipk0T, P1T, Cgs0T, Cgd0T, Lsb0T;
     real Idtn, Tds, Sid, Sidfl;
 
@@ -137,13 +138,17 @@ module angelov(drain,gate,source);
         Vgdi = V(gdi);
 
         // temperature equations
+        if ($param_given(temp) == 0)
+            Tdev = $temperature + trise;
+        else
+            Tdev = temp + `P_CELSIUS0;
 
-        fourkt = 4.0 * `P_K * temp;
-        Ipk0T = ipk0 * (1 + tcipk0 * (temp - tnom));
-        P1T = p1 * (1 + tcp1 * (temp - tnom));
-        Lsb0T = lsb0 * (1 + tclsb0 * (temp - tnom));
-        Cgs0T = cgs0 * (1 + tcgs0 * (temp - tnom));
-        Cgd0T = cgd0 * (1 + tcgd0 * (temp - tnom));
+        fourkt = 4.0 * `P_K * Tdev;
+        Ipk0T = ipk0 * (1 + tcipk0 * (Tdev - tnom));
+        P1T = p1 * (1 + tcp1 * (Tdev - tnom));
+        Lsb0T = lsb0 * (1 + tclsb0 * (Tdev - tnom));
+        Cgs0T = cgs0 * (1 + tcgs0 * (Tdev - tnom));
+        Cgd0T = cgd0 * (1 + tcgd0 * (Tdev - tnom));
 
         // current equations
 
@@ -231,7 +236,7 @@ module angelov(drain,gate,source);
 
         Idtn = abs(Ids) + abs(Igd);
         Tds = td*(1+tmn*(1+tanh(Phi))*abs(tanh(Alpha*Vds))*(1+lambda*Vds));
-        Sid = fourkt * lw*1e-2 * sqrt(Tds/(temp+1e-12)*Idtn+td1*pow(Idtn,2));
+        Sid = fourkt * lw*1e-2 * sqrt(Tds/(Tdev+1e-12)*Idtn+td1*pow(Idtn,2));
         I(ds) <+ white_noise(Sid, "ids shot noise");
 
         Sidfl = klf * Sid;
