@@ -110,7 +110,7 @@ module angelov(drain,gate,source);
     real Vgsi, Vgdi;
     real Qgs, phi1, phi2;
     real Qgd, phi3, phi4;
-    real Vpkm, Tdev;
+    real Vpkm, Tdev, TnomK;
     real fourkt, Ipk0T, P1T, Cgs0T, Cgd0T, Lsb0T;
     real Idtn, Tds, Sid, Sidfl;
 
@@ -138,17 +138,18 @@ module angelov(drain,gate,source);
         Vgdi = V(gdi);
 
         // temperature equations
+        TnomK = tnom + `P_CELSIUS0;
         if ($param_given(temp) == 0)
             Tdev = $temperature + trise;
         else
             Tdev = temp + `P_CELSIUS0;
 
         fourkt = 4.0 * `P_K * Tdev;
-        Ipk0T = ipk0 * (1 + tcipk0 * (Tdev - tnom));
-        P1T = p1 * (1 + tcp1 * (Tdev - tnom));
-        Lsb0T = lsb0 * (1 + tclsb0 * (Tdev - tnom));
-        Cgs0T = cgs0 * (1 + tcgs0 * (Tdev - tnom));
-        Cgd0T = cgd0 * (1 + tcgd0 * (Tdev - tnom));
+        Ipk0T = ipk0 * (1 + tcipk0 * (Tdev - TnomK));
+        P1T = p1 * (1 + tcp1 * (Tdev - TnomK));
+        Lsb0T = lsb0 * (1 + tclsb0 * (Tdev - TnomK));
+        Cgs0T = cgs0 * (1 + tcgs0 * (Tdev - TnomK));
+        Cgd0T = cgd0 * (1 + tcgd0 * (Tdev - TnomK));
 
         // current equations
 
