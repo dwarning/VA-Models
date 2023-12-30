@@ -21,7 +21,6 @@
 // - selectable model variants for gate-source and gate-drain capacitances
 // - selectable model variants for noise calculation
 // - Generation-Recombination (GRN) flicker noise
-// - Self-heating effect
 // - scaling effects
 //
 // Version: 1.0
@@ -34,6 +33,7 @@ module angelov(drain,gate,source);
     inout drain, gate, source;
     electrical drain, gate, source;
     electrical di, gi, si, gi1, di1, si1, gi2, gi3;
+    electrical tnode;
 
     (* desc="device temperature", type="instance", units="degC" *) parameter real temp=25.0;
     (* desc="temperature rise over ambient", type="instance", units="degC" *) parameter real trise=0.0;
@@ -106,6 +106,10 @@ module angelov(drain,gate,source);
     (* desc="noise frequency exponent", units="" *) parameter real np=1.0;
     (* desc="eff. gate width", units="mm" *) parameter real lw=0.1;
 
+    (* desc="Flag for turning self-heating off", units="" *) parameter integer flsh=0;
+    (* desc="Thermal resistance", units="K/W" *) parameter real rth=0.0;
+    (* desc="Thermal capacitance", units="J/K" *) parameter real cth=0.0;
+
     real Vgs, Vds, Phi, P1m, Alpha;
     real Vgsi, Vgdi;
     real Qgs, phi1, phi2;
@@ -113,6 +117,7 @@ module angelov(drain,gate,source);
     real Vpkm, Tdev, TnomK;
     real fourkt, Ipk0T, P1T, Cgs0T, Cgd0T, Lsb0T;
     real Idtn, Tds, Sid, Sidfl;
+    real I_cth, pterm;
 
     // OP variables
     (* desc="gm" *) real gm;
@@ -129,6 +134,7 @@ module angelov(drain,gate,source);
     branch (di, si) ds;
     branch (gi2, di) gdi;
     branch (gi3, si) gsi;
+    branch (tnode ) br_sht;
 
     analog begin
 
@@ -143,6 +149,10 @@ module angelov(drain,gate,source);
             Tdev = $temperature + trise;
         else
             Tdev = temp + `P_CELSIUS0;
+
+        if (flsh!=0 && rth >= minr) begin
+            Tdev = Tdev + V(br_sht);
+        end
 
         fourkt = 4.0 * `P_K * Tdev;
         Ipk0T = ipk0 * (1 + tcipk0 * (Tdev - TnomK));
@@ -225,6 +235,23 @@ module angelov(drain,gate,source);
             I(si1,si) <+ white_noise(fourkt / rs, "rs thermal noise");
         end
 
+        pterm = 0;
+        if (flsh == 1 && rth >= minr) begin
+            pterm = abs(Vds*Ids) + abs(Igs*Vgsi) + abs(Igd*Vgdi);
+        end
+
+        if (flsh == 0 || cth == 0.0) begin
+            I_cth = 0.0;
+        end else begin
+            I_cth = ddt(cth*V(br_sht));
+        end
+        if (flsh == 0 || rth < minr) begin
+            V(br_sht) <+ 0.0;
+        end else begin
+            I(br_sht) <+ V(br_sht)/rth-pterm;
+            I(br_sht) <+ I_cth;
+        end
+
         I(ds) <+ cds*ddt(Vds);
 
         gm = ddx(Ids, V(gi));
@@ -237,7 +264,7 @@ module angelov(drain,gate,source);
 
         Idtn = abs(Ids) + abs(Igd);
         Tds = td*(1+tmn*(1+tanh(Phi))*abs(tanh(Alpha*Vds))*(1+lambda*Vds));
-        Sid = fourkt * lw*1e-2 * sqrt(Tds/(Tdev+1e-12)*Idtn+td1*pow(Idtn,2));
+        Sid = fourkt * lw*1e-2 * sqrt(Tds/Tdev*Idtn+td1*pow(Idtn,2));
         I(ds) <+ white_noise(Sid, "ids shot noise");
 
         Sidfl = klf * Sid;
