@@ -39,65 +39,64 @@ module angelov(drain,gate,source);
     (* desc="temperature rise over ambient", type="instance", units="degC" *) parameter real trise=0.0;
     (* desc="saturation parametr", units="1/V" *) parameter real alphas=1.0 from [0:inf);
     (* desc="saturation parametr", units="1/V" *) parameter real alphar=0.1 from [0:inf);
-    (* desc="channel length modulation", units="" *) parameter real lambda=0.01 from [0:inf);
+    (* desc="channel length modulation", units="" *) parameter real lambda=0.0 from [0:inf);
     (* desc="gate voltage max. transconductance", units="V" *) parameter real vpks=-0.2 from (-inf:inf);
     (* desc="current max. transconductance", units="A" *) parameter real ipk0=0.05 from [0:inf);
-    (* desc="polynomial coefficient Ids", units="1/V" *) parameter real p1=0.8 from [0:inf);
-    (* desc="polynomial coefficient Ids", units="1/V**2" *) parameter real p2=0.0 from [0:inf);
-    (* desc="polynomial coefficient Ids", units="1/V**3" *) parameter real p3=0.0 from [0:inf);
-    (* desc="unsaturated coefficient for P1", units="" *) parameter real b1=0.1 from [0:inf);
-    (* desc="unsaturated coefficient for P2", units="1/V" *) parameter real b2=4.0 from [0:inf);
+    (* desc="polynomial coefficient Ids", units="1/V" *) parameter real p1=1.0 from (-inf:inf);
+    (* desc="polynomial coefficient Ids", units="1/V**2" *) parameter real p2=0.0 from (-inf:inf);
+    (* desc="polynomial coefficient Ids", units="1/V**3" *) parameter real p3=0.0 from (-inf:inf);
+    (* desc="unsaturated coefficient for P1", units="" *) parameter real b1=0.0 from [0:inf);
+    (* desc="unsaturated coefficient for P2", units="1/V" *) parameter real b2=3.0 from [0:inf);
 
     (* desc="delta gate voltage at peak Gm", units="V" *) parameter real dvpks=0.2;
     (* desc="soft breakdown model parametr", units="" *) parameter real lsb0=0.0;
-    (* desc="threshold voltage for breakdown", units="V" *) parameter real vtr=50;
+    (* desc="threshold voltage for breakdown", units="V" *) parameter real vtr=20;
     (* desc="surface breakdown model parametr", units="V" *) parameter real vsb2=0.0;
 
     (* desc="gate fwd saturation current", units="A" *) parameter real ij=5e-4 from [0:inf);
     (* desc="gate current parametr", units="" *) parameter real pg=15 from [0:inf);
     (* desc="gate current parametr", units="V" *) parameter real vjg=0.7 from [0:inf);
     (* desc="gate brkdwn current parametr", units="" *) parameter real kbdg=1.0 from [0:inf);
-    (* desc="gate brkdwn voltage gs", units="V" *) parameter real vbdgs=100 from [0:inf);
+    (* desc="gate brkdwn voltage gs", units="V" *) parameter real vbdgs=10 from [0:inf);
     (* desc="gate brkdwn voltage gd", units="V" *) parameter real vbdgd=100 from [0:inf);
     (* desc="gate brkdwn exponent", units="" *) parameter real pbdg=0.5 from [0:inf);
+    aliasparam kbdgate = kbdg;
 
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p111=0.008 from [0:inf);
+    (* desc="gate-source pinch-off capacitance", units="F" *) parameter real cgspi=10e-15 from [0:inf);
+    (* desc="gate-source capacitance", units="F" *) parameter real cgs0=10e-15 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p10=0.0 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p11=1.0 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p20=0.0 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p21=0.2 from (-inf:inf);
 
-    (* desc="gate-source pinch-off capacitance", units="F" *) parameter real cgspi=15e-15 from [0:inf);
-    (* desc="gate-source capacitance", units="F" *) parameter real cgs0=3500e-15 from [0:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p10=0.48 from [0:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p11=0.2 from [0:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p20=0.03 from [0:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p21=0.2 from [0:inf);
+    (* desc="gate-drain pinch-off capacitance", units="F" *) parameter real cgdpi=10e-15 from [0:inf);
+    (* desc="gate-drain capacitance", units="F" *) parameter real cgd0=10e-15 from [0:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p30=0.0 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p31=0.2 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p40=0.0 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p41=1.0 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p111=0.0 from [0:inf);
 
-    (* desc="gate-drain pinch-off capacitance", units="F" *) parameter real cgdpi=200e-15 from [0:inf);
-    (* desc="gate-drain capacitance", units="F" *) parameter real cgd0=378e-15 from [0:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p30=0.0 from [0:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p31=0.2 from [0:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p40=0.48 from [0:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p41=0.2 from [0:inf);
-
-    (* desc="drain lead inductance", units="H" *) parameter real ld=0.1e-9;
-    (* desc="gate lead inductance", units="H" *) parameter real lg=0.1e-9;
-    (* desc="source lead inductance", units="H" *) parameter real ls=0.1e-9;
-    (* desc="drain resistance", units="Ohm" *) parameter real rd=50e-3 from [1e-3:inf);
-    (* desc="gate resistance", units="Ohm" *) parameter real rg=50e-3 from [1e-3:inf);
-    (* desc="source resistance", units="Ohm" *) parameter real rs=50e-3 from [1e-3:inf);
-    (* desc="inner gate resistance", units="Ohm" *) parameter real rgd=10e-3 from [1e-3:inf);
-    (* desc="inner gate resistance", units="Ohm" *) parameter real ri=1.0 from [1e-3:inf);
-    (* desc="drain-source capacitance", units="F" *) parameter real cds=800e-15;
+    (* desc="drain lead inductance", units="H" *) parameter real ld=0.0;
+    (* desc="gate lead inductance", units="H" *) parameter real lg=0.0;
+    (* desc="source lead inductance", units="H" *) parameter real ls=0.0;
+    (* desc="drain resistance", units="Ohm" *) parameter real rd=1e-3 from [1e-3:inf);
+    (* desc="gate resistance", units="Ohm" *) parameter real rg=1e-3 from [1e-3:inf);
+    (* desc="source resistance", units="Ohm" *) parameter real rs=1e-3 from [1e-3:inf);
+    (* desc="inner gate resistance", units="Ohm" *) parameter real rgd=1e-3 from [1e-3:inf);
+    (* desc="inner gate resistance", units="Ohm" *) parameter real ri=1e-3 from [1e-3:inf);
+    (* desc="drain-source capacitance", units="F" *) parameter real cds=10e-15;
     (* desc="minimal resistance", units="Ohm" *) parameter real minr=1e-3;
 
     (* desc="nominal temperature", units="degC" *) parameter real tnom=25;
     (* desc="linear coefficient ipk0", units="1/degC" *) parameter real tcipk0=0.0;
     (* desc="linear coefficient p1", units="1/degC" *) parameter real tcp1=0.0;
     (* desc="linear coefficient lsb0", units="1/degC" *) parameter real tclsb0=0.0;
-    (* desc="linear coefficient cgs0", units="1/degC" *) parameter real tcgs0=0.0;
-    (* desc="linear coefficient cgd0", units="1/degC" *) parameter real tcgd0=0.0;
+    (* desc="linear coefficient cgs0", units="1/degC" *) parameter real tccgs0=0.0;
+    (* desc="linear coefficient cgd0", units="1/degC" *) parameter real tccgd0=0.0;
 
     (* desc="flicker noise coefficient", units="" *) parameter real kf=0.0;
     (* desc="flicker noise exponent", units="" *) parameter real af=1.0;
-
     (* desc="flicker noise frequency exponent", units="" *) parameter real ffe=1.0;
     (* desc="drain equivalent temperature coefficient", units="degC" *) parameter real td=25.0;
     (* desc="drain equivalent temperature coefficient", units="" *) parameter real td1=0.1;
@@ -106,9 +105,9 @@ module angelov(drain,gate,source);
     (* desc="noise frequency exponent", units="" *) parameter real np=1.0;
     (* desc="eff. gate width", units="mm" *) parameter real lw=0.1;
 
-    (* desc="Flag for turning self-heating off", units="" *) parameter integer flsh=0;
-    (* desc="Thermal resistance", units="K/W" *) parameter real rth=0.0;
-    (* desc="Thermal capacitance", units="J/K" *) parameter real cth=0.0;
+    (* desc="flag for turning self-heating off", units="" *) parameter integer flsh=0;
+    (* desc="thermal resistance", units="K/W" *) parameter real rth=0.0;
+    (* desc="thermal capacitance", units="J/K" *) parameter real cth=0.0;
 
     real Vgs, Vds, Phi, P1m, Alpha;
     real Vgsi, Vgdi;
@@ -158,8 +157,8 @@ module angelov(drain,gate,source);
         Ipk0T = ipk0 * (1 + tcipk0 * (Tdev - TnomK));
         P1T = p1 * (1 + tcp1 * (Tdev - TnomK));
         Lsb0T = lsb0 * (1 + tclsb0 * (Tdev - TnomK));
-        Cgs0T = cgs0 * (1 + tcgs0 * (Tdev - TnomK));
-        Cgd0T = cgd0 * (1 + tcgd0 * (Tdev - TnomK));
+        Cgs0T = cgs0 * (1 + tccgs0 * (Tdev - TnomK));
+        Cgd0T = cgd0 * (1 + tccgd0 * (Tdev - TnomK));
 
         // current equations
 
