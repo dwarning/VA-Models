@@ -18,7 +18,6 @@
 //
 // Following effects are not considered in this code:
 // - selectable model variants for drain-source, gate-source and gate-drain currents
-// - selectable model variants for gate-source and gate-drain capacitances
 // - selectable model variants for noise calculation
 // - Generation-Recombination (GRN) flicker noise
 // - scaling effects
@@ -35,6 +34,7 @@ module angelov(drain,gate,source);
     electrical di, gi, si, gi1, di1, si1, gi2, gi3;
     electrical tnode;
 
+    (* desc="flag for capacitance model selection", units="" *) parameter integer capmod=1 from [0:2];
     (* desc="device temperature", type="instance", units="degC" *) parameter real temp=25.0;
     (* desc="temperature rise over ambient", type="instance", units="degC" *) parameter real trise=0.0;
     (* desc="saturation parametr", units="1/V" *) parameter real alphas=1.0 from [0:inf);
@@ -65,7 +65,7 @@ module angelov(drain,gate,source);
     (* desc="gate-source pinch-off capacitance", units="F" *) parameter real cgspi=10e-15 from [0:inf);
     (* desc="gate-source capacitance", units="F" *) parameter real cgs0=10e-15 from [0:inf);
     (* desc="capacitance polynomial coefficient", units="" *) parameter real p10=0.0 from (-inf:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p11=1.0 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p11=1.0 from (-inf:inf) exclude 0.0;
     (* desc="capacitance polynomial coefficient", units="" *) parameter real p20=0.0 from (-inf:inf);
     (* desc="capacitance polynomial coefficient", units="" *) parameter real p21=0.2 from (-inf:inf);
 
@@ -74,7 +74,7 @@ module angelov(drain,gate,source);
     (* desc="capacitance polynomial coefficient", units="" *) parameter real p30=0.0 from (-inf:inf);
     (* desc="capacitance polynomial coefficient", units="" *) parameter real p31=0.2 from (-inf:inf);
     (* desc="capacitance polynomial coefficient", units="" *) parameter real p40=0.0 from (-inf:inf);
-    (* desc="capacitance polynomial coefficient", units="" *) parameter real p41=1.0 from (-inf:inf);
+    (* desc="capacitance polynomial coefficient", units="" *) parameter real p41=1.0 from (-inf:inf) exclude 0.0;
     (* desc="capacitance polynomial coefficient", units="" *) parameter real p111=0.0 from [0:inf);
 
     (* desc="drain lead inductance", units="H" *) parameter real ld=0.0;
@@ -113,6 +113,7 @@ module angelov(drain,gate,source);
     real Vgsi, Vgdi;
     real Qgs, phi1, phi2;
     real Qgd, phi3, phi4;
+    real Lc1, Lc10, Lc4, Lc40, Qgs0, Qgd0;
     real Vpkm, Tdev, TnomK;
     real fourkt, Ipk0T, P1T, Cgs0T, Cgd0T, Lsb0T;
     real Idtn, Tds, Sid, Sidfl;
@@ -184,15 +185,41 @@ module angelov(drain,gate,source);
 
         phi1 = p10 + p11*Vgsi + p111*Vds;
         phi2 = p20 + p21*Vds;
-        Cgs = cgspi+Cgs0T*(1+tanh(phi1))*(1+tanh(phi2));
-        Qgs = Vgsi*Cgs;
+        if (capmod == 0) begin
+            Cgs = cgspi+Cgs0T;
+            Qgs = Vgsi*Cgs;
+        end
+        else if (capmod == 1) begin
+            Cgs = cgspi+Cgs0T*(1+tanh(phi1))*(1+tanh(phi2));
+            Qgs = Vgsi*Cgs;
+        end
+        else if (capmod == 2) begin
+            Lc1 = ln(cosh(phi1));
+            Lc10 = ln(cosh(p10 + p111*Vds));
+            Qgs0 = p10 + p111*Vds + Lc10;
+            Qgs = cgspi*Vgsi + Cgs0T*(phi1+Lc1-Qgs0)*(1+tanh(phi2))/p11;
+            Cgs = -ddx(Qgs, V(si));
+        end
 
         I(gs) <+ ddt(Qgs);
 
         phi3 = p30 - p31*Vds;
         phi4 = p40 + p41*Vgdi - p111*Vds;
-        Cgd = cgdpi+Cgd0T*((1-p111+tanh(phi3))*(1+tanh(phi4))+2*p111);
-        Qgd = Vgdi*Cgd;
+        if (capmod == 0) begin
+            Cgd = cgdpi+Cgd0T;
+            Qgd = Vgdi*Cgd;
+        end
+        else if (capmod == 1) begin
+            Cgd = cgdpi+Cgd0T*((1-p111+tanh(phi3))*(1+tanh(phi4))+2*p111);
+            Qgd = Vgdi*Cgd;
+        end
+        else if (capmod == 2) begin
+            Lc4 = ln(cosh(phi4));
+            Lc40 = ln(cosh(p40 + p111*Vds));
+            Qgd0 = p40 + p111*Vds + Lc40;
+            Qgd = cgdpi*Vgdi + Cgd0T*(phi4+Lc4-Qgd0)*(1-p111+tanh(phi3))/p41;
+            Cgd = -ddx(Qgd, V(di));
+        end
 
         I(gd) <+ ddt(Qgd);
 
