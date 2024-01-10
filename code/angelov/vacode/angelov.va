@@ -198,7 +198,7 @@ module angelov(drain,gate,source);
             Lc10 = ln(cosh(p10 + p111*Vds));
             Qgs0 = p10 + p111*Vds + Lc10;
             Qgs = cgspi*Vgsi + Cgs0T*(phi1+Lc1-Qgs0)*(1+tanh(phi2))/p11;
-            Cgs = -ddx(Qgs, V(si));
+            Cgs = -ddx(Qgs, V(gi));
         end
 
         I(gs) <+ ddt(Qgs);
@@ -218,7 +218,7 @@ module angelov(drain,gate,source);
             Lc40 = ln(cosh(p40 + p111*Vds));
             Qgd0 = p40 + p111*Vds + Lc40;
             Qgd = cgdpi*Vgdi + Cgd0T*(phi4+Lc4-Qgd0)*(1-p111+tanh(phi3))/p41;
-            Cgd = -ddx(Qgd, V(di));
+            Cgd = -ddx(Qgd, V(gi));
         end
 
         I(gd) <+ ddt(Qgd);
