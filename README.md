@@ -31,13 +31,13 @@ Actual version status:
 | bsim6         | 6.1.1         | vbic          | 1.3           |
 | bsimbulk      | 107.1.0       | fbh_hbt       | 2.3           |
 | ekv26         | 2.6           | **HEMT**      |               |
-| hisim2        | 3.2.0         | angelov       | 1.0           |
-| psp102        | 102.5.0       | asmhemt       | 101.4.0       |
-| psp103        | 103.8.0       | epfl-hemt     | 3.0.0         |
-| psp104        | 104.0.0       | mvsg_cmc      | 3.2.0         |
-| **SOI MOSFET**|               | **IGBT**      |               |
-| l-lutsoi      | 102.7.0       | igbt3         | 1.0.0         |
-| bsim-soi      | 4.6.1         |               |               |
+| hisim2        | 3.2.0         | angelov       | 2.0           |
+| psp102        | 102.5.0       | angelov_gan   | 2.0           |
+| psp103        | 103.8.0       | asmhemt       | 101.4.0       |
+| psp104        | 104.0.0       | epfl-hemt     | 3.0.0         |
+| **SOI MOSFET**|               | mvsg_cmc      | 3.2.0         |
+| l-lutsoi      | 102.7.0       | **IGBT**      |               |
+| bsim-soi      | 4.6.1         | igbt3         | 1.0.0         |
 | hisim-soi     | 1.5.0         |               |               |
 | hisim-sotb    | 1.3.0         |               |               |
 

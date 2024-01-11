@@ -1,0 +1,13 @@
+Changes to
+angelov_gan.va Rev. 2.22.24052023 contributed by Prof. I. Angelov on 4.1.24:
+
+- G-R Noise commented out per macro HAVE_GRN_NOISE because openVAF has no $frequency access
+- Cdel=0 follows in short between nodes gsi and si because of node collapsing
+- Node vrf is dangling and not needed, Variable Vrf is V(rf) and used for Idsmod 4
+- Vgd duplicated
+- Vpks_T not used
+- Rc_T not used
+- psi_1 double defined
+- there is no Capmod=6
+- V(g,ggi) <+ I(g,ggi) * `SPICE_GMIN leakage resistance
+- Lw is in mm but no factor 1e-2
