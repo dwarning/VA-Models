@@ -8,6 +8,7 @@ mkdir -p admslibs
 
 cd ./angelov/vacode
 buildxyceplugin angelov.va ../../admslibs
+buildxyceplugin angelov_gan.va ../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..
