@@ -404,7 +404,8 @@ module angelov(d, g, s);
         endcase
 
 
-        I(xt1)     <+ -Ids0 + ddt(Tau * V(xt1));
+        I(xt1)     <+ -Ids0;
+        I(xt1)     <+ ddt(Tau * V(xt1));
         I(xt2)     <+ V(xt2);
         V(xt1,xt2) <+ ddt((Tau/3) * I(xt1,xt2));
 
@@ -450,7 +451,8 @@ module angelov(d, g, s);
             V(gi,gsi) <+ 0.0;
 
         if (Rg > 0.0) begin
-            V(g,gi)  <+ I(g,gi) * Rg + ddt(Lg * I(g,gi));
+            V(g,gi)  <+ I(g,gi) * Rg;
+            V(g,gi)  <+ ddt(Lg * I(g,gi));
             if (Noise)
                 V(g,gi) <+ white_noise(4.0 * `P_K * T * Rg, "Rg");
         end
@@ -468,7 +470,8 @@ module angelov(d, g, s);
         V(sii,s) <+ ddt(Ls * I(sii,s));
 
         if ((Rd > 0.0) || (Rd2 > 0.0)) begin
-            V(di,d)  <+ I(di,d) * Rd1_T + ddt(Ld * I(di,d));
+            V(di,d)  <+ I(di,d) * Rd1_T;
+            V(di,d)  <+ ddt(Ld * I(di,d));
             if (Noise)
                 V(di,d) <+ white_noise(4.0 * `P_K * T * Rd1, "Rd");
         end

@@ -468,7 +468,8 @@ module angelov_gan(d, g, s, t, rf);
         endcase
 
 
-        I(xt1)     <+ -Ids0 + ddt(Tau * V(xt1));
+        I(xt1)     <+ -Ids0;
+        I(xt1)     <+ ddt(Tau * V(xt1));
         I(xt2)     <+ V(xt2);
         V(xt1,xt2) <+ ddt((Tau/3) * I(xt1,xt2));
 
@@ -488,7 +489,8 @@ module angelov_gan(d, g, s, t, rf);
         I(gi,di)  <+ ddt(Cgdpe * V(gi,di));
         I(di,si)  <+ ddt(Cds   * Vds);
 
-        I(dii,rf)  <+ ddt(Crf_T * V(dii,rf)) + `SPICE_GMIN * V(dii,rf);
+        I(dii,rf)  <+ ddt(Crf_T * V(dii,rf));
+        I(dii,rf)  <+ `SPICE_GMIN * V(dii,rf);
 
         T0 = ddt(Ldc * I(rf,si)); // Avoid analog operator in if/else block
         if (Rc > 0.0) begin
@@ -602,7 +604,8 @@ module angelov_gan(d, g, s, t, rf);
                         I(ib) <+  white_noise(k, "correlated noise");
                         I(ib) <+  V(ib);
                         I(gi,si)<+ V(ia);
-                        I(gi,di)<+ cr*V(ia)+cbar*V(ib) + ddt(-ci*V(ia));
+                        I(gi,di)<+ cr*V(ia)+cbar*V(ib);
+                        I(gi,di)<+ ddt(-ci*V(ia));
                     end
 
                     // Contribute the noise
@@ -640,7 +643,8 @@ module angelov_gan(d, g, s, t, rf);
 
         if (Selft == 1) begin
             I(t) <+ -1 * (abs(Ids0 * Vds) + abs(Igs * Vgsc));
-            I(t) <+ V(t) / Rth_T + ddt(Cth * V(t));
+            I(t) <+ V(t) / Rth_T;
+            I(t) <+ ddt(Cth * V(t));
         end
         else
             I(t) <+ V(t) * `SPICE_GMIN;
