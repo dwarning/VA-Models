@@ -530,7 +530,8 @@ module angelov(d, g, s);
                         I(ib) <+  white_noise(k, "correlated noise");
                         I(ib) <+  V(ib);
                         I(gi,si)<+ V(ia);
-                        I(gi,di)<+ cr*V(ia)+cbar*V(ib) + ddt(-ci*V(ia));
+                        I(gi,di)<+ cr*V(ia)+cbar*V(ib);
+                        I(gi,di)<+ ddt(-ci*V(ia));
                     end
 
                     // Contribute the noise

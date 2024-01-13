@@ -568,7 +568,7 @@ module angelov_gan(d, g, s, t, rf);
                 NoisePwr = Lw * 4.0 * `P_K * T * sqrt(abs(Td_prime/T * Idtn + Td1 * Idtn * Idtn));
                 if (Noise) begin
                     I(di,si) <+ white_noise(NoisePwr, "Ids noise");
-                    I(di,si) <+ flicker_noise(NoisePwr * Klf, Np, "flicker");
+                    I(di,si) <+ flicker_noise(NoisePwr * Klf, Np, "Ids flicker");
 //`define HAVE_GRN_NOISE
 `ifdef HAVE_GRN_NOISE
                     if (Fgr > 0.0)
