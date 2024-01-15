@@ -149,7 +149,7 @@ module angelov_gan(d, g, s, t, rf);
     (* desc="Equiv temp", units="C" *)                                  parameter real Td = 25.0 from (-`P_CELSIUS0:inf);
     (* desc="Equiv temp", units="C" *)                                  parameter real Td1 = 0.1 from (-inf:inf);
     (* desc="noise fitting coeff", units="" *)                          parameter real Tmn = 1.0 from (-inf:inf);
-    (* desc="Flicker noise exponent", units="" *)                       parameter real Klf = 1.0e14 from (-inf:inf);
+    (* desc="Flicker noise coeff", units="" *)                          parameter real Klf = 1.0e-14 from (-inf:inf);
     (* desc="G-R freq corner", units="Hz" *)                            parameter real Fgr = 60.0e3 from (-inf:inf);
     (* desc="flicker noise freq exp", units="" *)                       parameter real Np = 0.3 from (-inf:inf);
     (* desc="effective gate noise width", units="mm" *)                 parameter real Lw = 0.1 from (-inf:inf);
