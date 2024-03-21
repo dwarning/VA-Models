@@ -16,7 +16,7 @@
 //  undivided ownership and copyrights.
 //
 //
-//  Version: 200.6.1, July 2020
+//  Version: 200.6.2, April 2021
 //
 //======================================================================================
 //======================================================================================
@@ -131,7 +131,7 @@ end
 
 //  Variables related to temperatures
 tkr          = `KELVINCONVERSION + TRJ;
-tkd          =  max($temperature + DTA, `KELVINCONVERSION + `MINTEMP);
+tkd          =  max($temperature + DTA + TRISE, `KELVINCONVERSION + `MINTEMP);
 auxt         =  tkd / tkr;
 KBOL_over_QELE = `KBOL / `QELE;
 phitr        =  KBOL_over_QELE * tkr;

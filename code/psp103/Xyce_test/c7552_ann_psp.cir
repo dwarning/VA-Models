@@ -3,8 +3,8 @@
 * by Jingye Xu @ VLSI group, Dept of ECE, UIC
 
 * Path to the models
-.include ../Modelcards/psp103_nmos-2.mod
-.include ../Modelcards/psp103_pmos-2.mod
+.include ../Modelcards/psp103_nmos-2_va.mod
+.include ../Modelcards/psp103_pmos-2_va.mod
 
 *.OPTIONS GMIN=1e-015 ABSTOL=1e-13 ACCT noopiter
 *.options vntol=10u

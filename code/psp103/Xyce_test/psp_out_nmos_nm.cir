@@ -24,6 +24,6 @@ YPSP103_VA m1  d g s b nch
 *.dc vg 0 1.5 0.05 vb 0 -3.0 -1
 *.plot i(vs)
 
-.include ../Modelcards/psp103_nmos-2.mod
+.include ../Modelcards/psp103_nmos-2_va.mod
 
 .end

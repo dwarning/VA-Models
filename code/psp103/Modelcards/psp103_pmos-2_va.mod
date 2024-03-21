@@ -1,9 +1,9 @@
-* psp_VA_and_CMC_ref_data 103.3.0 asym_nmos_t
+* psp_VA_and_CMC_ref_data 103.3.0 asym_pmos_t
 * LEVEL=103.0
 * https://www.cea.fr/cea-tech/leti/pspsupport/Documents/Level%20103.3.3/psp_VA_and_CMC_ref_data.tar.gz
-.model nch psp103va
+.model pch psp103_va
 * level=69
-+type=1
++TYPE=-1
 +TR=27.0
 +DTA=0
 +SWGEO=1

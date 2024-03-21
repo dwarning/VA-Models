@@ -16,7 +16,7 @@
 //  undivided ownership and copyrights.
 //
 //
-//  Version: 200.6.1, July 2020
+//  Version: 200.6.2, April 2021
 //
 //======================================================================================
 //======================================================================================
@@ -36,6 +36,7 @@
 
 // Parameters for source-bulk junction
 `ifdef JUNCAP_StandAlone
+    aliasparam TREF = TRJ;
     `MPRco(CJORBOT        ,1.0e-3     ,"Fm^-2"    ,`CJORBOT_cliplow  ,inf              ,"Zero-bias capacitance per unit-of-area of bottom component")
     `MPRco(CJORSTI        ,1.0e-9     ,"Fm^-1"    ,`CJORSTI_cliplow  ,inf              ,"Zero-bias capacitance per unit-of-length of STI-edge component")
     `MPRco(CJORGAT        ,1.0e-9     ,"Fm^-1"    ,`CJORGAT_cliplow  ,inf              ,"Zero-bias capacitance per unit-of-length of gate-edge component")

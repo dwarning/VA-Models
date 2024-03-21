@@ -16,7 +16,7 @@
 //  undivided ownership and copyrights.
 //
 //
-//  Version: 103.8.0 (PSP), 200.6.1 (JUNCAP), July 2020
+//  Version: 103.8.2 (PSP), 200.6.2 (JUNCAP), June 2022
 //
 //======================================================================================
 //======================================================================================
@@ -129,6 +129,8 @@ electrical BD;
 `IPRco(AD             ,1.0e-12    ,"m^2"      ,`AB_cliplow ,inf         ,"Bottom area of drain junction")
 `IPRco(PD             ,1.0e-6     ,"m"        ,`LS_cliplow ,inf         ,"Perimeter of drain junction")
 `IPRco(MULT           ,1.0        ,""         ,0.0         ,inf         ,"Number of devices in parallel")
+`IPRnb(TRISE          ,0.0        ,"K"                                  ,"Device temperature offset")
+aliasparam DTEMP = TRISE;
 
 //  --------------------------------------------------------------------------------------------------------------
 //  PSP Model Parameters
@@ -278,30 +280,30 @@ real gmin;
 real id_op, is, ig, ib, P_D, facvsb, facvsb0, sig1k, vth_i, vts_i, ids_i;
 `OPP(ctype             ,""             ,"Flag for channel type")
 `OPP(sdint             ,""             ,"Flag for source-drain interchange")
-`OPP(ise               ,"A"            ,"Total source current")
-`OPP(ige               ,"A"            ,"Total gate current")
-`OPP(ide               ,"A"            ,"Total drain current")
-`OPP(ibe               ,"A"            ,"Total bulk current")
-`OPP(ids               ,"A"            ,"Drain current, excl. edge transistor currents, avalanche, tunnel, GISL, GIDL, and junction currents")
-`OPP(idb               ,"A"            ,"Drain to bulk current")
-`OPP(isb               ,"A"            ,"Source to bulk current")
-`OPP(igs               ,"A"            ,"Gate-source tunneling current")
-`OPP(igd               ,"A"            ,"Gate-drain tunneling current")
-`OPP(igb               ,"A"            ,"Gate-bulk tunneling current")
-`OPP(idedge            ,"A"            ,"Drain current of edge transistors")
-`OPP(igcs              ,"A"            ,"Gate-channel tunneling current (source component)")
-`OPP(igcd              ,"A"            ,"Gate-channel tunneling current (drain component)")
-`OPP(iavl              ,"A"            ,"Substrate current due to weak avelanche")
-`OPP(igisl             ,"A"            ,"Gate-induced source leakage current")
-`OPP(igidl             ,"A"            ,"Gate-induced drain leakage current")
-`OPP(ijs               ,"A"            ,"Total source junction current")
-`OPP(ijsbot            ,"A"            ,"Source junction current (bottom component)")
-`OPP(ijsgat            ,"A"            ,"Source junction current (gate-edge component)")
-`OPP(ijssti            ,"A"            ,"Source junction current (STI-edge component)")
-`OPP(ijd               ,"A"            ,"Total drain junction current")
-`OPP(ijdbot            ,"A"            ,"Drain junction current (bottom component)")
-`OPP(ijdgat            ,"A"            ,"Drain junction current (gate-edge component)")
-`OPP(ijdsti            ,"A"            ,"Drain junction current (STI-edge component)")
+`OPM(ise               ,"A"            ,"Total source current")
+`OPM(ige               ,"A"            ,"Total gate current")
+`OPM(ide               ,"A"            ,"Total drain current")
+`OPM(ibe               ,"A"            ,"Total bulk current")
+`OPM(ids               ,"A"            ,"Drain current, excl. edge transistor currents, avalanche, tunnel, GISL, GIDL, and junction currents")
+`OPM(idb               ,"A"            ,"Drain to bulk current")
+`OPM(isb               ,"A"            ,"Source to bulk current")
+`OPM(igs               ,"A"            ,"Gate-source tunneling current")
+`OPM(igd               ,"A"            ,"Gate-drain tunneling current")
+`OPM(igb               ,"A"            ,"Gate-bulk tunneling current")
+`OPM(idedge            ,"A"            ,"Drain current of edge transistors")
+`OPM(igcs              ,"A"            ,"Gate-channel tunneling current (source component)")
+`OPM(igcd              ,"A"            ,"Gate-channel tunneling current (drain component)")
+`OPM(iavl              ,"A"            ,"Substrate current due to weak avelanche")
+`OPM(igisl             ,"A"            ,"Gate-induced source leakage current")
+`OPM(igidl             ,"A"            ,"Gate-induced drain leakage current")
+`OPM(ijs               ,"A"            ,"Total source junction current")
+`OPM(ijsbot            ,"A"            ,"Source junction current (bottom component)")
+`OPM(ijsgat            ,"A"            ,"Source junction current (gate-edge component)")
+`OPM(ijssti            ,"A"            ,"Source junction current (STI-edge component)")
+`OPM(ijd               ,"A"            ,"Total drain junction current")
+`OPM(ijdbot            ,"A"            ,"Drain junction current (bottom component)")
+`OPM(ijdgat            ,"A"            ,"Drain junction current (gate-edge component)")
+`OPM(ijdsti            ,"A"            ,"Drain junction current (STI-edge component)")
 `OPP(vds               ,"V"            ,"Drain-source voltage")
 `OPP(vgs               ,"V"            ,"Gate-source voltage")
 `OPP(vsb               ,"V"            ,"Source-bulk voltage")
@@ -312,61 +314,61 @@ real id_op, is, ig, ib, P_D, facvsb, facvsb0, sig1k, vth_i, vts_i, ids_i;
 `OPP(vdss              ,"V"            ,"Drain saturation voltage at actual bias")
 `OPP(vsat              ,""             ,"Saturation limit")
 `ifdef OPderiv
-    `OPP(gm                ,"1/Ohm"        ,"Transconductance")
-    `OPP(gmb               ,"1/Ohm"        ,"Substrate transconductance")
-    `OPP(gds               ,"1/Ohm"        ,"Output conductance")
-    `OPP(gjs               ,"1/Ohm"        ,"Source junction conductance")
-    `OPP(gjd               ,"1/Ohm"        ,"Drain junction conductance")
-    `OPP(cdd               ,"F"            ,"Drain capacitance")
-    `OPP(cdg               ,"F"            ,"Drain-gate capacitance")
-    `OPP(cds               ,"F"            ,"Drain-source capacitance")
-    `OPP(cdb               ,"F"            ,"Drain-bulk capacitance")
-    `OPP(cgd               ,"F"            ,"Gate-drain capacitance")
-    `OPP(cgg               ,"F"            ,"Gate capacitance")
-    `OPP(cgs               ,"F"            ,"Gate-source capacitance")
-    `OPP(cgb               ,"F"            ,"Gate-bulk capacitance")
-    `OPP(csd               ,"F"            ,"Source-drain capacitance")
-    `OPP(csg               ,"F"            ,"Source-gate capacitance")
-    `OPP(css               ,"F"            ,"Source capacitance")
-    `OPP(csb               ,"F"            ,"Source-bulk capacitance")
-    `OPP(cbd               ,"F"            ,"Bulk-drain capacitance")
-    `OPP(cbg               ,"F"            ,"Bulk-gate capacitance")
-    `OPP(cbs               ,"F"            ,"Bulk-source capacitance")
-    `OPP(cbb               ,"F"            ,"Bulk capacitance")
-    `OPP(cgsol             ,"F"            ,"Total gate-source overlap capacitance")
-    `OPP(cgdol             ,"F"            ,"Total gate-drain overlap capacitance")
-    `OPP(cjs               ,"F"            ,"Total source junction capacitance")
-    `OPP(cjsbot            ,"F"            ,"Source junction capacitance (bottom component)")
-    `OPP(cjsgat            ,"F"            ,"Source junction capacitance (gate-edge component)")
-    `OPP(cjssti            ,"F"            ,"Source junction capacitance (STI-edge component)")
-    `OPP(cjd               ,"F"            ,"Total drain junction capacitance")
-    `OPP(cjdbot            ,"F"            ,"Drain junction capacitance (bottom component)")
-    `OPP(cjdgat            ,"F"            ,"Drain junction capacitance (gate-edge component)")
-    `OPP(cjdsti            ,"F"            ,"Drain junction capacitance (STI-edge component)")
+    `OPM(gm                ,"S"            ,"Transconductance")
+    `OPM(gmb               ,"S"            ,"Substrate transconductance")
+    `OPM(gds               ,"S"            ,"Output conductance")
+    `OPM(gjs               ,"S"            ,"Source junction conductance")
+    `OPM(gjd               ,"S"            ,"Drain junction conductance")
+    `OPM(cdd               ,"F"            ,"Drain capacitance")
+    `OPM(cdg               ,"F"            ,"Drain-gate capacitance")
+    `OPM(cds               ,"F"            ,"Drain-source capacitance")
+    `OPM(cdb               ,"F"            ,"Drain-bulk capacitance")
+    `OPM(cgd               ,"F"            ,"Gate-drain capacitance")
+    `OPM(cgg               ,"F"            ,"Gate capacitance")
+    `OPM(cgs               ,"F"            ,"Gate-source capacitance")
+    `OPM(cgb               ,"F"            ,"Gate-bulk capacitance")
+    `OPM(csd               ,"F"            ,"Source-drain capacitance")
+    `OPM(csg               ,"F"            ,"Source-gate capacitance")
+    `OPM(css               ,"F"            ,"Source capacitance")
+    `OPM(csb               ,"F"            ,"Source-bulk capacitance")
+    `OPM(cbd               ,"F"            ,"Bulk-drain capacitance")
+    `OPM(cbg               ,"F"            ,"Bulk-gate capacitance")
+    `OPM(cbs               ,"F"            ,"Bulk-source capacitance")
+    `OPM(cbb               ,"F"            ,"Bulk capacitance")
+    `OPM(cgsol             ,"F"            ,"Total gate-source overlap capacitance")
+    `OPM(cgdol             ,"F"            ,"Total gate-drain overlap capacitance")
+    `OPM(cjs               ,"F"            ,"Total source junction capacitance")
+    `OPM(cjsbot            ,"F"            ,"Source junction capacitance (bottom component)")
+    `OPM(cjsgat            ,"F"            ,"Source junction capacitance (gate-edge component)")
+    `OPM(cjssti            ,"F"            ,"Source junction capacitance (STI-edge component)")
+    `OPM(cjd               ,"F"            ,"Total drain junction capacitance")
+    `OPM(cjdbot            ,"F"            ,"Drain junction capacitance (bottom component)")
+    `OPM(cjdgat            ,"F"            ,"Drain junction capacitance (gate-edge component)")
+    `OPM(cjdsti            ,"F"            ,"Drain junction capacitance (STI-edge component)")
 `endif // OPderiv
 `OPP(weff              ,"m"            ,"Effective channel width for geometrical models")
 `OPP(leff              ,"m"            ,"Effective channel length for geometrical models")
 `ifdef OPderiv
     `OPP(u                 ,""             ,"Transistor gain")
-    `OPP(rout              ,"Ohm"          ,"Small-signal output resistance")
+    `OPD(rout              ,"Ohm"          ,"Small-signal output resistance")
     `OPP(vearly            ,"V"            ,"Equivalent Early voltage")
-    `OPP(beff              ,"A/V^2"        ,"Gain factor")
+    `OPM(beff              ,"A/V^2"        ,"Gain factor")
     `OPP(fug               ,"Hz"           ,"Unity gain frequency at actual bias")
-    `OPP(rg                ,"Ohm"          ,"Gate resistance")
-    `OPP(sfl               ,"A^2/Hz"       ,"Flicker noise current spectral density at 1 Hz")
+    `OPD(rg                ,"Ohm"          ,"Gate resistance")
+    `OPM(sfl               ,"A^2/Hz"       ,"Flicker noise current spectral density at 1 Hz")
     `OPP(sqrtsff           ,"V/sqrt(Hz)"   ,"Input-referred RMS white noise voltage spectral density at 1 kHz")
     `OPP(sqrtsfw           ,"V/sqrt(Hz)"   ,"Input-referred RMS white noise voltage spectral density")
-    `OPP(sid               ,"A^2/Hz"       ,"White noise current spectral density")
-    `OPP(sig               ,"A^2/Hz"       ,"Induced gate noise current spectral density at 1 Hz")
+    `OPM(sid               ,"A^2/Hz"       ,"White noise current spectral density")
+    `OPM(sig               ,"A^2/Hz"       ,"Induced gate noise current spectral density at 1 Hz")
     `OPP(cigid             ,""             ,"Imaginary part of correlation coefficient between Sig and Sid")
     `OPP(fknee             ,"Hz"           ,"Cross-over frequency above which white noise is dominant")
-    `OPP(sigs              ,"A^2/Hz"       ,"Gate-source current noise spectral density")
-    `OPP(sigd              ,"A^2/Hz"       ,"Gate-drain current noise spectral density")
-    `OPP(siavl             ,"A^2/Hz"       ,"Impact ionization current noise spectral density")
-    `OPP(ssi               ,"A^2/Hz"       ,"Total source junction current noise spectral density")
-    `OPP(sdi               ,"A^2/Hz"       ,"Total drain junction current noise spectral density")
-    `OPP(sfledge           ,"A^2/Hz"       ,"Flicker noise current spectral density at 1 Hz of edge transistors")
-    `OPP(sidedge           ,"A^2/Hz"       ,"White noise current spectral density of edge transistors")
+    `OPM(sigs              ,"A^2/Hz"       ,"Gate-source current noise spectral density")
+    `OPM(sigd              ,"A^2/Hz"       ,"Gate-drain current noise spectral density")
+    `OPM(siavl             ,"A^2/Hz"       ,"Impact ionization current noise spectral density")
+    `OPM(ssi               ,"A^2/Hz"       ,"Total source junction current noise spectral density")
+    `OPM(sdi               ,"A^2/Hz"       ,"Total drain junction current noise spectral density")
+    `OPM(sfledge           ,"A^2/Hz"       ,"Flicker noise current spectral density at 1 Hz of edge transistors")
+    `OPM(sidedge           ,"A^2/Hz"       ,"White noise current spectral density of edge transistors")
 `endif // OPderiv
 // local parameters after scaling, T-scaling, and clipping
 `OPP(lp_vfb            ,"V"            ,"Local parameter VFB after T-scaling and clipping")
@@ -413,7 +415,7 @@ real id_op, is, ig, ib, P_D, facvsb, facvsb0, sig1k, vth_i, vts_i, ids_i;
 `OPP(lp_xcor           ,"V^-1"         ,"Local parameter XCOR after T-scaling and clipping")
 `OPP(lp_stxcor         ,""             ,"Local parameter STXCOR after clipping")
 `OPP(lp_feta           ,""             ,"Local parameter FETA after clipping")
-`OPP(lp_rs             ,"Ohm"          ,"Local parameter RS after T-scaling and clipping")
+`OPD(lp_rs             ,"Ohm"          ,"Local parameter RS after T-scaling and clipping")
 `OPP(lp_strs           ,""             ,"Local parameter STRS after clipping")
 `OPP(lp_rsb            ,"V^-1"         ,"Local parameter RSB after clipping")
 `OPP(lp_rsg            ,"V^-1"         ,"Local parameter RSG after clipping")
@@ -435,9 +437,9 @@ real id_op, is, ig, ib, P_D, facvsb, facvsb0, sig1k, vth_i, vts_i, ids_i;
 `OPP(lp_a3             ,""             ,"Local parameter A3 after clipping")
 `OPP(lp_a4             ,"1/sqrt(V)"    ,"Local parameter A4 after clipping")
 `OPP(lp_gco            ,""             ,"Local parameter GCO after clipping")
-`OPP(lp_iginv          ,"A"            ,"Local parameter IGINV after T-scaling and clipping")
-`OPP(lp_igov           ,"A"            ,"Local parameter IGOV after T-scaling and clipping")
-`OPP(lp_igovd          ,"A"            ,"Local parameter IGOVD after T-scaling and clipping")
+`OPM(lp_iginv          ,"A"            ,"Local parameter IGINV after T-scaling and clipping")
+`OPM(lp_igov           ,"A"            ,"Local parameter IGOV after T-scaling and clipping")
+`OPM(lp_igovd          ,"A"            ,"Local parameter IGOVD after T-scaling and clipping")
 `OPP(lp_stig           ,""             ,"Local parameter STIG after clipping")
 `OPP(lp_gc2            ,""             ,"Local parameter GC2 after clipping")
 `OPP(lp_gc3            ,""             ,"Local parameter GC3 after clipping")
@@ -452,21 +454,21 @@ real id_op, is, ig, ib, P_D, facvsb, facvsb0, sig1k, vth_i, vts_i, ids_i;
 `OPP(lp_stbgidld       ,"V/K"          ,"Local parameter STBGIDLD after clipping")
 `OPP(lp_cgidl          ,""             ,"Local parameter CGIDL after clipping")
 `OPP(lp_cgidld         ,""             ,"Local parameter CGIDLD after clipping")
-`OPP(lp_cox            ,"F"            ,"Local parameter COX after clipping")
-`OPP(lp_cgov           ,"F"            ,"Local parameter CGOV after clipping")
-`OPP(lp_cgovd          ,"F"            ,"Local parameter CGOVD after clipping")
+`OPM(lp_cox            ,"F"            ,"Local parameter COX after clipping")
+`OPM(lp_cgov           ,"F"            ,"Local parameter CGOV after clipping")
+`OPM(lp_cgovd          ,"F"            ,"Local parameter CGOVD after clipping")
 `OPP(lp_fcgovacc       ,""             ,"Local parameter FCGOVACC after clipping")
 `OPP(lp_fcgovaccd      ,""             ,"Local parameter FCGOVACCD after clipping")
 `OPP(lp_cgovaccg       ,""             ,"Local parameter CGOVACCG after clipping")
-`OPP(lp_cgbov          ,"F"            ,"Local parameter CGBOV after clipping")
-`OPP(lp_cinr           ,"F"            ,"Local parameter CINR after clipping")
-`OPP(lp_cinrd          ,"F"            ,"Local parameter CINRD after clipping")
+`OPM(lp_cgbov          ,"F"            ,"Local parameter CGBOV after clipping")
+`OPM(lp_cinr           ,"F"            ,"Local parameter CINR after clipping")
+`OPM(lp_cinrd          ,"F"            ,"Local parameter CINRD after clipping")
 `OPP(lp_dvfbinr        ,"V"            ,"Local parameter DVFBINR after clipping")
 `OPP(lp_fcinrdep       ,""             ,"Local parameter FCINRDEP after clipping")
 `OPP(lp_fcinracc       ,""             ,"Local parameter FCINRACC after clipping")
 `OPP(lp_axinr          ,""             ,"Local parameter AXINR after clipping")
-`OPP(lp_cfr            ,"F"            ,"Local parameter CFR after clipping")
-`OPP(lp_cfrd           ,"F"            ,"Local parameter CFRD after clipping")
+`OPM(lp_cfr            ,"F"            ,"Local parameter CFR after clipping")
+`OPM(lp_cfrd           ,"F"            ,"Local parameter CFRD after clipping")
 `OPP(lp_fnt            ,""             ,"Local parameter FNT after clipping")
 `OPP(lp_fntexc         ,""             ,"Local parameter FNTEXC after clipping")
 `OPP(lp_nfa            ,"1/(V m^4)"    ,"Local parameter NFA after clipping")
@@ -491,39 +493,39 @@ real id_op, is, ig, ib, P_D, facvsb, facvsb0, sig1k, vth_i, vts_i, ids_i;
 `OPP(lp_nfbedge        ,"1/(V m^4)"    ,"Local parameter NFBEDGE after clipping")
 `OPP(lp_nfcedge        ,"V^-1"         ,"Local parameter NFCEDGE after clipping")
 `OPP(lp_efedge         ,""             ,"Local parameter EFEDGE after clipping")
-`OPP(lp_rg             ,"Ohm"          ,"Local parameter RG after clipping")
-`OPP(lp_rse            ,"Ohm"          ,"Local parameter RSE after clipping")
-`OPP(lp_rde            ,"Ohm"          ,"Local parameter RDE after clipping")
-`OPP(lp_rbulk          ,"Ohm"          ,"Local parameter RBULK after clipping")
-`OPP(lp_rwell          ,"Ohm"          ,"Local parameter RWELL after clipping")
-`OPP(lp_rjuns          ,"Ohm"          ,"Local parameter RJUNS after clipping")
-`OPP(lp_rjund          ,"Ohm"          ,"Local parameter RJUND after clipping")
+`OPD(lp_rg             ,"Ohm"          ,"Local parameter RG after clipping")
+`OPD(lp_rse            ,"Ohm"          ,"Local parameter RSE after clipping")
+`OPD(lp_rde            ,"Ohm"          ,"Local parameter RDE after clipping")
+`OPD(lp_rbulk          ,"Ohm"          ,"Local parameter RBULK after clipping")
+`OPD(lp_rwell          ,"Ohm"          ,"Local parameter RWELL after clipping")
+`OPD(lp_rjuns          ,"Ohm"          ,"Local parameter RJUNS after clipping")
+`OPD(lp_rjund          ,"Ohm"          ,"Local parameter RJUND after clipping")
 `ifdef SelfHeating
-    `OPP(lp_rth            ,"K/W"          ,"Local parameter RTH after T-scaling and clipping")
+    `OPD(lp_rth            ,"K/W"          ,"Local parameter RTH after T-scaling and clipping")
     `OPP(lp_cth            ,"J/K"          ,"Local parameter CTH after clipping")
     `OPP(lp_strth          ,""             ,"Local parameter STRTH after clipping")
-    `OPP(pdiss             ,"W"            ,"Power dissipation")
+    `OPM(pdiss             ,"W"            ,"Power dissipation")
     `OPP(dtsh              ,"K"            ,"Temperature rise due to self heating")
 `endif // SelfHeating
 `OPP(tk                ,"K"            ,"Device Temperature")
-`OPP(cjosbot           ,"F"            ,"Bottom component of total zero-bias source junction capacitance at device temperature")
-`OPP(cjossti           ,"F"            ,"STI-edge component of total zero-bias source junction capacitance at device temperature")
-`OPP(cjosgat           ,"F"            ,"Gate-edge component of total zero-bias source junction capacitance at device temperature")
+`OPM(cjosbot           ,"F"            ,"Bottom component of total zero-bias source junction capacitance at device temperature")
+`OPM(cjossti           ,"F"            ,"STI-edge component of total zero-bias source junction capacitance at device temperature")
+`OPM(cjosgat           ,"F"            ,"Gate-edge component of total zero-bias source junction capacitance at device temperature")
 `OPP(vbisbot           ,"V"            ,"Built-in voltage of source-side bottom junction at device temperature")
 `OPP(vbissti           ,"V"            ,"Built-in voltage of source-side STI-edge junction at device temperature")
 `OPP(vbisgat           ,"V"            ,"Built-in voltage of source-side gate-edge junction at device temperature")
-`OPP(idsatsbot         ,"A"            ,"Total source-side bottom junction saturation current")
-`OPP(idsatssti         ,"A"            ,"Total source-side STI-edge junction saturation current")
-`OPP(idsatsgat         ,"A"            ,"Total source-side gate-edge junction saturation current")
-`OPP(cjosbotd          ,"F"            ,"Bottom component of total zero-bias drain junction capacitance at device temperature")
-`OPP(cjosstid          ,"F"            ,"STI-edge component of total zero-bias drain junction capacitance at device temperature")
-`OPP(cjosgatd          ,"F"            ,"Gate-edge component of total zero-bias drain junction capacitance at device temperature")
+`OPM(idsatsbot         ,"A"            ,"Total source-side bottom junction saturation current")
+`OPM(idsatssti         ,"A"            ,"Total source-side STI-edge junction saturation current")
+`OPM(idsatsgat         ,"A"            ,"Total source-side gate-edge junction saturation current")
+`OPM(cjosbotd          ,"F"            ,"Bottom component of total zero-bias drain junction capacitance at device temperature")
+`OPM(cjosstid          ,"F"            ,"STI-edge component of total zero-bias drain junction capacitance at device temperature")
+`OPM(cjosgatd          ,"F"            ,"Gate-edge component of total zero-bias drain junction capacitance at device temperature")
 `OPP(vbisbotd          ,"V"            ,"Built-in voltage of drain-side bottom junction at device temperature")
 `OPP(vbisstid          ,"V"            ,"Built-in voltage of drain-side STI-edge junction at device temperature")
 `OPP(vbisgatd          ,"V"            ,"Built-in voltage of drain-side gate-edge junction at device temperature")
-`OPP(idsatsbotd        ,"A"            ,"Total drain-side bottom junction saturation current")
-`OPP(idsatsstid        ,"A"            ,"Total drain-side STI-edge junction saturation current")
-`OPP(idsatsgatd        ,"A"            ,"Total drain-side gate-edge junction saturation current")
+`OPM(idsatsbotd        ,"A"            ,"Total drain-side bottom junction saturation current")
+`OPM(idsatsstid        ,"A"            ,"Total drain-side STI-edge junction saturation current")
+`OPM(idsatsgatd        ,"A"            ,"Total drain-side gate-edge junction saturation current")
 `ifdef NQSmodel
     `OPP(lp_munqs          ,""             ,"Local parameter MUNQS after clipping")
 `endif // NQSmodel
@@ -604,10 +606,11 @@ analog begin
         `DefACparam(PWALPAC_i,      PWALP,      PWALPAC)
         `DefACparam(PLWALPAC_i,     PLWALP,     PLWALPAC)
         `DefACparam(KVSATAC_i,      KVSAT,      KVSATAC)
+
 `ifndef __XYCE__
         //  Transistor temperature
         TKR         = `KELVINCONVERSION + TR;
-        TKA         =  $temperature + DTA;
+        TKA         =  $temperature + DTA + TRISE;
         rTa         =  TKA / TKR;
         delTa       =  TKA - TKR;
         phita       =  TKA * `KBOL / `QELE;
@@ -676,7 +679,7 @@ analog begin
 `ifdef __XYCE__
         //  Transistor temperature
         TKR         = `KELVINCONVERSION + TR;
-        TKA         =  $temperature + DTA;
+        TKA         =  $temperature + DTA + TRISE;
         rTa         =  TKA / TKR;
         delTa       =  TKA - TKR;
         phita       =  TKA * `KBOL / `QELE;
@@ -1290,7 +1293,11 @@ analog begin
                 inv_phit1edge =  1.0 / phit1edge;
                 Vdspedge     =  2.0 * Vdsx / (1.0 + sqrt(1.0 + CFDEDGE_i * Vdsx));
                 delVgedge    =  CFEDGE_i * Vdspedge * (1.0 + CFBEDGE_i * Vsbxedge); // DIBL effect
-                xgedge       =  inv_phit1edge * (Vgs + Vsbstaredge + delVgedge - VFBEDGE_T);
+                if (SWFIX > 0.0) begin
+                    xgedge       =  inv_phit1edge * (Vgb + delVgedge - VFBEDGE_T);
+                end else begin
+                    xgedge       =  inv_phit1edge * (Vgs + Vsbstaredge + delVgedge - VFBEDGE_T);
+                end
                 xbedge       =  inv_phit1edge * phibedge;
                 dxthedge     =  2.0 * ln(xbedge / Gfedge + sqrt(xbedge));
                 xnedge_s     =  inv_phit1edge * Vsbstaredge;
@@ -1460,7 +1467,7 @@ analog begin
             Qginr        =  0.0;
             if ((CINR_i > 0.0)||(CINRD_i > 0.0)) begin
                 finracc      =  1.0;
-                dVinracc     =  0.0;
+                dVinracc     =  Vgb1_ac;
                 if (FCINRACC_i > 1.0e-10) begin
                     Vginr        =  Vgb1_ac - DVFBINR_i + Vinr_max;
                     temp         = `MAXA(Vginr, Vinr_max, ainr);
@@ -1534,7 +1541,7 @@ analog begin
                 temp         =  CGOVACCG_i * (0.5 * xgb_ov + dxgb_ov_d);
                 if (temp < `se05) begin
                     `expl_low(temp, yb_ov_d)
-                    if (yb_ov_s > 1.0e-10) begin
+                    if (yb_ov_d > 1.0e-10) begin
                         xgbeff_ov_d  =  ln(1.0 + yb_ov_d);
                         temp1        =  xgbeff_ov_d * (1.0 - ln(1.0 + xgbeff_ov_d) / (2.0 + xgbeff_ov_d));
                     end else begin
@@ -1823,7 +1830,7 @@ analog begin
                         migid0       =  migid0 - Sidexc * sqt2 * (1.0 + r) / (g_ideal * nt0);
                     end
                     sqig         =  sqrt(nt / mig);
-                    if (sqid == 0) begin
+                    if (sqid <= 0) begin
                         c_igid       =  0.0;
                     end else begin
                         c_igid       =  migid0 * sqig / sqid; // = migid0 / sqrt(mig * mid);
@@ -1979,7 +1986,7 @@ analog begin
                 vgt          =  vgs - vth;
                 vdss         =  Vdsat_dc;
                 vsat         =  Vds - vdss;
-                ids_i        =  Ids + Idsedge + Iimpact + Igisl - Igcd - Igsov - ijun_s; // Total drain-current
+                ids_i        =  Ids + Idsedge + Iimpact + Igisl - Igcs - Igsov - ijun_s; // Total drain-current
                 `ifdef OPderiv
                     gm           =  CHNL_TYPE * MULT_i * ddx(ids_i, V(GP));
                     gmb          =  CHNL_TYPE * MULT_i * ddx(ids_i, V(BP));
@@ -2131,13 +2138,18 @@ analog begin
                     sqrtsff      =  0.0;
                     sqrtsfw      =  0.0;
                 end else begin
+`ifndef __XYCE__
+                    sqrtsff      =  sqrt(MULT_i * Sfl / 1000.0 / $mfactor) / gm;
+                    sqrtsfw      =  sqrt(MULT_i / $mfactor) * sqid / gm;
+`else
                     sqrtsff      =  sqrt(MULT_i * Sfl / 1000.0) / gm;
                     sqrtsfw      =  sqrt(MULT_i) * sqid / gm;
+`endif
                 end
                 sid          =  MULT_i * sqid * sqid;
                 sig          =  MULT_i * nt * sig1k / (1.0 + sig1k * mig);
                 cigid        =  c_igid;
-                if (sid == 0.0) begin
+                if (sid <= 0.0) begin
                     fknee        =  0.0;
                 end else begin
                     fknee        =  sfl / sid;

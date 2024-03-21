@@ -16,7 +16,7 @@
 //  undivided ownership and copyrights.
 //
 //
-//  Version: 103.8.0 (PSP), 200.6.1 (JUNCAP), July 2020
+//  Version: 103.8.2 (PSP), 200.6.2 (JUNCAP), June 2022
 //
 //======================================================================================
 //======================================================================================
@@ -104,7 +104,7 @@
             SP_S_ysub   = 1.25 * (SP_S_yg * inv_xi); \
             SP_S_eta    = 0.5 * (SP_S_ysub + 10 - sqrt((SP_S_ysub - 6.0) * (SP_S_ysub - 6.0) + 64.0)); \
             SP_S_temp   = SP_S_yg - SP_S_eta; \
-            SP_S_a      = SP_S_temp * SP_S_temp + Gf2*(SP_S_eta + 1.0); \
+            SP_S_a      = SP_S_temp * SP_S_temp + Gf2*(SP_S_eta + 1.0);\
             SP_S_c      = 2.0 * SP_S_temp - Gf2; \
             SP_S_tau    = -SP_S_eta + ln(SP_S_a * inv_Gf2); \
             `sigma(SP_S_a, SP_S_c, SP_S_tau, SP_S_eta, SP_S_y0) \
@@ -209,7 +209,7 @@
         SP_S_qC     = SP_S_temp * SP_S_temp - Gf2 * (SP_S_delta1 + SP_S_x0 - 1.0 + SP_S_delta0 - (delta) * (SP_S_x0 + 1.0 + SP_S_xi0)); \
         SP_S_temp   = 2.0 - Gf2*(SP_S_delta1+SP_S_delta0-(delta)*SP_S_xi2); \
         SP_S_temp   = SP_S_pC * SP_S_pC - 2.0 * (SP_S_qC * SP_S_temp); \
-        sp          = SP_S_x0 + 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp))); \
+        sp          = SP_S_x0 + 2.0 * (SP_S_qC / (SP_S_pC + sqrt(SP_S_temp)));\
     end
 
 //  sp_ovInit function: surface potential calculation for the overlap regions initialization
@@ -464,7 +464,11 @@
     qbd          =  0.0; \
     \
     /* Bias definition */  \
-    Vgb1         =  Vgs + Vsbstar - VFB_T; \
+    if (SWFIX > 0.0) begin \
+        Vgb1         =  Vgb - VFB_T; \
+    end else begin \
+        Vgb1         =  Vgs + Vsbstar - VFB_T; \
+    end \
     Vsbx         =  Vsbstar + 0.5 * (Vds - Vdsx); \
     Vdsp         =  2.0 * Vdsx / (1.0 + sqrt(1.0 + CFD_i * Vdsx)); \
     delVg        =  cfloc * Vdsp * (1.0 + CFB_i * Vsbx); \
@@ -499,6 +503,13 @@
     phit1        =  phit * ct_fact * (1.0 + dphit1); \
     inv_phit1    =  1.0 / phit1; \
     xg           =  Vgb1 * inv_phit1; \
+    \
+    /* Bias dependent body factor recalculation */ \
+    if (SWFIX > 0.0) begin \
+        Gf           =  Gf * sqrt(inv_phit1 / inv_phit); \
+        Gf2          =  Gf * Gf; \
+        inv_Gf2      =  1.0 / Gf2; \
+    end \
     \
     /* Surface potential at source side */ \
     xi           =  1.0 + Gf * `invSqrt2; \

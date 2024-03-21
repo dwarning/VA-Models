@@ -37,8 +37,8 @@ vssp 33 0 0
 vbsp 44 0 0
 
 * PSP modelparameters for PSP 103.3
-.include ../Modelcards/psp103_nmos-2.mod
-.include ../Modelcards/psp103_pmos-2.mod
+.include ../Modelcards/psp103_nmos-2_va.mod
+.include ../Modelcards/psp103_pmos-2_va.mod
 
 * NMOS
 .dc vgsn 0 1.5 0.05 vbsn 0 -1.5 -0.3

@@ -16,7 +16,7 @@
 //  undivided ownership and copyrights.
 //
 //
-//  Version: 103.8.0 (PSP), 200.6.1 (JUNCAP), July 2020
+//  Version: 103.8.2 (PSP), 200.6.2 (JUNCAP), June 2022
 //
 //======================================================================================
 //======================================================================================
@@ -363,8 +363,8 @@ if (SWGEO == 1) begin
     FCGOVACCD_p  =  FCGOVACCDO;
     CGOVACCG_p   =  CGOVACCGO;
     CGBOV_p      =  CGBOVL * Lcv / `LEN;
-    CINR_p       =  CINRW * Wcv / `WEN;
-    CINRD_p      =  CINRDW * Wcv / `WEN;
+    CINR_p       =  CINRW * WEcv / `WEN;
+    CINRD_p      =  CINRDW * WEcv / `WEN;
     DVFBINR_p    =  DVFBINRO;
     FCINRDEP_p   =  FCINRDEPO;
     FCINRACC_p   =  FCINRACCO;
@@ -555,8 +555,8 @@ if (SWGEO == 2) begin
     FCGOVACCD_p  =  POFCGOVACCD;
     CGOVACCG_p   =  POCGOVACCG;
     CGBOV_p      =  POCGBOV + iiLcv * PLCGBOV + iiWcv * PWCGBOV + iiLWcv * PLWCGBOV;
-    CINR_p       =  POCINR + iLcv * PLCINR + iiWcv * PWCINR + iiiLWcv * PLWCINR;
-    CINRD_p      =  POCINRD + iLcv * PLCINRD + iiWcv * PWCINRD + iiiLWcv * PLWCINRD;
+    CINR_p       =  POCINR + iLEcv * PLCINR + iiWEcv * PWCINR + iiiLEWEcv * PLWCINR;
+    CINRD_p      =  POCINRD + iLEcv * PLCINRD + iiWEcv * PWCINRD + iiiLEWEcv * PLWCINRD;
     DVFBINR_p    =  PODVFBINR;
     FCINRDEP_p   =  POFCINRDEP;
     FCINRACC_p   =  POFCINRACC;

@@ -1,3 +1,7 @@
+Update to version 103.8.2 downloaded from http://www.cea.fr/cea-tech/leti/pspsupport.
+
+Xyce: Change module name PSP103VA to PSP103_VA to prevent conflict with build-in model.
+
 Use DTA and TRISE as instance parameter and model parameter. Instance parameter will overwrite model parameter.
 For ADMS/Xyce temperature initialization code must be shifted and pseudo event blocks needed.
 

@@ -25,6 +25,6 @@ YPSP103_VA m1  d g s b pch
 *.print dc i(vs)
 *
 
-.include ../Modelcards/psp103_pmos-2.mod
+.include ../Modelcards/psp103_pmos-2_va.mod
 
 .end

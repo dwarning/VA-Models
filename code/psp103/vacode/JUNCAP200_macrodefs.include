@@ -16,7 +16,7 @@
 //  undivided ownership and copyrights.
 //
 //
-//  Version: 200.6.1, July 2020
+//  Version: 200.6.2, April 2021
 //
 //======================================================================================
 //======================================================================================
@@ -255,7 +255,7 @@
     erfcpos = (`aerfc * terfc + berfc * (terfc * terfc) + cerfc * (terfc * terfc * terfc)) * tmp; \
     if (y > 0.0) begin \
         result       =  erfcpos; \
-    end else begin \
+    end else begin\
         `expl_low(m, tmp) \
         result       =  2.0 * tmp - erfcpos; \
     end
@@ -289,7 +289,7 @@
         twoatatoverthreebtat = (`twothirds * atat) / btat; \
         umaxbeforelimiting = twoatatoverthreebtat * twoatatoverthreebtat; \
         umax         =  sqrt(umaxbeforelimiting * umaxbeforelimiting / (umaxbeforelimiting * umaxbeforelimiting + 1.0)); \
-        sqrtumax     =  sqrt(abs(umax)); \
+        sqrtumax     =  sqrt(umax); \
         umaxpoweronepointfive = umax * sqrtumax; \
         `mypower2((1.0 + btat * umaxpoweronepointfive), (-P * one_over_one_minus_P), wgamma) \
         wtat         =  wsrh * wgamma / (wsrh + wgamma); \

@@ -2,8 +2,8 @@
 * simple 5-stage ring oscillator
 
 * Path to the models
-.include ../Modelcards/psp103_nmos-2.mod
-.include ../Modelcards/psp103_pmos-2.mod
+.include ../Modelcards/psp103_nmos-2_va.mod
+.include ../Modelcards/psp103_pmos-2_va.mod
 
 * the voltage sources: 
 Vdd vdd 0 DC 1.2

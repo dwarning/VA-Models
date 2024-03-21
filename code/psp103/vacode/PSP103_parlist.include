@@ -16,7 +16,7 @@
 //  undivided ownership and copyrights.
 //
 //
-//  Version: 103.8.0 (PSP), 200.6.1 (JUNCAP), July 2020
+//  Version: 103.8.2 (PSP), 200.6.2 (JUNCAP), June 2022
 //
 //======================================================================================
 //======================================================================================
@@ -31,6 +31,7 @@
 `MPInb(LEVEL          ,103        ,""                                   ,"Model level")
 `MPIty(TYPE           ,1          ,""                                   ,"Channel type parameter, +1=NMOS -1=PMOS")
 `MPRco(TR             ,21.0       ,"C"        ,-273.0      ,inf         ,"nominal (reference) temperature")
+aliasparam TREF = TR;
 
 //  Switch parameters that turn models or effects on or off
 `MPIcc(SWGEO          ,1          ,""         ,0           ,2           ,"Flag for geometrical model, 0=local, 1=global, 2=binning")
@@ -45,6 +46,7 @@
 `MPIcc(SWQSAT         ,0          ,""         ,0           ,1           ,"Flag for separate capacitance calculation in saturation only: 0=off, 1=on")
 `MPIcc(SWQPART        ,0          ,""         ,0           ,1           ,"Flag for drain/source charge partitioning; 0=linear distribution, 1=source")
 `MPIcc(SWIGN          ,1          ,""         ,0           ,1           ,"Flag for induced gate noise; 0=off, 1=on")
+`MPIcc(SWFIX          ,0          ,""         ,0           ,1           ,"Flag for fixes introduced in PSP103.8.2")
 `ifdef NQSmodel
 `MPIcc(SWNQS          ,0          ,""         ,0           ,9           ,"Flag for NQS, 0=off, 1, 2, 3, 5, or 9=number of collocation points")
 `endif // NQSmodel
@@ -947,4 +949,3 @@
 `else
 `IPRnb(DTA            ,0.0        ,"K"                                  ,"Temperature offset w.r.t. ambient temperature")
 `endif
-`ALIAS(TRISE, DTA)

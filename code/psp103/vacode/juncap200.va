@@ -16,7 +16,7 @@
 //  undivided ownership and copyrights.
 //
 //
-//  Version: 200.6.1, July 2020
+//  Version: 200.6.2, April 2021
 //
 //======================================================================================
 //======================================================================================
@@ -56,11 +56,7 @@ module JUNCAP200(A,K);
     //  --------------------------------------------------------------------------------------------------------------
     `MPInb(LEVEL          ,200        ,""                                     ,"Model level must be 200")
     `MPIty(TYPE           ,1          ,""                                     ,"Type parameter, in output value 1 reflects n-type, -1 reflects p-type")
-`ifdef __XYCE__
-    `MPRnb_BOTH(DTA            ,0.0        ,"K"                                    ,"Temperature offset with respect to ambient temperature")
-`else
-    `IPRnb(DTA            ,0.0        ,"K"                                    ,"Temperature offset with respect to ambient temperature")
-`endif
+    `MPRnb(DTA            ,0.0        ,"K"                                    ,"Temperature offset with respect to ambient temperature")
 
     //  --------------------------------------------------------------------------------------------------------------
     //  Instance parameters
@@ -69,6 +65,8 @@ module JUNCAP200(A,K);
     `IPRco(LS             ,1.0e-6     ,"m"        ,`LS_cliplow   ,inf         ,"STI-edge part of junction perimeter")
     `IPRco(LG             ,1.0e-6     ,"m"        ,`LG_cliplow   ,inf         ,"Gate-edge part of junction perimeter")
     `IPRco(MULT           ,1.0        ,""         ,`MULT_cliplow ,inf         ,"Number of devices in parallel")
+    `IPRnb(TRISE          ,0.0        ,"K"                                    ,"Device temperature offset")
+    aliasparam DTEMP = TRISE;
 
     //  --------------------------------------------------------------------------------------------------------------
     //  JUNCAP2 model parameters
@@ -88,24 +86,24 @@ module JUNCAP200(A,K);
 
     `OPP(vak               ,"V"            ,"Voltage between anode and cathode")
     `ifdef OPderiv
-        `OPP(cj                ,"F"            ,"Total source junction capacitance")
-        `OPP(cjbot             ,"F"            ,"Junction capacitance (bottom component)")
-        `OPP(cjgat             ,"F"            ,"Junction capacitance (gate-edge component)")
-        `OPP(cjsti             ,"F"            ,"Junction capacitance (STI-edge component)")
+        `OPM(cj                ,"F"            ,"Total source junction capacitance")
+        `OPM(cjbot             ,"F"            ,"Junction capacitance (bottom component)")
+        `OPM(cjgat             ,"F"            ,"Junction capacitance (gate-edge component)")
+        `OPM(cjsti             ,"F"            ,"Junction capacitance (STI-edge component)")
     `endif // OPderiv
-    `OPP(ij                ,"A"            ,"Total source junction current")
-    `OPP(ijbot             ,"A"            ,"Junction current (bottom component)")
-    `OPP(ijgat             ,"A"            ,"Junction current (gate-edge component)")
-    `OPP(ijsti             ,"A"            ,"Junction current (STI-edge component)")
-    `OPP(si                ,"A^2/Hz"       ,"Total junction current noise spectral density")
+    `OPM(ij                ,"A"            ,"Total source junction current")
+    `OPM(ijbot             ,"A"            ,"Junction current (bottom component)")
+    `OPM(ijgat             ,"A"            ,"Junction current (gate-edge component)")
+    `OPM(ijsti             ,"A"            ,"Junction current (STI-edge component)")
+    `OPM(si                ,"A^2/Hz"       ,"Total junction current noise spectral density")
 
     // local parameters after scaling, T-scaling, and clipping
-    `OPP(idsatsbot         ,"A"            ,"Total bottom saturation current")
-    `OPP(idsatssti         ,"A"            ,"Total STI-edge saturation current")
-    `OPP(idsatsgat         ,"A"            ,"Total gate-edge saturation current")
-    `OPP(cjosbot           ,"F"            ,"Total bottom capacity")
-    `OPP(cjossti           ,"F"            ,"Total STI-edge capacity")
-    `OPP(cjosgat           ,"F"            ,"Total gate-edge capacity")
+    `OPM(idsatsbot         ,"A"            ,"Total bottom saturation current")
+    `OPM(idsatssti         ,"A"            ,"Total STI-edge saturation current")
+    `OPM(idsatsgat         ,"A"            ,"Total gate-edge saturation current")
+    `OPM(cjosbot           ,"F"            ,"Total bottom capacity")
+    `OPM(cjossti           ,"F"            ,"Total STI-edge capacity")
+    `OPM(cjosgat           ,"F"            ,"Total gate-edge capacity")
     `OPP(vbisbot           ,"V"            ,"built-in voltage of the bottom junction")
     `OPP(vbissti           ,"V"            ,"built-in voltage of the STI-edge junction")
     `OPP(vbisgat           ,"V"            ,"built-in voltage of the gate-edge junction")
