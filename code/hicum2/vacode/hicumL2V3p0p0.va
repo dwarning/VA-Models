@@ -532,7 +532,7 @@ parameter real rhjei    = 1.0           from (0:10]     `ATTR(info="Smoothing pa
 parameter real hjci     = 1.0           from [0:100]    `ATTR(info="B-C depletion charge weighting factor in HBTs");
 
 //Base-Emitter diode currents
-parameter real ibeis    = 1.0E-18       from [0:1]      `ATTR(info="Internal B-E saturation current" unit="A");
+parameter real ibeis    = 1.0E-18       from (0:1]      `ATTR(info="Internal B-E saturation current" unit="A");
 parameter real mbei     = 1.0           from (0:10]     `ATTR(info="Internal B-E current ideality factor");
 parameter real ireis    = 0.0           from [0:1]      `ATTR(info="Internal B-E recombination saturation current" unit="A");
 parameter real mrei     = 2.0           from (0:10]     `ATTR(info="Internal B-E recombination current ideality factor");
@@ -546,7 +546,7 @@ parameter real mcf      = 1.0           from (0:10]     `ATTR(info="Non-ideality
 parameter real tbhrec   = 0.0           from [0:inf)    `ATTR(info="Base current recombination time constant at B-C barrier for high forward injection" unit="s");
 
 //Base-Collector diode currents
-parameter real ibcis    = 1.0E-16       from [0:1.0]    `ATTR(info="Internal B-C saturation current" unit="A");
+parameter real ibcis    = 1.0E-16       from (0:1.0]    `ATTR(info="Internal B-C saturation current" unit="A");
 parameter real mbci     = 1.0           from (0:10]     `ATTR(info="Internal B-C current ideality factor");
 parameter real ibcxs    = 0.0           from [0:1.0]    `ATTR(info="External B-C saturation current" unit="A");
 parameter real mbcx     = 1.0           from (0:10]     `ATTR(info="External B-C current ideality factor");
@@ -758,6 +758,9 @@ real Ixf, Qxf, Ixf1, Ixf2, Qxf1, Qxf2, Itxf, Qdeix;
 // Avalanche current
 integer use_aval;
 real iavl;
+`ifdef __XYCE__
+    real Vcrit1, Vcrit2;
+`endif
 
 `ifdef CALC_OP
     (* desc="External (saturated) collector series resistance",        units="Ohm" *) real rcx_t;
@@ -818,8 +821,10 @@ analog begin
     end
 `else
 `ifdef __XYCE__
-    Vbiei = $limit(V(br_biei),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibeis)),type);
-    Vbici = $limit(V(br_bici),"typedpnjlim_new",VT,VT*ln(VT/(`M_SQRT2*ibcis)),type);
+    Vcrit1 = VT*ln(VT/(`M_SQRT2*ibeis));
+    Vbiei = $limit(V(br_biei),"typedpnjlim_new",VT,Vcrit1,type);
+    Vcrit2 = VT*ln(VT/(`M_SQRT2*ibcis));
+    Vbici = $limit(V(br_bici),"typedpnjlim_new",VT,Vcrit2,type);
 `else
     Vbiei = type*V(br_biei);
     Vbici = type*V(br_bici);
