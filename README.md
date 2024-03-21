@@ -33,7 +33,7 @@ Actual version status:
 | ekv26         | 2.6           | **HEMT**      |               |
 | hisim2        | 3.2.0         | angelov       | 2.0           |
 | psp102        | 102.5.0       | angelov_gan   | 2.0           |
-| psp103        | 103.8.0       | asmhemt       | 101.4.0       |
+| psp103        | 103.8.2       | asmhemt       | 101.4.0       |
 | psp104        | 104.0.0       | epfl-hemt     | 3.0.0         |
 | **SOI MOSFET**|               | mvsg_cmc      | 3.2.0         |
 | l-lutsoi      | 102.7.0       | **IGBT**      |               |
