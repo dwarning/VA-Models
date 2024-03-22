@@ -1,8 +1,11 @@
 Update to version 103.8.2 downloaded from http://www.cea.fr/cea-tech/leti/pspsupport.
 
+Xyce: Remove $mfactor from OP output variables calculation
+Xyce: Omit TRISE instance parameter for standalone juncap200 because parameter scope problem
+
+
+Initial code version 103.8.0 downloaded from http://www.cea.fr/cea-tech/leti/pspsupport.
+
 Xyce: Change module name PSP103VA to PSP103_VA to prevent conflict with build-in model.
-
-Use DTA and TRISE as instance parameter and model parameter. Instance parameter will overwrite model parameter.
+Use TRISE and DTA as instance parameter and model parameter. Instance parameter will overwrite model parameter.
 For ADMS/Xyce temperature initialization code must be shifted and pseudo event blocks needed.
-
-Code version 103.8.0 downloaded from http://www.cea.fr/cea-tech/leti/pspsupport.

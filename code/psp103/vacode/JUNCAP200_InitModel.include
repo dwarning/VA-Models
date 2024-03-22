@@ -131,7 +131,11 @@ end
 
 //  Variables related to temperatures
 tkr          = `KELVINCONVERSION + TRJ;
-tkd          =  max($temperature + DTA + TRISE, `KELVINCONVERSION + `MINTEMP);
+`ifndef __XYCE__
+    tkd          =  max($temperature + DTA + TRISE, `KELVINCONVERSION + `MINTEMP);
+`else
+    tkd          =  max($temperature + DTA, `KELVINCONVERSION + `MINTEMP);
+`endif
 auxt         =  tkd / tkr;
 KBOL_over_QELE = `KBOL / `QELE;
 phitr        =  KBOL_over_QELE * tkr;

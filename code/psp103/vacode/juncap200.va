@@ -65,9 +65,10 @@ module JUNCAP200(A,K);
     `IPRco(LS             ,1.0e-6     ,"m"        ,`LS_cliplow   ,inf         ,"STI-edge part of junction perimeter")
     `IPRco(LG             ,1.0e-6     ,"m"        ,`LG_cliplow   ,inf         ,"Gate-edge part of junction perimeter")
     `IPRco(MULT           ,1.0        ,""         ,`MULT_cliplow ,inf         ,"Number of devices in parallel")
+`ifndef __XYCE__
     `IPRnb(TRISE          ,0.0        ,"K"                                    ,"Device temperature offset")
     aliasparam DTEMP = TRISE;
-
+`endif
     //  --------------------------------------------------------------------------------------------------------------
     //  JUNCAP2 model parameters
     //  --------------------------------------------------------------------------------------------------------------
