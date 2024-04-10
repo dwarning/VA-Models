@@ -19,7 +19,7 @@ VP1 _net0 0 dc 0 ac 0.316228 SIN(0 0.316228 1MEG) portnum 1 z0 50
 VP2 _net6 0 dc 0 ac 0.316228 SIN(0 0.316228 1MEG) portnum 2 z0 50
 XSUB1 n2 _net5 0 meb
 .control
-pre_osdi '../../osdilibs/angelov.osdi'
+pre_osdi '../../../osdilibs/angelov.osdi'
 SP DEC 101 1MEG 0.99G 1
 let gain = db((S_2_1))
 plot S_1_1 S_1_2 S_2_1 S_2_2

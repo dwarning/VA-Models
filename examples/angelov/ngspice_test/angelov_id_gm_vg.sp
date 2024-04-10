@@ -9,7 +9,7 @@ vs s 0 dc=0.0
 N1 d g s nfet
 
 .control
-pre_osdi ../../osdilibs/angelov.osdi
+pre_osdi ../../../osdilibs/angelov.osdi
 op
 show all
 dc vg -2 1 0.01
