@@ -20,7 +20,7 @@ x5 4 out vdd 0 inv
 .tran 10n 5u
 
 .control
-pre_osdi ../../osdilibs/bsimbulk.osdi
+pre_osdi ../../../osdilibs/bsimbulk.osdi
 run
 rusage all
 plot v(in) v(out)

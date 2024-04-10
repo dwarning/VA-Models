@@ -12,7 +12,7 @@ CLOAD  dd d  20f
 VGS     g 0  dc 1.25 ac 1.0
 
 .control
-pre_osdi ../osdilibs/hisim2.osdi
+pre_osdi ../../osdilibs/hisim2.osdi
 op
 print all
 ac DEC 10 1k 1G

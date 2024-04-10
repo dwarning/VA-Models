@@ -23,7 +23,7 @@ nm1  d g s b nch
 .model nch PSP104VA TYPE=1
 
 .control
-pre_osdi ../../osdilibs/psp104.osdi
+pre_osdi ../../../osdilibs/psp104.osdi
 dc vd 0 2.0 0.05 vg 0 1.5 0.25
 plot i(vs)
 dc vg 0 1.5 0.05 vb 0 -3.0 -1

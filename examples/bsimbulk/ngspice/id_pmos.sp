@@ -11,7 +11,7 @@ vb b 0 dc 0
 nm1 d g s b pmos W=20e-6 L=1e-6
 
 .control
-pre_osdi ../../osdilibs/bsimbulk.osdi
+pre_osdi ../../../osdilibs/bsimbulk.osdi
 op
 show all
 dc vg -1.3 0.0 0.01 vb 0 1.2 0.2

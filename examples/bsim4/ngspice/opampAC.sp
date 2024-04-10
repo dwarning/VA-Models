@@ -22,7 +22,7 @@ vss vss 0  -1.8
 Vdd vdd 0  1.8 
 
 .control
-pre_osdi ../../osdilibs/bsim4.osdi
+pre_osdi ../../../osdilibs/bsim4.osdi
 ac dec 10 100 100Meg
 plot vdb(8)
 .endc

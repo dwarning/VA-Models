@@ -26,7 +26,7 @@ nq1               B  B E    hicumL2va M=4
 .include ../Modelcards/examples.lib
 
 .control
-pre_osdi ../../osdilibs/hicumL2.osdi
+pre_osdi ../../../osdilibs/hicumL2.osdi
 setplot           new 
 
 let               V10u  = 0*vector(91)

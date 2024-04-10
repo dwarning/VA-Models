@@ -18,7 +18,7 @@ N1 drain gate 0 bulk 0 nmos TFIN=15n L=30n NFIN=10 NRS=1 NRD=1
 
 * --- Analysis ---
 .control
-pre_osdi ../../osdilibs/bsimcmg.osdi
+pre_osdi ../../../osdilibs/bsimcmg.osdi
 
 op
 print all

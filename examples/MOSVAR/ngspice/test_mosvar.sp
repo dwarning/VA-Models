@@ -9,7 +9,7 @@ NCx vc bi 0 pmoscap w=10u l=10u ngcon=2
 .model pmoscap mosvar type=1 toxo=13n VFBO=-1; NSUBO=1e22 rshg=10 igmax=1e-3
 
 .control
-pre_osdi ../../osdilibs/mosvar.osdi
+pre_osdi ../../../osdilibs/mosvar.osdi
 tran 1n 10u 10n
 plot -i(v1)/1e6 vs v(vc)
 .endc

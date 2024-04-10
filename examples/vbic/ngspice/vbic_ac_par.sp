@@ -8,7 +8,7 @@ vb b 0 dc 0.6
 nq1 1 b 0 T M_BFP780
 
 .control
-pre_osdi ../../osdilibs/vbic_1p3.osdi
+pre_osdi ../../../osdilibs/vbic_1p3.osdi
 save @nq1[gm] @nq1[go] @nq1[gpi]
 save @nq1[cbe] @nq1[cbc]
 save @nq1[qbe] @nq1[qbc]

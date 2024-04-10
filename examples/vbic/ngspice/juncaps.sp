@@ -22,7 +22,7 @@ v3 3 0 dc 0
 * Analysis and capacitance computation
 **************************************
 .control
-pre_osdi ../../osdilibs/vbic_1p3.osdi
+pre_osdi ../../../osdilibs/vbic_1p3.osdi
 deftype v admittance S
 deftype v capacitance F
 set width=180

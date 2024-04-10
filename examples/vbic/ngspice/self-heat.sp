@@ -15,7 +15,7 @@ NQ1 c1 b1 e1 s1 vbicmod sw_et=1 m=5
 .include ../Modelcards/vbic.mod
 
 .control
-pre_osdi ../../osdilibs/vbic_1p3.osdi
+pre_osdi ../../../osdilibs/vbic_1p3.osdi
 dc vc 0.0 5.0001 0.05 vb 0.7 1.0001 0.05
 altermod @vbicmod[RTH]=0
 dc vc 0.0 5.0001 0.05 vb 0.7 1.0001 0.05

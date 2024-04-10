@@ -11,7 +11,7 @@ vb b 0 dc 0.0
 N1 d g s b pmos W = 10e-6 L = 10e-6
 
 .control
-pre_osdi ../../osdilibs/BSIM6.1.1.osdi
+pre_osdi ../../../osdilibs/BSIM6.1.1.osdi
 op
 show all
 dc vg -1.3 0.0 0.01 vb 0.0 0.5 0.1

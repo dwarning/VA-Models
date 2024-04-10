@@ -11,7 +11,7 @@ Vgs   g 0  dc   0.0
 Vbs   b 0  dc   0.0
 
 .control
-pre_osdi ../osdilibs/hisim2.osdi
+pre_osdi ../../osdilibs/hisim2.osdi
 dc  Vgs 0 2.0 0.01  Vbs 0.0 -1.0 -0.2
 *dc  Vds 0 2.0 0.01  Vgs 0.5 2.0 0.1
 plot  -I(Vds)

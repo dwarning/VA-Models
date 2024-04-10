@@ -10,7 +10,7 @@ ic 0 c 0.001
 NQ1 C B 0 hicumL2va
 
 .control
-pre_osdi ../../osdilibs/hicumL2.osdi
+pre_osdi ../../../osdilibs/hicumL2.osdi
 foreach myic 2e-03 4e-03 7e-03 9e-03 18e-03 33e-3
  alter ic = $myic
  op

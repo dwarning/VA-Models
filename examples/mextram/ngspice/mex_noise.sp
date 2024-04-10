@@ -17,10 +17,10 @@ NQ1 C B 0 0 BJTRF1
 *.model BJTRF1 bjt505t_va
 
 .control
-*pre_osdi ../../osdilibs/bjt504.osdi
-*pre_osdi ../../osdilibs/bjt504t.osdi
-pre_osdi ../../osdilibs/bjt505.osdi
-*pre_osdi ../../osdilibs/bjt505t.osdi
+*pre_osdi ../../../osdilibs/bjt504.osdi
+*pre_osdi ../../../osdilibs/bjt504t.osdi
+pre_osdi ../../../osdilibs/bjt505.osdi
+*pre_osdi ../../../osdilibs/bjt505t.osdi
 op
 print all
 noise v(c) vin dec 10 10 99Meg 1

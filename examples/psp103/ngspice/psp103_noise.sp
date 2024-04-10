@@ -20,7 +20,7 @@ Rl out vdd 200 noisy=0
 .include ../Modelcards/psp103_nmos-2.mod
 
 .control
-pre_osdi ../../osdilibs/psp103.osdi
+pre_osdi ../../../osdilibs/psp103.osdi
 noise v(out) vin dec 10 10 10G 1
 setplot noise1
 plot ally

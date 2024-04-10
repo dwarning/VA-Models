@@ -18,7 +18,7 @@ Xinv1  vi vo supply 0 inverter
 
 * --- DC Analysis ---
 .control
-pre_osdi ../../osdilibs/BSIM6.1.1.osdi
+pre_osdi ../../../osdilibs/BSIM6.1.1.osdi
 dc vin 0 1 0.01
 plot v(vi) v(vo)
 .endc

@@ -7,7 +7,7 @@ NQ1 C B 0 T fbhhbt
 RT T 0 1.0
 
 .control
-pre_osdi ../osdilibs/fbh_hbt-2_3.osdi
+pre_osdi ../../osdilibs/fbh_hbt-2_3.osdi
 option gmin=1e-13
 dc vc 0 5 0.1 ib 1m 10m 1m
 plot abs(i(vc))

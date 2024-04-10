@@ -26,7 +26,7 @@ Xinv5  4 vo supply ss mg_inv
 .tran 0.1n 2u
 
 .control
-pre_osdi ../../osdilibs/bsimcmg.osdi
+pre_osdi ../../../osdilibs/bsimcmg.osdi
 run
 plot v(vi) v(vo)
 .endc

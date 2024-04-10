@@ -14,7 +14,7 @@ nn0 VS Gate Out VS nmos1 W=10u L=0.18u
 np0 VD Gate Out VS pmos1 W=20u L=0.18u
 
 .control
-pre_osdi ../../osdilibs/bsimsoi.osdi
+pre_osdi ../../../osdilibs/bsimsoi.osdi
 tran 0.01n 600ps
 plot v(gate) v(out)
 .endc

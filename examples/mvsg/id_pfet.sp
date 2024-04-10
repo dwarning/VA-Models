@@ -10,7 +10,7 @@ vb 0 b dc=0.0
 N1 d g s b pfet
 
 .control
-pre_osdi ../osdilibs/mvsg_cmc.osdi
+pre_osdi ../../osdilibs/mvsg_cmc.osdi
 dc vg -5 5 0.01
 plot -i(vd)
 dc vd 0.0 50 0.1 vg -2 0 0.5

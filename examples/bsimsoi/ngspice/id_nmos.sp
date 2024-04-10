@@ -15,7 +15,7 @@ nx1 drain gate source substrate nmos1 W=1e-6 L=1e-7 soimod=0 nf=1
 
 * --- DC Analysis ---
 .control
-pre_osdi ../../osdilibs/bsimsoi.osdi
+pre_osdi ../../../osdilibs/bsimsoi.osdi
 op
 show all
 dc vg 0 1.2 0.01

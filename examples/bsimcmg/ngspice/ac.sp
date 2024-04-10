@@ -29,7 +29,7 @@ cl supply vout c=10f
 *.param myvdd=2.0
 
 .control
-pre_osdi ../../osdilibs/bsimcmg.osdi
+pre_osdi ../../../osdilibs/bsimcmg.osdi
 run
 show all
 plot vdb(vout)

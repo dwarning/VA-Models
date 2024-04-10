@@ -11,7 +11,7 @@ N1 d g s b dt nfet
 rth0 dt 0 4.0
 
 .control
-pre_osdi ../osdilibs/epfl_hemt.osdi
+pre_osdi ../../osdilibs/epfl_hemt.osdi
 dc vg -4 1 0.01
 plot -i(vd)
 dc vd 0.0 40 0.1 vg -3 1 0.5

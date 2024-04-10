@@ -7,7 +7,7 @@ VS S 0 0.0
 NQ1 C B 0 S hicumL2va
 
 .control
-pre_osdi ../../osdilibs/hicumL2.osdi
+pre_osdi ../../../osdilibs/hicumL2.osdi
 option gmin=1e-14
 dc vb 0.2 1.2 0.01
 *plot i(vc) i(vb) i(vs)

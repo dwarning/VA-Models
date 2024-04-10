@@ -7,7 +7,7 @@ VS S 0 0.0
 NQ1 0 B E S hicumL2va
 
 .control
-pre_osdi ../../osdilibs/hicumL2.osdi
+pre_osdi ../../../osdilibs/hicumL2.osdi
 dc vb 0.4 1.2 0.01
 plot abs(i(ve)) abs(i(vb)) abs(i(vs)) xlimit 0.4 1.2 ylog ylimit 1e-12 0.1
 plot abs(i(ve))/abs(i(vb)) vs abs(i(ve)) xlog xlimit 1e-06 100e-3 ylimit 0 40

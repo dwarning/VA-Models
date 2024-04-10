@@ -28,7 +28,7 @@ Vb B 0 0
 .include "../Modelcards/modelcard.pmos"
 
 .control
-pre_osdi ../../osdilibs/bsim4.osdi
+pre_osdi ../../../osdilibs/bsim4.osdi
 tran 1ns 60ns
 plot a b v(9) v(8) 
 .endc

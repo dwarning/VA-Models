@@ -13,7 +13,7 @@ XQ1 C B 0 0 DT hicumL0V1p1_c_sbt
 .include ../Modelcards/model-card-hicumL0V1p11_mod.lib
 
 .control
-pre_osdi ../../osdilibs/hicumL0_v2p1p0.osdi
+pre_osdi ../../../osdilibs/hicumL0_v2p1p0.osdi
 op
 print all
 echo

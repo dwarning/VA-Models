@@ -10,7 +10,7 @@ XQ1 C B 0 S npn13G2 nx=1
 *XQ1 C B 0 S npn13G2v nx=1
 
 .control
-pre_osdi ../../osdilibs/vbic_1p3.osdi
+pre_osdi ../../../osdilibs/vbic_1p3.osdi
 let rth_est=11e3
 save all
 op

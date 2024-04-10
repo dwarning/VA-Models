@@ -44,7 +44,7 @@ nmn17 2  18 0 0 n1 l=0.18u w=5u ad=5p pd=6u as=5p ps=6u SA=2u SB=8u NF=3 SD=0.2u
 c1 18 0 .1p
 
 .control
-pre_osdi ../../osdilibs/bsim4.osdi
+pre_osdi ../../../osdilibs/bsim4.osdi
 tran .1ns 10ns
 plot v(2) v(5)
 .endc

@@ -4,7 +4,7 @@ va a 0 dc 1.0
 nd1 a 0 diocmc AB=100e-12
 
 .control
-pre_osdi ../../osdilibs/diode_cmc.osdi
+pre_osdi ../../../osdilibs/diode_cmc.osdi
 dc va 0.01 1.5 0.01 temp -25 125 50
 plot abs(i(va)) ylog
 .endc

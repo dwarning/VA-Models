@@ -16,7 +16,7 @@ nx1 drain gate source substrate nmos1 W=1e-6 L=1e-7
 
 * --- DC Analysis ---
 .control
-pre_osdi ../../osdilibs/L_UTSOI_102.osdi
+pre_osdi ../../../osdilibs/L_UTSOI_102.osdi
 dc vg 0 1.2 0.01 vb 0 -1 -0.2
 plot -i(vd)
 dc vd 0 1.2 0.01 vg 0.5 1.2 0.1

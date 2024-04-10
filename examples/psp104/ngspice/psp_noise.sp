@@ -21,7 +21,7 @@ Rl out vdd 200 noisy=0
 .model nch PSP104VA TYPE=1
 
 .control
-pre_osdi ../../osdilibs/psp104.osdi
+pre_osdi ../../../osdilibs/psp104.osdi
 noise v(out) vin dec 10 10 10G 1
 setplot noise1
 plot ally

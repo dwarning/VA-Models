@@ -16,7 +16,7 @@ N1 drain gate source bulk nmos W=10u L=10u
 * --- DC Analysis ---
 .dc vdrain -0.1 0.1 0.001 vgate 0.0 1.0 0.2
 .control
-pre_osdi ../../osdilibs/BSIM6.1.1.osdi
+pre_osdi ../../../osdilibs/BSIM6.1.1.osdi
 run
 plot -i(vdrain)
 let gx=deriv(-i(vdrain))

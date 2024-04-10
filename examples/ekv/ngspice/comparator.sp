@@ -29,7 +29,7 @@ Vb B 0 0
 
 *----------------------------------------
 .control
-    pre_osdi ../../osdilibs/ekv26.osdi
+    pre_osdi ../../../osdilibs/ekv26.osdi
     run  
     plot A B v(9) v(8)
 .endc

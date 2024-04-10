@@ -37,7 +37,7 @@ x100E in outE 1 Fifty
 x100F in outF 1 Fifty
 
 .control
-pre_osdi ../../osdilibs/bsimcmg.osdi
+pre_osdi ../../../osdilibs/bsimcmg.osdi
 
 tran 2p 1.2n
 

@@ -56,7 +56,7 @@ c2  z     vss   0.576f
 .tran 1p 2n uic
 
 .control
-pre_osdi ../../osdilibs/psp103.osdi
+pre_osdi ../../../osdilibs/psp103.osdi
 run
 plot v(in) 
 rusage

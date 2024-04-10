@@ -11,7 +11,7 @@ Vgs   g 0  dc   0.0
 Vss sub 0  dc  -2.0
 
 .control
-pre_osdi ../osdilibs/hisimsoi.osdi
+pre_osdi ../../osdilibs/hisimsoi.osdi
 dc  Vds 0 2.0 0.2  Vgs 0.5 2.0 0.5
 plot  -I(Vds)
 .endc

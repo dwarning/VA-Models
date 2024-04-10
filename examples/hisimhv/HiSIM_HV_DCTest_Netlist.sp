@@ -18,7 +18,7 @@ Vgs   g 0  dc   0.0
 Vss sub 0  dc -20.0
 
 .control
-pre_osdi ../osdilibs/hisimhv.osdi
+pre_osdi ../../osdilibs/hisimhv.osdi
 dc  Vds 0 20.0 0.2  Vgs 2 20.0 2.0
 plot  -I(Vds)
 plot v(dt)

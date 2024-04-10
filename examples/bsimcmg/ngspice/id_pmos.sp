@@ -11,7 +11,7 @@ VB e 0 0
 N1 d g s e pmos L=0.2u NF=20
 
 .control
-pre_osdi ../../osdilibs/bsimcmg.osdi
+pre_osdi ../../../osdilibs/bsimcmg.osdi
 op
 show all
 dc Vg 0.0 -1.0 -0.01

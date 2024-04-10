@@ -38,7 +38,7 @@ vb 32 0 dc -20
 
 *----------------------------------------
 .control
-pre_osdi ../../osdilibs/ekv26.osdi
+pre_osdi ../../../osdilibs/ekv26.osdi
 ac dec 100 1k 100Meg
 plot vdb(out)
 plot 180/PI*ph(out)

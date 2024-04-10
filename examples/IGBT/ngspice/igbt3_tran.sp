@@ -12,7 +12,7 @@ Rg gg g 100
 
 *.option abstol=1e-10; gear
 .control
-pre_osdi ../../osdilibs/igbt3.osdi
+pre_osdi ../../../osdilibs/igbt3.osdi
 op
 *tran 20u 5m
 tran 10n 100u uic

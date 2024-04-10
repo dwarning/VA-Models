@@ -16,7 +16,7 @@ CLOAD  dd d  10f
 VGS     g 0  dc 5 ac 1.0
 
 .control
-pre_osdi ../osdilibs/hisimhv.osdi
+pre_osdi ../../osdilibs/hisimhv.osdi
 show all
 ac DEC 10 1k 1T
 plot  vdB(d)

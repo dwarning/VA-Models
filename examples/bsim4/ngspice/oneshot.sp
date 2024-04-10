@@ -32,7 +32,7 @@ vin in 0 pulse 0 1.8 1ns .1ns .1ns .8ns 5ns
 .include "../Modelcards/modelcard.pmos"
 
 .control
-pre_osdi ../../osdilibs/bsim4.osdi
+pre_osdi ../../../osdilibs/bsim4.osdi
 tran 1ns 10ns
 plot in out
 .endc

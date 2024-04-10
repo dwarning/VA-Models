@@ -36,7 +36,7 @@ Xinv17 17  1 supply 0 inverter
 *.ic  1=1
 
 .control
-pre_osdi ../../osdilibs/BSIM6.1.1.osdi
+pre_osdi ../../../osdilibs/BSIM6.1.1.osdi
 tran 1n 10u
 plot v(1)
 meas tran t1 when v(1)=0.5 cross=1

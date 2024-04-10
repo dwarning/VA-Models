@@ -13,7 +13,7 @@ NQ1 C B 0 0 hicumL2va
 .include ../Modelcards/examples.lib
 
 .control
-pre_osdi ../../osdilibs/hicumL2.osdi
+pre_osdi ../../../osdilibs/hicumL2.osdi
 op
 print all
 echo

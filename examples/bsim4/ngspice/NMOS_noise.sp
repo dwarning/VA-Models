@@ -10,7 +10,7 @@ Vin 1 0 dc 0.8 ac 1
 .include "../Modelcards/modelcard.nmos"
 
 .control
-pre_osdi ../../osdilibs/bsim4.osdi
+pre_osdi ../../../osdilibs/bsim4.osdi
 noise v(d) Vin dec 10 100 990Meg 
 setplot noise1
 plot ally

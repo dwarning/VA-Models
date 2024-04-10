@@ -9,7 +9,7 @@ Rl out vdd 620 noisy=0
 .include ../Modelcards/model.l
 
 .control
-pre_osdi ../../osdilibs/bsimbulk.osdi
+pre_osdi ../../../osdilibs/bsimbulk.osdi
 noise v(out) vin dec 10 10 1G 1
 setplot noise1
 plot ally

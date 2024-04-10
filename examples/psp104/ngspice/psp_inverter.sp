@@ -53,7 +53,7 @@ c2  z     vss   0.576f
 .dc V1 0 'vcc' 'vcc/100'
 
 .control
-pre_osdi ../../osdilibs/psp104.osdi
+pre_osdi ../../../osdilibs/psp104.osdi
 run
 *set nolegend
 set xbrushwidth=2

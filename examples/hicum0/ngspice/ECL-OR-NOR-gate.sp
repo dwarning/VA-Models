@@ -18,7 +18,7 @@ Ra2 A2_NOR VEE 510
 Rt1 DT GND 1G
 .tran 0.1n 100u
 .control
-pre_osdi ../../osdilibs/hicumL0_v2p1p0.osdi
+pre_osdi ../../../osdilibs/hicumL0_v2p1p0.osdi
 run
 plot A1_OR A2_NOR+2 in1+4 in2+6
 .endc

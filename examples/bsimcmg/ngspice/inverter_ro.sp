@@ -27,7 +27,7 @@ Xinv6  vi vo supply ss mg_inv
 .tran 0.1p 1n
 
 .control
-pre_osdi ../../osdilibs/bsimcmg.osdi
+pre_osdi ../../../osdilibs/bsimcmg.osdi
 run
 plot i(vss)
 plot v(vo)

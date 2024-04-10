@@ -11,7 +11,7 @@ N1 d g s b dt nfet
 rth0 dt 0 5.0
 
 .control
-pre_osdi ../osdilibs/asmhemt.osdi
+pre_osdi ../../osdilibs/asmhemt.osdi
 op
 show all
 dc vg -3 3 0.01

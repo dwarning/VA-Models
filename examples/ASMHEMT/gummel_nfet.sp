@@ -12,7 +12,7 @@ N1 d g s b dt nfet
 rth0 dt 0 5.0
 
 .control
-pre_osdi ../osdilibs/asmhemt.osdi
+pre_osdi ../../osdilibs/asmhemt.osdi
 dc vd -1.0 1.0 0.001 vg -0.5 0.5 0.5
 plot -i(vd)
 let gx=deriv(-i(vd))

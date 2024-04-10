@@ -8,7 +8,7 @@ NQ1 C B 0 S tj hicumL2va
 rth tj 0 300
 
 .control
-pre_osdi ../../osdilibs/hicumL2.osdi
+pre_osdi ../../../osdilibs/hicumL2.osdi
 dc vc 0.0 1.8 0.01 ib 10u 100u 10u
 plot -i(vc)
 reset

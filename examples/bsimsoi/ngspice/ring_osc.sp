@@ -15,7 +15,7 @@ xinv11 dd ss sub out buf inv1
 cout  buf ss 1pF
 
 .control
-pre_osdi ../../osdilibs/bsimsoi.osdi
+pre_osdi ../../../osdilibs/bsimsoi.osdi
 option reltol=1e-4
 *option itl1=1000 itl4=20 temp=85 gmin=1e-15 abstol=1e-12 reltol=1e-4
 tran 0.2n 10n

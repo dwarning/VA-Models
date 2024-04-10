@@ -34,7 +34,7 @@ vin in 0 pulse(0 1.8 1ns .1ns .1ns .8ns 5ns)
 
 *----------------------------------------
 .control
-    pre_osdi ../../osdilibs/ekv26.osdi
+    pre_osdi ../../../osdilibs/ekv26.osdi
     run  
     plot in out
 .endc

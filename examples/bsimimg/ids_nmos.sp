@@ -15,7 +15,7 @@ VB bg 0 0
 N1 d fg s bg nch W=1e-6 L=1e-7
 
 .control
-pre_osdi ../osdilibs/bsimimg.osdi
+pre_osdi ../../osdilibs/bsimimg.osdi
 op
 show all
 dc Vg 0 1.0 0.01 Vb 0 -1.0 -0.2

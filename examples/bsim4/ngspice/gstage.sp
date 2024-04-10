@@ -8,7 +8,7 @@ Vdd vdd 0 1.8
 Vin 1 0 dc 0.8 ac 1
 
 .control
-pre_osdi ../../osdilibs/bsim4.osdi
+pre_osdi ../../../osdilibs/bsim4.osdi
 op
 print all
 ac dec 10 100 1000Meg 

@@ -13,7 +13,7 @@ r3 out 0 1k
 
 .ic v(c)=0.9
 .control
-pre_osdi ../../osdilibs/hicumL2.osdi
+pre_osdi ../../../osdilibs/hicumL2.osdi
 option method=gear
 op
 print all

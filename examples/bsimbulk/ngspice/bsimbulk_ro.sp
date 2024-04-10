@@ -31,7 +31,7 @@ c2  z     vss   0.576f
 .tran 10p 10n uic
 
 .control
-pre_osdi ../../osdilibs/bsimbulk.osdi
+pre_osdi ../../../osdilibs/bsimbulk.osdi
 run
 rusage all
 set xbrushwidth=3

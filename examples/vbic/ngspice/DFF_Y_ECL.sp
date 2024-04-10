@@ -31,7 +31,7 @@ NQVLGNPN3 NET6 D NET8 VEE NPN_VBIC_VLG sw_et=0
 
 .SAVE V(D) V(CLK) V(Q)
 .control
-pre_osdi ../../osdilibs/vbic_1p3.osdi
+pre_osdi ../../../osdilibs/vbic_1p3.osdi
 *op
 TRAN 0.25p 5n
 *rusage all

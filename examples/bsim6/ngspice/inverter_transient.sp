@@ -23,7 +23,7 @@ Xinv5  4 vo supply 0 inverter
 
 * --- Transient Analysis ---
 .control
-pre_osdi ../../osdilibs/BSIM6.1.1.osdi
+pre_osdi ../../../osdilibs/BSIM6.1.1.osdi
 tran 10n 5u
 plot v(vi) v(vo)
 .endc

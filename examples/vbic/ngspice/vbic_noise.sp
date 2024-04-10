@@ -31,7 +31,7 @@ nq1 c b 0 0 VBIC_EXAMPLE sw_noise=1
 +kfn=.3e-15 afn=1 bfn=1
 
 .control
-pre_osdi ../../osdilibs/vbic_1p3.osdi
+pre_osdi ../../../osdilibs/vbic_1p3.osdi
 op
 print all
 noise v(c) vin dec 10 10 99Meg 1

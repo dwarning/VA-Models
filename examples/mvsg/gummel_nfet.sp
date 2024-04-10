@@ -11,7 +11,7 @@ vb b 0 dc=0.0
 N1 d g s b nfet
 
 .control
-pre_osdi ../osdilibs/mvsg_cmc.osdi
+pre_osdi ../../osdilibs/mvsg_cmc.osdi
 dc vd -5.0 5.0 0.01 vg -1.0 0.0 0.5
 plot -i(vd)
 let gx=deriv(-i(vd))

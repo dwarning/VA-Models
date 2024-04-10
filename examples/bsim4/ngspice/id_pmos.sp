@@ -13,7 +13,7 @@ NM1 d g s b p1 W = 10e-6 L = 1e-6 nf=1
 
 * --- DC Analysis ---
 .control
-pre_osdi ../../osdilibs/bsim4.osdi
+pre_osdi ../../../osdilibs/bsim4.osdi
 op
 show all
 dc vg -1.2 0.0 0.01 vb 0 0.5 0.1

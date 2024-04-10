@@ -10,7 +10,7 @@ ic 0 c 0.001
 NQ1 C B 0 hicumL2va
 
 .control
-pre_osdi ../../osdilibs/hicumL2.osdi
+pre_osdi ../../../osdilibs/hicumL2.osdi
 let run = 0
 let ft_runs = 10
 set curplot=new          $ create a new plot

@@ -18,7 +18,7 @@ NN1 vout vin 0 0 nmos            TFIN=15n L=40n NFIN=10 NRS=1 NRD=1 D=40n
 *.tran 10n 2u
 
 .control
-pre_osdi ../../osdilibs/bsimcmg.osdi
+pre_osdi ../../../osdilibs/bsimcmg.osdi
 set xbrushwidth=3
 run
 plot v(vout) v(vin)

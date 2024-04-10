@@ -7,7 +7,7 @@ Nr3_cmc 1 0 0 dt poly_87OhmPerSquare w=1.05u l=42u
 .include ../Modelcards/poly_87OhmPerSquare.par
 
 .control
-pre_osdi ../../osdilibs/r3_cmc.osdi
+pre_osdi ../../../osdilibs/r3_cmc.osdi
 op
 let res = v(1)/-v1#branch
 print res

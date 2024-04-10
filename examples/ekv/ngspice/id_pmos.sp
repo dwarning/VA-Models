@@ -14,7 +14,7 @@ VB b 0 0
 N1 d g s b pch W=10e-6 L=5e-7
 
 .control
-pre_osdi ../../osdilibs/ekv26.osdi
+pre_osdi ../../../osdilibs/ekv26.osdi
 set xbrushwidth=3
 dc VG 0 -3.3 -0.01 VB 0 2.0 0.5
 plot -i(VD)
