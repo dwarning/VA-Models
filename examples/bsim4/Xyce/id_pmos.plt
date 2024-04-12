@@ -1,5 +1,5 @@
 #set terminal postscript eps color
-#set output "id_pmos.eps"
+#set output "pmos_id_vd_vg.eps"
 
 set title "Id=f(Vgs) Vd=-50mV Temp: 27degC"
 
@@ -10,4 +10,4 @@ set format y "%.1s%c"
 set xlabel "Vgs [V]"
 set ylabel "Id [A]"
 set logscale y
-plot 'id_pmos.cir.prn' using 2:($3) t "Id" w lp
+plot 'pmos_id_vd_vg.cir.prn' using 2:($3) t "Id" w lp
