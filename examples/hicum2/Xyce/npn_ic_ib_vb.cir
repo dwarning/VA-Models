@@ -1,0 +1,16 @@
+HICUM2v2.40 Gummel Test Ic,b,s=f(Vc,Ib) Vce=1V
+
+VB B 0 1.2
+VC C 0 1.0
+VS S 0 0.0
+
+YhicumL2_va q1 C B 0 S dt hicumL2va
+Rth dt 0 1.0
+
+.options device gmin=1e-14
+.dc vb 0.2 1.2 0.01
+.print dc format=gnuplot v(b) i(vc) i(vb) i(vs)
+
+.include ../Modelcards/examples_va.lib
+
+.end

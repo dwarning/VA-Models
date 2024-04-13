@@ -1,0 +1,20 @@
+HICUM2v2.40 Noise Test
+
+vcc 4 0 26
+vin 1 0 ac 1
+
+ccouple 1 b 1
+
+ibias 0 b 100uA
+
+rload 4 c 1k
+
+YhicumL2_va q1 c b 0 0 tj hicumL2va
+Rth tj 0 100
+
+.include ../Modelcards/examples_va.lib
+
+.noise v(c) Vin dec 10 100 10G 
+.print format=gnuplot noise inoise onoise
+
+.end

@@ -1,0 +1,32 @@
+HICUM2v2.40 Noise Current Test
+
+*      _______
+*    _|_     _|_
+*    ///    / _ \
+*           \/ \/ I1
+*           /\_/\
+*     R1    \___/
+*      _/\  __|
+*     |   \/ _|
+*     |____|'
+*     B    |`->
+*            _|_ E
+*           /VIN\
+*           \___/
+*            _|_
+*            ///
+*
+*
+
+vin                 E  0  DC    0.0 ac 1.0u
+I1                  0  C 100uA
+R1                  C  B 1000k
+YhicumL2_va q1 C 0 E 0 tj hicumL2va
+Rth tj 0 100
+
+.include ../Modelcards/examples_va.lib
+
+.noise v(C) vin dec 10 1 100Meg
+.print noise format=gnuplot onoise
+
+.end
