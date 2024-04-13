@@ -24,81 +24,81 @@ cp nfet_id_vd_vg.sp     nfet_id_vd_vg.spv
 cp nfet_id_vd_vg_gummel.sp nfet_id_vd_vg_gummel.spv
 sed -i 's/.endc/quit\n.endc/g' nfet_id_vd_vg.spv
 sed -i 's/.endc/quit\n.endc/g' nfet_id_vd_vg_gummel.spv
-$VALGRIND --log-file=../../memory_test/asmhemt_id_nfet.vlog     $NGSPICE nfet_id_vd_vg.spv
-$VALGRIND --log-file=../../memory_test/asmhemt_gummel_nfet.vlog $NGSPICE nfet_id_vd_vg_gummel.spv
+$VALGRIND --log-file=../../memory_test/asmhemt_nfet_id_vd_vg.vlog        $NGSPICE nfet_id_vd_vg.spv
+$VALGRIND --log-file=../../memory_test/asmhemt_nfet_id_vd_vg_gummel.vlog $NGSPICE nfet_id_vd_vg_gummel.spv
 rm *.spv
 cd ../../memory_test
 
-cd ../examples/bsim6
+cd ../examples/ngspice/bsim6
 cp ringosc_17.sp         ringosc_17.spv
 sed -i 's/10us/1us/g'    ringosc_17.spv
 cp inverter_transient.sp inverter_transient.spv
 cp inv_dc.sp             inv_dc.spv
-cp id_pmos.sp            id_pmos.spv
-cp id_nmos.sp            id_nmos.spv
-cp gummel_pmos.sp        gummel_pmos.spv
-cp gummel_nmos.sp        gummel_nmos.spv
+cp pmos_id_vd_vg.sp      pmos_id_vd_vg.spv
+cp nmos_id_vd_vg.sp      nmos_id_vd_vg.spv
+cp pmos_id_vd_vg_gummel.sp        pmos_id_vd_vg_gummel.spv
+cp nmos_id_vd_vg_gummel.sp        nmos_id_vd_vg_gummel.spv
 sed -i 's/.endc/quit\n.endc/g' ringosc_17.spv
 sed -i 's/.endc/quit\n.endc/g' inverter_transient.spv
 sed -i 's/.endc/quit\n.endc/g' inv_dc.spv
-sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
-sed -i 's/.endc/quit\n.endc/g' gummel_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' gummel_nmos.spv
-$VALGRIND --log-file=../../memory_test/bsim6_ringosc_17.vlog         $NGSPICE ringosc_17.spv
-$VALGRIND --log-file=../../memory_test/bsim6_inverter_transient.vlog $NGSPICE inverter_transient.spv
-$VALGRIND --log-file=../../memory_test/bsim6_inv_dc.vlog             $NGSPICE inv_dc.spv
-$VALGRIND --log-file=../../memory_test/bsim6_id_pmos.vlog            $NGSPICE id_pmos.spv
-$VALGRIND --log-file=../../memory_test/bsim6_id_nmos.vlog            $NGSPICE id_nmos.spv
-$VALGRIND --log-file=../../memory_test/bsim6_gummel_pmos.vlog        $NGSPICE gummel_pmos.spv
-$VALGRIND --log-file=../../memory_test/bsim6_gummel_nmos.vlog        $NGSPICE gummel_nmos.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg_gummel.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg_gummel.spv
+$VALGRIND --log-file=../../../memory_test/bsim6_ringosc_17.vlog         $NGSPICE ringosc_17.spv
+$VALGRIND --log-file=../../../memory_test/bsim6_inverter_transient.vlog $NGSPICE inverter_transient.spv
+$VALGRIND --log-file=../../../memory_test/bsim6_inv_dc.vlog             $NGSPICE inv_dc.spv
+$VALGRIND --log-file=../../../memory_test/bsim6_id_pmos.vlog            $NGSPICE pmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsim6_id_nmos.vlog            $NGSPICE nmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsim6_pmos_id_vd_vg_gummel.vlog        $NGSPICE pmos_id_vd_vg_gummel.spv
+$VALGRIND --log-file=../../../memory_test/bsim6_nmos_id_vd_vg_gummel.vlog        $NGSPICE nmos_id_vd_vg_gummel.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/bsimbulk
+cd ../examples/ngspice/bsimbulk
 cp ring_osc.sp             ring_osc.spv
 sed -i 's/10us/1us/g'      ring_osc.spv
 cp inv_tran.sp             inv_tran.spv
 cp inv_dc.sp               inv_dc.spv
-cp id_nmos.sp              id_nmos.spv
-cp nmos_pmos.sp            nmos_pmos.spv
-cp gummel_pmos.sp          gummel_pmos.spv
-cp gummel_nmos.sp          gummel_nmos.spv
+cp nmos_id_vd_vg.sp              nmos_id_vd_vg.spv
+cp nmos_pmos_id_vd_vg_temp.sp            nmos_pmos_id_vd_vg_temp.spv
+cp pmos_id_vd_vg_gummel.sp          pmos_id_vd_vg_gummel.spv
+cp nmos_id_vd_vg_gummel.sp          nmos_id_vd_vg_gummel.spv
 cp bsimbulk_ro.sp          bsimbulk_ro.spv
 cp bsimbulk_inverter.sp    simbulk_inverter.spv
 cp c7552_ann_bsimbulk.net  c7552_ann_bsimbulk.spv
 sed -i 's/.endc/quit\n.endc/g' ring_osc.spv
 sed -i 's/.endc/quit\n.endc/g' inv_tran.spv
 sed -i 's/.endc/quit\n.endc/g' inv_dc.spv
-sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
-sed -i 's/.endc/quit\n.endc/g' nmos_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' gummel_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' gummel_nmos.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_pmos_id_vd_vg_temp.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg_gummel.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg_gummel.spv
 sed -i 's/.endc/quit\n.endc/g' bsimbulk_ro.spv
 sed -i 's/.endc/quit\n.endc/g' simbulk_inverter.spv
 sed -i 's/.endc/quit\n.endc/g' c7552_ann_bsimbulk.spv
 sed -i 's/1ns/0.1ns/g' c7552_ann_bsimbulk.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_ring_osc.vlog           $NGSPICE ring_osc.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_inv_tran.vlog           $NGSPICE inv_tran.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_inv_dc.vlog             $NGSPICE inv_dc.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_id_nmos.vlog            $NGSPICE id_nmos.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_nmos_pmos.vlog          $NGSPICE nmos_pmos.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_gummel_pmos.vlog        $NGSPICE gummel_pmos.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_gummel_nmos.vlog        $NGSPICE gummel_nmos.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_bsimbulk_ro.vlog        $NGSPICE bsimbulk_ro.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_simbulk_inverter.vlog   $NGSPICE simbulk_inverter.spv
-$VALGRIND --log-file=../../memory_test/bsimbulk_c7552_ann_bsimbulk.vlog $NGSPICE c7552_ann_bsimbulk.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_ring_osc.vlog           $NGSPICE ring_osc.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_inv_tran.vlog           $NGSPICE inv_tran.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_inv_dc.vlog             $NGSPICE inv_dc.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_nmos_id_vd_vg.vlog            $NGSPICE nmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_nmos_pmos_id_vd_vg_temp.vlog          $NGSPICE nmos_pmos_id_vd_vg_temp.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_pmos_id_vd_vg_gummel.vlog        $NGSPICE pmos_id_vd_vg_gummel.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_nmos_id_vd_vg_gummel.vlog        $NGSPICE nmos_id_vd_vg_gummel.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_bsimbulk_ro.vlog        $NGSPICE bsimbulk_ro.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_simbulk_inverter.vlog   $NGSPICE simbulk_inverter.spv
+$VALGRIND --log-file=../../../memory_test/bsimbulk_c7552_ann_bsimbulk.vlog $NGSPICE c7552_ann_bsimbulk.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/bsimcmg
+cd ../examples/ngspice/bsimcmg
 cp simple_inverter_dc.sp simple_inverter_dc.spv
 cp ringosc_17stg.sp      ringosc_17stg.spv
 cp NuV-memory_test.sp          NuV-memory_test.spv
 cp inverter_transient.sp inverter_transient.spv
 cp inverter_ro.sp        inverter_ro.spv
-cp id_pmos.sp            id_pmos.spv
-cp id_nmos.sp            id_nmos.spv
+cp pmos_id_vd_vg.sp            pmos_id_vd_vg.spv
+cp nmos_id_vd_vg.sp            nmos_id_vd_vg.spv
 cp ac.sp                 ac.spv
 sed -i 's/.endc/quit\n.endc/g' simple_inverter_dc.spv
 sed -i 's/.endc/quit\n.endc/g' ringosc_17stg.spv
@@ -106,145 +106,145 @@ sed -i 's/.endc/quit\n.endc/g' NuV-memory_test.spv
 sed -i 's/1.2ns/0.2ns/g' NuV-memory_test.spv
 sed -i 's/.endc/quit\n.endc/g' inverter_transient.spv
 sed -i 's/.endc/quit\n.endc/g' inverter_ro.spv
-sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg.spv
 sed -i 's/.endc/quit\n.endc/g' ac.spv
-$VALGRIND --log-file=../../memory_test/bsimcmg_simple_inverter_dc.vlog $NGSPICE simple_inverter_dc.spv
-$VALGRIND --log-file=../../memory_test/bsimcmg_ringosc_17stg.vlog      $NGSPICE ringosc_17stg.spv
-$VALGRIND --log-file=../../memory_test/bsimcmg_NuV-memory_test.vlog           $NGSPICE NuV-memory_test.spv
-$VALGRIND --log-file=../../memory_test/bsimcmg_inverter_transient.vlog $NGSPICE inverter_transient.spv
-$VALGRIND --log-file=../../memory_test/bsimcmg_inverter_ro.vlog        $NGSPICE inverter_ro.spv
-$VALGRIND --log-file=../../memory_test/bsimcmg_id_pmos.vlog            $NGSPICE id_pmos.spv
-$VALGRIND --log-file=../../memory_test/bsimcmg_id_nmos.vlog            $NGSPICE id_nmos.spv
-$VALGRIND --log-file=../../memory_test/bsimcmg_ac.vlog                 $NGSPICE ac.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_simple_inverter_dc.vlog $NGSPICE simple_inverter_dc.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_ringosc_17stg.vlog      $NGSPICE ringosc_17stg.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_NuV-memory_test.vlog           $NGSPICE NuV-memory_test.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_inverter_transient.vlog $NGSPICE inverter_transient.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_inverter_ro.vlog        $NGSPICE inverter_ro.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_pmos_id_vd_vg.vlog            $NGSPICE pmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_nmos_id_vd_vg.vlog            $NGSPICE nmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_ac.vlog                 $NGSPICE ac.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/bsimimg
-cp ids_pmos.sp            ids_pmos.spv
-cp ids_nmos.sp            ids_nmos.spv
-sed -i 's/.endc/quit\n.endc/g' ids_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' ids_nmos.spv
-$VALGRIND --log-file=../../memory_test/bsimimg_ids_pmos.vlog            $NGSPICE ids_pmos.spv
-$VALGRIND --log-file=../../memory_test/bsimimg_ids_nmos.vlog            $NGSPICE ids_nmos.spv
+cd ../examples/ngspice/bsimimg
+cp pmos_id_vd_vg.sp            pmos_id_vd_vg.spv
+cp nmos_id_vd_vg.sp            nmos_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsimimg_pmos_id_vd_vg.vlog            $NGSPICE pmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsimimg_nmos_id_vd_vg.vlog            $NGSPICE nmos_id_vd_vg.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/bsimsoi
+cd ../examples/ngspice/bsimsoi
 cp ring_osc.sp           ring_osc.spv
 cp inverter_tr.sp        inverter_tr.spv
 cp inverter_dc.sp        inverter_dc.spv
-cp id_pmos.sp            id_pmos.spv
-cp id_nmos.sp            id_nmos.spv
+cp pmos_id_vd_vg.sp            pmos_id_vd_vg.spv
+cp nmos_id_vd_vg.sp            nmos_id_vd_vg.spv
 sed -i 's/.endc/quit\n.endc/g' ring_osc.spv
 sed -i 's/.endc/quit\n.endc/g' inverter_tr.spv
 sed -i 's/.endc/quit\n.endc/g' inverter_dc.spv
-sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
-$VALGRIND --log-file=../../memory_test/bsimsoi_ring_osc.vlog           $NGSPICE ring_osc.spv
-$VALGRIND --log-file=../../memory_test/bsimsoi_inverter_tr.vlog        $NGSPICE inverter_tr.spv
-$VALGRIND --log-file=../../memory_test/bsimsoi_inverter_dc.vlog        $NGSPICE inverter_dc.spv
-$VALGRIND --log-file=../../memory_test/bsimsoi_id_pmos.vlog            $NGSPICE id_pmos.spv
-$VALGRIND --log-file=../../memory_test/bsimsoi_id_nmos.vlog            $NGSPICE id_nmos.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsimsoi_ring_osc.vlog           $NGSPICE ring_osc.spv
+$VALGRIND --log-file=../../../memory_test/bsimsoi_inverter_tr.vlog        $NGSPICE inverter_tr.spv
+$VALGRIND --log-file=../../../memory_test/bsimsoi_inverter_dc.vlog        $NGSPICE inverter_dc.spv
+$VALGRIND --log-file=../../../memory_test/bsimsoi_pmos_id_vd_vg.vlog            $NGSPICE pmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/bsimsoi_nmos_id_vd_vg.vlog            $NGSPICE nmos_id_vd_vg.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/diode_cmc
-cp dio_trr_vp.sp           dio_trr_vp.spv
-cp diode_temp.sp           diode_temp.spv
-sed -i 's/.endc/quit\n.endc/g' dio_trr_vp.spv
-sed -i 's/.endc/quit\n.endc/g' diode_temp.spv
-$VALGRIND --log-file=../../memory_test/diode_cmc_dio_trr_vp.vlog       $NGSPICE dio_trr_vp.spv
-$VALGRIND --log-file=../../memory_test/diode_cmc_diode_temp.vlog       $NGSPICE diode_temp.spv
+cd ../examples/ngspice/diode_cmc
+cp id_trr_vp_tran.sp           id_trr_vp_tran.spv
+cp id_vd_temp.sp           id_vd_temp.spv
+sed -i 's/.endc/quit\n.endc/g' id_trr_vp_tran.spv
+sed -i 's/.endc/quit\n.endc/g' id_vd_temp.spv
+$VALGRIND --log-file=../../../memory_test/diode_cmc_id_trr_vp_tran.vlog       $NGSPICE id_trr_vp_tran.spv
+$VALGRIND --log-file=../../../memory_test/diode_cmc_id_vd_temp.vlog       $NGSPICE id_vd_temp.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/ekv
+cd ../examples/ngspice/ekv
 cp oneshot.sp    oneshot.spv
 cp mosamp2.sp    mosamp2.spv
 cp inverter.sp   inverter.spv
-cp id_pmos.sp    id_pmos.spv
-cp id_nmos.sp    id_nmos.spv
+cp pmos_id_vd_vg.sp    pmos_id_vd_vg.spv
+cp nmos_id_vd_vg.sp    nmos_id_vd_vg.spv
 cp dio_test.sp   dio_test.spv
 cp comparator.sp comparator.spv
 sed -i 's/.endc/quit\n.endc/g' oneshot.spv
 sed -i 's/.endc/quit\n.endc/g' mosamp2.spv
 sed -i 's/.endc/quit\n.endc/g' inverter.spv
-sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg.spv
 sed -i 's/.endc/quit\n.endc/g' dio_test.spv
 sed -i 's/.endc/quit\n.endc/g' comparator.spv
-$VALGRIND --log-file=../../memory_test/ekv_oneshot.vlog    $NGSPICE oneshot.spv
-$VALGRIND --log-file=../../memory_test/ekv_mosamp2.vlog    $NGSPICE mosamp2.spv
-$VALGRIND --log-file=../../memory_test/ekv_inverter.vlog   $NGSPICE inverter.spv
-$VALGRIND --log-file=../../memory_test/ekv_id_pmos.vlog    $NGSPICE id_pmos.spv
-$VALGRIND --log-file=../../memory_test/ekv_id_nmos.vlog    $NGSPICE id_nmos.spv
-$VALGRIND --log-file=../../memory_test/ekv_dio_test.vlog   $NGSPICE dio_test.spv
-$VALGRIND --log-file=../../memory_test/ekv_comparator.vlog $NGSPICE comparator.spv
+$VALGRIND --log-file=../../../memory_test/ekv_oneshot.vlog    $NGSPICE oneshot.spv
+$VALGRIND --log-file=../../../memory_test/ekv_mosamp2.vlog    $NGSPICE mosamp2.spv
+$VALGRIND --log-file=../../../memory_test/ekv_inverter.vlog   $NGSPICE inverter.spv
+$VALGRIND --log-file=../../../memory_test/ekv_pmos_id_vd_vg.vlog    $NGSPICE pmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/ekv_nmos_id_vd_vg.vlog    $NGSPICE nmos_id_vd_vg.spv
+$VALGRIND --log-file=../../../memory_test/ekv_dio_test.vlog   $NGSPICE dio_test.spv
+$VALGRIND --log-file=../../../memory_test/ekv_comparator.vlog $NGSPICE comparator.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
 cd ../examples/EPFL-HEMT
-cp id_nfet.sp           id_nfet.spv
-sed -i 's/.endc/quit\n.endc/g' id_nfet.spv
-$VALGRIND --log-file=../../memory_test/EPFL-HEMT_id_nfet.vlog     $NGSPICE id_nfet.spv
+cp nfet_id_vd_vg.sp           nfet_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nfet_id_vd_vg.spv
+$VALGRIND --log-file=../../memory_test/EPFL-HEMT_nfet_id_vd_vg.vlog     $NGSPICE nfet_id_vd_vg.spv
 rm *.spv
 cd ../../memory_test
 
 cd ../examples/fbh_hbt
-cp hbt_out.sp           hbt_out.spv
-cp hbt_gum.sp           hbt_gum.spv
-sed -i 's/.endc/quit\n.endc/g' hbt_out.spv
-sed -i 's/.endc/quit\n.endc/g' hbt_gum.spv
-$VALGRIND --log-file=../../memory_test/fbh_hbt_hbt_out.vlog       $NGSPICE hbt_out.spv
-$VALGRIND --log-file=../../memory_test/fbh_hbt_hbt_gum.vlog       $NGSPICE hbt_gum.spv
+cp hbt_ic_vd.sp           hbt_ic_vd.spv
+cp hbt_ic_ib_vb.sp           hbt_ic_ib_vb.spv
+sed -i 's/.endc/quit\n.endc/g' hbt_ic_vd.spv
+sed -i 's/.endc/quit\n.endc/g' hbt_ic_ib_vb.spv
+$VALGRIND --log-file=../../memory_test/fbh_hbt_hbt_ic_vd.vlog       $NGSPICE hbt_ic_vd.spv
+$VALGRIND --log-file=../../memory_test/fbh_hbt_hbt_ic_ib_vb.vlog       $NGSPICE hbt_ic_ib_vb.spv
 rm *.spv
 cd ../../memory_test
 
-cd ../examples/hicum0
-cp hic0_out.sp        hic0_out.spv
-cp hic0_gum.sp        hic0_gum.spv
+cd ../examples/ngspice/hicum0
+cp npn_ic_vc_ib.sp        npn_ic_vc_ib.spv
+cp npn_ic_ib_vb.sp        npn_ic_ib_vb.spv
 cp ECL-RO.sp         ECL-RO.spv
 cp ECL-RO-5.sp       ECL-RO-5.spv
 cp DFF_Y_ECL_HICUM.sp DFF_Y_ECL_HICUM.spv
-cp bip_subsmod.sp     bip_subsmod.spv
-sed -i 's/.endc/quit\n.endc/g' hic0_out.spv
-sed -i 's/.endc/quit\n.endc/g' hic0_gum.spv
+cp npn_noise.sp     npn_noise.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_vc_ib.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_ib_vb.spv
 sed -i 's/.endc/quit\n.endc/g' ECL-RO.spv
 sed -i 's/100u/1u/g' ECL-RO.spv
 sed -i 's/.endc/quit\n.endc/g' ECL-RO-5.spv
 sed -i 's/.endc/quit\n.endc/g' DFF_Y_ECL_HICUM.spv
-sed -i 's/.endc/quit\n.endc/g' bip_subsmod.spv
-$VALGRIND --log-file=../../memory_test/hicum0_hic0_out.vlog         $NGSPICE hic0_out.spv
-$VALGRIND --log-file=../../memory_test/hicum0_hic0_gum.vlog         $NGSPICE hic0_gum.spv
-$VALGRIND --log-file=../../memory_test/hicum0_ECL-RO.vlog           $NGSPICE ECL-RO.spv
-$VALGRIND --log-file=../../memory_test/hicum0_ECL-RO-5.vlog         $NGSPICE ECL-RO-5.spv
-$VALGRIND --log-file=../../memory_test/hicum0_DFF_Y_ECL_HICUM.vlog  $NGSPICE DFF_Y_ECL_HICUM.spv
-$VALGRIND --log-file=../../memory_test/hicum0_bip_subsmod.vlog      $NGSPICE bip_subsmod.spv
+sed -i 's/.endc/quit\n.endc/g' npn_noise.spv
+$VALGRIND --log-file=../../../memory_test/hicum0_npn_ic_vc_ib.vlog         $NGSPICE npn_ic_vc_ib.spv
+$VALGRIND --log-file=../../../memory_test/hicum0_npn_ic_ib_vb.vlog         $NGSPICE npn_ic_ib_vb.spv
+$VALGRIND --log-file=../../../memory_test/hicum0_ECL-RO.vlog           $NGSPICE ECL-RO.spv
+$VALGRIND --log-file=../../../memory_test/hicum0_ECL-RO-5.vlog         $NGSPICE ECL-RO-5.spv
+$VALGRIND --log-file=../../../memory_test/hicum0_DFF_Y_ECL_HICUM.vlog  $NGSPICE DFF_Y_ECL_HICUM.spv
+$VALGRIND --log-file=../../../memory_test/hicum0_npn_noise.vlog      $NGSPICE npn_noise.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/hicum2
-cp hic2_tran.sp    hic2_tran.spv
-cp hic2_out.sp     hic2_out.spv
-cp hic2_gum.sp     hic2_gum.spv
-cp hic2_gum_inv.sp hic2_gum_inv.spv
-cp hic2_gain.sp    hic2_gain.spv
-cp hic2_ft.sp      hic2_ft.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_tran.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_out.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_gum.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_gum_inv.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_gain.spv
-sed -i 's/.endc/quit\n.endc/g' hic2_ft.spv
-$VALGRIND --log-file=../../memory_test/hicum2_hic2_tran.vlog    $NGSPICE hic2_tran.spv
-$VALGRIND --log-file=../../memory_test/hicum2_hic2_out.vlog     $NGSPICE hic2_out.spv
-$VALGRIND --log-file=../../memory_test/hicum2_hic2_gum.vlog     $NGSPICE hic2_gum.spv
-$VALGRIND --log-file=../../memory_test/hicum2_hic2_gum_inv.vlog $NGSPICE hic2_gum_inv.spv
-$VALGRIND --log-file=../../memory_test/hicum2_hic2_gain.vlog    $NGSPICE hic2_gain.spv
-$VALGRIND --log-file=../../memory_test/hicum2_hic2_ft.vlog      $NGSPICE hic2_ft.spv
+cd ../examples/ngspice/hicum2
+cp npn_amp_tran.sp    npn_amp_tran.spv
+cp npn_ic_vc_ib.sp     npn_ic_vc_ib.spv
+cp npn_ic_ib_vb.sp     npn_ic_ib_vb.spv
+cp npn_ic_ib_vb_inv.sp npn_ic_ib_vb_inv.spv
+cp npn_gain_ic.sp    npn_gain_ic.spv
+cp npn_ft_ic.sp      npn_ft_ic.spv
+sed -i 's/.endc/quit\n.endc/g' npn_amp_tran.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_vc_ib.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_ib_vb.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_ib_vb_inv.spv
+sed -i 's/.endc/quit\n.endc/g' npn_gain_ic.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ft_ic.spv
+$VALGRIND --log-file=../../../memory_test/hicum2_npn_amp_tran.vlog    $NGSPICE npn_amp_tran.spv
+$VALGRIND --log-file=../../../memory_test/hicum2_npn_ic_vc_ib.vlog     $NGSPICE npn_ic_vc_ib.spv
+$VALGRIND --log-file=../../../memory_test/hicum2_npn_ic_ib_vb.vlog     $NGSPICE npn_ic_ib_vb.spv
+$VALGRIND --log-file=../../../memory_test/hicum2_npn_ic_ib_vb_inv.vlog $NGSPICE npn_ic_ib_vb_inv.spv
+$VALGRIND --log-file=../../../memory_test/hicum2_npn_gain_ic.vlog    $NGSPICE npn_gain_ic.spv
+$VALGRIND --log-file=../../../memory_test/hicum2_npn_ft_ic.vlog      $NGSPICE npn_ft_ic.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
 cd ../examples/hisim2
 cp HiSIM2_TRTest_Netlist.sp HiSIM2_TRTest_Netlist.spv
@@ -298,120 +298,123 @@ $VALGRIND --log-file=../../memory_test/HiSIM_SOTB_ACTest_Netlist.vlog $NGSPICE H
 rm *.spv
 cd ../../memory_test
 
-cd ../examples/L-UTSOI
-cp id_pmos.sp            id_pmos.spv
-cp id_nmos.sp            id_nmos.spv
-sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
-$VALGRIND --log-file=../../memory_test/L-UTSOI_id_pmos.vlog            $NGSPICE id_pmos.spv
-$VALGRIND --log-file=../../memory_test/L-UTSOI_id_nmos.vlog            $NGSPICE id_nmos.spv
+cd ../examples/ngspice/L-UTSOI
+cp pmos_id_vd_vg_vb.sp            pmos_id_vd_vg_vb.spv
+cp nmos_id_vd_vg_vb.sp            nmos_id_vd_vg_vb.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg_vb.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg_vb.spv
+$VALGRIND --log-file=../../../memory_test/L-UTSOI_pmos_id_vd_vg_vb.vlog            $NGSPICE pmos_id_vd_vg_vb.spv
+$VALGRIND --log-file=../../../memory_test/L-UTSOI_nmos_id_vd_vg_vb.vlog            $NGSPICE nmos_id_vd_vg_vb.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/mextram
-cp mex_out.sp            mex_out.spv
-cp mex_gum.sp            mex_gum.spv
+cd ../examples/ngspice/mextram
+cp npn_ic_vc_ib.sp            npn_ic_vc_ib.spv
+cp npn_ic_ib_is_vb.sp            npn_ic_ib_is_vb.spv
 cp meclgate.sp          meclgate.spv
-sed -i 's/.endc/quit\n.endc/g' mex_out.spv
-sed -i 's/.endc/quit\n.endc/g' mex_gum.spv
+cp npn_noise.sp          npn_noise.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_vc_ib.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_ib_is_vb.spv
 sed -i 's/.endc/quit\n.endc/g' meclgate.spv
-$VALGRIND --log-file=../../memory_test/mextram_mex_out.vlog            $NGSPICE mex_out.spv
-$VALGRIND --log-file=../../memory_test/mextram_mex_gum.vlog            $NGSPICE mex_gum.spv
-$VALGRIND --log-file=../../memory_test/mextram_meclgate.vlog           $NGSPICE meclgate.spv
+sed -i 's/.endc/quit\n.endc/g' npn_noise.spv
+$VALGRIND --log-file=../../../memory_test/mextram_npn_ic_vc_ib.vlog            $NGSPICE npn_ic_vc_ib.spv
+$VALGRIND --log-file=../../../memory_test/mextram_npn_ic_ib_is_vb.vlog            $NGSPICE npn_ic_ib_is_vb.spv
+$VALGRIND --log-file=../../../memory_test/mextram_meclgate.vlog           $NGSPICE meclgate.spv
+$VALGRIND --log-file=../../../memory_test/mextram_npn_noise.vlog           $NGSPICE npn_noise.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/MOSVAR
-cp test_mosvar.sp            test_mosvar.spv
-sed -i 's/.endc/quit\n.endc/g' test_mosvar.spv
-$VALGRIND --log-file=../../memory_test/MOSVAR_test_mosvar.vlog        $NGSPICE test_mosvar.spv
+cd ../examples/ngspice/MOSVAR
+cp mosvar_c_v.sp            mosvar_c_v.spv
+sed -i 's/.endc/quit\n.endc/g' mosvar_c_v.spv
+$VALGRIND --log-file=../../../memory_test/MOSVAR_mosvar_c_v.vlog        $NGSPICE mosvar_c_v.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
 cd ../examples/mvsg
-cp id_pfet.sp            id_pfet.spv
-cp id_nfet.sp            id_nfet.spv
-cp gummel_nfet.sp        gummel_nfet.spv
-sed -i 's/.endc/quit\n.endc/g' id_pfet.spv
-sed -i 's/.endc/quit\n.endc/g' id_nfet.spv
-sed -i 's/.endc/quit\n.endc/g' gummel_nfet.spv
-$VALGRIND --log-file=../../memory_test/mvsg_id_pfet.vlog            $NGSPICE id_pfet.spv
-$VALGRIND --log-file=../../memory_test/mvsg_id_nfet.vlog            $NGSPICE id_nfet.spv
-$VALGRIND --log-file=../../memory_test/mvsg_gummel_nfet.vlog        $NGSPICE gummel_nfet.spv
+cp pfet_id_vd_vg.sp            pfet_id_vd_vg.spv
+cp nfet_id_vd_vg.sp            nfet_id_vd_vg.spv
+cp nfet_id_vd_vg_gummel.sp        nfet_id_vd_vg_gummel.spv
+sed -i 's/.endc/quit\n.endc/g' pfet_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nfet_id_vd_vg.spv
+sed -i 's/.endc/quit\n.endc/g' nfet_id_vd_vg_gummel.spv
+$VALGRIND --log-file=../../memory_test/mvsg_pfet_id_vd_vg.vlog            $NGSPICE pfet_id_vd_vg.spv
+$VALGRIND --log-file=../../memory_test/mvsg_nfet_id_vd_vg.vlog            $NGSPICE nfet_id_vd_vg.spv
+$VALGRIND --log-file=../../memory_test/mvsg_nfet_id_vd_vg_gummel.vlog        $NGSPICE nfet_id_vd_vg_gummel.spv
 rm *.spv
 cd ../../memory_test
 
 cd ../examples/psp102
-cp id_pmos.sp            id_pmos.spv
-cp id_nmos.sp            id_nmos.spv
-sed -i 's/.endc/quit\n.endc/g' id_pmos.spv
-sed -i 's/.endc/quit\n.endc/g' id_nmos.spv
-$VALGRIND --log-file=../../memory_test/psp102_id_pmos.vlog            $NGSPICE id_pmos.spv
-$VALGRIND --log-file=../../memory_test/psp102_id_nmos.vlog            $NGSPICE id_nmos.spv
+cp pmos_id_vd_vg_vb.sp            pmos_id_vd_vg_vb.spv
+cp nmos_id_vd_vg_vb.sp            nmos_id_vd_vg_vb.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg_vb.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg_vb.spv
+$VALGRIND --log-file=../../memory_test/psp102_pmos_id_vd_vg_vb.vlog            $NGSPICE pmos_id_vd_vg_vb.spv
+$VALGRIND --log-file=../../memory_test/psp102_nmos_id_vd_vg_vb.vlog            $NGSPICE nmos_id_vd_vg_vb.spv
 rm *.spv
 cd ../../memory_test
 
-cd ../examples/psp103
-cp psp_transfer.sp    psp_transfer.spv
+cd ../examples/ngspice/psp103
+cp nmos_id_vg_vb.sp    nmos_id_vg_vb.spv
 cp psp_ro.sp          psp_ro.spv
-cp psp_out_pmos_nm.sp psp_out_pmos_nm.spv
-cp psp_out_nmos_nm.sp psp_out_nmos_nm.spv
+cp pmos_id_vd_vg_vb.sp pmos_id_vd_vg_vb.spv
+cp nmos_id_vd_vg_vb.sp nmos_id_vd_vg_vb.spv
 cp psp_inverter.sp    psp_inverter.spv
-cp nmos_pmos_PSP.sp   nmos_pmos_PSP.spv
+cp nmos_pmos_id_vd_vg_temp_PSP.sp   nmos_pmos_id_vd_vg_temp_PSP.spv
 cp c7552_ann_psp.net  c7552_ann_psp.spv
-sed -i 's/.endc/quit\n.endc/g' psp_transfer.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vg_vb.spv
 sed -i 's/.endc/quit\n.endc/g' psp_ro.spv
-sed -i 's/.endc/quit\n.endc/g' psp_out_pmos_nm.spv
-sed -i 's/.endc/quit\n.endc/g' psp_out_nmos_nm.spv
+sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg_vb.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg_vb.spv
 sed -i 's/.endc/quit\n.endc/g' psp_inverter.spv
-sed -i 's/.endc/quit\n.endc/g' nmos_pmos_PSP.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_pmos_id_vd_vg_temp_PSP.spv
 sed -i 's/.endc/quit\n.endc/g' c7552_ann_psp.spv
 sed -i 's/15ns/0.1ns/g' c7552_ann_psp.spv
-$VALGRIND --log-file=../../memory_test/psp103_psp_transfer.vlog    $NGSPICE psp_transfer.spv
-$VALGRIND --log-file=../../memory_test/psp103_psp_ro.vlog          $NGSPICE psp_ro.spv
-$VALGRIND --log-file=../../memory_test/psp103_psp_out_pmos_nm.vlog $NGSPICE psp_out_pmos_nm.spv
-$VALGRIND --log-file=../../memory_test/psp103_psp_out_nmos_nm.vlog $NGSPICE psp_out_nmos_nm.spv
-$VALGRIND --log-file=../../memory_test/psp103_psp_inverter.vlog    $NGSPICE psp_inverter.spv
-$VALGRIND --log-file=../../memory_test/psp103_nmos_pmos_PSP.vlog   $NGSPICE nmos_pmos_PSP.spv
-$VALGRIND --log-file=../../memory_test/psp103_c7552_ann_psp.vlog   $NGSPICE c7552_ann_psp.spv
+$VALGRIND --log-file=../../../memory_test/psp103_nmos_id_vg_vb.vlog    $NGSPICE nmos_id_vg_vb.spv
+$VALGRIND --log-file=../../../memory_test/psp103_psp_ro.vlog          $NGSPICE psp_ro.spv
+$VALGRIND --log-file=../../../memory_test/psp103_pmos_id_vd_vg_vb.vlog $NGSPICE pmos_id_vd_vg_vb.spv
+$VALGRIND --log-file=../../../memory_test/psp103_nmos_id_vd_vg_vb.vlog $NGSPICE nmos_id_vd_vg_vb.spv
+$VALGRIND --log-file=../../../memory_test/psp103_psp_inverter.vlog    $NGSPICE psp_inverter.spv
+$VALGRIND --log-file=../../../memory_test/psp103_nmos_pmos_id_vd_vg_temp_PSP.vlog   $NGSPICE nmos_pmos_id_vd_vg_temp_PSP.spv
+$VALGRIND --log-file=../../../memory_test/psp103_c7552_ann_psp.vlog   $NGSPICE c7552_ann_psp.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
 cd ../examples/r2_cmc
-cp res_r2_cmc.sp              res_r2_cmc.spv
-sed -i 's/.endc/quit\n.endc/g' res_r2_cmc.spv
-$VALGRIND --log-file=../../memory_test/r2_res_r2_cmc.vlog          $NGSPICE res_r2_cmc.spv
+cp res_r_vr_temp.sp              res_r_vr_temp.spv
+sed -i 's/.endc/quit\n.endc/g' res_r_vr_temp.spv
+$VALGRIND --log-file=../../memory_test/r2_res_r_vr_temp.vlog          $NGSPICE res_r_vr_temp.spv
 rm *.spv
 cd ../../memory_test
 
-cd ../examples/r3_cmc
-cp res_r3_cmc.sp               res_r3_cmc.spv
-sed -i 's/.endc/quit\n.endc/g' res_r3_cmc.spv
-$VALGRIND --log-file=../../memory_test/r3_res_r3_cmc.vlog          $NGSPICE res_r3_cmc.spv
+cd ../examples/ngspice/r3_cmc
+cp res_r_vr_temp.sp               res_r_vr_temp.spv
+sed -i 's/.endc/quit\n.endc/g' res_r_vr_temp.spv
+$VALGRIND --log-file=../../../memory_test/r3_res_r_vr_temp.vlog          $NGSPICE res_r_vr_temp.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
-cd ../examples/vbic
-cp vbic_ac_par.sp vbic_ac_par.spv
-cp self-heat.sp   self-heat.spv
-cp npn_out.sp     npn_out.spv
-cp npn_out_qs.sp  npn_out_qs.spv
-cp npn_gum.sp     npn_gum.spv
+cd ../examples/ngspice/vbic
+cp npn_cj_vc_cb_ac.sp npn_cj_vc_cb_ac.spv
+cp npn_ic_vc_ib_sfh.sp   npn_ic_vc_ib_sfh.spv
+cp npn_ic_vc_ib.sp     npn_ic_vc_ib.spv
+cp npn_ic_vc_ib_qs.sp  npn_ic_vc_ib_qs.spv
+cp npn_ic_ib_is_vb.sp     npn_ic_ib_is_vb.spv
 cp DFF_Y_ECL.sp   DFF_Y_ECL.spv
-sed -i 's/.endc/quit\n.endc/g' vbic_ac_par.spv
-sed -i 's/.endc/quit\n.endc/g' self-heat.spv
-sed -i 's/.endc/quit\n.endc/g' npn_out.spv
-sed -i 's/.endc/quit\n.endc/g' npn_out_qs.spv
-sed -i 's/.endc/quit\n.endc/g' npn_gum.spv
+sed -i 's/.endc/quit\n.endc/g' npn_cj_vc_cb_ac.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_vc_ib_sfh.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_vc_ib.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_vc_ib_qs.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ic_ib_is_vb.spv
 sed -i 's/.endc/quit\n.endc/g' DFF_Y_ECL.spv
-$VALGRIND --log-file=../../memory_test/vbic_vbic_ac_par.vlog       $NGSPICE vbic_ac_par.spv
-$VALGRIND --log-file=../../memory_test/vbic_self-heat.vlog         $NGSPICE self-heat.spv
-$VALGRIND --log-file=../../memory_test/vbic_npn_out.vlog           $NGSPICE npn_out.spv
-$VALGRIND --log-file=../../memory_test/vbic_npn_out_qs.vlog        $NGSPICE npn_out_qs.spv
-$VALGRIND --log-file=../../memory_test/vbic_npn_gum.vlog           $NGSPICE npn_gum.spv
-$VALGRIND --log-file=../../memory_test/vbic_DFF_Y_ECL.vlog         $NGSPICE DFF_Y_ECL.spv
+$VALGRIND --log-file=../../../memory_test/vbic_npn_cj_vc_cb_ac.vlog       $NGSPICE npn_cj_vc_cb_ac.spv
+$VALGRIND --log-file=../../../memory_test/vbic_npn_ic_vc_ib_sfh.vlog         $NGSPICE npn_ic_vc_ib_sfh.spv
+$VALGRIND --log-file=../../../memory_test/vbic_npn_ic_vc_ib.vlog           $NGSPICE npn_ic_vc_ib.spv
+$VALGRIND --log-file=../../../memory_test/vbic_npn_ic_vc_ib_qs.vlog        $NGSPICE npn_ic_vc_ib_qs.spv
+$VALGRIND --log-file=../../../memory_test/vbic_npn_ic_ib_is_vb.vlog           $NGSPICE npn_ic_ib_is_vb.spv
+$VALGRIND --log-file=../../../memory_test/vbic_DFF_Y_ECL.vlog         $NGSPICE DFF_Y_ECL.spv
 rm *.spv
-cd ../../memory_test
+cd ../../../memory_test
 
 # Check the results
 # Find correct response: ngspice-<version> done

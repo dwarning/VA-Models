@@ -78,7 +78,7 @@ NGSPICE is stable and in an regulary update process.
 
 **[Xyce](https://xyce.sandia.gov/)** is a open source simulator for electronic circuit simulation. Source code, documentation and precompiled binaries of all release are available on the **[website](https://xyce.sandia.gov/sign-in/)**.
 
-Xyce is stable and in an regulary update process. Xyce/ADMS is supporting small signal noise analysis.
+Xyce is stable and in an regulary update process. ADMS/Xyce is supporting small signal noise analysis.
 
 ## How to build the models
 
@@ -119,11 +119,23 @@ adms-compile-va.bat for MS Windows
 
 Released are pre-compiled models for linux (Ubuntu 22.04 checked) and Windows 10 (64bit) ready for usage with osdi configured ngspice version > 39.
 
+## Project structure
+
+VA-Models
+   |_ admslibs    The place where the binaries reside after execution the adms-compile script
+   |_ code        Below this folder all the VA models reside
+   |_ examples
+     |_ ngspice   ngspice example scripts
+     |_ Qucs-S    qucs-s example schematics
+     |_ Xyce      Xyce example scripts
+   |_ memory_test Script for memory check (Linux only), only for debugging purpose
+   |_ osdilibs    The place where the binaries reside after execution the osdi-compile script
+
 ## General Usage Instructions NGSPICE
 
 Copy the *.osdi* files from directory osdilibs to the place where the NGSPICE code models (*.cm*) are located, e.g. */usr/local/share/ngspice/osdi (linux)*, *C:\Spice64\lib\ngspice (Windows)*.
 
-Other way (as shown in the example files) is the load command *pre_osdi ../osdilibs/bsimcmg.osdi* in the NGSPICE control section. 
+Other way (as shown in the example files) is the load command *pre_osdi ../../osdilibs/bsimcmg.osdi* in the NGSPICE control section. 
 You can also extend the ngspice environment variable SPICE_LIB_DIR to your_path/code/osdilibs
 
 It is important that the *.model* card use the name of the Verilog-A module, e.g. in case of bsimcmg: *.model BSIMCMG_N bsimcmg_va*.
