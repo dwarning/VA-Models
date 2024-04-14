@@ -99,7 +99,7 @@ cp inverter_transient.sp inverter_transient.spv
 cp inverter_ro.sp        inverter_ro.spv
 cp pmos_id_vd_vg.sp            pmos_id_vd_vg.spv
 cp nmos_id_vd_vg.sp            nmos_id_vd_vg.spv
-cp ac.sp                 ac.spv
+cp nmos_amp_ac.sp                 nmos_amp_ac.spv
 sed -i 's/.endc/quit\n.endc/g' simple_inverter_dc.spv
 sed -i 's/.endc/quit\n.endc/g' ringosc_17stg.spv
 sed -i 's/.endc/quit\n.endc/g' NuV-test.spv
@@ -108,7 +108,7 @@ sed -i 's/.endc/quit\n.endc/g' inverter_transient.spv
 sed -i 's/.endc/quit\n.endc/g' inverter_ro.spv
 sed -i 's/.endc/quit\n.endc/g' pmos_id_vd_vg.spv
 sed -i 's/.endc/quit\n.endc/g' nmos_id_vd_vg.spv
-sed -i 's/.endc/quit\n.endc/g' ac.spv
+sed -i 's/.endc/quit\n.endc/g' nmos_amp_ac.spv
 $VALGRIND --log-file=../../../memory_test/bsimcmg_simple_inverter_dc.vlog $NGSPICE simple_inverter_dc.spv
 $VALGRIND --log-file=../../../memory_test/bsimcmg_ringosc_17stg.vlog      $NGSPICE ringosc_17stg.spv
 $VALGRIND --log-file=../../../memory_test/bsimcmg_NuV-test.vlog           $NGSPICE NuV-test.spv
@@ -116,7 +116,7 @@ $VALGRIND --log-file=../../../memory_test/bsimcmg_inverter_transient.vlog $NGSPI
 $VALGRIND --log-file=../../../memory_test/bsimcmg_inverter_ro.vlog        $NGSPICE inverter_ro.spv
 $VALGRIND --log-file=../../../memory_test/bsimcmg_pmos_id_vd_vg.vlog            $NGSPICE pmos_id_vd_vg.spv
 $VALGRIND --log-file=../../../memory_test/bsimcmg_nmos_id_vd_vg.vlog            $NGSPICE nmos_id_vd_vg.spv
-$VALGRIND --log-file=../../../memory_test/bsimcmg_ac.vlog                 $NGSPICE ac.spv
+$VALGRIND --log-file=../../../memory_test/bsimcmg_nmos_amp_ac.vlog                 $NGSPICE nmos_amp_ac.spv
 rm *.spv
 cd ../../../memory_test
 
@@ -225,19 +225,19 @@ cd ../examples/hicum2/ngspice
 cp npn_amp_tran.sp    npn_amp_tran.spv
 cp npn_ic_vc_ib.sp     npn_ic_vc_ib.spv
 cp npn_ic_ib_vb.sp     npn_ic_ib_vb.spv
-cp npn_ic_ib_vb_inv.sp npn_ic_ib_vb_inv.spv
+cp npn_ie_ib_vb.sp    npn_ie_ib_vb.spv
 cp npn_gain_ic.sp    npn_gain_ic.spv
 cp npn_ft_ic.sp      npn_ft_ic.spv
 sed -i 's/.endc/quit\n.endc/g' npn_amp_tran.spv
 sed -i 's/.endc/quit\n.endc/g' npn_ic_vc_ib.spv
 sed -i 's/.endc/quit\n.endc/g' npn_ic_ib_vb.spv
-sed -i 's/.endc/quit\n.endc/g' npn_ic_ib_vb_inv.spv
+sed -i 's/.endc/quit\n.endc/g' npn_ie_ib_vb.spv
 sed -i 's/.endc/quit\n.endc/g' npn_gain_ic.spv
 sed -i 's/.endc/quit\n.endc/g' npn_ft_ic.spv
 $VALGRIND --log-file=../../../memory_test/hicum2_npn_amp_tran.vlog    $NGSPICE npn_amp_tran.spv
 $VALGRIND --log-file=../../../memory_test/hicum2_npn_ic_vc_ib.vlog     $NGSPICE npn_ic_vc_ib.spv
 $VALGRIND --log-file=../../../memory_test/hicum2_npn_ic_ib_vb.vlog     $NGSPICE npn_ic_ib_vb.spv
-$VALGRIND --log-file=../../../memory_test/hicum2_npn_ic_ib_vb_inv.vlog $NGSPICE npn_ic_ib_vb_inv.spv
+$VALGRIND --log-file=../../../memory_test/hicum2_npn_ie_ib_vb.vlog $NGSPICE npn_ie_ib_vb.spv
 $VALGRIND --log-file=../../../memory_test/hicum2_npn_gain_ic.vlog    $NGSPICE npn_gain_ic.spv
 $VALGRIND --log-file=../../../memory_test/hicum2_npn_ft_ic.vlog      $NGSPICE npn_ft_ic.spv
 rm *.spv
