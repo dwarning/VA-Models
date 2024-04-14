@@ -125,9 +125,9 @@ VA-Models
    * admslibs    The place where the binaries reside after execution the adms-compile script
    * code        Below this folder all the VA models reside
    * examples
-     ** ngspice   ngspice example scripts
-     ** Qucs-S    qucs-s example schematics
-     ** Xyce      Xyce example scripts
+     * ngspice   ngspice example scripts
+     * Qucs-S    qucs-s example schematics
+     * Xyce      Xyce example scripts
    * memory_test Script for memory check (Linux only), only for debugging purpose
    * osdilibs    The place where the binaries reside after execution the osdi-compile script
 
