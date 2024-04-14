@@ -32,7 +32,7 @@ X9 out8 out8 a5 out9 vee gnd nor
 
 V1 VEE GND -5.2
 
-.tran 0.02n 200n
+.tran 0.02ns 200ns
 
 .control
 pre_osdi ../../../osdilibs/hicumL0_v2p1p0.osdi

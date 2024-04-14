@@ -39,7 +39,7 @@ x100F in outF 1 Fifty
 .control
 pre_osdi ../../../osdilibs/bsimcmg.osdi
 
-tran 2p 1.2n
+tran 2ps 1.2ns
 
 * write ascii rawfile
 *set filetype=ascii

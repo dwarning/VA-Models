@@ -30,7 +30,7 @@ x17 17 1 vdd 0 inv
 
 *.ic 1=1
 
-.tran 1n 10u uic
+.tran 1ns 10us uic
 
 .control
 pre_osdi ../../../osdilibs/bsimbulk.osdi
