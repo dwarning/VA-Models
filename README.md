@@ -122,14 +122,14 @@ Released are pre-compiled models for linux (Ubuntu 22.04 checked) and Windows 10
 ## Project structure
 
 VA-Models
-   |_ admslibs    The place where the binaries reside after execution the adms-compile script
-   |_ code        Below this folder all the VA models reside
-   |_ examples
-     |_ ngspice   ngspice example scripts
-     |_ Qucs-S    qucs-s example schematics
-     |_ Xyce      Xyce example scripts
-   |_ memory_test Script for memory check (Linux only), only for debugging purpose
-   |_ osdilibs    The place where the binaries reside after execution the osdi-compile script
+   * admslibs    The place where the binaries reside after execution the adms-compile script
+   * code        Below this folder all the VA models reside
+   * examples
+     ** ngspice   ngspice example scripts
+     ** Qucs-S    qucs-s example schematics
+     ** Xyce      Xyce example scripts
+   * memory_test Script for memory check (Linux only), only for debugging purpose
+   * osdilibs    The place where the binaries reside after execution the osdi-compile script
 
 ## General Usage Instructions NGSPICE
 
