@@ -1,0 +1,174 @@
+////////////////////////////////////////////////////////////////////////
+/////////////////////////// OP INFO ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+begin : OPinfo
+
+    VOD = nv * (vp_dibl - vs)*UT;
+    VDSAT = vdssat*UT;
+    ///Effective Beta /////////////////////
+    Beta = Ispec / (2.0 * nq * UT2 );
+    ///Inversion Coefficient ////////////////
+    ic = i;
+    ISPEC = Ispec_dits;
+    VTH = VTO_DEV_t + UT* gamma_b_eff * ( sqrt(`MAXA(phi + vs,0.0,`POS_MIN)) - sqrt(phi)) ;
+    Vtb = VTO_DEV_t;
+    Nf=NF;
+
+
+    VDS = V(d) - V(s);
+    VGS = V(g) - V(s);
+    VBS = V(b) - V(s);
+    VDB = V(d) - V(b);
+    VGB = V(g) - V(b);
+
+    ////////////////////////////////////////
+    //Current Calculation
+    ids_intr = SIGN_M * d_gt_s_flag * IDS;
+    ids_edge_effect = SIGN_M * d_gt_s_flag * IDS_edge;
+
+
+    tmp = IDS + IDS_edge;
+    ID = SIGN*M*(   tmp  + IDB  - IGD - IGDOV - IDBJ  + IGIDL  ) ;
+    IS = SIGN*M*( - tmp         - IGS - IGSOV - ISBJ  + IGISL  ) ;
+    IG = SIGN*M*(   IGD  + IGS  + IGB + IGDOV + IGSOV          ) ;
+    IB = SIGN*M*( - IDBJ - ISBJ - IGB - IDB   - IGIDL - IGISL  ) ;
+
+
+    ///////////Transconductances//////////////
+    tmp = (IDS+IDS_edge);
+    gmsi =  abs(SIGN_M * d_gt_s_flag * ddx( tmp,V(`SEFF)));
+    gmgi =  abs(SIGN_M * d_gt_s_flag * ddx( tmp,V(`GEFF)));
+    gmdi =  abs(SIGN_M * d_gt_s_flag * ddx( tmp,V(`DEFF)));
+    gmbi =  abs(SIGN_M * d_gt_s_flag * ddx( tmp,V(`BEFF)));
+
+    tmp = (IDB - IGD - IGDOV - IDBJ  + IGIDL);
+
+    gmgt = gmgi + M * ( `abs_ddx(tmp,V(`GEFF)) );
+    gmst = gmsi + M * ( `abs_ddx(tmp,V(`SEFF)) );
+    gmdt = gmdi + M * ( `abs_ddx(tmp,V(`DEFF)) );
+    gmbt = gmbi + M * ( `abs_ddx(tmp,V(`BEFF)) );
+
+    //gmgt = gmgi + M * ( `abs_ddx(IDB,V(`GEFF))-`abs_ddx(IGB,V(`GEFF))-`abs_ddx(IGDOV,V(`GEFF))-`abs_ddx(IDBJ,V(`GEFF)) + `abs_ddx(IGIDL,V(`GEFF)) );
+    //gmst = gmsi + M * ( `abs_ddx(IDB,V(`SEFF))-`abs_ddx(IGB,V(`SEFF))-`abs_ddx(IGDOV,V(`SEFF))-`abs_ddx(IDBJ,V(`SEFF)) + `abs_ddx(IGIDL,V(`SEFF)) );
+    //gmdt = gmdi + M * ( `abs_ddx(IDB,V(`DEFF))-`abs_ddx(IGB,V(`DEFF))-`abs_ddx(IGDOV,V(`DEFF))-`abs_ddx(IDBJ,V(`DEFF)) + `abs_ddx(IGIDL,V(`DEFF)) );
+    //gmbt = gmbi + M * ( `abs_ddx(IDB,V(`BEFF))-`abs_ddx(IGB,V(`BEFF))-`abs_ddx(IGDOV,V(`BEFF))-`abs_ddx(IDBJ,V(`BEFF)) + `abs_ddx(IGIDL,V(`BEFF)) );
+
+`ifdef DC_S
+    gmsex =  gmst ;
+    gmgex =  gmgt ;
+    gmdex =  gmdt ;
+    gmbex =  gmbt ;
+`else
+    gmsex =  gmst /  (1.0 + (gmdt*rd_wt/M) + (gmst*rs_wt/M));
+    gmgex =  gmgt /  (1.0 + (gmdt*rd_wt/M) + (gmst*rs_wt/M));
+    gmdex =  gmdt /  (1.0 + (gmdt*rd_wt/M) + (gmst*rs_wt/M));
+    gmbex =  gmbt /  (1.0 + (gmdt*rd_wt/M) + (gmst*rs_wt/M));
+`endif
+
+
+    ///////////slope factor calculation////////
+    slopefactor = UT*abs(ddx(vp_dibl,V(`GEFF)));
+    slopefactor = 1/slopefactor;
+    Vp = vp_dibl * UT;
+
+    //////////Intrinsic Capacitances/////////////////
+    tmp = QG + QG_edge;
+
+    Cggi  = M *( abs(ddx(tmp,V(`GEFF))) );
+    Cgsi  = M *( abs(ddx(tmp,V(`SEFF))) );
+    Cgdi  = M *( abs(ddx(tmp,V(`DEFF))) );
+    Cgbi  = M *( abs(ddx(tmp,V(`BEFF))) );
+
+    tmp = QS + QS_edge;
+
+    Csgi  = M *( abs(ddx(tmp,V(`GEFF)))  );
+    Cssi  = M *( abs(ddx(tmp,V(`SEFF)))  );
+    Csdi  = M *( abs(ddx(tmp,V(`DEFF)))  );
+    Csbi  = M *( abs(ddx(tmp,V(`BEFF)))  );
+
+    tmp = QD + QD_edge;
+
+    Cdgi  = M *( abs(ddx(tmp,V(`GEFF))) );
+    Cdsi  = M *( abs(ddx(tmp,V(`SEFF))) );
+    Cddi  = M *( abs(ddx(tmp,V(`DEFF))) );
+    Cdbi  = M *( abs(ddx(tmp,V(`BEFF))) );
+
+    tmp = QB + QB_edge;
+
+    Cbgi  = M *( abs(ddx(tmp,V(`GEFF))) );
+    Cbsi  = M *( abs(ddx(tmp,V(`SEFF))) );
+    Cbdi  = M *( abs(ddx(tmp,V(`DEFF))) );
+    Cbbi  = M *( abs(ddx(tmp,V(`BEFF))) );
+    ///////////Overlap Voltage Dependent Capacitances ///////////////
+    Cgsov = M *( abs(ddx((QSOV),V(`GEFF))));
+    Cgdov = M *( abs(ddx((QDOV),V(`GEFF))));
+
+    ///Total extrinsic capacitance////////////
+    tmp1 = M * abs(ddx(QSFR,V(`GEFF)));
+    tmp2 = M * abs(ddx(QDFR,V(`GEFF)));
+    Cgsex = Cgsi + (CGSO * M * WeffNF) + Cgsov + tmp1;
+    Cgdex = Cgdi + (CGDO * M * WeffNF) + Cgdov + tmp2;
+    Cgbex = Cgbi + CGBO * M * 2.0 * Leff * NF ;
+    Ctotex = Cgsex + Cgbex + Cgdex;
+    ////Intrnsic Gain ///////////////////////
+    Avi = gmgex/gmdex;
+    ///Early voltage ///////////////////////
+    VM = ID/ gmdex;
+    ///Transit Fr4equency /////////////////
+    Ft = gmgex / (2.0*`PI*Ctotex);
+
+    if (ID !=0.0) begin
+        GmgUtId = UT * abs(gmgex / ID);
+        GmsUtId = UT * abs(gmsex / ID);
+        GmbUtId = UT * abs(gmbex / ID);
+        GmdUtId = UT * abs(gmdex / ID);
+        GmId = abs( gmgex / ID );
+    end
+    else begin
+        GmgUtId = 0.0;
+        GmsUtId = 0.0;
+        GmbUtId = 0.0;
+        GmdUtId = 0.0;
+        GmId = 0.0;
+    end
+
+    //tmp3 = 1.0/(WeffNF*Leff);
+    //tmp  = AKP * awl * AKP * awl;
+    //tmp2 = GmId*GmId;
+    //tmp2 = tmp2 * AVTO * AVTO *awl *awl;
+    //tmp2 = tmp2 ;
+    //siId = sqrt(tmp + tmp2);
+
+    //siVg = (GmId == 0.0 )?
+    //      0.0:
+    //      siId/GmId;
+
+    SID_flicker = flicker/M;
+    SID_thermal = thermal*M;
+
+
+
+    SVG_flicker = (gmgex != 0)? SID_flicker /  (gmgex*gmgex) : 0;
+    SVG_thermal = (gmgex != 0)? SID_thermal /  (gmgex*gmgex) : 0;
+
+
+
+    //TFP = Ft * GmgUtId / UT;
+    //GTFP = TFP * Avi;
+
+
+
+    tmp = i0 /(  nq * UT * COX );
+    tau0 = pow(Leff - deltal,2.0) / (tmp);
+
+    tmp         = xf + xrp;
+    tmp1        = xf * xrp;
+    tmp3        = tmp * tmp * tmp;
+    tau = tau0 *( 4.0/15.0 ) * (xf2 + 3.0*tmp1 +xrp2) / tmp3;
+
+
+
+
+
+
+end

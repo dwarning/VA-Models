@@ -1,0 +1,588 @@
+.SUBCKT nch90 d g s b w=1u l=0.1u nf=1 ad=1e-12 as=1e-12 pd=4e-6 ps=4e-6
+M1 d g s b nmos90 w='w' l='l' nf='nf' ad='ad' as='as' pd='pd' ps='ps'
+.ENDS
+.MODEL NMOS90 NMOS
++ LEVEL=301
+*--------------------------------
+*-- FLAGS AND SETUP PARAMETERS --
+*--------------------------------
++SIGN  = 1.000
++TNOM  = 27.00
++TG    = -1.000
++QOFF  = 0.000
++XL    = 0.000
++XW    = 0.000
++SCALE = 1.000
+*---------------------------------------------------------
+*-- OXIDE, SUBSTRATE AND GATE DOPING RELATED PARAMETERS --
+*---------------------------------------------------------
++VTO   = 55.00m
++COX   = 14.50m
++XJ    = 20.00n
++PHIF  = 428.0m
++GAMMA = 155.0m
++GAMMAG= 15.00
++N0    = 1.050
+*---------------------
+*-- QUANTUM EFFECTS --
+*---------------------
++AQMA = 2.000
++AQMI = 500.0m
++ETAQM= 750.0m
+*------------------------------------------------
+*-- VERTICAL FIELD MOBILITY EFFECTS PARAMETERS –-
+*------------------------------------------------
++KP = 1.100m
++E0 = 140.0MEG
++E1 = 10.00G
++ETA= 1.000
+*------------------------
+*-- COULOMB SCATTERING --
+*------------------------
++ZC = 1.000u
++THC= 0.000
+*-------------------------------------------
+*-- DRAIN INDUCED THRESHOLD VOLTAGE SWIFT --
+*-------------------------------------------
++FPROUT= 3.000MEG
++PDITS = 60.00u
++PDITSL= 0.000
++PDITSD= 200.0m
++DDITS = 10.00
+*---------------------------------------------
+*-- MOBILITY RELATED GEOMETRICAL PARAMETERS –-
+*---------------------------------------------
++KA  = 400.0m
++LA  = 300.0n
++KB  = 500.0m
++LB  = 20.00n
++WKP1= 240.0n
++WKP2= 600.0m
++WKP3= 500.0m
+*----------------------------------------------------
+*-- LONG AND WIDE CHANNEL VTO AND GAMMA CORRECTION --
+*----------------------------------------------------
++LVT= 1.000
++WVT= 100.0u
++AVT= 35.00m
++LGAM= 1.000
++WGAM= 100.0u
++AGAM= 25.00m
+*----------------------------
+*-- GEOMETRICAL PARAMETERS –-
+*----------------------------
++DL = 25.00n
++DW = -10.00n
++DLC= 0.000
++DWC= 15.00n
++LL = 0.000
++LLN= 1.000
++WDL= 7.000f
++LDW= 2.500f
+*----------------------------------
+*-- REVERSE SHORT CHANNEL EFFECT --
+*----------------------------------
++LR = 67.08n
++QLR= 3.300m
++NLR= 75.00m
++FLR= 1.000
+*---------------------------------
+*-- INVERSE NARROW WIDTH EFFECT –-
+*---------------------------------
++WR = 100.0n
++QWR= 5.000u
++NWR= 5.000m
+*---------------------------
+*-- CHARGE SHARING EFFECT --
+*---------------------------
++NCS  = 1.500
++LETA0= 1.00MEG
++LETA = 1.050
++LETA2= -25.00n
++WETA = 0.000
+*--------------------------------------------------
+*-- VELOCITY SATURATION & CLM RELATED PARAMETERS --
+*--------------------------------------------------
++UCRIT= 3.800MEG
++LAMBDA= 480.0m
++DELTA= 2.000
++ACLM= 830.0m
+*------------------------------------
+*-- DRAIN INDUCED BARRIER LOWERING --
+*------------------------------------
++ETAD  = 1.100
++SIGMAD= 300.0m
+*--------------------------
+*-- OVERLAP CAPACITANCES –-
+*--------------------------
++LOV    = 21.00n
++GAMMAOV= 4.000
++VFBOV  = 0.000
++VOV    = 1.000
+*+ cgso = 10p cgdo = 10p cgbo = 1p
+*---------------------------
+*-- FRINGING CAPACITANCES --
+*---------------------------
++KJF= 0.000
++CJF= 0.000
+*-------------------------------
+*-- IMPACT IONIZATION CURRENT --
+*-------------------------------
++IBA= 0.000
++IBB= 900.0MEG
++IBN= 100.0m
+*------------------
+*-- GATE CURRENT --
+*------------------
++KG   = 15.00u
++XB   = 6.000
++EB   = 40.00G
++LOVIG= 25.00n
+*------------------------------
+*-- FLICKER NOISE PARAMETERS --
+*------------------------------
++AF= 1.000
+*+KF= 0.000
++kf= 1e-23
+*----------------------------
+*-- TEMPERATURE PARAMETERS --
+*----------------------------
++TCV    = 300.0u
++BEX    = -1.200
++TETA   = 0.000
++UCEX   = 1.500
++TLAMBDA= 200.0m
++TE0EX  = 0.000
++TE1EX  = 0.000
++IBBT   = 900.0u
+*--------------------------------------
+*-- TEMPERATURE AND GEOMETRY SCALING --
+*--------------------------------------
++TCVL = 0.000
++TCVW = 80.00p
++TCVWL= 0.000
+*-------------------------------------
+*-- RESISTANCES TEMPERATURE SCALING --
+*-------------------------------------
++TR = 0.000
++TR2= 0.000
+*---------------------------------------------------------------------
+*-- JUNCTION DRAIN - BULK AND SOURCE-BULK AREA, CURRENT, CAPACITANCE -
+*-- SOURCE SIDE
++NJS  = 1.250
++JSS  = 10.00u
++JSSWS= 0.000
++JSSWGS= 0.000
++MJS   = 150.0m
++MJSWS = 468.3m
++MJSWGS= 468.3m
++PBS   = 598.8m
++PBSWS = 1.457
++PBSWGS= 1.457
++CJS   = 4.000m
++CJSWS = 70.00p
++CJSWGS= 70.00p
++NJTSS   = 2.000
++NJTSSWS = 1.000
++NJTSSWGS= 1.000
++VTSS    = 300.0m
++VTSSWS  = 300.0m
++VTSSWGS = 300.0m
++XJBVS= 1.000
++BVS = 3.000
++XTIS= 3.000
++TNJTSS= 2.500
++TNJTSSWS = 2.000
++TNJTSSWGS= 2.000
+*-- DRAIN SIDE
++NJD   = 1.250
++JSD   = 10.00u
++JSSWD = 0.000
++JSSWGD= 0.000
++MJD   = 150.0m
++MJSWD = 468.3m
++MJSWGD= 468.3m
++PBD  = 598.8m
++PBSWD= 1.457
++PBSWGD= 1.457
++CJD   = 4.000m
++CJSWD = 70.00p
++CJSWGD= 70.00p
++NJTSD  = 2.000
++NJTSSWD = 1.000
++NJTSSWGD= 1.000
++VTSD   = 300.0m
++VTSSWD = 300.0m
++VTSSWGD= 300.0m
++XJBVD= 1.000
++BVD = 3.000
++XTID= 3.000
++TNJTSD   = 2.500
++TNJTSSWD = 2.000
++TNJTSSWGD= 2.000
+*-- BOTH SIDES
++GMIN= 10.00p
++TCJ   = 867.4u
++TCJSW = 687.3u
++TCJSWG= 687.3u
++TPB   = 0.000
++TPBSW = 0.000
++TPBSWG= 0.000
+*------------------------------
+*-- WIDTH SCALING PARAMETERS --
+*------------------------------
++WE0       = 50.00n
++WE1       = 0.000
++WRLX      = 50.00n
++WUCRIT    = -40.00n
++WLAMBDA   = 0.000
++WETAD     = 0.000
++WUCEX     = 0.000
++WLR       = 0.000
++WQLR      = 0.000
++WNLR      = 130.0n
++WDPHIEDGE = 0.000
+*-------------------------------
+*-- LENGTH SCALING PARAMETERS --
+*-------------------------------
++LWR       = 0.000
++LQWR      = 1.500u
++LNWR      = 0.000
++LDPHIEDGE = 0.000
+*-----------------
+*-- EDGE DEVICE --
+*-----------------
++DGAMMAEDGE= 0.000
++DPHIEDGE  = 0.000
++WEDGE     = 0.000
+*---------------------------------
+*-- COMBINED SCALING PARAMETERS --
+*---------------------------------
++WLDPHIEDGE = 0.000
++WLDGAMMAEDGE= 0.000
+*-----------------------
+*-- STI STRESS EFFECT --
+*-----------------------
++SAREF = 1.460u
++SBREF = 1.460u
++KVTO  = 0.000
++KKP   = -35.00n
++KGAMMA= 0.000
++KETAD = 30.00n
++KUCRIT= -9.000
+*--------------------------------
+*-- EXTERNAL SERIES RESISTANCE --
+*--------------------------------
++RLX= 75.00u
+*-----------------------------
+*-- SPICE GEOMETRICAL MODEL --
+*-----------------------------
++RSH= 0.000
++LDIF= 0.000
++HDIF= 240.0n
+*---------------------
+*-- GATE RESISTANCE --
+*---------------------
++GC  = 1.000
++RGSH= 53.00
+*----------------------------------
+*-- SUBSTRATE RESISTANCE NETWORK --
+*----------------------------------
++RDSBSH= 1.500K
++RBWSH = 1.000K
++RSBWSH= 50.00
++RDBWSH= 50.00
+
+.SUBCKT pch90 d g s b w=3u l=0.1u nf=1 ad=3e-12 as=3e-12 pd=8e-6 ps=8e-6
+M1 d g s b pmos90 w='w' l='l' nf='nf' ad='ad' as='as' pd='pd' ps='ps'
+.ENDS
+.MODEL PMOS90 PMOS
++ LEVEL=301
+*--------------------------------
+*-- FLAGS AND SETUP PARAMETERS --
+*--------------------------------
++SIGN = -1.000
++TNOM = 27.00
++TG   = -1.000
++QOFF = 0.000
++XL   = 0.000
++XW   = 0.000
++SCALE= 1.000
+*---------------------------------------------------------
+*-- OXIDE, SUBSTRATE AND GATE DOPING RELATED PARAMETERS --
+*---------------------------------------------------------
++VTO   = -88.00m
++COX   = 13.50m
++XJ    = 10.410n
++PHIF  = 420.0m
++GAMMA = 25.96m
++GAMMAG= 5.500
++N0    = 1.100
+*---------------------
+*-- QUANTUM EFFECTS --
+*---------------------
++AQMA = 590.8m
++AQMI = 392.6m
++ETAQM= 750.0m
+*------------------------------------------------
+*-- VERTICAL FIELD MOBILITY EFFECTS PARAMETERS –-
+*------------------------------------------------
++KP = 310.0u
++E0 = 95.00MEG
++E1 = 8.259G
++ETA= 1.311
+*------------------------
+*-- COULOMB SCATTERING --
+*------------------------
++ZC = 1.000u
++THC= 0.000
+*-------------------------------------------
+*-- DRAIN INDUCED THRESHOLD VOLTAGE SWIFT --
+*-------------------------------------------
++FPROUT= 10.00MEG
++PDITS = 15.00u
++PDITSL= 0.000
++PDITSD= 800.0m
++DDITS = 10.00
+*---------------------------------------------
+*-- MOBILITY RELATED GEOMETRICAL PARAMETERS –-
+*---------------------------------------------
++KA  = 0.000
++LA  = 3.000u
++KB  = 0.000
++LB  = 170.0n
++WKP1= 300.0n
++WKP2= -270.0m
++WKP3= 1.500
+*----------------------------------------------------
+*-- LONG AND WIDE CHANNEL VTO AND GAMMA CORRECTION --
+*----------------------------------------------------
++LVT= 1.000
++WVT= 100.0u
++AVT= 150.0m
++LGAM= 1.500u
++WGAM= 1.000
++AGAM= -200.0m
+*----------------------------
+*-- GEOMETRICAL PARAMETERS –-
+*----------------------------
++DL  = 85.00n
++DW  = 0.00n
++DLC = 0.000
++DWC = 100.0n
++LL  = 0.000
++LLN = 1.000
++WDL = 0.000
++LDW = 0.000
+*----------------------------------
+*-- REVERSE SHORT CHANNEL EFFECT --
+*----------------------------------
++LR = 38.26n
++QLR= 8.300m
++NLR= 7.494
++FLR= 0.000
+*---------------------------------
+*-- INVERSE NARROW WIDTH EFFECT –-
+*---------------------------------
++WR = 40.00n
++QWR= 300.0u
++NWR= -30.00m
+*---------------------------
+*-- CHARGE SHARING EFFECT --
+*---------------------------
++NCS  = 2.000
++LETA0= 2.700MEG
++LETA = 1.500
++LETA2= 0.000
++WETA = 0.000
+*--------------------------------------------------
+*-- VELOCITY SATURATION & CLM RELATED PARAMETERS --
+*--------------------------------------------------
++UCRIT= 16.50MEG
++LAMBDA= 1.450
++DELTA= 1.000
++ACLM= 830.0m
+*------------------------------------
+*-- DRAIN INDUCED BARRIER LOWERING --
+*------------------------------------
++ETAD  = 1.750
++SIGMAD= 1.000
+*--------------------------
+*-- OVERLAP CAPACITANCES –-
+*--------------------------
++LOV    = 24.00n
++GAMMAOV= 3.000
++VFBOV  = 0.000
++VOV    = 1.000
++ cgso = 10p cgdo = 10p cgbo = 1p
+*---------------------------
+*-- FRINGING CAPACITANCES --
+*---------------------------
++KJF= 0.000
++CJF= 0.000
+*-------------------------------
+*-- IMPACT IONIZATION CURRENT --
+*-------------------------------
++IBA= 0.000
++IBB= 400.0MEG
++IBN= 100.0m
+*------------------
+*-- GATE CURRENT --
+*------------------
++KG   = 24.61u
++XB   = 4.280
++EB   = 28.42G
++LOVIG= 28.06n
+*------------------------------
+*-- FLICKER NOISE PARAMETERS --
+*------------------------------
++AF= 1.000
++KF= 0.000
+*----------------------------
+*-- TEMPERATURE PARAMETERS --
+*----------------------------
++TCV    = -500.0u
++BEX    = -1.100
++TETA   = 0.000
++UCEX   = 3.500
++TLAMBDA= 1.500
++TE0EX  = 500.0m
++TE1EX  = 1.000
++IBBT   = 700.0u
+*--------------------------------------
+*-- TEMPERATURE AND GEOMETRY SCALING --
+*--------------------------------------
++TCVL = -30.00p
++TCVW = 30.00p
++TCVWL= 0.000
+*-------------------------------------
+*-- RESISTANCES TEMPERATURE SCALING --
+*-------------------------------------
++TR = -5.000m
++TR2= 0.000
+*---------------------------------------------------------------------
+*-- JUNCTION DRAIN - BULK AND SOURCE-BULK AREA, CURRENT, CAPACITANCE -
+*-- SOURCE SIDE
++NJS= 1.000
++JSS   = 1.000u
++JSSWS = 0.000
++JSSWGS= 0.000
++MJS   = 900.0m
++MJSWS = 700.0m
++MJSWGS= 700.0m
++PBS   = 800.0m
++PBSWS = 600.0m
++PBSWGS= 600.0m
++CJS   = 12.00m
++CJSWS = 0.000
++CJSWGS= 0.000
++NJTSS   = 1.000
++NJTSSWS = 1.000
++NJTSSWGS= 1.000
++VTSS   = 0.000
++VTSSWS = 0.000
++VTSSWGS= 0.000
++XJBVS= 0.000
++BVS = 10.00
++XTIS= 3.000
++TNJTSS  = 0.000
++TNJTSSWS= 0.000
++TNJTSSWGS= 0.000
+*-- DRAIN SIDE
++NJD = 1.000
++JSD   = 1.000u
++JSSWD = 0.000
++JSSWGD= 0.000
++MJD   = 900.0m
++MJSWD = 700.0m
++MJSWGD= 700.0m
++PBD   = 800.0m
++PBSWD = 600.0m
++PBSWGD= 600.0m
++CJD= 12.00m
++CJSWD= 0.000
++CJSWGD= 0.000
++NJTSD  = 1.000
++NJTSSWD= 1.000
++NJTSSWGD= 1.000
++VTSD  = 0.000
++VTSSWD= 0.000
++VTSSWGD= 0.000
++XJBVD= 0.000
++BVD = 10.00
++XTID= 3.000
++TNJTSD   = 0.000
++TNJTSSWD = 0.000
++TNJTSSWGD= 0.000
+*-- BOTH SIDES
++GMIN= 0.000
++TCJ   = 694.8u
++TCJSW = 1.124m
++TCJSWG= 1.124m
++TPB   = 2.450m
++TPBSW = -1.360m
++TPBSWG= -1.360m
+*------------------------------
+*-- WIDTH SCALING PARAMETERS --
+*------------------------------
++WE0      = 150.00n
++WE1      = 0.000
++WRLX     = 0.000
++WUCRIT   = 130.0n
++WLAMBDA  = 25.00n
++WETAD    = -40.00n
++WUCEX    = 0.000
++WLR      = 0.000
++WQLR     = -20.00n
++WNLR     = -170.0n
++WDPHIEDGE= 0.000
+*-------------------------------
+*-- LENGTH SCALING PARAMETERS --
+*-------------------------------
++LWR = 0.000
++LQWR= 0.000
++LNWR= -50.00n
++LDPHIEDGE= 0.000
+*-----------------
+*-- EDGE DEVICE --
+*-----------------
++DGAMMAEDGE= 0.000
++DPHIEDGE  = 0.000
++WEDGE     = 0.000
+*---------------------------------
+*-- COMBINED SCALING PARAMETERS --
+*---------------------------------
++WLDPHIEDGE = 0.000
++WLDGAMMAEDGE= 0.000
+*-----------------------
+*-- STI STRESS EFFECT --
+*-----------------------
++SAREF  = 1.460u
++SBREF  = 1.460u
++KVTO   = 7.000n
++KKP    = 30.00n
++KGAMMA = 0.000
++KETAD  = 0.000
++KUCRIT = 0.000
+*--------------------------------
+*-- EXTERNAL SERIES RESISTANCE --
+*--------------------------------
++RLX= 50.00u
+*-----------------------------
+*-- SPICE GEOMETRICAL MODEL --
+*-----------------------------
++RSH= 0.000
++LDIF= 0.000
++HDIF= 240.0n
+*---------------------
+*-- GATE RESISTANCE --
+*---------------------
++GC  = 1.000
++RGSH= 50.00
+*----------------------------------
+*-- SUBSTRATE RESISTANCE NETWORK --
+*----------------------------------
++RDSBSH= 10.00K
++RBWSH = 1.000K
++RSBWSH= 75.00
++RDBWSH= 75.00

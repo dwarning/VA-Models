@@ -1,0 +1,219 @@
+// ANALYTICAL CALCULATION OF EDGE-CONDUCTANCE EFFECT.
+// CHANNEL CURRENT AND CHARGES FOR THE NODES OF THE EDGE TRANSISTOR ARE CALCULATED.
+
+// CALCULATION OF EDGE_DEVICE'S_NORMALIZATION_FACTORS
+Ispec_dits_edge = Ispec_dits * rWNWedge;
+Q0_edge     = Q0 * rWNWedge;
+Gspec_dits_edge = Gspec_dits * rWNWedge;
+
+// CALCULATION OF NORMALIZED AND SCALED THE DEVICE'S GEOMETRY PARAMETERS
+dgamma_edge     = DGAMMAEDGE * (1.0 + WLDGAMMAEDGE / WLeff) / sqrtUT;
+dphi_edge   = DPHIEDGE * (1.0 + LDPHIEDGE / Leff) * (1.0 + WDPHIEDGE / Weff) * (1.0 + WLDPHIEDGE / WLeff) / UT;
+
+// CALCULATION OF DIFFERENTIAL PINCH-OFF VOLTAGE OF THE EDGE DEVICE WITH RESPECT TO THE MAIN DEVICE
+dvp_edge    = - dgamma_edge * psi_p / (sqrt_psi_p + 0.5 * gamma_b_eff) - dphi_edge;
+
+begin : INVERSION_CHARGES
+    vp_dibl_edge    = vp_dibl + dvp_edge;
+    `QV(qs_edge ,(vp_dibl_edge - vs ))
+    `QV(qdp_edge,(vp_dibl_edge - vdp))
+end
+
+// CALCULATION OF EDGE DEVICE'S CHANNEL CURRENT, NORMALIZED AND DENORMALIZED
+ids_edge    = qs_edge * (qs_edge + 1.0) - qdp_edge * (qdp_edge + 1.0);
+IDS_edge    = Ispec_dits_edge * ids_edge;
+
+// CALCULATION OF PINCH-OFF SURFACE POTENTIAL OF THE EDGE DEVICE, NORMALIZED
+psi_p_edge      = psi_p - dgamma_edge * psi_p / (sqrt_psi_p + 0.5 * gamma_b_eff);
+sqrt_psi_p_edge = sqrt(`MAXA(psi_p_edge,1.0E-4,1.0E-2));
+// CALCULATION OF BODY EFFECT COEFFICIENT OF THE EDGE DEVICE, NORMALIZED
+gamma_b_chsh_edge = gamma_b_chsh + dgamma_edge;
+
+// CALCULATION OF THE CHARGE SLOPE FACTOR OF THE EDGE DEVICE
+`NQ(nq_edge,psi_p_edge,sqrt_psi_p_edge,qs_edge,qdp_edge,dpd,gamma_b_chsh_edge,gamma_g2)
+
+// FREQUENTLY PERFORMED CALCULATIONS
+qsqdp_edge  = qs_edge + qdp_edge;
+qs_qdp_edge     = qs_edge - qdp_edge;
+powqs_qdp2_edge = qs_qdp_edge * qs_qdp_edge;
+qsqdpp1_edge    = qsqdp_edge + 1.0;
+powqsqdpp1_2_edge = 1.0 / (qsqdpp1_edge * qsqdpp1_edge);
+
+// CALCULATION OF THE CHARGES AT THE NODES OF THE EDGE DEVICE, NORMALIZED
+`QX(qS_edge,psi_p_edge,nq_edge,qs_edge,qdp_edge,powqs_qdp2_edge,powqsqdpp1_2_edge)
+`QX(qD_edge,psi_p_edge,nq_edge,qdp_edge,qs_edge,powqs_qdp2_edge,powqsqdpp1_2_edge)
+`QG(qG_edge,psi_p_edge,qs_edge,qdp_edge,powqs_qdp2_edge,powqsqdpp1_2_edge,qsqdpp1_edge,v_o_qme,gamma_g2)
+qB_edge     = qG_edge - qS_edge - qD_edge;
+
+// DEMORMALIZATION OF THE CHARGES AT THE NODES OF THE EDGE DEVICE
+QS_edge     =   qS_edge * Q0_edge;
+QD_edge     =   qD_edge * Q0_edge;
+QG_edge     = - qG_edge * Q0_edge;
+QB_edge     = - QS_edge - QD_edge - QG_edge;
+
+// ASSIGNMENT OF CHANNEL CURRENT AND DYNAMIC BEHAVIOUR OF THE EDGE DEVICE
+
+`ifdef DC_S
+// SERIES RESISTANCE
+    RES_IDS_edge    = 1.0 + rs_wt * Gspec_dits_edge * qs_edge + rd_wt * Gspec_dits_edge * qdp_edge; // NOTE: Internal, first-order calculation of the series resistance effect for the simplest mode of the model (DC_S), where no internal nodes are introduced.
+    IDS_edge    = IDS_edge / RES_IDS_edge;
+    // CHANNEL CURRENT OF THE EDGE DEVICE
+    I(d ,s )    <+  SIGN_M * d_gt_s_flag * IDS_edge;
+    // CAPACITANCES OF THE EDGE DEVICE
+    I(b ,g )    <+  SIGN_M * ddt(QB_edge) * QON;
+    I(d ,g )    <+  SIGN_M * (d_gt_s * ddt(QD_edge) + s_gt_d * ddt(QS_edge)) * QON;
+    I(s ,g )    <+  SIGN_M * (d_gt_s * ddt(QS_edge) + s_gt_d * ddt(QD_edge)) * QON;
+`endif
+
+`ifdef DC
+    // CHANNEL CURRENT OF THE EDGE DEVICE
+    I(di,si)    <+  SIGN_M * d_gt_s_flag * IDS_edge;
+    // CAPACITANCES OF THE EDGE DEVICE
+    I(b ,g )    <+  SIGN_M * ddt(QB_edge) * QON;
+    I(di,g )    <+  SIGN_M * (d_gt_s * ddt(QD_edge) + s_gt_d * ddt(QS_edge)) * QON;
+    I(si,g )    <+  SIGN_M * (d_gt_s * ddt(QS_edge) + s_gt_d * ddt(QD_edge)) * QON;
+`endif
+
+`ifdef RF_S
+    // CHANNEL CURRENT OF THE EDGE DEVICE
+    I(di,si)    <+  SIGN_M * d_gt_s_flag * IDS_edge;
+    // CAPACITANCES OF THE EDGE DEVICE
+    I(bi,gi)    <+  SIGN_M * ddt(QB_edge) * QON;
+    I(di,gi)    <+  SIGN_M * (d_gt_s * ddt(QD_edge) + s_gt_d * ddt(QS_edge)) * QON;
+    I(si,gi)    <+  SIGN_M * (d_gt_s * ddt(QS_edge) + s_gt_d * ddt(QD_edge)) * QON;
+`endif
+
+`ifdef RF
+    // CHANNEL CURRENT OF THE EDGE DEVICE
+    I(di,si)    <+  SIGN_M * d_gt_s_flag * IDS_edge;
+    // CAPACITANCES OF THE EDGE DEVICE
+    I(bi,gi)    <+  SIGN_M * ddt(QB_edge) * QON;
+    I(di,gi)    <+  SIGN_M * (d_gt_s * ddt(QD_edge) + s_gt_d * ddt(QS_edge)) * QON;
+    I(si,gi)    <+  SIGN_M * (d_gt_s * ddt(QS_edge) + s_gt_d * ddt(QD_edge)) * QON;
+`endif
+
+`ifdef NQS
+    // HARD-WRITTEN INTRINSIC CHANNEL SEGMENTATION TO FIVE SEGMENTS (NCS: Number of Channel Segments) FOR EDGE DEVICE.
+    Ispec_dits_edge_seg = Ispec_dits_edge * `NoCS;
+    Q0_edge_seg     = Q0_edge / `NoCS;
+    begin : EDGE_MOS_S0
+        // STATIC PART OF THE SEGMENT, CHANNEL CURRENT, EDGE CONDUCTANCE
+        v1      = d_gt_s * vs + s_gt_d * vdp;
+        v2      = SIGN * V(m1,bi) / UT;
+        `QV(q1,(vp_dibl_edge - v1))
+        i1      = q1 * (q1 + 1.0);
+        `QV(q2,(vp_dibl_edge - v2))
+        i2      = q2 * (q2 + 1.0);
+        I(m1,si)    <+ SIGN_M * Ispec_dits_edge_seg * (i1 - i2);
+        // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES, EDGE CONDUCTANCE
+        `NQ(nq_edge,psi_p_edge,sqrt_psi_p_edge,q1,q2,dpd,gamma_b_chsh_edge,gamma_g2)
+        q1q2        = q1 + q2;
+        q1_q2       = q1 - q2;
+        powq1_q22   = q1_q2 * q1_q2;
+        q1q2p1      = q1q2 + 1.0;
+        powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+        `QX(qq1,psi_p_edge,nq_edge,q1,q2,powq1_q22,powq1q2p1_2)
+        `QX(qq2,psi_p_edge,nq_edge,q2,q1,powq1_q22,powq1q2p1_2)
+        `QG(qG_edge,psi_p_edge,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+        qB_edge     = - qq1 - qq2 + qG_edge;
+        I(bi,gi)    <+ SIGN_M * ddt(qB_edge  * Q0_edge_seg) * QON;
+        I(m1,gi)    <+ SIGN_M * ddt(qq2 * Q0_edge_seg) * QON;
+        I(si,gi)    <+ SIGN_M * ddt(qq1 * Q0_edge_seg) * QON;
+    end //  EDGE_MOS_S0
+    begin : EDGE_MOS_S1
+        // STATIC PART OF THE SEGMENT, CHANNEL CURRENT, EDGE CONDUCTANCE
+        v1      = SIGN * V(m1,bi) / UT;
+        v2      = SIGN * V(m2,bi) / UT;
+        `QV(q1,(vp_dibl_edge - v1))
+        i1      = q1 * (q1 + 1.0);
+        `QV(q2,(vp_dibl_edge - v2))
+        i2      = q2 * (q2 + 1.0);
+        I(m2,m1)    <+ SIGN_M * Ispec_dits_edge_seg * (i1 - i2);
+        // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES, EDGE CONDUCTANCE
+        `NQ(nq_edge,psi_p_edge,sqrt_psi_p_edge,q1,q2,dpd,gamma_b_chsh_edge,gamma_g2)
+        q1q2        = q1 + q2;
+        q1_q2       = q1 - q2;
+        powq1_q22   = q1_q2 * q1_q2;
+        q1q2p1      = q1q2 + 1.0;
+        powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+        `QX(qq1,psi_p_edge,nq_edge,q1,q2,powq1_q22,powq1q2p1_2)
+        `QX(qq2,psi_p_edge,nq_edge,q2,q1,powq1_q22,powq1q2p1_2)
+        `QG(qG_edge,psi_p_edge,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+        qB_edge     = - qq1 - qq2 + qG_edge;
+        I(bi,gi)    <+ SIGN_M * ddt(qB_edge  * Q0_edge_seg) * QON;
+        I(m2,gi)    <+ SIGN_M * ddt(qq2 * Q0_edge_seg) * QON;
+        I(m1,gi)    <+ SIGN_M * ddt(qq1 * Q0_edge_seg) * QON;
+    end //  EDGE_MOS_S1
+    begin : EDGE_MOS_M
+        // STATIC PART OF THE SEGMENT, CHANNEL CURRENT, EDGE CONDUCTANCE
+        v1      = SIGN * V(m2,bi) / UT;
+        v2      = SIGN * V(m3,bi) / UT;
+        `QV(q1,(vp_dibl_edge - v1))
+        i1      = q1 * (q1 + 1.0);
+        `QV(q2,(vp_dibl_edge - v2))
+        i2      = q2 * (q2 + 1.0);
+        I(m3,m2)    <+ SIGN_M * Ispec_dits_edge_seg * (i1 - i2);
+        // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES, EDGE CONDUCTANCE
+        `NQ(nq_edge,psi_p_edge,sqrt_psi_p_edge,q1,q2,dpd,gamma_b_chsh_edge,gamma_g2)
+        q1q2        = q1 + q2;
+        q1_q2       = q1 - q2;
+        powq1_q22   = q1_q2 * q1_q2;
+        q1q2p1      = q1q2 + 1.0;
+        powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+        `QX(qq1,psi_p_edge,nq_edge,q1,q2,powq1_q22,powq1q2p1_2)
+        `QX(qq2,psi_p_edge,nq_edge,q2,q1,powq1_q22,powq1q2p1_2)
+        `QG(qG_edge,psi_p_edge,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+        qB_edge     = - qq1 - qq2 + qG_edge;
+        I(bi,gi)    <+ SIGN_M * ddt(qB_edge  * Q0_edge_seg) * QON;
+        I(m3,gi)    <+ SIGN_M * ddt(qq2 * Q0_edge_seg) * QON;
+        I(m2,gi)    <+ SIGN_M * ddt(qq1 * Q0_edge_seg) * QON;
+    end //  EDGE_MOS_M
+    begin : EDGE_MOS_D1
+        // STATIC PART OF THE SEGMENT, CHANNEL CURRENT, EDGE CONDUCTANCE
+        v1      = SIGN * V(m3,bi) / UT;
+        v2      = SIGN * V(m4,bi) / UT;
+        `QV(q1,(vp_dibl_edge - v1))
+        i1      = q1 * (q1 + 1.0);
+        `QV(q2,(vp_dibl_edge - v2))
+        i2      = q2 * (q2 + 1.0);
+        I(m4,m3)    <+ SIGN_M * Ispec_dits_edge_seg * (i1 - i2);
+        // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES, EDGE CONDUCTANCE
+        `NQ(nq_edge,psi_p_edge,sqrt_psi_p_edge,q1,q2,dpd,gamma_b_chsh_edge,gamma_g2)
+        q1q2        = q1 + q2;
+        q1_q2       = q1 - q2;
+        powq1_q22   = q1_q2 * q1_q2;
+        q1q2p1      = q1q2 + 1.0;
+        powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+        `QX(qq1,psi_p_edge,nq_edge,q1,q2,powq1_q22,powq1q2p1_2)
+        `QX(qq2,psi_p_edge,nq_edge,q2,q1,powq1_q22,powq1q2p1_2)
+        `QG(qG_edge,psi_p_edge,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+        qB_edge     = - qq1 - qq2 + qG_edge;
+        I(bi,gi)    <+ SIGN_M * ddt(qB_edge  * Q0_edge_seg) * QON;
+        I(m4,gi)    <+ SIGN_M * ddt(qq2 * Q0_edge_seg) * QON;
+        I(m3,gi)    <+ SIGN_M * ddt(qq1 * Q0_edge_seg) * QON;
+    end //  EDGE_MOS_D1
+    begin : EDGE_MOS_D0
+        // STATIC PART OF THE SEGMENT, CHANNEL CURRENT, EDGE CONDUCTANCE
+        v1      = SIGN * V(m4,bi) / UT;
+        v2      = d_gt_s * vdp + s_gt_d * vs;
+        `QV(q1,(vp_dibl_edge - v1))
+        i1      = q1 * (q1 + 1.0);
+        `QV(q2,(vp_dibl_edge - v2))
+        i2      = q2 * (q2 + 1.0);
+        I(di,m4)    <+ SIGN_M * Ispec_dits_edge_seg * (i1 - i2);
+        // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES, EDGE CONDUCTANCE
+        `NQ(nq_edge,psi_p_edge,sqrt_psi_p_edge,q1,q2,dpd,gamma_b_chsh_edge,gamma_g2)
+        q1q2        = q1 + q2;
+        q1_q2       = q1 - q2;
+        powq1_q22   = q1_q2 * q1_q2;
+        q1q2p1      = q1q2 + 1.0;
+        powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+        `QX(qq1,psi_p_edge,nq_edge,q1,q2,powq1_q22,powq1q2p1_2)
+        `QX(qq2,psi_p_edge,nq_edge,q2,q1,powq1_q22,powq1q2p1_2)
+        `QG(qG_edge,psi_p_edge,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+        qB_edge     = - qq1 - qq2 + qG_edge;
+        I(bi,gi)        <+ SIGN_M * ddt(qB_edge  * Q0_edge_seg) * QON;
+        I(di,gi)        <+ SIGN_M * ddt(qq2 * Q0_edge_seg) * QON;
+        I(m4,gi)    <+ SIGN_M * ddt(qq1 * Q0_edge_seg) * QON;
+    end //  EDGE_MOS_D0
+`endif

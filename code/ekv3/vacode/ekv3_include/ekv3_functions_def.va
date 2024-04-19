@@ -1,0 +1,93 @@
+`ifdef FUNCTIONS_INCLUDE
+`else
+
+// FUNCTION `QV CALCULATES NORMALIZED INVERSION CHARGE, AT ANY POINT OF THE CHANNEL, AFTER THE DIFFERENCE BETWEEN THE PINCH-OFF VOLTAGE AND THE VOLTAGE AT THAT POINT.
+// IT IS USED TO CALCULATE qs AND qd, THE NORMALIZED INVERSION CHARGES AT THE EDGES OF THE CHANNEL, THE SOURCE AND THE DRAIN END RESPECTIVELY.
+// `QV IS THE INVERSE FUNCTION OF THE v(q) = 2q + lnq.
+
+`define QV(q,v)                                             \
+    begin                                                   \
+        vv = v / NUV;                                           \
+        if (vv > -0.6)                                          \
+        begin                                               \
+            z1      = 0.25 * (vv - 1.4 + sqrt(vv * (vv - 0.394036) + 9.662671));        \
+            ln_z1_      = ln(z1);                               \
+            z2      = (vv - (2.0 * z1 + ln_z1_)) / (2.0 * z1 + 1.0);            \
+            q       = z1 * (1.0 + z2 * (1.0 + 0.070 * z2)) * NUV;               \
+        end                                             \
+        else                                                \
+        begin                                               \
+            ln_z1_      = 0.5 * (vv - 0.201491 - sqrt(vv * (vv + 0.402982) + 2.446562));    \
+            z1      = exp(ln_z1_);                              \
+            z2      = (vv - (2.0 * z1 + ln_z1_)) / (2.0 * z1 + 1.0);            \
+            q       = z1 * (1.0 + z2 * (1.0 + 0.483 * z2)) * NUV;               \
+        end                                             \
+    end
+
+
+// FUNCITON `NQ CALCULATES THE CHARGE SLOPE FACTOR. THE FORMULATION TAKES INTO ACCOUNT POLYSILICON DEPLETION
+
+`define NQ(nq,psi_p,sqrt_psi_p,qs,qd,dpd,gamma_b,gamma_g2)                      \
+    begin                                                   \
+        tmp_psi_sa  = psi_p - qs - qd;                              \
+        sqrt_psi_sa     = sqrt(`MAXA(tmp_psi_sa,1.0e-4,1.0E-2));                    \
+        if (TG < 0)                                         \
+        begin                                               \
+            z0      = 1.0 + dpd + gamma_b / (sqrt_psi_p + sqrt_psi_sa);         \
+            zk      = 0.5 + dpd * sqrt_psi_sa / gamma_b;                    \
+            nq      = z0 / (zk + sqrt(zk * zk + z0 * (qs + qd) / gamma_g2));        \
+        end                                             \
+        else                                                \
+        begin                                               \
+            nq      = 1.0 + gamma_b / (sqrt_psi_p + sqrt_psi_sa);               \
+        end                                             \
+    end
+
+// FUNCTION `QX CALCULATES THE CHARGES AT THE END OF THE CHANNEL (SOURCE AND DRAIN NODES).
+
+`define QX(qx,psi_p,nq,qs,qd,powqs_qd2,powqsqd1_2)                          \
+    begin                                                   \
+        if (psi_p > 2.0)                                        \
+        begin                                               \
+            qx      = inv_dqmip1 * nq * `ONE3RD * (qs + qd + qs + 0.5 * (1.0 + 0.8 * qs + 1.2 * qd) * powqs_qd2 * powqsqd1_2);  \
+        end                                             \
+        else                                                \
+        begin                                               \
+            qx      = 0.0;                                  \
+        end                                             \
+    end
+
+// FUNCTION `QG CALCULATES THE CHARGE AT THE GATE NODE.
+
+`define QG(qG,psi_p,qs,qd,powqs_qd2,powqsqd1_2,qsqd1,v_o,gamma_g2)                  \
+    begin                                                   \
+        if (psi_p > 2.0)                                        \
+        begin                                               \
+            if (TG < 0)                                     \
+            begin                                           \
+                v1_qg       = v_o + 2.0 * qs * inv_dqmip1;                  \
+                v2_qg       = v_o + 2.0 * qd * inv_dqmip1;                  \
+                k1      = sqrt(0.25 + v1_qg / gamma_g2);                \
+                k2      = sqrt(0.25 + v2_qg / gamma_g2);                \
+                k12         = k1 + k2;                          \
+                k12_2       = k12 * k12;                            \
+                k12_3       = k12_2 * k12;                          \
+                qG      = v1_qg / (1.0 + 2.0 * k1) + v2_qg / (1.0 + 2.0 * k2) + inv_dqmip1 * `ONE3RD * (powqs_qd2 / k12_3) * (0.8 * (k12_2 + k1 * k2) / qsqd1 + 2.0 / gamma_g2);    \
+            end                                         \
+            else                                            \
+            begin                                           \
+                qG      = v_o + qs + qd + inv_dqmip1 * `ONE3RD * powqs_qd2 / qsqd1; \
+            end                                         \
+        end                                             \
+        else if (psi_p > 0.0)                                       \
+        begin                                               \
+            qG      = (TG < 0) ? v_o / (0.5 + sqrt(0.25 + v_o / gamma_g2)) : v_o;       \
+        end                                             \
+        else                                                \
+        begin                                               \
+            qG      = (TG > 0) ? v_o / (0.5 + sqrt(0.25 - v_o / gamma_g2)) : v_o;       \
+        end                                             \
+    end
+
+`define FUNCTIONS_INCLUDE
+`endif

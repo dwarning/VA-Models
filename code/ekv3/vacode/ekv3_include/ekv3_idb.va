@@ -1,0 +1,42 @@
+// ANALYTICAL CALCULATION OF IMPACT IONIZATION CURRENT
+
+begin : IMPACT_IONIZATION_CURRENT_IDB
+    v_ib        = (vd - vs) - IBN * 2.0 * vdssat;
+    if (v_ib > 0.0)
+    begin
+        tmp         = IBB_t * LC / (v_ib * UT);
+        tmp1        = `MINA(tmp,70,1.0E-2); // NOTE: Limiting the argument of the exponential function at the IDB calculation.
+        IDB         = IDS * v_ib * UT * exp(-tmp1) * IBA / IBB_t;
+    end
+    else
+    begin
+        IDB         = 0.0;
+    end
+end //  IMPACT_IONIZATION_CURRENT_IDB
+
+// ASSIGNMENT OF THE IMPACT IONIZATION CURRENT
+
+`ifdef DC_S
+    I(d ,b ) <+  SIGN_M * d_gt_s * IDB;
+    I(s ,b ) <+  SIGN_M * s_gt_d * IDB;
+`endif
+
+`ifdef DC
+    I(di,b ) <+  SIGN_M * d_gt_s * IDB;
+    I(si,b ) <+  SIGN_M * s_gt_d * IDB;
+`endif
+
+`ifdef RF_S
+    I(di,bi) <+  SIGN_M * d_gt_s * IDB;
+    I(si,bi) <+  SIGN_M * s_gt_d * IDB;
+`endif
+
+`ifdef RF
+    I(di,bi) <+  SIGN_M * d_gt_s * IDB;
+    I(si,bi) <+  SIGN_M * s_gt_d * IDB;
+`endif
+
+`ifdef NQS
+    I(di,bi) <+  SIGN_M * d_gt_s * IDB;
+    I(si,bi) <+  SIGN_M * s_gt_d * IDB;
+`endif

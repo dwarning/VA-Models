@@ -1,0 +1,144 @@
+`ifdef DEFINITIONS_INCLUDE
+`else
+`define TAD            (0.1E-9)
+// Physical Constants
+//
+// Silicon Electrical Permittivity [F/m]
+`define C_EPSSIL        (1.03594314E-10)
+// Oxide Electrical Permittivity [F/m]
+`define C_EPSOX         (34.53144E-12)
+// Electron Charge [C]
+`define C_QE            (1.602E-19)
+// Boltzmann constant [J/K]
+`define C_K         (1.3807E-23)
+
+// zero Celsius in Kelvin
+`define    P_CELSIUS0         273.15
+
+// Thermal Potential, as a function of temperature (T) in K.
+`define UT(T)           ((`C_K * (T)) / `C_QE)
+
+// Frequently Used Numbers
+//
+// Square root of two
+`define SQRT2           (1.4142135623730950488016887242097)
+// One third
+`define ONE3RD          (0.33333333333333333333333333333333)
+// Two thirds
+`define TWO3RDS         (0.66666666666666666666666666666667)
+// One over square root of two
+`define ONESQRT2        (0.70710678118654752440084436210485)
+// The pi number, the ratio of circumference to diameter at a circle
+`define PI          (3.1415926535897932384626433832795)
+
+// Small Positive Number
+`define POS_MIN         (1.0E-6)
+// The minimum value of a resistance.
+`define MINIMUM_RESISTANCE  (1.0E-3)
+
+// Useful mathematical functions
+//
+// Maximum function (not smooth)
+`define MAX(x,y)        ((x)>(y)?(x):(y))
+// Minimum function (not smooth)
+`define MIN(x,y)        ((x)<(y)?(x):(y))
+// Nested maximum in minimum function (not smooth)
+`define MIN_MAX(val,min,max)    (`MIN(`MAX(val,min),max))
+// Maximum function (smoothened)
+`define MAXA(x,y,a)         (0.5*((x)+(y)+sqrt(((x)-(y))*((x)-(y))+(a))))
+// Minimum function (smoothened)
+`define MINA(x,y,a)         (0.5*((x)+(y)-sqrt(((x)-(y))*((x)-(y))+(a))))
+// Nested maximum in minimum function (smoothened)
+`define MINA_MAXA(val,min,max,a) (`MINA(`MAXA(val,min,a),max,a))
+
+// Used for limiting exponent by analog function lexp
+`define EXPL_THRESHOLD 80.0
+`define MAX_EXPL 5.540622384e+34
+`define MIN_EXPL 1.804851387e-35
+
+// Definition used in ADMS
+`ifdef insideADMS
+`define MODEL @(initial_model)
+`define INSTANCE @(initial_instance)
+`define ATTR(txt) (*txt*)
+`else
+`define MODEL
+`define INSTANCE
+`define ATTR(txt)
+`endif
+
+`ifdef insideADMS
+`define OPPATTR(n,d,u)  (* spice:name=n, info=d , unit=u , ask="yes" *)
+`else
+`define OPPATTR(n,d,u)  (* desc=d , units=u  *)
+`endif
+`define abs_ddx(a,b)  abs(ddx(a,b))
+
+`define DEFINITIONS_INCLUDE
+`endif
+//
+//  Parameter definition macros: "des" description argument is intended to
+//  be a short description, the "inf" information argument is intended to be
+//  a detailed description (e.g. for display as part of on-line help).
+//
+//  MPR      model    parameter real
+//  MPI      model    parameter integer
+//  IPR      instance parameter real
+//  IPI      instance parameter integer
+//  OPP      operating point parameter, includes units and description for printing
+//  OPM      operating point parameter, scales with $mfactor
+//  OPD      operating point parameter, scales with 1/$mfactor
+//
+//  Instance parameters have the attribute *type="instance"* and note that
+//  compilers treat these as both instance and model parameters, with a
+//  specified instance value taking precedence over a specified model card value.
+//
+//  There are some issues with passing range directives with some compilers,
+//  so for each parameter declaration there are multiple versions:
+//  cc       closed lower bound, closed upper bound
+//  co       closed lower bound, open   upper bound
+//  cz       closed lower bound of zero (no upper bound)
+//  oc       open   lower bound, closed upper bound
+//  oo       open   lower bound, open   upper bound
+//  oz       open   lower bound of zero (no upper bound)
+//  nb       no bounds
+//  sw       switch (integer only, values  0=false  and >0=true)
+//  ty       switch (integer only, values -1=n-type and +1=p-type)
+//
+
+`define ALIAS(alias,paramName) aliasparam alias = paramName;
+`define OPP(nam,uni,des)               (*units=uni,                             desc=des*)           real    nam;
+`define OPM(nam,uni,des)               (*units=uni, multiplicity="multiply",    desc=des*)           real    nam;
+`define OPD(nam,uni,des)               (*units=uni, multiplicity="divide",      desc=des*)           real    nam;
+`define MPRcc(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from[lwr:upr];
+`define MPRco(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from[lwr:upr);
+`define MPRcz(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from[  0:inf);
+`define MPRoc(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from(lwr:upr];
+`define MPRoo(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from(lwr:upr);
+`define MPRoz(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def from(  0:inf);
+`define MPRnb(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter real    nam=def;
+`define MPIcc(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[lwr:upr];
+`define MPIco(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[lwr:upr);
+`define MPIcz(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[  0:inf);
+`define MPIoc(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from(lwr:upr];
+`define MPIoo(nam,def,uni,lwr,upr,des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from(lwr:upr);
+`define MPIoz(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from(  0:inf);
+`define MPInb(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def;
+`define MPIsw(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[  0:inf);
+`define MPIty(nam,def,uni,        des) (*units=uni,                  ask="yes", desc=des*) parameter integer nam=def from[ -1:  1] exclude 0;
+`define IPRcc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from[lwr:upr];
+`define IPRco(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from[lwr:upr);
+`define IPRcz(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from[  0:inf);
+`define IPRoc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from(lwr:upr];
+`define IPRoo(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from(lwr:upr);
+`define IPRoz(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def from(  0:inf);
+`define IPRnb(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter real    nam=def;
+`define IPIcc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from[lwr:upr];
+`define IPIco(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from[lwr:upr);
+`define IPIcz(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from[  0:inf);
+`define IPIoc(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from(lwr:upr];
+`define IPIoo(nam,def,uni,lwr,upr,des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from(lwr:upr);
+`define IPIoz(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from(  0:inf);
+`define IPInb(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def;
+`define IPIsw(nam,def,uni,        des) (*units=uni, type="instance", ask="yes", desc=des*) parameter integer nam=def from[  0:inf);
+

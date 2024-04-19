@@ -1,0 +1,194 @@
+// EXTERNAL: RESISTORS ANS BIAS INDEPENDENT OVERLAP CAPACITANCES
+
+begin : EXTERNAL_RESISTORS
+    // CALCULATION OF THE SERIES RESISTANCES
+    // IN MODES DC, RF_S, RF AND NQS THESE RESISTANCES ARE PLACED BETWEEN THE INTERNAL AND THE EXTERNAL NODES OF SOURCE AND DRAIN
+    // IN MODE DC_S THE CALCULATION OF THE SERIES RESISTANCE EFFECT IS PERFORMED ANALYTICALLY AS A FIRST ORDER APPROXIMATION AND NO INTERNAL NODES ARE CREATED
+    if (RLX < 0.0) // NOTE: RLX parameter overrides the assymetric model parameters RSX and RDX. A non-physical negative value for RLX sets the parameter off.
+    begin
+        if (RSX < 0.0) // NOTE: RSX parameter overrides the RSH (resistance factor for the active area of source and drain) and RS (resistance factor of the LDD area) model. A non-physical negative value for RSX sets the parameter off.
+            rs      = (hdif * RSH + (ldif - DL / 2.0) * RS) / WeffNF;
+        else
+            rs      = RSX / WeffNF; // NOTE: RSX used. Asymmetric model.
+        if (RDX < 0.0) // NOTE: RDX parameter overrides the RSH (resistance factor for the active area of source and drain) and RS (resistance factor of the LDD area) model. A non-physical negative value for RDX sets the parameter off.
+            rd      = (hdif * RSH + (ldif - DL / 2.0) * RD) / WeffNF;
+        else
+            rd      = RDX / WeffNF; // NOTE: RDX used. Asymmetric model.
+    end
+    else
+    begin
+        rs      = RLX / WeffNF; // NOTE: RLX used.
+        rd      = rs; // NOTE: Symmetric model.
+    end
+    // WIDTH SCALING OF SERIES RESISTANCES
+    tmp         = (1.0 + WRLX / Weff);
+    rs_w        = rs * tmp;
+    rd_w        = rd * tmp;
+
+    // CALCULATION OF GATE RESISTANCE
+    // GATE RESISTANCE IS USED IN RF_S, RF AND NQS MODES
+    rg      = RGSH * Weff / (3.0 * GC * GC * NF * Leff) * (1.0 + KRGL1 * Leff2);
+
+    // CALCULATION OF SUBSTRATE NETWORK RESISTANCES (RB, RSB, RDB, RDSB)
+    // RB IS USED IN RF_S, RF AND NQS MODES
+    // RSB, RDB AND RDSB ARE USED IN RF AND NQS MODES
+    if (RINGTYPE == 1.0) // NOTE: Check if the shape of the bulk contact is of HORSE-SHOE type (three sides)
+    begin
+        rb      = (RBN  == 0.0) ? // NOTE: Check if bulk resistance per finger is defined.
+                  RBWSH * 0.5 / Weff :
+                  1.0 / ((Weff * 2.0 / RBWSH) + (NF / RBN));
+        //      if (NF % 2 == 0) // NOTE: EVEN NUMBER OF FINGERS (Asymmetric device, substrate source-bulk resistance is NOT equal with substrate drain-bulk resistance.)
+        if (even_nf == NF)
+        begin
+            rsb         = (RSBN == 0.0) ? // NOTE: Check if substrate source-bulk resistance per finger is defined.
+                      RSBWSH * 0.5 / Weff :
+                      1.0 / ((Weff * 2.0 / RSBWSH) + (NF / RSBN));
+            rdb         = (RDBN == 0.0) ? // NOTE: Check if substrate drain-bulk resistance per finger is defined.
+                      RDBWSH * 0.5 / Weff :
+                      1.0 / ((Weff * 2.0 / RDBWSH) + (NF / RDBN));
+        end
+        else // NOTE: ODD NUMBER OF FINGERS (Symmetric device, substrate source-bulk resistance is equal with substrate drain-bulk resistance.)
+        begin
+            rsb         = (RSBN == 0.0) ? // NOTE: Check if substrate source-bulk resistance per finger is defined.
+                      RSBWSH / Weff :
+                      1.0 / ((Weff / RSBWSH) + (NF / RSBN));
+            rdb         = rsb; // NOTE: Symmetric device, substrate source-bulk resistance is equal with substrate drain-bulk resistance.
+        end
+    end
+    else // NOTE: The shape of the bulk contact is SYMMETRIC type (two sides). No resistance pef finger parameter is used.
+    begin
+        rb      = RBWSH * 0.5 / Weff;
+        //      if (NF % 2 == 0) // NOTE: EVEN NUMBER OF FINGERS (Asymmetric device, substrate source-bulk resistance is NOT equal with substrate drain-bulk resistance.)
+        if (even_nf == NF)
+        begin
+            rsb         = RSBWSH * 0.5 / Weff ;
+            rdb         = RDBWSH * 0.5 / Weff ;
+        end
+        else // NOTE: ODD NUMBER OF FINGERS (Symmetric device, substrate source-bulk resistance is equal with substrate drain-bulk resistance.)
+        begin
+            rsb         = RSBWSH / Weff ;
+            rdb         = rsb; // NOTE: Symmetric device, substrate source-bulk resistance is equal with substrate drain-bulk
+        end
+    end
+    // CALCULATION OF SUBSTRATE SOURCE-DRAIN RESISTANCE
+    rdsb        = RDSBSH * Leff / WeffNF;
+
+    // CALCULATION OF TEMPERATURE EFFECT ON RESISTORS
+    Mr_t        = (1.0 + TR * dT + TR2 * dT2);
+    rs_wt       = rs_w * Mr_t;
+    rd_wt       = rd_w * Mr_t;
+    rg_t        = rg * Mr_t;
+    rb_t        = rb * Mr_t;
+    rsb_t       = rsb * Mr_t;
+    rdb_t       = rdb * Mr_t;
+    rdsb_t      = rdsb * Mr_t;
+
+    // TRIMMING ALL RESISTANCES TO A POSITIVE MINIMUM VALUE
+    rs_wt       = `MAX(rs_wt ,`MINIMUM_RESISTANCE);
+    rd_wt       = `MAX(rd_wt ,`MINIMUM_RESISTANCE);
+    rg_t        = `MAX(rg_t  ,`MINIMUM_RESISTANCE);
+    rb_t        = `MAX(rb_t  ,`MINIMUM_RESISTANCE);
+    rsb_t       = `MAX(rsb_t ,`MINIMUM_RESISTANCE);
+    rdb_t       = `MAX(rdb_t ,`MINIMUM_RESISTANCE);
+    rdsb_t      = `MAX(rdsb_t,`MINIMUM_RESISTANCE);
+end // EXTERNAL_RESISTORS
+
+// ASSIGNMENT OF BIAS-INDEPENDENT OVERLAP CAPACITANCES, ASSIGNMENT AND PLACEMENT OF EXTERNAL RESISTORS AND THERE NOISE SOURCES
+
+`ifdef DC_S
+// BIAS-INDEPENDENT OVERLAP CAPACITANCES
+    tmp         = M * WeffNF;
+    I(g,s)      <+ ddt(CGSO * tmp * V(g,s));
+    I(g,d)      <+ ddt(CGDO * tmp * V(g,d));
+    I(g,b)      <+ ddt(CGBO * M * 2.0 * Leff * NF * V(g,b));
+    // CALCULATION OF SERIES RESISTANCE EFFECT ON CHANNEL CURRENT
+    RES_IDS     = 1.0 + rs_wt * Gspec_dits * qs + rd_wt * Gspec_dits * qdp; // NOTE: RES_IDS is used at the ekv3.va file
+`endif
+
+`ifdef DC
+    // BIAS-INDEPENDENT OVERLAP CAPACITANCES
+    tmp         = M * WeffNF;
+    I(g,si)     <+ ddt(CGSO * tmp * V(g,si));
+    I(g,di)     <+ ddt(CGDO * tmp * V(g,di));
+    I(g,b)      <+ ddt(CGBO * M * 2.0 * Leff * NF * V(g,b));
+    // SERIES RESISTORS
+    I(s ,si)    <+ M * V(s,si) / rs_wt;
+    I(s ,si)    <+ white_noise(KT4 / rs_wt, "rs");
+    I(d ,di)    <+ M * V(d,di) / rd_wt;
+    I(d ,di)    <+ white_noise(KT4 / rd_wt, "rd");
+`endif
+
+`ifdef RF_S
+    // BIAS-INDEPENDENT OVERLAP CAPACITANCES
+    tmp         = M * WeffNF;
+    I(gi,si)    <+ ddt(CGSO * tmp * V(gi,si));
+    I(gi,di)    <+ ddt(CGDO * tmp * V(gi,di));
+    I(gi,bi)    <+ ddt(CGBO * M * 2.0 * Leff * NF * V(gi,bi));
+    // SERIES RESISTORS
+    I(s ,si)    <+ M * V(s,si) / rs_wt;
+    I(s ,si)    <+ white_noise(KT4 / rs_wt, "rs");
+    I(d ,di)    <+ M * V(d,di) / rd_wt;
+    I(d ,di)    <+ white_noise(KT4 / rd_wt, "rd");
+    // GATE RESISTANCE
+    I(g ,gi)    <+ M * V(g,gi) / rg_t;
+    I(g ,gi)    <+ white_noise(KT4 / rg_t, "rg");
+    // SUBSTRATE RESISTANCE NETWORK
+    I(b ,bi)    <+ M * V(b,bi) / rb_t;
+    I(b ,bi)    <+ white_noise(KT4 / rb_t, "rb");
+`endif
+
+`ifdef RF
+    // BIAS-INDEPENDENT OVERLAP CAPACITANCES
+    tmp         = M * WeffNF;
+    I(gi,si)    <+ ddt(CGSO * tmp * V(gi,si));
+    I(gi,di)    <+ ddt(CGDO * tmp * V(gi,di));
+    I(gi,bi)    <+ ddt(CGBO * M * 2.0 * Leff * NF * V(gi,bi));
+    // SERIES RESISTORS
+    I(s ,si)    <+ M * V(s,si) / rs_wt;
+    I(s ,si)    <+ white_noise(KT4 / rs_wt, "rs");
+    I(d ,di)    <+ M * V(d,di) / rd_wt;
+    I(d ,di)    <+ white_noise(KT4 / rd_wt, "rd");
+    // GATE RESISTANCE
+    I(g ,gi )   <+ M * V(g ,gi ) / rg_t;
+    I(g ,gi )   <+ white_noise(KT4 / rg_t, "rg");
+    // SUBSTRATE RESISTANCE NETWORK
+    I(b ,bi )   <+ M * V(b ,bi ) / rb_t;
+    I(b ,bi )   <+ white_noise(KT4 / rb_t, "rb");
+    I(b ,bsi)   <+ M * V(b ,bsi) / rsb_t;
+    I(b ,bsi)   <+ white_noise(KT4 / rsb_t, "rsb");
+    I(b ,bdi)   <+ M * V(b ,bdi) / rdb_t;
+    I(b ,bdi)   <+ white_noise(KT4 / rdb_t, "rdb");
+    tmp         = M * 2.0 / rdsb_t;
+    I(bi,bsi)   <+ V(bi,bsi) * tmp;
+    I(bi,bsi)   <+ white_noise(KT4 * tmp, "shot ibs");
+    I(bi,bdi)   <+ V(bi,bdi) * tmp;
+    I(bi,bdi)   <+ white_noise(KT4 * tmp, "shot ibd");
+`endif
+
+`ifdef NQS
+    // BIAS-INDEPENDENT OVERLAP CAPACITANCES
+    tmp         = M * WeffNF;
+    I(gi,si)    <+ ddt(CGSO * tmp * V(gi,si));
+    I(gi,di)    <+ ddt(CGDO * tmp * V(gi,di));
+    I(gi,bi)    <+ ddt(CGBO * M * 2.0 * Leff * NF * V(gi,bi));
+    // SERIES RESISTORS
+    I(s ,si)    <+ M * V(s,si) / rs_wt;
+    I(s ,si)    <+ white_noise(KT4 / rs_wt, "rs");
+    I(d ,di)    <+ M * V(d,di) / rd_wt;
+    I(d ,di)    <+ white_noise(KT4 / rd_wt, "rd");
+    // GATE RESISTANCE
+    I(g ,gi )   <+ M * V(g ,gi ) / rg_t;
+    I(g ,gi )   <+ white_noise(KT4 / rg_t, "rg");
+    // SUBSTRATE RESISTANCE NETWORK
+    I(b ,bi )   <+ M * V(b ,bi ) / rb_t;
+    I(b ,bi )   <+ white_noise(KT4 / rb_t, "rb");
+    I(b ,bsi)   <+ M * V(b ,bsi) / rsb_t;
+    I(b ,bsi)   <+ white_noise(KT4 / rsb_t, "rsb");
+    I(b ,bdi)   <+ M * V(b ,bdi) / rdb_t;
+    I(b ,bdi)   <+ white_noise(KT4 / rdb_t, "rdb");
+    tmp         = M * 2.0 / rdsb_t;
+    I(bi,bsi)   <+ V(bi,bsi) * tmp;
+    I(bi,bsi)   <+ white_noise(KT4 * tmp, "shot ibs");
+    I(bi,bdi)   <+ V(bi,bdi) * tmp;
+    I(bi,bdi)   <+ white_noise(KT4 * tmp, "shot ibd");
+`endif

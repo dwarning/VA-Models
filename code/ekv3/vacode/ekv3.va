@@ -1,0 +1,1069 @@
+// ************* Verilog-A Code for EKV3 MOSFET MODEL **************************
+//               Copyright 2023 Matthias Bucher
+//
+// Title: EKV3 MOSFET Model Verilog - A Code
+// Current Authors: Matthias Bucher, Nikolaos Makris
+// Initial Authors: Antonios Bazigos, Matthias Bucher, Francois Krummenacher
+//
+//              Version     Date
+// ---------------------------------------------------------------
+//
+// Current: 302.00          April 2, 2015
+//
+// Older:
+//          301.04(revised) July 31, 2014
+//          301.04      September 4, 2009
+//          301.02      June 28, 2008
+//          301.01      November 22, 2007
+//          301.00      September 14, 2007
+//          300.03      August 1, 2007
+//          300.02      April 23, 2007
+//          300.01      October 28, 2006
+//          300.00      March 23, 2005
+//
+// *******************************************************************************
+//
+// This code is developed and maintained by EKV3 modeling group at Technical University of Crete (TUC).
+//
+// Your feedback is most welcome. Please direct inquiries, comments etc. to,
+//
+//  Prof. Matthias Bucher
+//  Technical University of Crete (TUC)
+//  73100 Chania, Crete, Greece
+//  phone: + 30 28210 37210
+//  fax: + 30 28210 37542
+//  mbucher@tuc.gr
+//
+// Current contributors: Matthias Bucher, Nikolaos Makris
+// Past contributors: Antonios Bazigos, Marianna Chalkiadaki, Nikolaos Mavredakis, Francois Krummenacher, Jean-Michel Sallese, Christian Enz, Ananda Roy
+//
+// It may not be copied or distributed in any form or medium, disclosed to third parties,
+// reverse engineered or used in any manner not provided for in said License Agreement
+// except with the prior written authorization.
+// Licensed under the Educational Community License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at http://opensource.org/licenses/ECL-2.0
+// Unless required by applicable law or agreed to in writing, software distributed under
+// the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+// either express or implied. See the License for the specific language governing permissions
+// and limitations under the License.
+//
+// The EKV3 MOSFET model code is continuously being tested, corrected and
+// extended. Updates to the code may be frequent. Backward compatibility of
+// code updates is not guaranteed.
+//
+// *******************************************************************************
+//
+// GENERAL COMMENTS:
+// - genvar (NQS MODEL) NOT ALWAYS SUPPORTED
+// - hand-written version of NQS instead of "for" loop; NCS = 5
+//
+// Please check the ekv3_updates.txt file for changes between the versions
+`define NoCS 5
+`include "ekv3_include/ekv3_natures.va"
+`include "ekv3_include/ekv3_definitions.va"
+
+// MODE SELECTION
+//
+// The user of the EKV3 model may choose between the five modes of the model.
+// Each mode differentiates itself by the number of internal nodes it uses.
+// As the number of the internal nodes increases so does the accuracy for higher frequencies,
+// as well as its complexity. The selection between the various modes is achieved by
+// defining a certain variable from the list below. In all cases the module is named "ekv3",
+// and all the instances in a circuit will correspond to the same mode.
+//
+// If the user wants to use different mode for specific transistors within a circuit,
+// the file "ekv3_all.va" has to be called, instead of the "ekv3.va" file (this file).
+// The "ekv3_all.va" file defines also the ALL variable, while it calls the "ekv3.va" file (this file) five times,
+// each time having defined a different variable for mode selection.
+// This way the resulted five modules are given different names.
+
+`define ALL 1
+
+`define RF
+
+
+//`include "ekv3_include/ekv3_def_check.va"
+
+`ifdef ALL
+//(* compact_module *)
+//(* instance_parameter_list = {L, W, PS, PD, AS, AD, M, NF, SA, SB} *)
+    `ifdef DC_S
+        module ekv3_s   (d,g,s,b);
+    `endif
+    `ifdef DC
+        module ekv3 (d,g,s,b);
+    `endif
+    `ifdef RF_S
+        module ekv3_r4  (d,g,s,b);
+    `endif
+    `ifdef RF
+        module ekv3_rf  (d,g,s,b);
+    `endif
+    `ifdef NQS
+        module ekv3_nqs (d,g,s,b);
+    `endif
+`else
+    module ekv3     (d,g,s,b);
+`endif
+
+////////// Clamped Exponential Function //////////
+analog function real lexp;
+    input x;
+    real x;
+    begin
+        if (x > `EXPL_THRESHOLD) begin
+            lexp = `MAX_EXPL * (1.0+(x)-`EXPL_THRESHOLD);
+        end else if (x < -`EXPL_THRESHOLD) begin
+            lexp = `MIN_EXPL;
+        end else begin
+            lexp = exp(x);
+        end
+    end
+endfunction
+
+inout       d,g,s,b ;
+`ifdef DC_S
+    electrical  d, g, s, b;
+    electrical  noi;
+    //Operating Point definitions of nodes
+    `define GEFF g
+    `define DEFF d
+    `define SEFF s
+    `define BEFF b
+`endif
+`ifdef DC
+    electrical  d, g, s, b;
+    electrical  di, si;
+    electrical  noi;
+    //Operating Point definitions of nodes
+    `define GEFF g
+    `define DEFF di
+    `define SEFF si
+    `define BEFF b
+`endif
+`ifdef RF_S
+    electrical  d, g, s, b;
+    electrical  di, si;
+    electrical  gi, bi;
+    electrical  noi;
+    //Operating Point definitions of nodes
+    `define GEFF gi
+    `define DEFF di
+    `define SEFF si
+    `define BEFF bi
+`endif
+`ifdef RF
+    electrical  d, g, s, b;
+    electrical  di, si;
+    electrical  gi, bi;
+    electrical  bdi, bsi;
+    electrical  noi;
+    //Operating Point definitions of nodes
+    `define GEFF gi
+    `define DEFF di
+    `define SEFF si
+    `define BEFF bi
+`endif
+`ifdef NQS
+    electrical  d, g, s, b;
+    electrical  di, si;
+    electrical  gi, bi;
+    electrical  bdi, bsi;
+    electrical  m1, m2, m3, m4;
+    electrical  noi;
+    //Operating Point definitions of nodes
+    `define GEFF gi
+    `define DEFF di
+    `define SEFF si
+    `define BEFF bi
+`endif
+
+
+//`include "ekv3_include/ekv3_variables.va"
+`include "ekv3_include/ekv3_functions_def.va"
+`include "ekv3_include/ekv3_parameters.va"
+`include "ekv3_include/ekv3_variables_oppoint.va"
+analog  begin
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // LEVEL 0                                                                    //
+    // MODEL LEVEL CALCULATIONS                                                   //
+    ////////////////////////////////////////////////////////////////////////////////
+    begin:EKV3
+`include "ekv3_include/ekv3_variables.va"
+        `MODEL
+        begin
+
+            begin : GENERAL_VALUES
+                // SIMULATION FLAGS
+                QON         = (1.0 - QOFF);
+                // IMPORTANT LENGTHS
+                TSI     = `C_EPSSIL / COX;
+                TOX         = `C_EPSOX / COX;
+                LC      = sqrt(TSI * XJ); // NOTE: used in the Velocity Saturation model
+                // NOMINAL TEMPERATURE PARAMETERS
+                TNOMK       = TNOM + 273.15; // Nominal temperature of model parameters in Kelvin
+                UTNOM       = `UT(TNOMK);
+            end //  GENERAL_VALUES
+
+            // SCALING OF NON-INSTANCE RELATED DIMENSIONS
+            hdif        = HDIF * SCALE;
+            ldif        = LDIF * SCALE;
+            // FREQUENTLY PERFOMED CALCULATIONS
+            TOX2        = TOX * TOX;
+
+        end
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // LEVEL 1                                                                    //
+        // INSTANCE LEVEL CALCULATIONS                                                //
+        ////////////////////////////////////////////////////////////////////////////////
+
+        `INSTANCE
+        begin
+            // This variable is set in order to overcome the modulo (%) operand problem in ADMS
+            even_nf     =(NF/2);
+            even_nf     =even_nf*2;
+            // FREQUENTLY PERFOMED CALCULATIONS
+            NF_M        = NF * M;
+            SIGN_NF     = SIGN * NF;
+            SIGN_M      = SIGN * M;
+            SIGN_NF_M   = SIGN * NF_M;
+
+            begin : EFFECTIVE_GATE_LENGTH_AND_WIDTH___SCALING
+                // SCALING OF INSTANCE RELATED DIMENSIONS
+                l       = L * SCALE + XL;
+                WF      = W / NF; // NOTE: W is the drawn width of the device, while WF is the drawn width of each finger.
+                w       = WF * SCALE + XW; // NOTE: w is the scaled width of each finger.
+                // EFFECTIVE CHANNEL DIMENSIONS
+                Leff        = (LL == 0.0) ?
+                l + DL + WDL / w:
+                l + DL + WDL / w - LL * lexp(LLN * ln(1.0 / l));
+                Weff        = w + DW + LDW / l; // NOTE: Weff is the effective width of each finger.
+                Leffc       = Leff + DLC;
+                Weffc       = Weff + DWC; // NOTE: Weffc is the effective width, for capacitive aspects, of each finger.
+                // LIMITING CHANNEL DIMENSIONS TO HIGHER THAN 1nm
+                Leff        = `MAX(Leff ,1.0e-9);
+                Weff        = `MAX(Weff ,1.0e-9);
+                Leffc       = `MAX(Leffc,1.0e-9);
+                Weffc       = `MAX(Weffc,1.0e-9);
+                // FREQUENTLY PERFOMED CALCULATIONS
+                WeffNF      = Weff * NF;
+                WeffcNF     = Weffc * NF;
+                WLeff       = Weff * Leff; // NOTE: WLeff is the channel area of each finger.
+                WLeffNF     = WeffNF * Leff; // NOTE: WLeffNF is the channel area of the whole device.
+                Leff2       = Leff * Leff;
+                rWedge      = WEDGE/Weff; // NOTE: Edge device width over full width ratio
+                rWNedge     = 1.0 - rWedge; // NOTE: Non-edge device width over full width ratio
+                rWNWedge    = rWedge / rWNedge; // NOTE: Non-edge over edge width ratio
+            end //  EFFECTIVE_GATE_LENGTH_AND_WIDTH___SCALING
+
+            begin : MATCHING_PROPERTIES
+                // FREQUENTLY PERFOMED CALCULATIONS
+                awl         = 1.0E6 / sqrt(WLeffNF);
+                // VTO, GAMMA, KP MISMATCH CALCULATIONS
+                VTO_a       = VTO + AVTO * awl;
+                GAMMA_a     = GAMMA + AGAMMA * awl;
+                KP_a        = KP * (1.0 + AKP * awl);
+            end //  MATCHING_PROPERTIES
+
+            begin : LONG_AND_WIDE_CHANNEL_VTO_CORRECTION
+                // THRESHOLD VOLTAGE CORRECTION FOR LONG AND WIDE CHANNEL
+                DVT_long    = - AVT * `MAXA(ln(Leff / LVT),0.0,1.0e-2);
+                DVT_wide    = - AVT * `MAXA(ln(Weff / WVT),0.0,1.0e-2);
+            end //  LONG_AND_WIDE_CHANNEL_VTO_CORRECTION
+
+            begin : LONG_AND_WIDE_CHANNEL_GAMMA_CORRECTION
+                // BODY EFFECT COEFFICIENT CORRECTION FOR LONG AND WIDE CHANNEL
+                DGAMMA_long     = - AGAM * `MAXA(ln(Leff / LGAM),0.0,1.0e-2);
+                DGAMMA_wide     = - AGAM * `MAXA(ln(Weff / WGAM),0.0,1.0e-2);
+            end //  LONG_AND_WIDE_CHANNEL_GAMMA_CORRECTION
+
+            begin : NF_DEPENDENCE_ON_THRESHOLD_VOLTAGE
+                // THRESHOLD VOLTAGE DEPENDENCE ON NUMBER OF FINGERS
+                // EMPIRICAL MODEL, OBSOLETE BY SHALLOW TRENCH ISOLATION STRESS EFFECT
+                DVT_nf      = NFVTA * log(((NF)-1)*NFVTB+1);
+            end //  NF_DEPENDENCE_ON_THRESHOLD_VOLTAGE
+
+            begin : WIDTH_SCALING
+                // WIDTH SCALING OF MODEL PARAMETERS FOR NARROW CHANNEL DEVICES
+                LR_w        = LR + WLR / Weff;
+                QLR_w       = QLR * (1.0 + WQLR / Weff);
+                NLR_w       = NLR * (1.0 + WNLR / Weff);
+                E0_w        = E0 * (1.0 + WE0 / Weff);
+                E1_w        = E1 * (1.0 + WE1 / Weff);
+                UCRIT_w     = UCRIT * (1.0 + WUCRIT / Weff);
+                LAMBDA_w    = LAMBDA * (1.0 + WLAMBDA / Weff);
+                ETAD_w      = ETAD * (1.0 + WETAD / Weff);
+                TCV_w       = TCV + TCVW / Weff;
+                UCEX_w      = UCEX * (1.0 + WUCEX / Weff);
+            end //  WIDTH_SCALING
+
+            begin : LENGTH_SCALING
+                // LENGTH SCALING OF MODEL PARAMETERS FOR SHORT CHANNEL DEVICES
+                WR_l        = WR + LWR / Leff;
+                QWR_l       = QWR * (1.0 + LQWR / Leff);
+                NWR_l       = NWR * (1.0 + LNWR / Leff);
+                TCV_wl      = TCV_w + TCVL / Leff;
+            end //  LENGTH_SCALING
+
+            begin : COMBINED_SHORT_AND_NARROW_DEVICES
+                // SCALING OF MODEL PARAMETERS FOR COMBINED SHORT AND NARROW CHANNEL DEVICES
+                TCV_wlc     = TCV_wl + TCVWL / WLeff;
+            end //  COMBINED_SHORT_AND_NARROW_DEVICES
+
+            begin : RSCE
+                // REVERSE SHORT CHANNEL EFFECT
+                Leff_o_LR   = Leff / LR_w;
+                tmp_rsce    = 1.0 - lexp( - Leff_o_LR * Leff_o_LR);
+                f_rsce      = 2.0 * tmp_rsce / (COX * Leff_o_LR);
+                DVT_rsce    = QLR_w * f_rsce;
+                fn_rsce     = 1.0 + NLR_w * f_rsce;
+                MGAMMA_rcse     = sqrt(fn_rsce);
+                DPHIF_rsce  = UTNOM * FLR * ln(fn_rsce);
+            end //  RSCE
+
+            begin : INWE
+                // INVERSE NARROW WIDTH EFFECT
+                // Weff_o_WR    = Weff / WR; = > Weff_o_WR  = Weff / WR_l;
+                Weff_o_WR   = Weff / WR_l;
+                tmp_inwe    = 1.0 - lexp( - Weff_o_WR * Weff_o_WR);
+                // bACK TO ORIGINAL f_inwe = - 2.0 * tmp_inwe / (COX * Weff_o_WR) => 2.0 * tmp_inwe / (COX * Weff_o_WR)
+                f_inwe      =  2.0 * tmp_inwe / (COX * Weff_o_WR);
+                DVT_inwe    = - QWR_l * f_inwe;
+                MGAMMA_inwe     = 1.0 / sqrt(1.0 + NWR_l * f_inwe);
+            end //  INWE
+
+
+
+
+            begin : MOBILITY_LENGTH_SCALING
+                // LENGTH SCALING OF THE MOBILITY FOR SHORT AND INTERMEDIATE LENGTH CHANNEL DEVICES
+                Leff_o_LA   = Leff / LA;
+                Leff_o_LB   = Leff / LB;
+                MKP_l       = 1.0 / (1.0 + (KA / Leff_o_LA) * (1.0 - lexp( - Leff_o_LA)) + (KB / Leff_o_LB) * (1.0 - lexp( - Leff_o_LB)));
+            end //  MOBILITY_LENGTH_SCALING
+
+            begin : MOBILITY_WIDTH_SCALING
+                // WIDTH SCALING OF THE MOBILITY AROUND THE VALUE OF WKP1 PARAMETER
+                tmp_kpw     = (ln(Weff / WKP1)) / WKP3;
+                MKP_w       = 1.0 + WKP2 * lexp( - tmp_kpw * tmp_kpw);
+            end //  MOBILITY_WIDTH_SCALING
+
+            begin : STI_STRESS
+                // SHALLOW TRENCH ISOLATION STRESS EFFECT
+                if ((SA > 0) && (SB > 0)) // NOTE: Basic STI parameters
+                begin
+                    // FREQUENTLY PERFOMED CALCULATIONS
+                    lhalf_sti   = 0.5 * l;
+                    SA_lhalf_sti    = SA + lhalf_sti;
+                    SB_lhalf_sti    = SB + lhalf_sti;
+                    SD_l_sti    = SD + l;
+
+                    i_sti       = 0.0; // NOTE: Index used in multi-finger devices in for-loop.
+                    if (NF == 1) // For single-finger devices
+                    begin
+                        inv_sa05l   = 1.0 / (SA_lhalf_sti);
+                        inv_sb05l   = 1.0 / (SB_lhalf_sti);
+                    end
+                    else if (NF > 1) // For multi-finger devices (for-loop calculation)
+                    begin
+                        inv_sa05l   = 1.0 / (SA_lhalf_sti);
+                        inv_sb05l   = 1.0 / (SB_lhalf_sti);
+                        //                      for loop replaced with while
+                        //          for (i_sti = 1.0; i_sti < NF; i_sti = i_sti + 1.0)
+                        i_sti = 1.0;
+                        while (i_sti < NF)
+                        begin
+                            inv_sa05l   = inv_sa05l + 1.0 / (SA_lhalf_sti + i_sti * SD_l_sti);
+                            inv_sb05l   = inv_sb05l + 1.0 / (SB_lhalf_sti + i_sti * SD_l_sti);
+                            i_sti = i_sti + 1.0;
+                        end
+                        inv_sa05l   = inv_sa05l / NF;
+                        inv_sb05l   = inv_sb05l / NF;
+
+                    end
+                    else // For completeness
+                    begin
+                        inv_sa05l   = 1.0;
+                        inv_sb05l   = 1.0;
+                    end
+
+                    inv_saref05l    = 1.0 / (SAREF + lhalf_sti);
+                    inv_sbref05l    = 1.0 / (SBREF + lhalf_sti);
+
+                    tmpl        = lexp(-LLODKKP*ln(l));
+                    tmpw        = lexp(-WLODKKP*ln(w+WLOD));
+                    KKP_sti     = (1.0 + LKKP * tmpl + WKKP * tmpw + PKKP * tmpl * tmpw);
+                    a_sti       = KKP / KKP_sti * (inv_sa05l    + inv_sb05l);
+                    aref_sti    = KKP / KKP_sti * (inv_saref05l + inv_sbref05l);
+                    MKP_sti     = (1.0 + a_sti) / (1.0 + aref_sti);
+                    MUCRIT_sti      = (1.0 + KUCRIT * a_sti) / (1.0 + KUCRIT * aref_sti);
+                    tmpl        = lexp(-LLODKVTO*ln(l));
+                    tmpw        = lexp(-WLODKVTO*ln(w+WLOD));
+                    KVTO_sti    = 1.0 + LKVTO * tmpl + WKVTO * tmpw + PKVTO * tmpl * tmpw;
+                    b_sti       = inv_sa05l + inv_sb05l - inv_saref05l - inv_sbref05l;
+                    DVT_sti     = KVTO / KVTO_sti * b_sti;
+                    DGAMMA_sti  = KGAMMA / lexp(LODKGAMMA*ln(KVTO_sti)) * b_sti;
+                    DETAD_sti   = KETAD / lexp(LODKETAD*ln(KVTO_sti)) * b_sti;
+                end
+                else // NOTE: If no basic STI parameters have been defined (are zero)
+                begin
+                    inv_sa05l   = 1.0;
+                    inv_sb05l   = 1.0;
+                    inv_saref05l    = 1.0;
+                    inv_sbref05l    = 1.0;
+                    KKP_sti     = 1.0;
+                    MKP_sti     = 1.0;
+                    MUCRIT_sti  = 1.0;
+                    DVT_sti     = 0.0;
+                    DGAMMA_sti  = 0.0;
+                    DETAD_sti   = 0.0;
+                end
+            end //  STI_STRESS
+
+            // CALCULATIONS OF THE DEVICE LEVEL PARAMETERS
+            VTO_DEV     = VTO_a + SIGN * (DVT_long + DVT_wide + DVT_rsce + DVT_inwe + DVT_nf + DVT_sti); // NOTE: SIGN switches the sign of the threshold voltage shift of each effect. VTO_DEV is negative for PMOS devices.
+            GAMMA_DEV   = GAMMA_a * MGAMMA_rcse * MGAMMA_inwe + DGAMMA_sti + DGAMMA_long + DGAMMA_wide;
+            PHIF_DEV    = PHIF + DPHIF_rsce;
+            KP_DEV      = KP_a * MKP_l * MKP_w * MKP_sti;
+            ETAD_DEV    = ETAD_w + DETAD_sti;
+            UCRIT_DEV   = UCRIT_w * MUCRIT_sti;
+
+            begin : CHARGE_SHARING
+                // DEVICE LEVEL PARAMETERS FOR CHARGE SHARING EFFECT
+                CHSHL       = LETA0 + LETA / Leff + LETA2 / Leff2;
+                CHSHW       = WETA / Weff;
+                NUV         = N0 + NCS * 3.0 * TOX * CHSHL;
+                CHSHLTSI    = CHSHL * TSI;
+                CHSHWTSI    = CHSHW * TSI;
+            end //  CHARGE_SHARING
+
+            ////////////////////////////////////////////////////////////////////////////////
+            // LEVEL 2                                                                    //
+            // TEMPERATURE MODELLING OF INSTANCE LEVEL                                    //
+            ////////////////////////////////////////////////////////////////////////////////
+
+            begin : STANDARD_VALUES
+                // TEMPERATURE PARAMETERS
+                T       = $temperature; // Simulation temperature of the device in Kelvin
+                UT      = `UT(T);
+                // FREQUENTLY PERFORMED CALCULATIONS
+                dT      = T - TNOMK;
+                dT2         = dT * dT;
+                rT      = T / TNOMK;
+                lnrT        = ln(rT);
+                UT2         = UT * UT;
+                UT3         = UT * UT2;
+                sqrtUT      = sqrt(UT);
+                KT4         = 4.0 * `C_K * T;
+            end //  STANDARD_VALUES
+
+            begin : TEMPERATURE_ON_STI
+                // TEMPERATURE EFFECT ON STI STRESS EFFECT
+                if ((SA > 0) && (SB > 0))
+                begin
+                    KKP_sti_t   = KKP_sti * (1.0 + TKKP * (rT - 1.0));
+                    a_sti_t     = KKP / KKP_sti_t * (inv_sa05l    + inv_sb05l);
+                    aref_sti_t  = KKP / KKP_sti_t * (inv_saref05l + inv_sbref05l);
+                    MKP_sti_t   = (1.0 + a_sti_t) / (1.0 + aref_sti_t) / MKP_sti;
+                end
+                else
+                begin
+                    MKP_sti_t       = 1.0;
+                end
+            end //  TEMPERATURE_ON_STI
+
+            begin : TEMPERATURE
+                // MODEL PARAMETERS AFFECTED BY TEMPERATURE
+                VTO_DEV_t   = VTO_DEV - TCV_wlc * dT; // NOTE: VTO_DEV_t is negative for PMOS devices.
+                KP_DEV_t    = KP_DEV * lexp(BEX * lnrT) * MKP_sti_t;
+                ETA_t       = ETA + (TETA * dT);
+                E0_wt       = E0_w * lexp(TE0EX * lnrT);
+                E1_wt       = E1_w * lexp(TE1EX * lnrT);
+                UCRIT_DEV_t     = UCRIT_DEV * lexp(UCEX_w * lnrT);
+                LAMBDA_wt   = LAMBDA_w + TLAMBDA * (rT - 1.0);
+                IBB_t       = IBB * (1.0 + IBBT * dT);
+                // PHIF
+                eg_tnom     = 1.16 - (7.02E-4 * TNOMK * TNOMK) / (TNOMK + 1108.0); // NOTE: Also used for junction diode temperature dependence
+                eg_t        = 1.16 - (7.02E-4 * T * T) / (T + 1108); // NOTE: Also used for junction diode temperature dependence
+                PHIF_DEV_t  = PHIF_DEV * rT + (- UT * 3.0 * lnrT + eg_t - eg_tnom * rT) / 2.0;
+            end //  TEMPERATURE
+
+            ////////////////////////////////////////////////////////////////////////////////
+            // LEVEL 3a                                                                   //
+            // INTRINSIC PART OF THE MODEL                                                //
+            // CALCULATION OF NORMALIZED VALUES (INDEPENDENT OF EXTERNAL POTENTIAL)       //
+            ////////////////////////////////////////////////////////////////////////////////
+
+            begin : NORMALIZING
+                // CALCULATING NORMALIZED VALUES OF INTRINSIC PART PARAMETERS
+                // FERMI POTENTIAL
+                //  phif        = PHIF_DEV_t / UT;
+                // PHIF is limited with a lower bound in order to avoid negative values.
+                phif = `MAXA(PHIF_DEV_t / UT,0.0,0.01);
+                // THRESHOLD VOLTAGE (UNDER ZERO BIAS)
+                vto         = SIGN * VTO_DEV_t / UT; // NOTE: The normalized vto is positive for both NMOS and PMOS devices.
+                // BODY EFFECT COEFFICIENT
+                gamma_b_dev     = GAMMA_DEV / sqrtUT;
+                // POLYSILICON DEPLETION, GATE NODE COEFFICIENT
+                gamma_g     = GAMMAG / sqrtUT;
+                // OVERLAP REGION, BODY EFFECT COEFFICIENT, GATE NODE COEFFICIENT, FLAT-BAND VOLTAGE
+                gamma_ov    = GAMMAOV / sqrtUT;
+                gamma_g_ov  = GAMMAGOV / sqrtUT;
+                vfb_ov      = VFBOV / UT;
+                // VELOCITY SATURATION EFFECT, CRITICAL VELOCITY
+                ucrit       = UCRIT_DEV_t / (UT / Leff);
+                // GATE CURRENT PARAMETERS
+                xb      = XB / UT;
+                ub      = EB * TOX / XB;
+                // MOBILITY REDUCED DUE TO VERTICAL FIELD EFFECT PARAMETERS
+                ev      = UT / (E0_wt * TSI);
+                tmp         = E1_wt * TSI;
+                ev1         = UT2 / (tmp * tmp);
+                // FREQUENTLY PERFORMED CALCULATIONS
+                sqrtphif    = sqrt(phif);
+                gamma_b_dev2    = gamma_b_dev * gamma_b_dev;
+                gamma_g2    = gamma_g * gamma_g;
+                dpd         = (TG != 0) ?
+                gamma_b_dev2 / gamma_g2 :
+                0.0;
+                gamma_ov2   = gamma_ov * gamma_ov;
+            end //  NORMALIZING
+
+            ////////////////////////////////////////////////////////////////////////////////
+            // LEVEL 3b                                                                   //
+            // INTRINSIC PART OF THE MODEL                                                //
+            // CALCULATION OF VARIABLES CONSIDERING ZERO EXTERNAL POTENTIAL               //
+            ////////////////////////////////////////////////////////////////////////////////
+
+            // NQ0: SLOPE FACTOR (CHARGE) CALCULATED UNDER ZERO BIAS
+            nq0         = (TG < 0) ?
+              (1.0 / (1.0 + (dpd * 2.0 * `SQRT2 * sqrtphif / gamma_b_dev)) + gamma_b_dev / (2.0 * `SQRT2 * sqrtphif)) :
+              1.0 + (gamma_b_dev / (2.0 * `SQRT2 * sqrtphif));
+
+            begin : QUANTUM_MECHANICAL_EFFECT
+                // BIAS INDEPENDENT CALCULATIONS FOR THE ACCUMULATION REGION
+                aqma        = AQMA * lexp(`ONE3RD * ln(COX * COX / UT));
+                axetaqm2_3  = aqma * lexp(`TWO3RDS * ln(ETAQM));
+                // QUANTUM MECHANICAL EFFECT ON SURFACE POTENTIAL SHIFT
+                dqmi        = `ONE3RD * AQMI * lexp(`TWO3RDS * ln(gamma_b_dev * COX * 0.5 / (sqrtUT * phif))) * (2.0 * `SQRT2 * ETAQM * nq0 * sqrtphif / gamma_b_dev - 1.0);
+                inv_dqmip1  = 1.0 / ( 1.0 + dqmi);
+                dpsi0       = AQMI * lexp(`TWO3RDS * ln(gamma_b_dev * COX * `SQRT2 * sqrtphif));
+                DPSI0       = dpsi0 * UT; // NOTE: Denormalized value of the surface potential shift.
+            end //  QUANTUM_MECHANICAL_EFFECT
+
+            // CALCULATION OF PHI, (or PSI0), USED IN CALCULATION OF PINCH-OFF VOLTAGE AFTER PINCH-OFF SURFACE POTENTIAL
+            // AND FOR THE CALCULATION OF FLAT-BAND VOLTAGE AFTER THRESHOLD VOLTAGE
+            phi         = phif * 2.0 + ln (4.0 * nq0 * sqrtphif * `SQRT2 / gamma_b_dev) + dpsi0;
+            // FREQUENTLY PERFORMED CALCULATION
+            sqrtphi     = sqrt(phi);
+            // CALCULATION OF VBI (BUILT-IN VOLTAGE), USED IN CHARGE SHARING MODEL AND FLAT-BAND VOLTAGE
+            // VBI IS NOMINALLY 3*UT HIGHER THAN PHI BUT MAY, AS WELL, BE DEFINED MANUALLY BY THE USER
+            if (VBI == 0.0) // NOTE: VBI has the physically non-logical default value of 0.0, so this 'if' statement checks if VBI has been redefined by the user, or not.
+            begin
+                nul         = 3.0;
+                vbi         = phi + nul;
+            end
+            else // NOTE: The following code is used when VBI is set to a value other than the default.
+            begin
+                vbi         = VBI / UT;
+                nul         = vbi - phi;
+            end
+            // FREQUENTLY PERFORMED CALCULATION
+            sqrtvbi     = sqrt(vbi);
+
+            begin : NORMALIZATION_FACTORS_FOR_CHARGES
+                // CALCULATION OF NORMALIZATION FACTORS FOR CHARGES OF THE CHANNEL AND THE OVERLAP REGION.
+                tmp         = WeffcNF * COX * UT * inv_dqmip1;
+                Q0      = - Leffc * tmp * rWNedge;
+                Q0OV        =   LOV   * tmp;
+            end //  NORMALIZATION_FACTORS_FOR_CHARGES
+
+        end
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // LEVEL 3c                                                                   //
+        // INTRINSIC PART OF THE MODEL                                                //
+        // CALCULATION OF BIAS DEPENDENT VARIABLES OF THE DEVICE                      //
+        // VARIABLES WITH "0" AT THE END ARE CALCULATED CONSIDERING VD=VS=0V          //
+        ////////////////////////////////////////////////////////////////////////////////
+
+        // READING THE INPUT VOLTAGES
+        // THE EXACT NODES DEPEND ON THE MODE USED AND THE INTERNAL NODES CREATED.
+
+        `ifdef DC_S
+            VS      = V(s ,b );
+            VD      = V(d ,b );
+            VG      = V(g ,b );
+            `endif
+        `ifdef DC
+            VS      = V(si,b );
+            VD      = V(di,b );
+            VG      = V(g ,b );
+            `endif
+        `ifdef RF_S
+            VS      = V(si,bi);
+            VD      = V(di,bi);
+            VG      = V(gi,bi);
+            `endif
+        `ifdef RF
+            VS      = V(si,bi);
+            VD      = V(di,bi);
+            VG      = V(gi,bi);
+            `endif
+        `ifdef NQS
+            VS      = V(si,bi);
+            VD      = V(di,bi);
+            VG      = V(gi,bi);
+            `endif
+
+        begin : NORMALIZING_INPUT_VOLTAGES
+            // NORMALIZATION OF THE INPUT VOLTAGES,
+            // SWAPPING ELECTRICAL AND PHYSICAL SOURCE AND DRAIN NODES IF NECESSARY,
+            // SWITCHING SIGNS OF DIFFERENCE POTENTIALS FOR THE PMOS CASE.
+            if (SIGN * VD >= SIGN * VS)
+            begin
+                d_gt_s_flag     = 1;
+                d_gt_s      = 1;
+                s_gt_d      = 0;
+            end
+            else
+            begin
+                d_gt_s_flag     = -1;
+                d_gt_s      = 0;
+                s_gt_d      = 1;
+            end
+            vd      = SIGN * (d_gt_s * VD + s_gt_d * VS) / UT;
+            vs      = SIGN * (d_gt_s * VS + s_gt_d * VD) / UT;
+            vg      = SIGN * VG / UT;
+        end //  NORMALIZING_INPUT_VOLTAGES
+
+        begin : EFFECTIVE_GAMMA_DUE_TO_CHARGE_SHARING_AND_POLYDEPLETION
+            // CALCULATION OF EFFECTIVE BODY EFFECT COEFFICIENT DUE TO CHARGE SHARING AND POLYSILICON DEPLETION.
+            // THE FOLLOWING VARIABLES ARE ALSO USED IN THE CALCULATION OF FLAT-BAND VOLTAGE (vfb), VG' (vg_p) AND VOLTAGE SLOPE FACTOR (nv).
+            chsh_1w     = 1.0 + CHSHWTSI; // NOTE: Also used in "vfb" and "vg_p_chsh"
+            tmp_chsh1   = CHSHLTSI / gamma_b_dev;
+            tmp_chsh2   = tmp_chsh1 * (sqrt(`MAXA(vbi + vs,0.0,`POS_MIN)) + sqrt(`MAXA(vbi + vd,0.0,`POS_MIN)));
+            chsh_1l     = 1.0 - tmp_chsh2; // NOTE: Also used in "nv"
+            tmp_chsh3   = CHSHWTSI * sqrtphi / gamma_b_dev; // NOTE: Also used in "tmp_vfb"
+            tmp_chsh3b  = tmp_chsh3 + tmp_chsh3;
+            chsh_1wl    = 1.0 - tmp_chsh2 - tmp_chsh2 + tmp_chsh3b;
+            chsh_1wlpd  = chsh_1w + dpd * chsh_1wl; // NOTE: Also used in "vg_p_chsh_pd" and "nv"
+            gamma_b_chsh    = gamma_b_dev * chsh_1l / chsh_1w; // NOTE: gamma_b_chsh takes into account charge sharing but not polydepletion.
+            gamma_b_eff     = gamma_b_dev * chsh_1l / chsh_1wlpd; // NOTE: gamma_b_eff takes into account charge sharing and polydepletion.
+            tmp_chsh4   = tmp_chsh1 * 2.0 * sqrtvbi; // NOTE: Also used in "tmp_vfb" and "vfb"
+            chsh_1l0    = 1.0 - tmp_chsh4;
+            chsh_1wl0   = 1.0 - tmp_chsh4 - tmp_chsh4 + tmp_chsh3b;
+            chsh_1wlpd0     = chsh_1w + dpd * chsh_1wl0; // NOTE: Used ONLY in "vg_p_chsh_pd0"
+            gamma_b_chsh0   = gamma_b_dev * chsh_1l0 / chsh_1w; // NOTE: gamma_b_chsh0 takes into account charge sharing under zero longitudinal bias (VD=VS=0V) but not polydepletion.
+            // FREQUENTLY PERFORMED CALCULATIONS
+            gamma_b_chsh2   = gamma_b_chsh * gamma_b_chsh;
+            gamma_b_eff2    = gamma_b_eff * gamma_b_eff;
+            gamma_b_chsh02  = gamma_b_chsh0 * gamma_b_chsh0;
+        end //  EFFECTIVE_GAMMA_DUE_TO_CHARGE_SHARING_AND_POLYDEPLETION
+
+        begin : FLAT_BAND_VOLTAGE
+            // CALCULATION OF THE FLAT-BAND VOLTAGE.
+            // vfb IS CALCULATED AFTER gamma_b_dev. "tmp_chsh3" and "tmp_chsh4" ARE CALCULATED AFTER gamma_b_dev AS WELL.
+            // "tmp_chsh4", "tmp_chsh3", "chsh_1w" DEPEND ALSO ON CHARGE SHARING PARAMETERS
+            // "dpd" DEPENDS ON POLYSILICON DEPLETION PARAMETERS
+            tmp_vfb     = 1.0 - tmp_chsh4 + tmp_chsh3;
+            vfb         = vto - phi * (chsh_1w + dpd * tmp_vfb * tmp_vfb) - gamma_b_dev * (1.0 - tmp_chsh4) * sqrtphi;
+        end //  FLAT_BAND_VOLTAGE
+
+        begin : EFFECTIVE_GATE_VOLTAGE
+            // CALCULATION OF THE EFFECTIVE GATE VOLTAGE (VG' or VG_PRIME)
+            // TAKING INTO ACCOUNT VARIOUS EFFECTS EACH TIME
+            vg_p        = vg - vfb;
+            vg_p_chsh   = vg_p / chsh_1w; // NOTE: Including CHARGE SHARING, used in calculation of psi_po (appoximation of psi_p when psi_p is close to zero) and psi_po0 and of psi_p and psi_p0 in accumulation and of dpsiv of QUANTUM MECHANICAL EFFECTS.
+            vg_p_chsh_pd    = vg_p / chsh_1wlpd; // NOTE: Including CHARGE SHARING and POLYDEPLETION and VD, VS BIAS DEPENDENCES, used in calculation of psi_p in depletion and inversion.
+            vg_p_chsh_pd0   = vg_p / chsh_1wlpd0; // NOTE: Including CHARGE SHARING and POLYDEPLETION at VD=VS=0V BIAS, used in calculation of psi_p0 in depletion and inversion.
+        end //  EFFECTIVE_GATE_VOLTAGE
+
+        begin : PSI_PO___APPROXIMATION_AROUND_PSI_P_EQUALS_ZERO
+            // CALCULATION OF PSI_PO, APPROXIMATION OF PINCH-OFF SURFACE POTENTIAL (PSI_P) WHEN PSI_P IS CLOSE TO ZERO.
+            // CHARGE SHARING EFFECT IS TAKEN INTO ACCOUNT, POLYDEPLETION DOES NOT EFFECT PSI_PO
+            // PSI_PO IS USED FOR THE CALCULATION OF THE EXACT PINCH-OFF SURFACE POTENTIAL, AND ALSO FOR THE QUANTUM MECHANICAL EFFECT.
+            tmp         = vg_p_chsh * 0.5 - 3.0 * (1.0 + gamma_b_chsh * `ONESQRT2);
+            psi_po      = tmp + sqrt(tmp * tmp + 6.0 * vg_p_chsh);
+            tmp         = vg_p_chsh * 0.5 - 3.0 * (1.0 + gamma_b_chsh0 * `ONESQRT2);
+            psi_po0     = tmp + sqrt(tmp * tmp + 6.0 * vg_p_chsh); // NOTE: Considering VD=VS=0V.
+        end //  PSI_PO___APPROXIMATION_AROUND_PSI_P_EQUALS_ZERO
+
+        /////////////////////////////////
+        // PINCH-OFF SURFACE POTENTIAL //
+        /////////////////////////////////
+
+        begin : PINCH_OFF_SURFACE_POTENTIAL_VOLTAGE_SLOPE_FACTOR
+            // CALCULATION OF THE PINCH-OFF SURFACE POTENTIAL (PSI_P), AFTER PSI_PO
+            if (vg_p < 0.0) // NOTE: Accumulation Region, only CHARGE SHARING affects PSI_P, not POLYDEPLETION.
+            begin
+                tmp         = (psi_po - vg_p_chsh) / gamma_b_chsh;
+                psi_p       = - ln(1.0 - psi_po + tmp * tmp);
+                tmp         = (psi_po0 - vg_p_chsh) / gamma_b_chsh0;
+                psi_p0      = - ln(1.0 - psi_po0 + tmp * tmp);
+            end
+            else // NOTE: Depletion and Inversion Regions, CHARGE SHARING and POLYDEPLETION affect PSI_P
+            begin
+                one_m_epsilon   = 1.0 - exp( - psi_po);
+                tmp         = sqrt(vg_p_chsh_pd - one_m_epsilon + gamma_b_eff2 * 0.25) - gamma_b_eff * 0.5;
+                psi_p       = tmp * tmp + one_m_epsilon;
+                one_m_epsilon   = 1.0 - exp( - psi_po0);
+                tmp         = sqrt(vg_p_chsh_pd0 - one_m_epsilon + gamma_b_chsh02 * 0.25) - gamma_b_chsh0 * 0.5;
+                psi_p0      = tmp * tmp + one_m_epsilon;
+            end
+            // FREQUENTLY PERFORMED CALCULATIONSekv3_edge.va
+            sqrt_psi_p  = sqrt(`MAXA(psi_p ,1.0E-4,1.0E-2)); // NOTE: Ensuring positive argument for the square root function.
+            sqrt_psi_p0     = sqrt(`MAXA(psi_p0,1.0E-4,1.0E-2)); // NOTE: Ensuring positive argument for the square root function.
+
+            // CALCULATION OF THE PINCH-OFF VOLTAGE, AFTER PINCH-OFF SURFACE POTENTIAL AND PHI
+            vp      = psi_p  - phi;
+            // CALCULATION OF SLOPE FACTOR NV
+            nv      = chsh_1wlpd  + gamma_b_dev * chsh_1l  / (2.0 * sqrt_psi_p); // NOTE: Used for the calculation of COULOMB SCATTERING and MOBILITY REDUCTION DUE TO VERTICAL FIELD.
+        end
+
+        begin : DIBL
+            // CALCULATION OF THE DRAIN INDUCED BARRIER LOWERING.
+            l0      = ETAD_DEV * TSI * sqrt(2.0 * sqrtphi / gamma_b_dev);
+            v_o_dibl    = 4.0 + 40.0 * l0 / Leff;
+            v_o_dibl2   = v_o_dibl * v_o_dibl;
+            dv_dibl     = `MINA(vp,`MINA(vs,vd ,v_o_dibl2),v_o_dibl2);
+            if (l0 == 0.0)
+            begin
+                deltapsis   = 0.0;
+            end
+            else
+            begin
+                tmp         = Leff / (l0 + l0);
+                deltapsis   = exp( - tmp) * (2.0 + SIGMAD * tmp * dv_dibl  / (2.0 * phi)) * sqrt((nul + vs - dv_dibl) * (nul + vd - dv_dibl)); // NOTE: deltapsis is used at the calculation of the normalized inversion charges at the source and drain ends. Effective PINCH-OFF VOLTAGE (vp_dibl) is increased by a factor of "deltapsis", due to DIBL.
+            end
+        end //  DIBL
+
+        // CALCULATION OF THE EFFECTIVE PINCH-OFF VOLTAGE DUE TO DIBL
+        vp_dibl     = vp + deltapsis;
+
+        begin : NORMALIZED_FORWARD_CURRENT
+            // CALCULATION OF NORMALIZED INVERSION CHARGE OF THE (ELECTRICAL) SOURCE SIDE
+            `QV(qs,(vp_dibl - vs))
+            // FREQUENTLY PERFORMED CALCULATION
+            qs2         = qs * qs;
+            // CALCULATION OF THE NORMALIZED FORWARD CURRENT
+            if_         = qs2 + qs;
+            // FREQUENTLY PERFORMED CALCULATIONS
+            xf2         = if_ + 0.25;
+            xf      = qs + 0.5;
+        end //  NORMALIZED_FORWARD_CURRENT
+
+        begin : VELOCITY_SATURATION
+            // CALCULATIONS FOR THE VELOCITY SATURATION EFFECT AND THE CHANNEL LENGTH MODULATION
+            // -- VELOCITY SATURATION (NOT DEPENDENT ON VD)
+            g_clm       = 0.1; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+            e_clm       = 2.0 / ucrit; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+            e_clm2      = e_clm * e_clm; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+            e_clmx2     = 2.0 * e_clm;
+            e_clmp2     = 2.0 + e_clm;
+            e_clmx2xqs  = e_clmx2 * qs;
+            qsat        = e_clmx2 * if_ / (e_clmp2 + e_clmx2xqs + sqrt(e_clmp2 * e_clmp2 + 4.0 * e_clmx2xqs)); // NOTE: The inversion charge at a point of maximum velocity saturation.
+            qs_qsat     = qs - qsat;
+            qs_qsat2    = qs_qsat * qs_qsat;
+            mdm2        = 2.0 - DELTA; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+            e_clmxmdm2_2    = e_clm2 * mdm2 * mdm2; // NOTE: Also used for the calculation of mobility reduction due to CHANNEL LENGTH MODULATION
+            tmp_vdsat1  = (2.0 * qsat + ln(qsat)) * (1.0 + e_clm * qs_qsat);
+            tmp_vdsat11 = g_clm + e_clm * mdm2 * qs_qsat;
+            tmp_vdsat2  = sqrt(1.0 + (2.0 * e_clm2 * mdm2 * mdm2 * qs_qsat2) / tmp_vdsat11 + e_clm2 * qs_qsat2);
+            vdsat       = vp - tmp_vdsat1 / tmp_vdsat2; // NOTE: The potential at a point of the channel of maximum velocity saturation.
+            vdssat      = `MAXA(vdsat - vs,3.0,4.0); // NOTE: The diffence potential along a fully velocity saturated part of the channel, limited to a minimum of 3*UT. Used also for the calculation of impact ionization current (ekv3_idb.va)
+            // -- VELOCITY SATURATION (DEPENDENT ON VD)
+            dv_clm      = (ACLM / DELTA) * (4.0 * qsat + DELTA) / (qs + 1.0);
+            tmp_vdp1    = (vd - vs) * sqrt(1.0 + 4.0 * dv_clm / vdssat);
+            tmp_vdp2    = sqrt((tmp_vdp1 + vdssat) * (tmp_vdp1 + vdssat) + 4.0 * dv_clm * vdssat);
+            tmp_vdp3    = sqrt((tmp_vdp1 - vdssat) * (tmp_vdp1 - vdssat) + 4.0 * dv_clm * vdssat);
+            vdp         = 0.5 * (tmp_vdp2 - tmp_vdp3) + vs; // NOTE: The potential at the velocity saturated point of the channel, limited by the maximum value (vdsat)
+            // -- CHANNEL LENGTH MODULATION
+            u_clm       = 0.5 * e_clm * Leff / LC * (vd - vdp);
+            alpha_clm   = LC / (Leff - 2.0 * LC);
+            deltal      = LAMBDA_wt * LC * ln((alpha_clm + u_clm + sqrt(u_clm * u_clm + 2.0 * alpha_clm * u_clm + 1.0)) / (alpha_clm + 1.0)); // NOTE: The distance between the velocity saturated point of the channel and the (electrical) drain end. Used at the SPECIFIC CURRENT calculation.
+        end //  VELOCITY_SATURATION
+
+        begin : NORMALIZED_REVERSE_CURRENT
+            // CALCULATION OF NORMALIZED INVERSION CHARGE OF THE VELOCITY SATURATED POINT (ELECTRICAL DRAIN END)
+            `QV(qdp,(vp_dibl - vdp))
+            // FREQUENTLY PERFORMED CALCULATION
+            qdp2        = qdp * qdp;
+            // CALCULATION OF THE NORMALIZED REVERSE CURRENT
+            irp         = qdp2 + qdp;
+            // FREQUENTLY PERFORMED CALCULATIONS
+            xrp2        = irp + 0.25;
+            xrp         = qdp + 0.5;
+        end //  NORMALIZED_REVERSE_CURRENT
+
+        // FREQUENTLY PERFORMED CALCULATIONS COMBINING BOTH NORMALIZED INVERSION CHARGES
+        qsqdp       = qs + qdp;
+        qs_qdp      = qs - qdp;
+        powqs_qdp2  = qs_qdp * qs_qdp;
+        qsqdpp1     = qsqdp + 1.0;
+        powqsqdpp1_2    = 1.0 / (qsqdpp1 * qsqdpp1);
+
+        // CALCULATION OF NORMALIZED CHANNEL CURRENT
+        i       = if_ - irp;
+
+        // CALCULATION OF CHARGE SLOPE FACTOR NQ
+        `NQ(nq,psi_p,sqrt_psi_p,qs,qdp,dpd,gamma_b_chsh,gamma_g2)
+
+        begin : CHARGE_MODEL
+            // THE DYNAMIC PART OF THE MODEL.
+            // CALCULATIONS OF THE CHARGES OF EACH NODE
+            v_o         = vg_p_chsh - psi_p0; // NOTE: psi_p0 used instead of psi_p.
+            // CALCULATIONS OF THE QUANTUM MECHANICAL EFFECT
+            qr1         = 3.0 * `ONESQRT2 * gamma_b_chsh;
+            if (vg_p < 0.0) qbo = vg_p_chsh    - psi_p;
+            else        qbo = vg_p_chsh / (1.0 + dpd) - psi_po;
+            dpsiv       = axetaqm2_3 * (lexp(`TWO3RDS * ln(sqrt(`MAXA(0.25 * qbo * qbo + 4.0 * axetaqm2_3 * gamma_b_chsh2,0.0,`POS_MIN)) - 0.5 * qbo)) - lexp(`TWO3RDS * ln(sqrt(`MAXA(qr1 * qr1 + 4.0 * axetaqm2_3 * gamma_b_chsh2,0.0,`POS_MIN)) - qr1)));
+            v_o_qme     = v_o + dpsiv;
+            // CALCULATIONS OF THE NORMALIZED CHARGES qS, qD, qG
+            begin
+                `QX(qS,psi_p,nq,qs,qdp,powqs_qdp2,powqsqdpp1_2)
+                `QX(qD,psi_p,nq,qdp,qs,powqs_qdp2,powqsqdpp1_2)
+                `QG(qG,psi_p,qs,qdp,powqs_qdp2,powqsqdpp1_2,qsqdpp1,v_o_qme,gamma_g2) // NOTE: qG is considered with the same sign as qS and qD, although in absolute values they are of opposite signs. This is taken care at the denormalization part of the code.
+            end
+            qI      = qS + qD;
+            // CALCULATION OF THE NORMALIZED CHARGE qB AS COMPLEMENTARY TO qS, qD AND qG.
+            // NOTE: THE ABSOLUTE VALUES OF THE CHARGES ARE NOT OF INTEREST, SINCE ONLY THE THEIR DERIVATIVES WITH RESPECT TO THE VOLTAGES DESCRIBE THE DYNAMIC BEHAVIOUR OF THE DEVICE.
+            qB      = qG - qI;
+        end //  CHARGE_MODEL
+
+        begin : MOBILITY_EFFECTS
+            // CALCULATION OF THE EFFECTIVE MOBILITY (beta).
+            // TAKING INTO ACCOUNT THE COULOMB SCATTERING EFFECT.
+            beta_coul   = THC / ((1.0 + (nv * ZC * qs)) * (1.0 + (nv * ZC * qdp))); // NOTE: used in "beta_denom"
+            // TAKING INTO ACCOUNT THE MOBILITY REDUCTION DUE TO VERTICAL FIELD.
+            nu      = nv * (1.0 - ETA_t) - 1.0;
+            gpnu        = gamma_b_eff * sqrt_psi_p + nu;
+            eq      = qB + ETA_t * nv * qI;
+            eq1         = gpnu * gpnu + nu * nu * (1.0 + if_ + if_ + irp + irp) - 8.0 * `ONE3RD * nu * gpnu * (xf2 + xf * xrp + xrp2) / (xf + xrp);
+            beta_nom    = 1.0 + ev * gamma_b_eff * sqrtphi + ev1 * gamma_b_eff2 * phi;
+            beta_denom  = 1.0 + ev * eq + ev1 * eq1 + beta_coul;
+            // TAKING INTO ACCOUNT THE CHANNEL LENGTH MODULATION EFFECT ON MOBILITY.
+            beta_clm_denom  = sqrt(1.0 + 2.0 * e_clmxmdm2_2 * powqs_qdp2 / (g_clm + e_clm * mdm2 * (qs_qdp)) + e_clm2 * powqs_qdp2);
+            // COMBINING ALL THE ABOVE PHENOMENA INTO THE CALCULATION OF beta.
+            beta        = KP_DEV_t * (beta_nom / beta_denom) / beta_clm_denom;
+        end //  MOBILITY_EFFECTS
+
+        begin : SPECIFIC_CURRENT
+            // CALCULATION OF THE SPECIFIC CURRENT OF THE TRANSISTOR (THE NORMALIZATION FACTOR FOR THE CHANNEL CURRENT)
+            i0      = 2.0 * nq * UT2 * beta * inv_dqmip1;
+            Ispec       = i0 * WeffNF / (Leff - deltal) * rWNedge;
+            // CALCULATION OF NORMALIZATION FACTOR FOR CONDUCTANCES (AND ALSO FREQUENTLY PERFORMED CALCULATION)
+            Gspec       = Ispec / UT;
+        end //  SPECIFIC_CURRENT
+
+        begin : DITS
+            // CALCULATION OF THE DRAIN INDUCED THRESHOLD VOTLAGE SHIFT (AFTER BSIM4 FORMULATION, ADAPTED FOR EKV)
+            if (PDITS == 0.0) // NOTE: This value for PDITS switches off the effect.
+            begin
+                dits_factor     = 1.0;
+            end
+            else // NOTE: Otherwise, the following coding calculates a DITS factor (dits_factor) which is multiplied with the channel current (IDS).
+            begin
+                f_dits      = 1.0 / (1.0 + FPROUT * sqrt(Leff) / (qI + 2.0));
+                va_dits     = (f_dits / PDITS) * (1.0 + (1.0 + PDITSL * Leff) * lexp(PDITSD * (vd - vs) * UT));
+                vdseff      = vdssat - `MAXA(vdssat - (vd - vs) - DDITS, 0.0, 4.0 * DDITS * vdssat);
+                dits_factor     = (1.0 + (vd - vs - vdseff) / va_dits );
+            end
+            Ispec_dits  = Ispec * dits_factor;
+            Gspec_dits  = Gspec * dits_factor;
+        end //  DITS
+
+        begin : DENORMALISING
+            // CALCULATIONS OF THE DENORMALIZED CHARGES OF THE NODES OF THE TRANSISTOR AND THE CHANNEL CURRENT
+            QS      =   qS * Q0;
+            QD      =   qD * Q0;
+            QG      = - qG * Q0; // NOTE: Here, QG has different sign with QS and QD, as it is physically correct.
+            QB      = - QS - QD - QG; // NOTE: Instead of multiplying, subtraction is used, since charges are complementary.
+            IDS         = i * Ispec_dits;
+        end //  DENORMALISING
+
+`include "ekv3_include/ekv3_extrinsic_diodes.va" // Modelling the extrinsic junction diodes formed bewteen source and bulk, on the source side, and between the drain and bulk, on the drain side.
+`include "ekv3_include/ekv3_extrinsic_rc.va" // Modelling the part of the extrinsic model that contains resistors and bias-independent capacitances (Related parameters: CGDO, CGSO, CGBO).
+`include "ekv3_include/ekv3_edge.va" // Modelling of the edge conductance effect.
+`include "ekv3_include/ekv3_overlap.va" // Modelling of the bias-dependent overlap capacitances, between source and gate, on the source side, and drain and gate, on the drain side.
+`include "ekv3_include/ekv3_fringing.va" // Modelling of the bias-dependent fringing capacitances, between source and gate, on the source side, and between, drain and gate, on the drain side.
+`include "ekv3_include/ekv3_gidl.va" // Modeling of the gate induced drain and source leakage currents.
+`include "ekv3_include/ekv3_gate_current.va" // Modelling of the gate leakage current, between gate and source on the source side, gate and drain, on the drain side, and directly from gate to the bulk.
+`include "ekv3_include/ekv3_idb.va" // Modelling of the impact ionization current.
+`include "ekv3_include/ekv3_noise.va" // Modelling of the noise.
+
+        // ASSIGNMENT OF CHANNEL CURRENT AND THE DYNAMIC BEHAVIOUR VIA THE CHARGES AT THE NODES TO THE RESPECTIVE BRANCES.
+        // ACCORDING TO THE MODE OF THE MODEL AND THE INTERNAL NODES USED EACH TIME, THE NODES USED DIFFER.
+
+        `ifdef DC_S
+            // SERIES RESISTANCE
+            IDS         = IDS / RES_IDS; // NOTE: Internal, first-order calculation of the series resistance effect for the simplest mode of the model, where no internal nodes are introduced.
+            // CHANNEL CURRENT
+            I(d ,s )    <+  SIGN_M * d_gt_s_flag * IDS;
+            // CAPACITANCES
+            I(b ,g )    <+  SIGN_M * ddt(QB) * QON;
+            I(d ,g )    <+  SIGN_M * (d_gt_s * ddt(QD) + s_gt_d * ddt(QS)) * QON;
+            I(s ,g )    <+  SIGN_M * (d_gt_s * ddt(QS) + s_gt_d * ddt(QD)) * QON;
+            `endif
+
+        `ifdef DC
+            // CHANNEL CURRENT
+            I(di,si)    <+  SIGN_M * d_gt_s_flag * IDS;
+            // CAPACITANCES
+            I(b ,g )    <+  SIGN_M * ddt(QB) * QON;
+            I(di,g )    <+  SIGN_M * (d_gt_s * ddt(QD) + s_gt_d * ddt(QS)) * QON;
+            I(si,g )    <+  SIGN_M * (d_gt_s * ddt(QS) + s_gt_d * ddt(QD)) * QON;
+            `endif
+
+        `ifdef RF_S
+            // CHANNEL CURRENT
+            I(di,si)    <+  SIGN_M * d_gt_s_flag * IDS;
+            // CAPACITANCES
+            I(bi,gi)    <+  SIGN_M * ddt(QB) * QON;
+            I(di,gi)    <+  SIGN_M * (d_gt_s * ddt(QD) + s_gt_d * ddt(QS)) * QON;
+            I(si,gi)    <+  SIGN_M * (d_gt_s * ddt(QS) + s_gt_d * ddt(QD)) * QON;
+            `endif
+
+        `ifdef RF
+            // CHANNEL CURRENT
+            I(di,si)    <+  SIGN_M * d_gt_s_flag * IDS;
+            // CAPACITANCES
+            I(bi,gi)    <+  SIGN_M * ddt(QB) * QON;
+            I(di,gi)    <+  SIGN_M * (d_gt_s * ddt(QD) + s_gt_d * ddt(QS)) * QON;
+            I(si,gi)    <+  SIGN_M * (d_gt_s * ddt(QS) + s_gt_d * ddt(QD)) * QON;
+            `endif
+
+        `ifdef NQS
+            // HARD-WRITTEN INTRINSIC CHANNEL SEGMENTATION TO FIVE SEGMENTS (NoCS: Number of Channel Segments). THE FOLLOWING CODING WAS WRITTEN ALLOWING VARIABLE NUMBERS OF SEGMENTS, USING THE A FOR-LOOP, BUT WAS SIMPLIFIED TO FIVE SEGMENTS FOR PORTABILITY REASONS, SINCE THE FOR-LOOP COMMAND OF THE VERILOG-A LANGUAGE WAS NOT SUPPORTED BY ALL SIMULATORS.
+            Ispec_dits_seg  = Ispec_dits * `NoCS;
+            Q0_seg      = Q0 / `NoCS;
+            begin : MOS_S0
+                // STATIC PART OF THE SEGMENT, CHANNEL CURRENT
+                v1      = d_gt_s * vs + s_gt_d * vdp;
+                v2      = SIGN * V(m1,bi) / UT;
+                `QV(q1,(vp_dibl - v1))
+                i1      = q1 * (q1 + 1.0);
+                `QV(q2,(vp_dibl - v2))
+                i2      = q2 * (q2 + 1.0);
+                I(m1,si)    <+ SIGN_M * Ispec_dits_seg * (i1 - i2);
+                // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES
+                `NQ(nq,psi_p,sqrt_psi_p,q1,q2,dpd,gamma_b_chsh,gamma_g2)
+                q1q2        = q1 + q2;
+                q1_q2       = q1 - q2;
+                powq1_q22   = q1_q2 * q1_q2;
+                q1q2p1      = q1q2 + 1.0;
+                powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+                `QX(qq1,psi_p,nq,q1,q2,powq1_q22,powq1q2p1_2)
+                `QX(qq2,psi_p,nq,q2,q1,powq1_q22,powq1q2p1_2)
+                `QG(qG,psi_p,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+                qB      = - qq1 - qq2 + qG;
+                I(bi,gi)        <+ SIGN_M * ddt(qB  * Q0_seg) * QON;
+                I(m1,gi)        <+ SIGN_M * ddt(qq2 * Q0_seg) * QON;
+                I(si,gi)        <+ SIGN_M * ddt(qq1 * Q0_seg) * QON;
+            end //  MOS_S0
+            begin : MOS_S1
+                // STATIC PART OF THE SEGMENT, CHANNEL CURRENT
+                v1      = SIGN * V(m1,bi) / UT;
+                v2      = SIGN * V(m2,bi) / UT;
+                `QV(q1,(vp_dibl - v1))
+                i1      = q1 * (q1 + 1.0);
+                `QV(q2,(vp_dibl - v2))
+                i2      = q2 * (q2 + 1.0);
+                I(m2,m1)    <+ SIGN_M * Ispec_dits_seg * (i1 - i2);
+                // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES
+                `NQ(nq,psi_p,sqrt_psi_p,q1,q2,dpd,gamma_b_chsh,gamma_g2)
+                q1q2        = q1 + q2;
+                q1_q2       = q1 - q2;
+                powq1_q22   = q1_q2 * q1_q2;
+                q1q2p1      = q1q2 + 1.0;
+                powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+                `QX(qq1,psi_p,nq,q1,q2,powq1_q22,powq1q2p1_2)
+                `QX(qq2,psi_p,nq,q2,q1,powq1_q22,powq1q2p1_2)
+                `QG(qG,psi_p,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+                qB      = - qq1 - qq2 + qG;
+                I(bi,gi)        <+ SIGN_M * ddt(qB  * Q0_seg) * QON;
+                I(m2,gi)        <+ SIGN_M * ddt(qq2 * Q0_seg) * QON;
+                I(m1,gi)        <+ SIGN_M * ddt(qq1 * Q0_seg) * QON;
+            end //  MOS_S1
+            begin : MOS_M
+                // STATIC PART OF THE SEGMENT, CHANNEL CURRENT
+                v1      = SIGN * V(m2,bi) / UT;
+                v2      = SIGN * V(m3,bi) / UT;
+                `QV(q1,(vp_dibl - v1))
+                i1      = q1 * (q1 + 1.0);
+                `QV(q2,(vp_dibl - v2))
+                i2      = q2 * (q2 + 1.0);
+                I(m3,m2)    <+ SIGN_M * Ispec_dits_seg * (i1 - i2);
+                // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES
+                `NQ(nq,psi_p,sqrt_psi_p,q1,q2,dpd,gamma_b_chsh,gamma_g2)
+                q1q2        = q1 + q2;
+                q1_q2       = q1 - q2;
+                powq1_q22   = q1_q2 * q1_q2;
+                q1q2p1      = q1q2 + 1.0;
+                powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+                `QX(qq1,psi_p,nq,q1,q2,powq1_q22,powq1q2p1_2)
+                `QX(qq2,psi_p,nq,q2,q1,powq1_q22,powq1q2p1_2)
+                `QG(qG,psi_p,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+                qB      = - qq1 - qq2 + qG;
+                I(bi,gi)        <+ SIGN_M * ddt(qB  * Q0_seg) * QON;
+                I(m3,gi)        <+ SIGN_M * ddt(qq2 * Q0_seg) * QON;
+                I(m2,gi)        <+ SIGN_M * ddt(qq1 * Q0_seg) * QON;
+            end //  MOS_M
+            begin : MOS_D1
+                // STATIC PART OF THE SEGMENT, CHANNEL CURRENT
+                v1      = SIGN * V(m3,bi) / UT;
+                v2      = SIGN * V(m4,bi) / UT;
+                `QV(q1,(vp_dibl - v1))
+                i1      = q1 * (q1 + 1.0);
+                `QV(q2,(vp_dibl - v2))
+                i2      = q2 * (q2 + 1.0);
+                I(m4,m3)    <+ SIGN_M * Ispec_dits_seg * (i1 - i2);
+                // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES
+                `NQ(nq,psi_p,sqrt_psi_p,q1,q2,dpd,gamma_b_chsh,gamma_g2)
+                q1q2        = q1 + q2;
+                q1_q2       = q1 - q2;
+                powq1_q22   = q1_q2 * q1_q2;
+                q1q2p1      = q1q2 + 1.0;
+                powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+                `QX(qq1,psi_p,nq,q1,q2,powq1_q22,powq1q2p1_2)
+                `QX(qq2,psi_p,nq,q2,q1,powq1_q22,powq1q2p1_2)
+                `QG(qG,psi_p,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+                qB      = - qq1 - qq2 + qG;
+                I(bi,gi)        <+ SIGN_M * ddt(qB  * Q0_seg) * QON;
+                I(m4,gi)        <+ SIGN_M * ddt(qq2 * Q0_seg) * QON;
+                I(m3,gi)        <+ SIGN_M * ddt(qq1 * Q0_seg) * QON;
+            end //  MOS_D1
+            begin : MOS_D0
+                // STATIC PART OF THE SEGMENT, CHANNEL CURRENT
+                v1      = SIGN * V(m4,bi) / UT;
+                v2      = d_gt_s * vdp + s_gt_d * vs;
+                `QV(q1,(vp_dibl - v1))
+                i1      = q1 * (q1 + 1.0);
+                `QV(q2,(vp_dibl - v2))
+                i2      = q2 * (q2 + 1.0);
+                I(di,m4)    <+ SIGN_M * Ispec_dits_seg * (i1 - i2);
+                // DYNAMIC PART OF THE SEGMENT, CHARGES AT THE NODES
+                `NQ(nq,psi_p,sqrt_psi_p,q1,q2,dpd,gamma_b_chsh,gamma_g2)
+                q1q2        = q1 + q2;
+                q1_q2       = q1 - q2;
+                powq1_q22   = q1_q2 * q1_q2;
+                q1q2p1      = q1q2 + 1.0;
+                powq1q2p1_2     = 1.0 / (q1q2p1 * q1q2p1);
+                `QX(qq1,psi_p,nq,q1,q2,powq1_q22,powq1q2p1_2)
+                `QX(qq2,psi_p,nq,q2,q1,powq1_q22,powq1q2p1_2)
+                `QG(qG,psi_p,q1,q2,powq1_q22,powq1q2p1_2,q1q2p1,v_o_qme,gamma_g2)
+                qB      = - qq1 - qq2 + qG;
+                I(bi,gi)    <+ SIGN_M * ddt(qB  * Q0_seg) * QON;
+                I(di,gi)    <+ SIGN_M * ddt(qq2 * Q0_seg) * QON;
+                I(m4,gi)    <+ SIGN_M * ddt(qq1 * Q0_seg) * QON;
+            end //  MOS_D0
+            `endif
+`include "ekv3_include/ekv3_oppoints.va"
+`include "ekv3_include/ekv3_extract_debug.va"
+
+    end
+end // EKV3
+endmodule

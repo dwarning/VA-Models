@@ -1,0 +1,674 @@
+begin : EXTRACTING_RESULTS
+    if (INFO_LEVEL > 0.0)
+    begin
+        if (INFO_LEVEL == 1.0)
+        begin
+            // INTRODUCTION
+            $strobe("");
+            $strobe("########################################");
+            $strobe("#                                      #");
+            $strobe("# EKV3 model, Verilog-A code           #");
+            $strobe("# (Model version: 301.04)              #");
+            $strobe("# Information level = %g                #", INFO_LEVEL);
+            $strobe("#   (INFO_LEVEL)                       #");
+            $strobe("#                                      #");
+            $strobe("########################################");
+            $strobe("");
+            // GENERAL INFORMATION
+            $strobe("  On device: %m");
+            `ifdef DC_S
+            $strobe("  Model mode: simple low frequency (DC_S: no intrinsic nodes) ");
+            `endif
+            `ifdef DC
+            $strobe("  Model mode: low frequency (DC: two intrinsic nodes) ");
+            `endif
+            `ifdef RF_S
+            $strobe("  Model mode: simple high frequency (RF_S: four intrinsic nodes) ");
+            `endif
+            `ifdef RF
+            $strobe("  Model mode: high frequency (RF: six intrinsic nodes) ");
+            `endif
+            `ifdef NQS
+            $strobe("  Model mode: non-quasi-static high frequency (NQS: ten intrinsic nodes) ");
+            `endif
+            $strobe("  Temperature: %g C \t UT = %g V \t TNOM = %g C", (T-273.15), UT, TNOM);
+            $strobe("");
+            $strobe("+ GENERAL CHARACTERISTICS ");
+            $strobe("|");
+            $strobe(">- TOX = %g m ", TOX);
+            $strobe(">- COX = %g F*m^(-2)", COX);
+            $strobe(">- VSB = %g V ",              V(s,b));
+            $strobe("");
+            // EXTERNAL BIAS
+            $strobe("+ EXTERNAL BIAS ");
+            $strobe("|");
+            $strobe(">- VGB = %g V \t VGS = %g V", V(g,b), (V(g,b)-V(s,b)));
+            $strobe(">- VDB = %g V \t VDS = %g V", V(d,b), (V(d,b)-V(s,b)));
+            $strobe(">- VSB = %g V ",              V(s,b));
+            $strobe("");
+            // DEVICE GEOMETRY
+            $strobe("+ DEVICE GEOMETRY ");
+            $strobe("|");
+            $strobe(">- Leff = %g m \t Leffc = %g m ", Leff, Leffc);
+            $strobe(">- Weff = %g m \t Weffc = %g m \t (finger)", Weff, Weffc);
+            $strobe(">- Wtot = %g m \t NF    = %d m ", WeffNF, NF);
+            $strobe(">");
+            $strobe(">- Leff - deltaL = %g m \t (CHANNEL LENGTH MODULATION)", (Leff - deltal));
+            $strobe(">- Weff - WEDGE  = %g m \t (EDGE CONDUCTANCE)", (Weff - WEDGE));
+            $strobe(">- WEDGE         = %g m ", WEDGE);
+            $strobe(">");
+            $strobe(">- W/L           = %g ", ((Weff-WEDGE)*NF/(Leff-deltal)));
+            $strobe("");
+            // THRESHOLD VOLTAGE
+            $strobe("+ THRESHOLD VOLTAGE ");
+            $strobe("|");
+            $strobe(">- VTO(dev,T) = %g V \t VTO(dev,TNOM) = %g V", VTO_DEV_t, VTO_DEV);
+            $strobe(">");
+            $strobe(">- VTO        = %g V ", VTO);
+            $strobe(">- DVTO(RSCE) = %g V \t\t (REVERSE SHORT CHANNEL EFFECT)", DVT_rsce);
+            $strobe(">- DVTO(INCE) = %g V \t\t (INVERSE NARROW CHANNEL EFFECT)", DVT_inwe);
+            $strobe(">- DVTO(STI)  = %g V \t\t (STI STRESS EFFECT)", DVT_sti);
+            $strobe(">- DVTO(LONG) = %g V \t\t (LONG CHANNEL CORRECTION)", DVT_long);
+            $strobe(">- DVTO(WIDE) = %g V \t\t (WIDE CHANNEL CORRECTION)", DVT_wide);
+            $strobe(">- DVTO(NF)   = %g V \t\t (NF CORRECTION)", DVT_nf);
+            $strobe(">- DVTO(T)    = %g V \t\t (TEMPERATURE)", (VTO_DEV_t-VTO_DEV));
+            $strobe(">");
+            $strobe(">- VFB        = %g V ", (vfb*UT));
+            $strobe("");
+            // BODY EFFECT FACTOR
+            $strobe("+ BODY EFFECT FACTOR ");
+            $strobe("|");
+            $strobe(">- GAMMA(dev)  = %g V^(1/2)", GAMMA_DEV);
+            $strobe(">");
+            $strobe(">- GAMMA       = %g V^(1/2)", GAMMA);
+            $strobe(">- AGAMMA(RSCE)= %g   \t\t (REVERSE SHORT CHANNEL EFFECT)", MGAMMA_rcse);
+            $strobe(">- AGAMMA(INCE)= %g   \t\t (INVERSE NARROW CHANNEL EFFECT)", MGAMMA_inwe);
+            $strobe(">- DGAMMA(STI) = %g V^(1/2) \t\t (STI STRESS EFFECT)", DGAMMA_sti);
+            $strobe(">- DGAMMA(LONG)= %g V^(1/2) \t\t (LONG CHANNEL CORRECTION)", DGAMMA_long);
+            $strobe(">- DGAMMA(WIDE)= %g V^(1/2) \t\t (WIDE CHANNEL CORRECTION)", DGAMMA_wide);
+            $strobe(">");
+            $strobe(">- GAMMAeff(CHSH) = %g V^(1/2) \t\t (CHARGE SHARING))", (gamma_b_chsh*UT));
+            $strobe(">- GAMMAeff0(CHSH)= %g V^(1/2) \t\t (CHARGE SHARING, NO BIAS)", (gamma_b_chsh0*UT));
+            $strobe(">- GAMMAeff       = %g V^(1/2) \t\t (ALL PHENOMENA, POLYSILICON DEPLETION)", (gamma_b_eff*UT));
+            $strobe("");
+            // FERMI POTENTIAL
+            $strobe("+ FERMI POTENTIAL ");
+            $strobe("|");
+            $strobe(">- PHIF(dev,T)  = %g V \t PHIF(dev,TNOM) = %g V", PHIF_DEV_t, PHIF_DEV);
+            $strobe(">");
+            $strobe(">- PHIF        = %g V", PHIF);
+            $strobe(">- DPHIF(RSCE) = %g V \t\t (REVERSE SHORT CHANNEL EFFECT)", DPHIF_rsce);
+            $strobe(">- DPHIF(T)    = %g V \t\t (TEMPERATURE)", (PHIF_DEV_t-PHIF_DEV));
+            $strobe(">");
+            $strobe(">- PHIF(dev,T)^(1/2) = %g V^(1/2)", (sqrt(PHIF_DEV_t)));
+            $strobe(">- PHI(dev,T)  = %g V", (phi*UT));
+            $strobe(">- DPSI(QM)    = %g V \t\t (QUANTUM MECHANICAL EFFECTS)", DPSI0);
+            $strobe(">- VBI(dev,T)  = %g V", (vbi*UT));
+            $strobe("");
+            // MOBILITY
+            $strobe("+ MOBILITY RELATED EFFECTS ");
+            $strobe("|");
+            $strobe(">- MOB(dev,T)    = %g m^2/(V*s)", (beta/COX));
+            $strobe(">");
+            $strobe(">- MOB(TNOM)     = %g m^2/(V*s)", (KP/COX));
+            $strobe(">- AMOB(STI,TNOM)= %g ", MKP_sti);
+            $strobe(">- AMOB(STI,T)   = %g ", MKP_sti_t);
+            $strobe(">- AMOB(LENGTH_SCALING) = %g ", MKP_l);
+            $strobe(">- AMOB(WIDTH_SCALING)  = %g ", MKP_w);
+            $strobe(">- AMOB(T)       = %g ", (exp(BEX*lnrT)));
+            $strobe(">- AMOB(MRVF)    = %g \t\t (MOBILITY REDUCTION DUE TO VERTICAL FIELD)", (beta_nom/beta_denom));
+            $strobe(">- AMOB(MRLF)    = %g \t\t (MOBILITY REDUCTION DUE TO LONGITUDINAL FIELD)", (1.0 / beta_clm_denom));
+            $strobe("");
+            // QUANTUM MECHANICAL
+            $strobe("+ QUANTUM MECHANICAL EFFECTS ");
+            $strobe("|");
+            $strobe(">- AQMA = %g \t AQMI = %g \t ETAQM = %g", AQMA, AQMI, ETAQM);
+            $strobe(">");
+            $strobe(">- 1/(1+delta_QMI) = %g ", inv_dqmip1);
+            $strobe(">- DPSI            = %g V \t\t (FERMI POTENTIAL)", DPSI0);
+            $strobe(">- DPSIV           = %g V \t\t (DVO ON CHARGE MODEL OF QB)", (dpsiv*UT));
+            $strobe("");
+            // SLOPE FACTOR
+            $strobe("+ SLOPE FACTOR ");
+            $strobe("|");
+            $strobe(">- nv  = %g ", nv);
+            $strobe(">- nq  = %g ", nq);
+            $strobe(">- nq0 = %g ", nq0);
+            $strobe("");
+            // PINCH-OFF
+            $strobe("+ PINCH-OFF SURFACE POTENTIAL AND VOLTAGE ");
+            $strobe("|");
+            $strobe(">- PSI_P   = %g V ", (psi_p*UT));
+            $strobe(">- PSI_P0  = %g V ", (psi_p0*UT));
+            $strobe(">");
+            $strobe(">- PSI_PO  = %g V \t\t (APPROXIMATION AROUND PSI_P=0)", (psi_po*UT));
+            $strobe(">- PSI_PO0 = %g V \t\t (APPROXIMATION AROUND PSI_P=0)", (psi_po0*UT));
+            $strobe(">");
+            $strobe(">- V_P         = %g V ", (vp*UT));
+            $strobe(">- DPSI_S(DIBL)= %g V \t\t (DRAIN INDUCED BARRIER LOWERING)", (deltapsis*UT));
+            $strobe(">- V_P(DIBL)   = %g V ", ((vp+deltapsis)*UT));
+            $strobe("");
+            // VELOCITY SATURATION
+            $strobe("+ VELOCITY SATURATION ");
+            $strobe("|");
+            $strobe(">- UCRIT  = %g V/m \t\t LAMBDA = %g   \t\t DELTA  = %g \t\t ACLM = %g ", UCRIT, LAMBDA, DELTA, ACLM);
+            $strobe(">- UCEX   = %g     \t\t WUCRIT = %g m \t\t KUCRIT = %g ", UCEX, WUCRIT, KUCRIT);
+            $strobe(">- TLAMBDA= %g     \t\t WLAMBDA= %g m ", TLAMBDA, WLAMBDA);
+            $strobe(">");
+            $strobe(">- UCRIT(dev,T)  = %g V/m ", UCRIT_DEV_t);
+            $strobe(">- LAMBDA(dev,T) = %g ", LAMBDA_wt);
+            $strobe(">");
+            $strobe(">- VDS_SAT       = %g V \t\t VDS    = %g V ", (vdssat*UT), ((vd-vs)*UT));
+            $strobe(">- VD_PRIME      = %g V \t\t VD     = %g V ", (vdp*UT), (vd*UT));
+            $strobe(">- DELTA_L       = %g m ", deltal);
+            $strobe("");
+            $strobe("+ NORMALIZED (LOCAL) INVERTED CHARGES");
+            $strobe("|");
+            $strobe(">- qs     = %g \t\t V_PS  = %g V ", qs, ((vp + deltapsis - vs)*UT));
+            $strobe(">- qd     = %g \t\t V_PD  = %g V ", qdp, ((vp + deltapsis - vdp)*UT));
+            $strobe("");
+            $strobe("+ CHANNEL CURRENT");
+            $strobe("|");
+            $strobe(">- if     = %g ", if_);
+            $strobe(">- irp    = %g ", irp);
+            $strobe(">- i      = %g ", i);
+            $strobe(">");
+            $strobe(">- Ispec  = %g A [2*nq*(UT^2)*beta*(W/L)*(1/(1+delta_QMI))]", Ispec);
+            $strobe(">");
+            $strobe(">- nq              = %g ", nq);
+            $strobe(">- beta            = %g A*V^(-2) ", beta);
+            $strobe(">- W/L             = %g ", ((Weff-WEDGE)*NF/(Leff-deltal)));
+            $strobe(">- 1/(1+delta_QMI) = %g ", inv_dqmip1);
+            $strobe(">- 2*UT^2          = %g V^2 ", UT2+UT2);
+            $strobe(">");
+            $strobe(">- DITS            = %g ", dits_factor);
+            $strobe(">");
+            $strobe(">- #### IDS ####   = %g A", IDS);
+            `ifdef DC_S
+            $strobe(">");
+            $strobe(">- SERIES RESISTANCE = %g ", (1.0/(1.0+(rs_wt*Ispec/UT)*qs+(rd_wt*Ispec/UT)*qdp)));
+            `endif
+            $strobe("");
+            $strobe("+ CHARGES ");
+            $strobe("|");
+            $strobe(">- qS = %g \t\t qD = %g \t\t qI = %g ", qS, qD, qI);
+            $strobe(">- qG = %g \t\t qB = %g ", qG, qB);
+            $strobe(">");
+            $strobe(">- Qspec           = %g Cb [-UT*Wc*Lc*COX*(1/(1+delta_QMI))]", Q0);
+            $strobe(">");
+            $strobe(">- COX             = %g F*m^(-2)", COX);
+            $strobe(">- Wc*Lc           = %g m^2", (Weffc*NF*Leffc*(Weff-WEDGE)/Weff));
+            $strobe(">- 1/(1+delta_QMI) = %g ", inv_dqmip1);
+            $strobe(">- UT              = %g V ", UT);
+            $strobe(">");
+            $strobe(">- ## QS ## = %g Cb ", QS);
+            $strobe(">- ## QD ## = %g Cb ", QD);
+            $strobe(">- ## QG ## = %g Cb ", QG);
+            $strobe(">- ## QB ## = %g Cb ", QB);
+            $strobe("");
+            $strobe("+ EDGE CONDUCTION ");
+            $strobe("|");
+            $strobe(">- Ispec_dits_edge = %g A ", Ispec_dits_edge);
+            $strobe(">- Q0_edge    = %g Cb ", Q0_edge);
+            $strobe(">");
+            $strobe(">- DELTA_GAMMA_EDGE_eff = %g V^(1/2) ", (dgamma_edge*sqrtUT));
+            $strobe(">- DELTA_PHI_EDGE_eff   = %g V  ", (dphi_edge*UT));
+            $strobe(">");
+            $strobe(">- DELTA_V_P_EDGE_eff   = %g V  ", (dvp_edge*UT));
+            $strobe(">");
+            $strobe(">- qs_edge= %g \t\t V_PS_edge  = %g V ", qs_edge, ((vp + dvp_edge + deltapsis - vs)*UT));
+            $strobe(">- qd_edge= %g \t\t V_PD_edge  = %g V ", qdp_edge, ((vp + dvp_edge + deltapsis - vdp)*UT));
+            $strobe(">");
+            $strobe(">- ids_edge= %g ", ids_edge);
+            $strobe(">");
+            $strobe(">- DITS            = %g ", dits_factor);
+            $strobe(">");
+            $strobe(">- ### IDS_edge ### = A %g ", IDS_edge);
+            $strobe(">");
+            $strobe(">- PSI_P_edge            = %g V", (psi_p_edge*UT));
+            $strobe(">- GAMMA_eff_edge(CHSH)  = %g V^(1/2)", (gamma_b_chsh_edge*sqrtUT));
+            $strobe(">- nq_edge               = %g ", nq_edge);
+            $strobe(">");
+            $strobe(">- qS_edge= %g \t\t QS_edge  = %g Cb ", qS_edge, QS_edge);
+            $strobe(">- qD_edge= %g \t\t QD_edge  = %g Cb ", qD_edge, QD_edge);
+            $strobe(">- qG_edge= %g \t\t QG_edge  = %g Cb ", qG_edge, QG_edge);
+            $strobe(">- qB_edge= %g \t\t QB_edge  = %g Cb ", qB_edge, QB_edge);
+            $strobe("");
+            $strobe("+ OVERLAP ");
+            $strobe("|");
+            $strobe(">- qSOV    = %g ", dpsiox_sov);
+            $strobe(">- qDOV    = %g ", dpsiox_dov);
+            $strobe(">");
+            $strobe(">- Q0OV    = %g Cb ", -Q0OV);
+            $strobe(">");
+            $strobe(">- Wc*L(OV)= %g m^2 ", (Weffc*NF*LOV));
+            $strobe(">");
+            $strobe(">- QSOV    = %g Cb ", QSOV);
+            $strobe(">- QDOV    = %g Cb ", QDOV);
+            $strobe("");
+            $strobe("+ INNER FRINGING ");
+            $strobe("|");
+            $strobe(">- QSFR    = %g Cb", QSFR);
+            $strobe(">- QDFR    = %g Cb", QDFR);
+            $strobe("");
+            $strobe("+ OUTER FRUNGING CAPACITANCE ");
+            $strobe("|");
+            $strobe(">- CGS      = %g F ", (CGSO*WeffNF));
+            $strobe(">- CGD      = %g F ", (CGDO*WeffNF));
+            $strobe(">- CGB      = %g F ", (CGBO*2.0*Leff*NF));
+            $strobe("");
+            $strobe("+ GIDL / GISL ");
+            $strobe("|");
+            $strobe(">- IGISL    = %g A", IGISL);
+            $strobe(">- IGIDL    = %g A", IGIDL);
+            $strobe("");
+            $strobe("+ GATE CURRENT ");
+            $strobe("|");
+            $strobe(">- IG    = %g A \t\t [IG=IGS+IGD]", IG);
+            $strobe(">- IGS   = %g A", IGS);
+            $strobe(">- IGD   = %g A", IGD);
+            $strobe(">- IGB   = %g A", IGB);
+            $strobe(">");
+            $strobe(">- IGSOV = %g A ", IGSOV);
+            $strobe(">- IGDOV = %g A ", IGDOV);
+            $strobe("");
+            $strobe("+ IMPACT IONIZATION CURRENT ");
+            $strobe("|");
+            $strobe(">- IDB   = %g A ", IDB);
+            $strobe("");
+            $strobe("+ NOISE ");
+            $strobe("|");
+            $strobe(">- THERMAL NOISE \t\t (TH_NOI = %g)", TH_NOI);
+            $strobe(">- gn      = %g \t\t (NORMALIZED EQUIVALENT CHANNEL NOISE RESISTANCE)", gn);
+            $strobe(">- thermal = %g (PSD) \t\t (THERMAL NOISE) ", thermal);
+            $strobe(">");
+            $strobe(">- FLICKER NOISE");
+            $strobe(">- gmg     = %g \t\t ", gmg_);
+            $strobe(">- flicker = %g (PSD) \t\t (FLICKER NOISE AT 1Hz) ", flicker);
+            $strobe(">");
+            $strobe(">- NON-QUASI-STATIC NOISE \t\t (NQS_NOI = %g)", NQS_NOI);
+            $strobe(">- Sn(id,id)     = %g (PSD) ", (Snspec*snidid));
+            $strobe(">- Sn(ig,ig)     = %g * OMEGA^2   (PSD) ", (Snspec*snigig));
+            $strobe(">- Sn(ig,id)     = %g * j * OMEGA (PSD) ", (Snspec*snigid));
+            $strobe(">- C(ig,id)      = %g * j         (PSD) ", c_igid);
+            $strobe(">- Sn(ib,ib)     = %g * OMEGA^2   (PSD) ", (Snspec*snibib));
+            $strobe(">");
+            $strobe(">- GATE SHOT AND FLICKER NOISE ");
+            $strobe(">- Sig(shot)        = %g (PSD) ", sig_shot);
+            $strobe(">- Sig(flicker,1Hz) = %g (PSD) ", sig_flicker);
+            $strobe("");
+            $strobe("+ EXTRINSIC DIODES ");
+            $strobe("|");
+            $strobe(">- AREA      (SOURCE-SIDE) = %g m^2", as);
+            $strobe(">- PERIMETER (SOURCE-SIDE) = %g m", ps);
+            $strobe(">- GATE-SIDE (SOURCE-SIDE) = %g m", WeffNF);
+            $strobe(">- AREA      (DRAIN-SIDE)  = %g m^2", ad);
+            $strobe(">- PERIMETER (DRAIN-SIDE)  = %g m", pd);
+            $strobe(">- GATE-SIDE (DRAIN-SIDE)  = %g m", WeffNF);
+            $strobe(">");
+            $strobe(">- IS_S   = %g A ", is_s);
+            $strobe(">- IS_D   = %g A ", is_d);
+            $strobe(">");
+            $strobe(">- ISB_TUN = %g A", isb_tun);
+            $strobe(">- IDB_TUN = %g A", idb_tun);
+            $strobe(">");
+            $strobe(">- ISBJ    = %g A", ISBJ);
+            $strobe(">- IDBJ    = %g A", IDBJ);
+            $strobe(">");
+            $strobe(">- CSBJ    = %g F \t\t QSBJ    = %g Cb", CSBJ, QSBJ);
+            $strobe(">- CDBJ    = %g F \t\t QDBJ    = %g Cb", CDBJ, QDBJ);
+            $strobe("");
+            $strobe("+ EXTRINSIC RESISTORS ");
+            $strobe("|");
+            `ifdef DC_S
+            $strobe(">- RS     = %g Ohm \t\t NOISE = %g (PSD)", rs_wt, (KT4/rs_wt));
+            $strobe(">- RD     = %g Ohm \t\t NOISE = %g (PSD)", rd_wt, (KT4/rd_wt));
+            `endif
+            `ifdef DC
+            $strobe(">- RS     = %g Ohm \t\t NOISE = %g (PSD)", rs_wt, (KT4/rs_wt));
+            $strobe(">- RD     = %g Ohm \t\t NOISE = %g (PSD)", rd_wt, (KT4/rd_wt));
+            `endif
+            `ifdef RF_S
+            $strobe(">- RS     = %g Ohm \t\t NOISE = %g (PSD)", rs_wt, (KT4/rs_wt));
+            $strobe(">- RD     = %g Ohm \t\t NOISE = %g (PSD)", rd_wt, (KT4/rd_wt));
+            $strobe(">- RG     = %g Ohm \t\t NOISE = %g (PSD)", rg_t, (KT4/rg_t));
+            $strobe(">- RB     = %g Ohm \t\t NOISE = %g (PSD)", rb_t, (KT4/rb_t));
+            `endif
+            `ifdef RF
+            $strobe(">- RS     = %g Ohm \t\t NOISE = %g (PSD)", rs_wt, (KT4/rs_wt));
+            $strobe(">- RD     = %g Ohm \t\t NOISE = %g (PSD)", rd_wt, (KT4/rd_wt));
+            $strobe(">- RG     = %g Ohm \t\t NOISE = %g (PSD)", rg_t, (KT4/rg_t));
+            $strobe(">- RB     = %g Ohm \t\t NOISE = %g (PSD)", rb_t, (KT4/rb_t));
+            $strobe(">- RSB    = %g Ohm \t\t NOISE = %g (PSD)", rsb_t, (KT4/rsb_t));
+            $strobe(">- RDB    = %g Ohm \t\t NOISE = %g (PSD)", rdb_t, (KT4/rdb_t));
+            $strobe(">- RDSB   = %g Ohm \t\t NOISE = %g (PSD)", rdsb_t, (KT4/rdsb_t));
+            $strobe(">- RDSB/2 = %g Ohm \t\t NOISE = %g (PSD)", rdsb_t*0.5, (0.5*KT4/rdsb_t));
+            `endif
+            `ifdef NQS
+            $strobe(">- RS     = %g Ohm \t\t NOISE = %g (PSD)", rs_wt, (KT4/rs_wt));
+            $strobe(">- RD     = %g Ohm \t\t NOISE = %g (PSD)", rd_wt, (KT4/rd_wt));
+            $strobe(">- RG     = %g Ohm \t\t NOISE = %g (PSD)", rg_t, (KT4/rg_t));
+            $strobe(">- RB     = %g Ohm \t\t NOISE = %g (PSD)", rb_t, (KT4/rb_t));
+            $strobe(">- RSB    = %g Ohm \t\t NOISE = %g (PSD)", rsb_t, (KT4/rsb_t));
+            $strobe(">- RDB    = %g Ohm \t\t NOISE = %g (PSD)", rdb_t, (KT4/rdb_t));
+            $strobe(">- RDSB   = %g Ohm \t\t NOISE = %g (PSD)", rdsb_t, (KT4/rdsb_t));
+            $strobe(">- RDSB/2 = %g Ohm \t\t NOISE = %g (PSD)", rdsb_t*0.5, (0.5*KT4/rdsb_t));
+            `endif
+            $strobe("");
+            $strobe("");
+            `ifdef DC_S
+            $strobe("#######################################################");
+            $strobe("                                                       ");
+            $strobe("   MACROMODEL:                                         ");
+            $strobe("                                                       ");
+            $strobe("                             |                         ");
+            $strobe("                             | G                        ");
+            $strobe("   --------------------------O-----------              ");
+            $strobe("   |              |          |          |              ");
+            $strobe("   |            -----        |        -----            ");
+            $strobe("   |      CGSex -----   -----------   ----- CGDex      ");
+            $strobe("   |              |     |         |     |              ");
+            $strobe("   |              |     |         |     |              ");
+            $strobe("   |            --O-----V    |    |-----O--            ");
+            $strobe("   |              | S        |        D |              ");
+            $strobe("   |              |          |          |              ");
+            $strobe(" -----           /^\\         |         /^\\           ");
+            $strobe(" ----- CGBex     --- CJS     |         --- CJD = %g F                ", CDBJ);
+            $strobe("   |              |          |          |  CJS = %g F                ", CSBJ);
+            $strobe("   ---------------+----------|          |              ");
+            $strobe("                  |          | B        |              ");
+            $strobe("                  -----------O-----------              ");
+            $strobe("                             |                         ");
+            $strobe("                             |                         ");
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            $strobe("                                                       ");
+            $strobe(" V_G = %g V \t V_GB = %g V \t V_GS = %g V                            ", V(g  ), (V(g  )-V(b  )), (V(g  )-V(s  )));
+            $strobe(" V_D = %g V \t V_DB = %g V \t V_DS = %g V                            ", V(d  ), (V(d  )-V(b  )), (V(d  )-V(s  )));
+            $strobe(" V_S = %g V \t V_SB = %g V                                           ", V(s  ), (V(s  )-V(b  )));
+            $strobe(" V_B = %g V                                                          ", V(b  ));
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            `endif
+            `ifdef DC
+            $strobe("#######################################################");
+            $strobe("                                                       ");
+            $strobe("   MACROMODEL:                                         ");
+            $strobe("                                                       ");
+            $strobe("                             |                         ");
+            $strobe("                             | G                        ");
+            $strobe("   --------------------------O-----------              ");
+            $strobe("   |              |          |          |              ");
+            $strobe("   |            -----        |        -----            ");
+            $strobe("   |      CGSex -----   -----------   ----- CGDex      ");
+            $strobe("   |              |     |         |     |              ");
+            $strobe("   |              |     |         |     |              ");
+            $strobe("   | --O---/\\/\\/\\-o-----V    |    |-----o-/\\/\\/\\---O--   ");
+            $strobe("   |         RS   |          |          |   RD = %g Ohm              ", rd_wt);
+            $strobe("   |              |     Si   |    Di    |   RS = %g Ohm              ", rs_wt);
+            $strobe(" -----           /^\\         |         /^\\           ");
+            $strobe(" ----- CGBex     --- CJS     |         --- CJD = %g F                ", CDBJ);
+            $strobe("   |              |          |          |  CJS = %g F                ", CSBJ);
+            $strobe("   ---------------+----------|          |              ");
+            $strobe("                  |          | B        |              ");
+            $strobe("                  -----------O-----------              ");
+            $strobe("                             |                         ");
+            $strobe("                             |                         ");
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            $strobe("                                                       ");
+            $strobe(" V_G  = %g V \t V_GB  = %g V \t V_GSi  = %g V                        ", V(g  ), (V(g  )-V(b  )), (V(g  )-V(si )));
+            $strobe(" V_Di = %g V \t V_DiB = %g V \t V_DiSi = %g V                        ", V(di ), (V(di )-V(b  )), (V(di )-V(si )));
+            $strobe(" V_Si = %g V \t V_SiB = %g V                                         ", V(si ), (V(si )-V(b  )));
+            $strobe(" V_B  = %g V                                                         ", V(b  ));
+            $strobe("                                                       ");
+            $strobe(" V_DDi = %g V                                                        ", (V(d  )-V(di )));
+            $strobe(" V_SSi = %g V                                                        ", (V(s  )-V(si )));
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            `endif
+            `ifdef RF_S
+            $strobe("#######################################################");
+            $strobe("                                                       ");
+            $strobe("   MACROMODEL:                                         ");
+            $strobe("                                                       ");
+            $strobe("                             |                         ");
+            $strobe("                             |                         ");
+            $strobe("                             O G                       ");
+            $strobe("                             |                         ");
+            $strobe("                             |                         ");
+            $strobe("                             /                         ");
+            $strobe("                             \\                        ");
+            $strobe("                             / RG = %g Ohm                           ", rg_t);
+            $strobe("                             \\                        ");
+            $strobe("                             |                         ");
+            $strobe("   --------------------------o-----------              ");
+            $strobe("   |              |          | Gi       |              ");
+            $strobe("   |            -----        |        -----            ");
+            $strobe("   |      CGSex -----   -----------   ----- CGDex      ");
+            $strobe("   |              |     |         |     |              ");
+            $strobe("   |              |     |         |     |              ");
+            $strobe("   | --O---/\\/\\/\\-o-----V    |    |-----o-/\\/\\/\\---O--   ");
+            $strobe("   |         RS   |          |          |   RD = %g Ohm              ", rd_wt);
+            $strobe("   |              |     Si   |    Di    |   RS = %g Ohm              ", rs_wt);
+            $strobe(" -----           /^\\         |         /^\\           ");
+            $strobe(" ----- CGBex     --- CJS     |         --- CJD = %g F                ", CDBJ);
+            $strobe("   |              |          | Bi       |  CJS = %g F                ", CSBJ);
+            $strobe("   ---------------+----------|          |              ");
+            $strobe("                  |          |          |              ");
+            $strobe("                  -----------o-----------              ");
+            $strobe("                             |                         ");
+            $strobe("                             /                         ");
+            $strobe("                             \\                         ");
+            $strobe("                             / RB = %g Ohm                           ", rb_t);
+            $strobe("                             \\                         ");
+            $strobe("                             |                         ");
+            $strobe("                             O                         ");
+            $strobe("                             | B                       ");
+            $strobe("                             |                         ");
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            $strobe("                                                       ");
+            $strobe(" V_Gi = %g V \t V_GiBi = %g V \t V_GiSi = %g V                       ", V(gi ), (V(gi )-V(bi )), (V(gi )-V(si )));
+            $strobe(" V_Di = %g V \t V_DiBi = %g V \t V_DiSi = %g V                       ", V(di ), (V(di )-V(bi )), (V(di )-V(si )));
+            $strobe(" V_Si = %g V \t V_SiBi = %g V                                        ", V(si ), (V(si )-V(bi )));
+            $strobe(" V_Bi = %g V                                                         ", V(bi ));
+            $strobe("                                                       ");
+            $strobe(" V_DDi = %g V                                                        ", (V(d  )-V(di )));
+            $strobe(" V_SSi = %g V                                                        ", (V(s  )-V(si )));
+            $strobe(" V_GGi = %g V                                                        ", (V(g  )-V(gi )));
+            $strobe(" V_BBi = %g V                                                        ", (V(b  )-V(bi )));
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            `endif
+            `ifdef RF
+            $strobe("#######################################################");
+            $strobe("                                                       ");
+            $strobe("   MACROMODEL:                                         ");
+            $strobe("                                                       ");
+            $strobe("                             |                         ");
+            $strobe("                             |                         ");
+            $strobe("                             O G                       ");
+            $strobe("                             |                         ");
+            $strobe("                             |                         ");
+            $strobe("                             /                         ");
+            $strobe("                             \\                        ");
+            $strobe("                             / RG = %g Ohm                           ", rg_t);
+            $strobe("                             \\                        ");
+            $strobe("                             |                         ");
+            $strobe("   --------------------------o-----------              ");
+            $strobe("   |              |          | Gi       |              ");
+            $strobe("   |            -----        |        -----            ");
+            $strobe("   |      CGSex -----   -----------   ----- CGDex      ");
+            $strobe("   |              |     |         |     |              ");
+            $strobe("   |              |     |         |     |              ");
+            $strobe("   | --O---/\\/\\/\\-o-----V    |    |-----o-/\\/\\/\\---O--   ");
+            $strobe("   |         RS   |          |          |   RD = %g Ohm              ", rd_wt);
+            $strobe("   |              |     Si   |    Di    |   RS = %g Ohm              ", rs_wt);
+            $strobe(" -----           /^\\         |         /^\\           ");
+            $strobe(" ----- CGBex     --- CJS     |         --- CJD = %g F                ", CDBJ);
+            $strobe("   |              |          | Bi       |  CJS = %g F                ", CSBJ);
+            $strobe("   ---------------+----------|          |              ");
+            $strobe("                  |          |          |              ");
+            $strobe("              BSi o--/\\/\\/\\--o--/\\/\\/\\--o BDi    ");
+            $strobe("                  |  RDSB/2  |  RDSB/2  |              ");
+            $strobe("                  /          /          /      RDSB   = %g Ohm       ", rdsb_t);
+            $strobe("                  \\          \\          \\      RDSB/2 = %g Ohm    ", rdsb_t/2.0);
+            $strobe("                  / RSB      / RB       / RDB  RSB    = %g Ohm       ", rsb_t);
+            $strobe("                  \\          \\          \\      RDB    = %g Ohm    ", rdb_t);
+            $strobe("                  |          |          |      RB     = %g Ohm       ", rb_t);
+            $strobe("                  -----------O-----------              ");
+            $strobe("                             |                         ");
+            $strobe("                             | B                       ");
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            $strobe("                                                       ");
+            $strobe(" V_Gi = %g V \t V_GiBi = %g V \t V_GiSi = %g V                       ", V(gi ), (V(gi )-V(bi )), (V(gi )-V(si )));
+            $strobe(" V_Di = %g V \t V_DiBi = %g V \t V_DiSi = %g V                       ", V(di ), (V(di )-V(bi )), (V(di )-V(si )));
+            $strobe(" V_Si = %g V \t V_SiBi = %g V                                        ", V(si ), (V(si )-V(bi )));
+            $strobe(" V_Bi = %g V                                                         ", V(bi ));
+            $strobe("                                                       ");
+            $strobe(" V_DDi   = %g V                                                      ", (V(d  )-V(di )));
+            $strobe(" V_SSi   = %g V                                                      ", (V(s  )-V(si )));
+            $strobe(" V_GGi   = %g V                                                      ", (V(g  )-V(gi )));
+            $strobe(" V_BBi   = %g V                                                      ", (V(b  )-V(bi )));
+            $strobe(" V_BiBSi = %g V                                                      ", (V(bi )-V(bsi)));
+            $strobe(" V_BiBDi = %g V                                                      ", (V(bi )-V(bdi)));
+            $strobe(" V_BBSi  = %g V                                                      ", (V(b  )-V(bsi)));
+            $strobe(" V_BBDi  = %g V                                                      ", (V(b  )-V(bdi)));
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            `endif
+            `ifdef NQS
+            $strobe("#######################################################");
+            $strobe("                                                       ");
+            $strobe("   MACROMODEL:                                         ");
+            $strobe("                                                       ");
+            $strobe("                             |                         ");
+            $strobe("                             |                         ");
+            $strobe("                             O G                       ");
+            $strobe("                             |                         ");
+            $strobe("                             |                         ");
+            $strobe("                             /                         ");
+            $strobe("                             \\                        ");
+            $strobe("                             / RG = %g Ohm                           ", rg_t);
+            $strobe("                             \\                        ");
+            $strobe("                             |                         ");
+            $strobe("   --------------------------o-----------              ");
+            $strobe("   |              |          | Gi       |              ");
+            $strobe("   |              |      ----|----      |              ");
+            $strobe("   |            -----    |   |   |    -----            ");
+            $strobe("   |      CGSex -----   --- --- ---   ----- CGDex      ");
+            $strobe("   |              |     | | | | | |     |              ");
+            $strobe("   |              |     | | | | | |     |              ");
+            $strobe("   | --O---/\\/\\/\\-o-----V --V --V |-----o-/\\/\\/\\---O--   ");
+            $strobe("   |         RS   | Si   |   |   |   Di |   RD = %g Ohm              ", rd_wt);
+            $strobe("   |              |      ----|----      |   RS = %g Ohm              ", rs_wt);
+            $strobe(" -----           /^\\         |         /^\\           ");
+            $strobe(" ----- CGBex     --- CJS     |         --- CJD = %g F                ", CDBJ);
+            $strobe("   |              |          | Bi       |  CJS = %g F                ", CSBJ);
+            $strobe("   ---------------+----------|          |              ");
+            $strobe("                  |          |          |              ");
+            $strobe("              BSi o--/\\/\\/\\--o--/\\/\\/\\--o BDi    ");
+            $strobe("                  |  RDSB/2  |  RDSB/2  |              ");
+            $strobe("                  /          /          /      RDSB   = %g Ohm       ", rdsb_t);
+            $strobe("                  \\          \\          \\      RDSB/2 = %g Ohm    ", rdsb_t/2.0);
+            $strobe("                  / RSB      / RB       / RDB  RSB    = %g Ohm       ", rsb_t);
+            $strobe("                  \\          \\          \\      RDB    = %g Ohm    ", rdb_t);
+            $strobe("                  |          |          |      RB     = %g Ohm       ", rb_t);
+            $strobe("                  -----------O-----------              ");
+            $strobe("                             |                         ");
+            $strobe("                             | B                       ");
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            $strobe("                                                       ");
+            $strobe(" V_Gi = %g V \t V_GiBi = %g V \t V_GiSi = %g V                       ", V(gi ), (V(gi )-V(bi )), (V(gi )-V(si )));
+            $strobe(" V_Di = %g V \t V_DiBi = %g V \t V_DiSi = %g V                       ", V(di ), (V(di )-V(bi )), (V(di )-V(si )));
+            $strobe(" V_Si = %g V \t V_SiBi = %g V                                        ", V(si ), (V(si )-V(bi )));
+            $strobe(" V_Bi = %g V                                                         ", V(bi ));
+            $strobe("                                                       ");
+            $strobe(" V_DDi   = %g V                                                      ", (V(d  )-V(di )));
+            $strobe(" V_SSi   = %g V                                                      ", (V(s  )-V(si )));
+            $strobe(" V_GGi   = %g V                                                      ", (V(g  )-V(gi )));
+            $strobe(" V_BBi   = %g V                                                      ", (V(b  )-V(bi )));
+            $strobe(" V_BiBSi = %g V                                                      ", (V(bi )-V(bsi)));
+            $strobe(" V_BiBDi = %g V                                                      ", (V(bi )-V(bdi)));
+            $strobe(" V_BBSi  = %g V                                                      ", (V(b  )-V(bsi)));
+            $strobe(" V_BBDi  = %g V                                                      ", (V(b  )-V(bdi)));
+            $strobe("                                                       ");
+            $strobe(" V_SiBi  = %g V                                                      ", (V(si )-V(bi )));
+            $strobe(" V_M1Bi  = %g V \t V_M1Si = %g V                                     ", (V(m1 )-V(bi )), (V(m1 )-V(si )));
+            $strobe(" V_M2Bi  = %g V \t V_M2M1 = %g V                                     ", (V(m2 )-V(bi )), (V(m2 )-V(m1 )));
+            $strobe(" V_M3Bi  = %g V \t V_M3M2 = %g V                                     ", (V(m3 )-V(bi )), (V(m3 )-V(m2 )));
+            $strobe(" V_M4Bi  = %g V \t V_M4M3 = %g V                                     ", (V(m4 )-V(bi )), (V(m4 )-V(m3 )));
+            $strobe(" V_DiBi  = %g V \t V_DiM4 = %g V                                     ", (V(di )-V(bi )), (V(di )-V(m4 )));
+            $strobe("                                                       ");
+            $strobe("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            `endif
+            $strobe("                                                       ");
+            $strobe("   CGSex = CGS_OV + CGS_FR_I + CGS_FR_O                ");
+            $strobe("   CGDex = CGD_OV + CGD_FR_I + CGD_FR_O                ");
+            $strobe("   CGBex = CGB_FR_O                                    ");
+            $strobe("                                                       ");
+            $strobe("   ID =   IDS + IDB - IGD - IGD_OV + IJD    + IGIDL = %g A             ", (   IDS  + IDB  - IGD - IGDOV - IDBJ  + IGIDL ) );
+            $strobe("   IS = - IDS       - IGS - IGS_OV + IJS    + IGISL = %g A             ", ( - IDS         - IGS - IGSOV - ISBJ  + IGISL ) );
+            $strobe("   IG =   IGD + IGS + IGB + IGD_OV + IGS_OV         = %g A             ", (   IGD  + IGS  + IGB + IGDOV + IGSOV         ) );
+            $strobe("   IB = - IJD - IJS - IGB - IDB    - IGIDL  - IGISL = %g A             ", ( - IDBJ - ISBJ - IGB - IDB   - IGIDL - IGISL ) );
+            $strobe("                                                       ");
+            $strobe("   IDS   = %g A ", IDS);
+            $strobe("   IDB   = %g A ", IDB);
+            $strobe("   IGS   = %g A ", IGS);
+            $strobe("   IGD   = %g A ", IGD);
+            $strobe("   IGB   = %g A ", IGB);
+            $strobe("   IGSOV = %g A ", IGSOV);
+            $strobe("   IGDOV = %g A ", IGDOV);
+            $strobe("   ISBJ  = %g A ", ISBJ);
+            $strobe("   IDBJ  = %g A ", IDBJ);
+            $strobe("   IGISL = %g A ", IGISL);
+            $strobe("   IGIDL = %g A ", IGIDL);
+            $strobe("");
+            $strobe("");
+            $strobe("#######################################################");
+            $strobe("");
+            $strobe("");
+            $strobe("########################################");
+            $strobe("#                                      #");
+            $strobe("# END OF INFORMATION                   #");
+            $strobe("#                                      #");
+            $strobe("########################################");
+        end
+    end
+    else
+    begin // NO INFO REQUESTED
+
+    end
+    //  file = 0;
+    //  file_info = 0;
+    //
+    //  $strobe("START_DEBUG_1 %m");
+    //
+    //  @(initial_step)     $strobe("START_DEBUG %m");
+    //  @(final_step)       $strobe("VGB:%g \t VSB:%g \t VDB:%g",V(g)-V(b),V(s)-V(b),V(d)-V(b));
+    //  @(final_step)       $strobe("qs:%g  \t qdp:%g",qs,qdp);
+    //  @(final_step)       $strobe("END_DEBUG %m");
+    //
+    //  extract info to file (ekv3_debug.txt)
+    //      uncomment the "integer file" command at the ekv3_variables.va file
+    //
+    //  @(initial_step)     file = $fopen("ekv3_debug.txt");
+    //  @(final_step)       $fstrobe(file,"VGB:%g \t VSB:%g \t VDB:%g",V(g)-V(b),V(s)-V(b),V(d)-V(b));
+    //  @(final_step)       $fstrobe(file,"qs:%g \t qdp:%g",qs,qdp);
+    //  @(final_step)       $fclose(file);
+    //
+    //  extract info to file (ekv3_info.txt)
+    //  uncomment the "integer file_info" command at the ekv3_variables.va file
+    //
+    //  @(initial_step)     file_info = $fopen("ekv3_info.txt");
+    //
+    //  @(final_step)       $fstrobe(file_info,"VGB:%g \t VSB:%g \t VDB:%g",V(g)-V(b),V(s)-V(b),V(d)-V(b));
+    //  @(final_step)       $fstrobe(file_info,"qs:%g \t qdp:%g",qs,qdp);
+    //
+    //  @(final_step)       $fclose(file_info);
+end
+
+

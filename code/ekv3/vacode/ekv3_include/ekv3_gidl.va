@@ -1,0 +1,52 @@
+// ANALYTICAL CALCULATION OF THE GATE INDUCED DRAIN (SOURCE) LEAKAGE CURRENT
+
+// DRAIN SIDE
+begin : GIDL
+    vgse    = vfb + psi_p - 2.0 * qs;
+    tmp1    = (vdp - vs - vgse)  * UT - EGIDL;
+    //  PATCH FOR
+    if (AGIDL==0 || tmp1 <=0 ) begin
+        IGIDL = 0;
+    end
+    else begin
+        tmp2    = vdp * vdp  * vdp * UT3;
+        IGIDL   = AGIDL * WeffNF * (tmp1 / (3.0 * TOX)) * exp(-(3.0 * TOX * BGIDL) / tmp1) * tmp2 / (CGIDL + tmp2);
+    end
+end //  GIDL
+
+// SOURCE SIDE
+begin : GISL
+    vgde    = vfb + psi_p - 2.0 * qdp;
+    tmp1    = (vs - vdp - vgde)  * UT - EGIDL;
+    if (AGIDL==0 || tmp1 <=0 ) begin
+        IGISL = 0;
+    end
+    else begin
+        tmp2    = vs * vs  * vs * UT3;
+        IGISL   = AGIDL * WeffNF * (tmp1 / (3.0 * TOX)) * exp(-(3.0 * TOX * BGIDL) / tmp1) * tmp2 / (CGIDL + tmp2);
+    end
+end //  GISL
+
+// ASSIGNMENT OF THE GIDL AND GISL CURRENT
+
+`ifdef DC_S
+    I(d ,b ) <+  SIGN_M * (d_gt_s * IGIDL + s_gt_d * IGISL);
+    I(s ,b ) <+  SIGN_M * (d_gt_s * IGISL + s_gt_d * IGIDL);
+`endif
+`ifdef DC
+    I(di,b ) <+  SIGN_M * (d_gt_s * IGIDL + s_gt_d * IGISL);
+    I(si,b ) <+  SIGN_M * (d_gt_s * IGISL + s_gt_d * IGIDL);
+`endif
+`ifdef RF_S
+    I(di,bi) <+  SIGN_M * (d_gt_s * IGIDL + s_gt_d * IGISL);
+    I(si,bi) <+  SIGN_M * (d_gt_s * IGISL + s_gt_d * IGIDL);
+`endif
+`ifdef RF
+    I(di,bi) <+  SIGN_M * (d_gt_s * IGIDL + s_gt_d * IGISL);
+    I(si,bi) <+  SIGN_M * (d_gt_s * IGISL + s_gt_d * IGIDL);
+`endif
+`ifdef NQS
+    I(di,bi) <+  SIGN_M * (d_gt_s * IGIDL + s_gt_d * IGISL);
+    I(si,bi) <+  SIGN_M * (d_gt_s * IGISL + s_gt_d * IGIDL);
+`endif
+

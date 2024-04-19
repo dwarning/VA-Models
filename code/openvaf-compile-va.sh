@@ -21,6 +21,7 @@ openvaf -D__NGSPICE__ -o bsimimg.osdi ../code/bsimimg/vacode/bsimimg.va
 openvaf -D__NGSPICE__ -o bsimsoi.osdi ../code/bsimsoi/vacode/bsimsoi.va
 openvaf -D__NGSPICE__ -o diode_cmc.osdi ../code/diode_cmc/vacode/diode_cmc.va
 openvaf -D__NGSPICE__ -o ekv26.osdi ../code/ekv/vacode/ekv26.va
+openvaf -D__NGSPICE__ -o ekv3.osdi ../code/ekv3/vacode/ekv3.va
 openvaf -D__NGSPICE__ -o epfl_hemt.osdi ../code/EPFL-HEMT/vacode/epfl_hemt.va
 openvaf -D__NGSPICE__ -o fbh_hbt-2_1.osdi ../code/fbh_hbt/vacode/fbh_hbt-2_1.va
 openvaf -D__NGSPICE__ -o fbh_hbt-2_3.osdi ../code/fbh_hbt/vacode/fbh_hbt-2_3.va

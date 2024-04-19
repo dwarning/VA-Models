@@ -1,0 +1,55 @@
+// This file makes sure that no more than one mode selections have been defined.
+// If so, the highest selection overides the rest (NQS, RF, RF_S, DC, DC_S).
+// For the NQS mode the NCS is set to be five.
+
+`ifdef NQS
+    `ifdef RF
+        `undef RF
+    `endif
+    `ifdef RF_S
+        `undef RF_S
+    `endif
+    `ifdef DC
+        `undef DC
+    `endif
+    `ifdef DC_S
+        `undef DC_S
+    `endif
+    `ifdef NCS
+    `else
+        `define NoCS 5
+    `endif
+`else
+    `ifdef RF
+        `ifdef RF_S
+            `undef RF_S
+        `endif
+        `ifdef DC
+            `undef DC
+        `endif
+        `ifdef DC_S
+            `undef DC_S
+        `endif
+    `else
+        `ifdef RF_S
+            `ifdef DC
+                `undef DC
+            `endif
+            `ifdef DC_S
+                `undef DC_S
+            `endif
+        `else
+            `ifdef DC
+                `ifdef DC_S
+                    `undef DC_S
+                `endif
+            `else
+                `ifdef DC_S
+                `else
+                    `define DC_S
+                `endif
+            `endif
+        `endif
+    `endif
+`endif
+

@@ -1,0 +1,166 @@
+// ANALYTICAL CALCULATION OF THE BIAS-DEPENDENT OVERLAP CAPACITANCES FORMED BETWEEN GATE AND SOURCE, ON THE ONE SIDE, AND GATE AND DRAIN, ON THE OTHER.
+// THE CHARGE CALCULATION IS BASED ON THE FORMULATION OF THE CHARGE CALCULATION OF THE INTRINSIC DEVICE, FOCUSSING ONLY ON TWO NODES (GATE AND BULK), WHERE BULK HERE IS SOURCE OR DRAIN AND WHERE THE DOPING IS OF THE DIFFERENT TYPE.
+
+begin : OVERLAP_CAPACITANCES_CHARGES
+    // CALCULATION OF NORMALIZED BIAS-DEPENDENT OVERLAP CHARGES
+    // SOURCE SIDE
+    if (TG < 0) // NOTE: Doping type of GATE opposite to the one of the bulk.
+    begin
+        vgsov_p         = vg - VOV * vs - vfb_ov; // NOTE: Default value of VOV is 1
+        if (vgsov_p > 0.0)
+        begin
+            gamma_dep_sov       = gamma_g_ov;
+            gamma_acc_sov       = gamma_ov;
+            v0_sov          = vgsov_p;
+        end
+        else
+        begin
+            gamma_dep_sov       = gamma_ov;
+            gamma_acc_sov       = gamma_g_ov;
+            v0_sov          = - vgsov_p;
+        end
+        a0_sov          = 1.0 + gamma_acc_sov * `ONESQRT2;
+        a1_sov          = gamma_dep_sov / gamma_acc_sov;
+        a2_sov          = a0_sov / (a0_sov + a1_sov);
+        a3_sov          = 1.0 + gamma_dep_sov * `ONESQRT2 + a1_sov;
+        v1_sov          = v0_sov * 0.5 - 3.0 * a2_sov * a3_sov;
+        dpsi_sov0       = v1_sov + sqrt(v1_sov * v1_sov + 6.0 * a2_sov * v0_sov);
+        gamma_dep2_sov      = gamma_dep_sov * (0.5 + 3.0 / (3.0 * `SQRT2 * gamma_acc_sov + v0_sov - dpsi_sov0));
+        a4_sov          = 1.0 - exp(-dpsi_sov0);
+        v2_sov          = v0_sov - a4_sov;
+        tmp             = v2_sov / (gamma_dep2_sov + sqrt(gamma_dep2_sov * gamma_dep2_sov + v2_sov));
+        dpsi_sov        = tmp * tmp + a4_sov;
+        v2b_sov         = v0_sov - dpsi_sov;
+        v3_sov          = v2b_sov * 0.5;
+        tmp             = v3_sov + 3.0 * a0_sov;
+        if (vgsov_p > 0.0)
+            dpsiox_sov      = v3_sov - 3.0 * a0_sov + sqrt(tmp * tmp - 6.0 * v2b_sov);
+        else
+            dpsiox_sov      = - (v3_sov - 3.0 * a0_sov + sqrt(tmp * tmp - 6.0 * v2b_sov));
+    end
+    else // NOTE: Doping type of GATE the same with the one of the bulk.
+    begin
+        vgsov_p         = vg - VOV * vs - vfb_ov; // NOTE: Default value of VOV is 1
+        if (vgsov_p > 0.0)
+        begin
+            gamma_acc_sov       = gamma_ov;
+            v0_sov          = vgsov_p;
+            a0_sov          = 1.0 + gamma_acc_sov * `ONESQRT2;
+            v1_sov          = v0_sov * 0.5 - 3.0 * a0_sov * a0_sov;
+            dpsi_sov0       = v1_sov + sqrt(v1_sov * v1_sov);
+            dpsi_sov        = 1.0 - exp(-dpsi_sov0);
+            v2b_sov         = v0_sov - dpsi_sov;
+            v3_sov          = v2b_sov * 0.5;
+            tmp             = v3_sov + 3.0 * a0_sov;
+            dpsiox_sov      = v3_sov - 3.0 * a0_sov + sqrt(tmp * tmp - 6.0 * v2b_sov);
+        end
+        else
+        begin
+            gamma_dep_sov       = gamma_ov;
+            v0_sov          = - vgsov_p;
+            a3_sov          = 1.0 + gamma_dep_sov * `ONESQRT2;
+            v1_sov          = v0_sov * 0.5 - 3.0 * a3_sov;
+            dpsi_sov0       = v1_sov + sqrt(v1_sov * v1_sov + 6.0 * v0_sov);
+            gamma_dep2_sov      = gamma_dep_sov * 0.5;
+            a4_sov          = 1.0 - exp(-dpsi_sov0);
+            v2_sov          = v0_sov - a4_sov;
+            tmp             = v2_sov / (gamma_dep2_sov + sqrt(gamma_dep2_sov * gamma_dep2_sov + v2_sov));
+            dpsi_sov        = tmp * tmp + a4_sov;
+            v2b_sov         = v0_sov - dpsi_sov;
+            dpsiox_sov      = - v2b_sov;
+        end
+    end
+    // DRAIN SIDE
+    if (TG < 0)
+    begin
+        vgdov_p         = vg - VOV * vd - vfb_ov; // NOTE: Default value of VOV is 1
+        if (vgdov_p > 0.0)
+        begin
+            gamma_dep_dov       = gamma_g_ov;
+            gamma_acc_dov       = gamma_ov;
+            v0_dov          = vgdov_p;
+        end
+        else
+        begin
+            gamma_dep_dov       = gamma_ov;
+            gamma_acc_dov       = gamma_g_ov;
+            v0_dov          = - vgdov_p;
+        end
+        a0_dov          = 1.0 + gamma_acc_dov * `ONESQRT2;
+        a1_dov          = gamma_dep_dov / gamma_acc_dov;
+        a2_dov          = a0_dov / (a0_dov + a1_dov);
+        a3_dov          = 1.0 + gamma_dep_dov * `ONESQRT2 + a1_dov;
+        v1_dov          = v0_dov * 0.5 - 3.0 * a2_dov * a3_dov;
+        dpsi_dov0       = v1_dov + sqrt(v1_dov * v1_dov + 6.0 * a2_dov * v0_dov);
+        gamma_dep2_dov      = gamma_dep_dov * (0.5 + 3.0 / (3.0 * `SQRT2 * gamma_acc_dov + v0_dov - dpsi_dov0));
+        a4_dov          = 1.0 - exp(-dpsi_dov0);
+        v2_dov          = v0_dov - a4_dov;
+        tmp             = v2_dov / (gamma_dep2_dov + sqrt(gamma_dep2_dov * gamma_dep2_dov + v2_dov));
+        dpsi_dov        = tmp * tmp + a4_dov;
+        v2b_dov         = v0_dov - dpsi_dov;
+        v3_dov          = v2b_dov * 0.5;
+        tmp             = v3_dov + 3.0 * a0_dov;
+        if (vgdov_p > 0.0)
+            dpsiox_dov      = v3_dov - 3.0 * a0_dov + sqrt(tmp * tmp - 6.0 * v2b_dov);
+        else
+            dpsiox_dov      = - (v3_dov - 3.0 * a0_dov + sqrt(tmp * tmp - 6.0 * v2b_dov));
+    end
+    else
+    begin
+        vgdov_p         = vg - VOV * vd - vfb_ov; // NOTE: Default value of VOV is 1
+        if (vgdov_p > 0.0)
+        begin
+            gamma_acc_dov       = gamma_ov;
+            v0_dov          = vgdov_p;
+            a0_dov          = 1.0 + gamma_acc_dov * `ONESQRT2;
+            v1_dov          = v0_dov * 0.5 - 3.0 * a0_dov * a0_dov;
+            dpsi_dov0       = v1_dov + sqrt(v1_dov * v1_dov);
+            dpsi_dov        = 1.0 - exp(-dpsi_dov0);
+            v2b_dov         = v0_dov - dpsi_dov;
+            v3_dov          = v2b_dov * 0.5;
+            tmp             = v3_dov + 3.0 * a0_dov;
+            dpsiox_dov      = v3_dov - 3.0 * a0_dov + sqrt(tmp * tmp - 6.0 * v2b_dov);
+        end
+        else
+        begin
+            gamma_dep_dov       = gamma_ov;
+            v0_dov          = - vgdov_p;
+            a3_dov          = 1.0 + gamma_dep_dov * `ONESQRT2;
+            v1_dov          = v0_dov * 0.5 - 3.0 * a3_dov;
+            dpsi_dov0       = v1_dov + sqrt(v1_dov * v1_dov + 6.0 * v0_dov);
+            gamma_dep2_dov      = gamma_dep_dov * 0.5;
+            a4_dov          = 1.0 - exp(-dpsi_dov0);
+            v2_dov          = v0_dov - a4_dov;
+            tmp             = v2_dov / (gamma_dep2_dov + sqrt(gamma_dep2_dov * gamma_dep2_dov + v2_dov));
+            dpsi_dov        = tmp * tmp + a4_dov;
+            v2b_dov         = v0_dov - dpsi_dov;
+            dpsiox_dov      = - v2b_dov;
+        end
+    end
+    // DENORMALIZATION OF BIAS-DEPENDENT OVERLAP CHARGES
+    QSOV        = - Q0OV * dpsiox_sov;
+    QDOV        = - Q0OV * dpsiox_dov;
+end
+
+// ASSIGNMENT OF DYNAMIC BEHAVIOUR VIA THE BIAS-DEPENDENT OVERLAP CHARGES
+
+`ifdef DC_S
+    I(d ,g )        <+  SIGN_M * (d_gt_s * ddt(QDOV) + s_gt_d * ddt(QSOV));
+    I(s ,g )        <+  SIGN_M * (d_gt_s * ddt(QSOV) + s_gt_d * ddt(QDOV));
+`endif
+`ifdef DC
+    I(di,g )        <+  SIGN_M * (d_gt_s * ddt(QDOV) + s_gt_d * ddt(QSOV));
+    I(si,g )        <+  SIGN_M * (d_gt_s * ddt(QSOV) + s_gt_d * ddt(QDOV));
+`endif
+`ifdef RF_S
+    I(di,gi)        <+  SIGN_M * (d_gt_s * ddt(QDOV) + s_gt_d * ddt(QSOV));
+    I(si,gi)        <+  SIGN_M * (d_gt_s * ddt(QSOV) + s_gt_d * ddt(QDOV));
+`endif
+`ifdef RF
+    I(di,gi)        <+  SIGN_M * (d_gt_s * ddt(QDOV) + s_gt_d * ddt(QSOV));
+    I(si,gi)        <+  SIGN_M * (d_gt_s * ddt(QSOV) + s_gt_d * ddt(QDOV));
+`endif
+`ifdef NQS
+    I(di,gi)        <+  SIGN_M * (d_gt_s * ddt(QDOV) + s_gt_d * ddt(QSOV));
+    I(si,gi)        <+  SIGN_M * (d_gt_s * ddt(QSOV) + s_gt_d * ddt(QDOV));
+`endif

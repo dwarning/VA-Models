@@ -1,0 +1,31 @@
+// ANALYTICAL CALCULATION OF THE FRINGING CAPACITANCES
+
+begin : FRINGING_CAPACITANCES_GUILDENBLAT
+    tmp = vbi + VFR / UT + vs - (psi_p - 2.0 * qs);
+    QSFR    = Weffc * NF * KJF * (1.0 + CJF * UT * vs) * sqrt(UT * `MAXA(tmp,0.0,DFR));
+    tmp = vbi + VFR / UT + vdp - (psi_p - 2.0 * qdp);
+    QDFR    = Weffc * NF * KJF * (1.0 + CJF * UT * vdp) * sqrt(UT * `MAXA(tmp,0.0,DFR));
+end //  FRINGING_CAPACITANCES_GUILDENBLAT
+
+// ASSIGNMENT OF DYNAMIC BEHAVIOUR VIA THE BIAS-DEPENDENT FRINGING CAPACITANCES
+
+`ifdef DC_S
+    I(d ,g ) <+  SIGN_M * (d_gt_s * ddt(QDFR) + s_gt_d * ddt(QSFR));
+    I(s ,g ) <+  SIGN_M * (d_gt_s * ddt(QSFR) + s_gt_d * ddt(QDFR));
+`endif
+`ifdef DC
+    I(di,g ) <+  SIGN_M * (d_gt_s * ddt(QDFR) + s_gt_d * ddt(QSFR));
+    I(si,g ) <+  SIGN_M * (d_gt_s * ddt(QSFR) + s_gt_d * ddt(QDFR));
+`endif
+`ifdef RF_S
+    I(di,gi) <+  SIGN_M * (d_gt_s * ddt(QDFR) + s_gt_d * ddt(QSFR));
+    I(si,gi) <+  SIGN_M * (d_gt_s * ddt(QSFR) + s_gt_d * ddt(QDFR));
+`endif
+`ifdef RF
+    I(di,gi) <+  SIGN_M * (d_gt_s * ddt(QDFR) + s_gt_d * ddt(QSFR));
+    I(si,gi) <+  SIGN_M * (d_gt_s * ddt(QSFR) + s_gt_d * ddt(QDFR));
+`endif
+`ifdef NQS
+    I(di,gi) <+  SIGN_M * (d_gt_s * ddt(QDFR) + s_gt_d * ddt(QSFR));
+    I(si,gi) <+  SIGN_M * (d_gt_s * ddt(QSFR) + s_gt_d * ddt(QDFR));
+`endif

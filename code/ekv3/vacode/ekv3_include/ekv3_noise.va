@@ -1,0 +1,241 @@
+// ANALYTICAL CALCULATION OF NOISE.
+// THE MODEL SUPPORTS TWO WAYS FOR THERMAL NOISE CALCULATION
+// WHEN FLNOI=0 (default) USES THE SIMPLE FLICKER NOISE MODEL (KF, AF, EF)
+// WHEN FLNOI=1 USE THE NEW FLICKER NOISE MODEL (NT, ALPHAC, ALPHAH, SDR)
+// WHEN TH_NOI=1 THE THERMAL NOISE MODEL TAKES INTO ACCOUNT SHORT CHANNEL EFFECTS (NO INDUCED GATE NOISE).
+// WHEN NQS_NOI=1 THE THERMAL NOISE MODEL WHICH IS USED CALCULATES THE INDUCED GATE (AND SUBSTRATE) NOISE (PARTIAL ACCOUNTING FOR SHORT CHANNEL EFFECTS).
+// NOTE THAT THESE TWO PARAMETERS SHOULD NOT BE BOTH SET TO 1.
+// ALSO NOTE THAT THE THERMAL NOISE OF THE RESISTANCES OF THE EXTRINSIC NETWORK IS DEFINED IN ekv3_extrinsic_rc.va.
+
+begin : noise
+    // FREQUENTLY PERFORMED CALCULATION
+    Snspec      = KT4 * Gspec;
+
+    begin : CHANNEL_NOISE
+        // CALCULATION OF THERMAL NOISE, INCLUDING SHORT CHANNEL EFFECTS (ANANDA ROY - CHRISTIAN ENZ)
+        tmp         = 1 + e_clm * qs_qdp;
+        tmp1        = e_clm * i;
+        gn          = (2 / (tmp * tmp * qsqdpp1)) * (`ONE3RD * (qs2 + qs * qdp + qdp2) + tmp1 * tmp1 * 0.25 + 0.25 * (tmp1 + 1) * qsqdp + (tmp1 - 1) * 0.125 * e_clm2 * i * qsqdpp1 * ln(max(1.0E-24,abs((xf - 0.5 * tmp1) / (xrp - 0.5 * tmp1)))));
+        thermal     = Snspec * gn;
+        ////////////////////////////////////////////////////////////////////////////
+        /////////////////////OLD FLICKER MODEL//////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////
+        gmg_        = Gspec * (qs_qdp) / nv;
+        if (LFNOI == 0)
+        begin
+            flicker     = KF * exp(EF * ln(max(1.0E-24,abs(gmg_)))) / (WeffNF * Leff * COX * inv_dqmip1);
+        end
+        ////////////////////////////////////////////////////////////////////////////
+        /////////////////////NEW FLICKER MODEL//////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////
+        else
+        begin
+            // FLICKER NOISE DUE TO CARRIER NUMBER FLUCTUATIONS-MC WORTHER MODEL
+            qel2        = `C_QE*`C_QE;
+            qel4        = qel2*qel2;
+            NT_var      = NT*(1.6E+25);
+            sddn        = (qel4*`TAD*NT_var)/(`C_K * T *WeffNF*(Leff - deltal)*(COX * inv_dqmip1)*(COX * inv_dqmip1)*nq*nq);
+            Qspec       = 2*nq*UT*COX* inv_dqmip1;
+            alpha       = ALPHAC*Qspec;
+            a_m         = alpha*beta/COX  ;
+            LC_R       = (2*UT)/(ECN*(Leff-deltal));
+            if (i!=0)
+            begin
+                kddn      =  (1/(2*i*i))*(((qs2+qs)-(qdp2+qdp))/((1+LC_R*(qs-qdp))*(1+LC_R*(qs-qdp))*(1+LC_R*(qs-qdp))))*ln(max(1.0E-24,(qs+0.5-((LC_R*((qs2+qs)-(qdp2+qdp)))/(2*(1+LC_R*(qs-qdp)))))/(qdp+0.5-((LC_R*((qs2+qs)-(qdp2+qdp)))/(2*(1+LC_R*(qs-qdp)))))))+ a_m/(1+qs+qdp) + (a_m/2)*(a_m/2);
+            end
+            else
+            begin
+                kddn = 0;
+            end
+            sidn     = sddn*kddn*IDS*IDS;
+
+            // FLICKER NOISE DUE TO MOBILITY FLUCTUATIONS-HOOGE MODEL
+            if (i!=0)
+            begin
+                sddm        = (ALPHAH*qel2)/(`C_K * T * WeffNF*(Leff - deltal)*COX * inv_dqmip1*nq);
+                kddm        = (1/(1+qs+qdp))*(1+((ln(qs/qdp))/(2*qs_qdp)));
+            end
+            else
+            begin
+                sddm = 0;
+                kddm = 0;
+            end
+            sidm        =  sddm * kddm *IDS*IDS ;
+            // FLICKER NOISE DUE TO SOURCE AND DRAIN ACESS RESISTANCES
+            // PATCH : 22 / 11 / 2013
+            //    Gspec_fn  = Ispec/(COX * inv_dqmip1);
+            Gspec_fn = Gspec / (1.0 + rs_wt * Gspec * qs + rd_wt * Gspec * qdp);
+            sddr        = (qs2+qdp2)*Gspec_fn*Gspec_fn*SDR;
+            sidr        = sddr*IDS*IDS ;
+
+            // TOTAL FLICKER NOISE
+            flicker     = sidn + sidm +sidr ;
+        end
+    end //  CHANNEL_NOISE
+    begin : CORRELATED_NOISE
+        // CALCULATION OF NON-QUASI-STATIC THERMAL NOISE, CORRELATED INDUCED GATE AND BULK NOISE
+        omegaspec   = beta / COX * UT / Leff2; // NOTE: Normalization factor for angular frequency.
+        OMEGA       = (omegaspec != 0.0) ?
+              1.0 / omegaspec : 0.0;
+        tmp         = xf + xrp;
+        tmp1        = xf * xrp;
+        tmp2        = tmp * tmp;
+        tmp3        = tmp2 * tmp;
+        snidid      = 2.0 * (xf2 - 0.75 * tmp + tmp1 + xrp2) / (3.0 * tmp);
+        snigig      = OMEGA * OMEGA * (16.0 * (xf2 * xf2 + xrp2 * xrp2) + 80.0 * tmp1 * (xrp2 + xf2) + 168.0 * xf2 * xrp2 - 15.0 * (xf2 * xf + xrp2 * xrp) - 75.0 * tmp1 * tmp) / (540.0 * nq0 * nq0 * tmp3 * tmp2);
+        snibib      = snigig * (nq0 - 1.0) * (nq0 - 1.0);
+        snigid      = (OMEGA / (18.0 * nq0)) * ((xf - xrp) * (xf2 + 4.0 * tmp1 + xrp2)) / tmp3; // NOTE: snigid is imaginary
+        //////////////////////////////////////////////////////
+        // PATCH : LIMIT THE VALUES / NON ZERO VALUES NEEDED
+        snigig  = `MAX(snigig,1e-54);
+        snibib  = `MAX(snibib,1e-54);
+        snidid  = `MAX(snidid,1e-54);
+        //////////////////////////////////////////////////////
+        c_igid      = ((snidid != 0.0) && (snigig != 0.0)) ?
+              snigid / sqrt(snidid * snigig) : 0.0; // NOTE: c_igid is imaginary
+        // VARIABLES USED IN ASSIGNMENT OF THE NQS NOISE
+        noise_ds1   = `MAX((snidid * (1.0 - c_igid * c_igid)),0.0); // NOTE: Thermal noise, uncorrelated part.
+        noise_ds2   = `MAX(c_igid * snidid,0.0); // NOTE: Thermal noise, correlated part.
+        noise_g     = `MAX(snigig,0.0);
+        noise_b     = `MAX(snibib,0.0);
+    end //  CORRELATED_NOISE
+
+    begin : GATE_NOISE__SHOT_AND_FLICKER
+        // CALCULATION OF THE GATE SHOT NOISE AND GATE FLICKER NOISE
+        if (IG > 0.0) // NOTE: IG is the gate to channel current, calculated in ekv3_gate_current.va.
+        begin
+            sig_shot    = 2.0 * `C_QE * IG;
+            sig_flicker     = KGFN * IG * IG;
+        end
+        else
+        begin
+            sig_shot    = 0.0;
+            sig_flicker     = 0.0;
+        end
+    end //  GATE_NOISE__SHOT_AND_FLICKER
+
+    // ASSIGNMENT OF THE CALCULATED NOISE SOURCES
+
+    flicker_m = flicker / M;
+    sig_flicker_m = sig_flicker / M;
+
+`ifdef DC_S
+    // THERMAL NOISE (INCLUDING SHORT CHANNEL EFFECTS, TH_NOI=1)
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //PATCH INSERT THE NQS_NOISE TERM IN THE TOTAL
+    I(d,s)  <+  white_noise (M * thermal * TH_NOI + M * Snspec * noise_ds1*NQS_NOI, "THERMAL NOISE IN CHANNEL (TH_NOI=1)");
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // FLICKER NOISE
+    I(d ,s )    <+  flicker_noise (flicker_m, AF, "FLICKER NOISE IN CHANNEL");
+    // NQS THERMAL NOISE (INCLUDING INDUCED GATE AND BULK NOISE, NQS_NOI=1)
+    I(noi)      <+  V(noi); // NOTE: Auxiliary node for defining correlated noise sources.
+    I(noi)      <+  white_noise(M * Snspec * NQS_NOI, "AUXILIARY NOISE SOURCE FOR CORRELATION, CORRELATED PART (NQS_NOI=1)");
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // PATCH CMI ERROR DUE TO THE FACT THAT IT CAN NOT RECOGNIZE PARALLEL NOISE SOURCES (12/11)
+    //  I(d,s)  <+  white_noise(M * Snspec * noise_ds1*NQS_NOI , "CHANNEL THERMAL NOISE, UNCORRELATED PART (NQS_NOI=1)");
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    I(d ,s )    <+  V(noi)  * noise_ds2 * NQS_NOI; // NOTE: Correlated part of thermal noise assigned to channel.
+    I(g)        <+  ddt(V(noi) * noise_g * NQS_NOI); // NOTE: Correlated part of thermal noise assigned to gate. The derivate allows the multiplication with the unity imaginary.
+    I(b)        <+  flicker_noise(Snspec * noise_b * 2.0 * `PI * NQS_NOI / M, -2.0, "INDUCED BULK NOISE (NQS_NOI=1)");
+    // GATE SHOT NOISE
+    I(g)        <+  white_noise   (M * sig_shot, "GATE SHOT NOISE");
+    // GATE FLICKER NOISE
+    I(g)        <+  flicker_noise   (sig_flicker_m, 1.0, "GATE FLICKER NOISE");
+`endif
+`ifdef DC
+    // THERMAL NOISE (INCLUDING SHORT CHANNEL EFFECTS, TH_NOI=1)
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //PATCH INSERT THE NQS_NOISE TERM IN THE TOTAL
+    I(di,si)    <+  white_noise (M * thermal * TH_NOI + M * Snspec * noise_ds1*NQS_NOI, "THERMAL NOISE IN CHANNEL (TH_NOI=1)");
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // FLICKER NOISE
+    I(di,si)    <+  flicker_noise (flicker_m, AF, "FLICKER NOISE IN CHANNEL");
+    // NQS THERMAL NOISE (INCLUDING INDUCED GATE AND BULK NOISE, NQS_NOI=1)
+    I(noi)      <+  V(noi); // NOTE: Auxiliary node for defining correlated noise sources.
+    I(noi)      <+  white_noise(M * Snspec * NQS_NOI, "AUXILIARY NOISE SOURCE FOR CORRELATION, CORRELATED PART (NQS_NOI=1)");
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // PATCH CMI ERROR DUE TO THE FACT THAT IT CAN NOT RECOGNIZE PARALLEL NOISE SOURCES (12/11)
+    //  I(di,si)    <+  white_noise(M * Snspec * noise_ds1*NQS_NOI , "CHANNEL THERMAL NOISE, UNCORRELATED PART (NQS_NOI=1)");
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    I(di,si)    <+  V(noi)  * noise_ds2 * NQS_NOI; // NOTE: Correlated part of thermal noise assigned to channel.
+    I(g)        <+  ddt(V(noi) * noise_g * NQS_NOI); // NOTE: Correlated part of thermal noise assigned to gate. The derivate allows the multiplication with the unity imaginary.
+    I(b)        <+  flicker_noise(Snspec * noise_b * 2.0 * `PI * NQS_NOI / M, -2.0, "INDUCED BULK NOISE (NQS_NOI=1)");
+    // GATE SHOT NOISE
+    I(g)        <+  white_noise   (M * sig_shot, "GATE SHOT NOISE");
+    // GATE FLICKER NOISE
+    I(g)        <+  flicker_noise   (sig_flicker_m, 1.0, "GATE FLICKER NOISE");
+`endif
+`ifdef RF_S
+    // THERMAL NOISE (INCLUDING SHORT CHANNEL EFFECTS, TH_NOI=1)
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //PATCH INSERT THE NQS_NOISE TERM IN THE TOTAL
+    I(di,si)    <+  white_noise (M * thermal * TH_NOI + M * Snspec * noise_ds1*NQS_NOI, "THERMAL NOISE IN CHANNEL (TH_NOI=1)");
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // FLICKER NOISE
+    I(di,si)    <+  flicker_noise (flicker_m, AF, "FLICKER NOISE IN CHANNEL");
+    // NQS THERMAL NOISE (INCLUDING INDUCED GATE AND BULK NOISE, NQS_NOI=1)
+    I(noi)      <+  V(noi); // NOTE: Auxiliary node for defining correlated noise sources.
+    I(noi)      <+  white_noise(M * Snspec * NQS_NOI, "AUXILIARY NOISE SOURCE FOR CORRELATION, CORRELATED PART (NQS_NOI=1)");
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // PATCH CMI ERROR DUE TO THE FACT THAT IT CAN NOT RECOGNIZE PARALLEL NOISE SOURCES (12/11)
+    //  I(di,si)    <+  white_noise(M * Snspec * noise_ds1*NQS_NOI , "CHANNEL THERMAL NOISE, UNCORRELATED PART (NQS_NOI=1)");
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    I(di,si)    <+  V(noi)  * noise_ds2 * NQS_NOI; // NOTE: Correlated part of thermal noise assigned to channel.
+    I(gi)       <+  ddt(V(noi) * noise_g * NQS_NOI); // NOTE: Correlated part of thermal noise assigned to gate. The derivate allows the multiplication with the unity imaginary.
+    I(bi)       <+  flicker_noise(Snspec * noise_b * 2.0 * `PI * NQS_NOI / M, -2.0, "INDUCED BULK NOISE (NQS_NOI=1)");
+    // GATE SHOT NOISE
+    I(gi)       <+  white_noise   (M * sig_shot, "GATE SHOT NOISE");
+    // GATE FLICKER NOISE
+    I(gi)       <+  flicker_noise   (sig_flicker_m, 1.0, "GATE FLICKER NOISE");
+`endif
+`ifdef RF
+    // THERMAL NOISE (INCLUDING SHORT CHANNEL EFFECTS, TH_NOI=1)
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //PATCH INSERT THE NQS_NOISE TERM IN THE TOTAL
+    I(di,si)    <+  white_noise (M * thermal * TH_NOI + M * Snspec * noise_ds1*NQS_NOI, "THERMAL NOISE IN CHANNEL (TH_NOI=1)");
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // FLICKER NOISE
+    I(di,si)    <+  flicker_noise (flicker_m, AF, "FLICKER NOISE IN CHANNEL");
+    // NQS THERMAL NOISE (INCLUDING INDUCED GATE AND BULK NOISE, NQS_NOI=1)
+    I(noi)      <+  V(noi);
+    // NOTE: Auxiliary node for defining correlated noise sources.
+    I(noi)      <+  white_noise(M * Snspec * NQS_NOI , "AUXILIARY NOISE SOURCE FOR CORRELATION, CORRELATED PART (NQS_NOI=1)");
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // PATCH CMI ERROR DUE TO THE FACT THAT IT CAN NOT RECOGNIZE PARALLEL NOISE SOURCES (12/11)
+    //  I(di,si)    <+  white_noise(M * Snspec * noise_ds1*NQS_NOI , "CHANNEL THERMAL NOISE, UNCORRELATED PART (NQS_NOI=1)");
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    I(di,si)    <+  V(noi)  * noise_ds2 * NQS_NOI ; // NOTE: Correlated part of thermal noise assigned to channel.
+    I(gi)       <+  ddt(V(noi) * noise_g * NQS_NOI ); // NOTE: Correlated part of thermal noise assigned to gate. The derivate allows the multiplication with the unity imaginary.
+    I(bi)       <+  flicker_noise(Snspec * noise_b * NQS_NOI * 2.0 * `PI  / M, -2.0, "INDUCED BULK NOISE (NQS_NOI=1)");
+
+    // GATE SHOT NOISE
+    I(gi)       <+  white_noise   (M * sig_shot, "GATE SHOT NOISE");
+    // GATE FLICKER NOISE
+    I(gi)       <+  flicker_noise   (sig_flicker_m, 1.0, "GATE FLICKER NOISE");
+
+`endif
+`ifdef NQS
+    // THERMAL NOISE (INCLUDING SHORT CHANNEL EFFECTS, TH_NOI=1)
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //PATCH INSERT THE NQS_NOISE TERM IN THE TOTAL
+    I(di,si)    <+  white_noise (M * thermal * TH_NOI + M * Snspec * noise_ds1*NQS_NOI, "THERMAL NOISE IN CHANNEL (TH_NOI=1)");
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // FLICKER NOISE
+    I(di,si)    <+  flicker_noise (flicker_m, AF, "FLICKER NOISE IN CHANNEL");
+    // NQS THERMAL NOISE (INCLUDING INDUCED GATE AND BULK NOISE, NQS_NOI=1)
+    I(noi)      <+  V(noi); // NOTE: Auxiliary node for defining correlated noise sources.
+    I(noi)      <+  white_noise(M * Snspec * NQS_NOI, "AUXILIARY NOISE SOURCE FOR CORRELATION, CORRELATED PART (NQS_NOI=1)");
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // PATCH CMI ERROR DUE TO THE FACT THAT IT CAN NOT RECOGNIZE PARALLEL NOISE SOURCES (12/11)
+    //  I(di,si)    <+  white_noise(M * Snspec * noise_ds1*NQS_NOI , "CHANNEL THERMAL NOISE, UNCORRELATED PART (NQS_NOI=1)");
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    I(di,si)    <+  V(noi)  * noise_ds2 * NQS_NOI; // NOTE: Correlated part of thermal noise assigned to channel.
+    I(gi)       <+  ddt(V(noi) * noise_g * NQS_NOI); // NOTE: Correlated part of thermal noise assigned to gate. The derivate allows the multiplication with the unity imaginary.
+    I(bi)       <+  flicker_noise(Snspec * noise_b * 2.0 * `PI * NQS_NOI / M, -2.0, "INDUCED BULK NOISE (NQS_NOI=1)");
+    // GATE SHOT NOISE
+    I(gi)       <+  white_noise   (M * sig_shot, "GATE SHOT NOISE");
+    // GATE FLICKER NOISE
+    I(gi)       <+  flicker_noise   (sig_flicker_m, 1.0, "GATE FLICKER NOISE");
+`endif
+
+end

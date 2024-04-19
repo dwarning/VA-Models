@@ -1,0 +1,174 @@
+// ANALYTICAL CALCULATION OF THE GATE CURRENT
+
+begin : GATE_CURRENT
+    if (((psi_p > 0) && (TG < 0)) || ((psi_p < 0) && (TG > 0)))
+    begin
+        v1_gc       = sqrt(0.25 + (v_o_qme + 2.0 * qs) / gamma_g2);
+        v2_gc       = 0.5 + v1_gc;
+        psi_ox      = (v_o_qme + 2.0 * qs) / v2_gc;
+        dpsi_dq     = (2.0 / v2_gc) * (1.0 - (v_o_qme + 2.0 * qs) / (2.0 * v1_gc * v2_gc * gamma_g2));
+    end
+    else
+    begin
+        psi_ox      = v_o_qme + 2.0 * qs;
+        dpsi_dq     = 2.0;
+    end
+    psi_x       = abs(psi_ox) / xb;
+    // CALCULATION OF PROBABILITY OF TUNNELING
+    if (psi_x < 1.0)
+    begin
+        tmp         = sqrt(1.0 - psi_x);
+        p_tun       = exp( - ub * (1.0 / (1.0 + tmp) + tmp));
+    end
+    else
+    begin
+        p_tun       = exp( - ub / psi_x);
+    end
+
+    igo         = qs * psi_ox * p_tun;
+    if ((vs == vd) || (psi_ox == 0.0)) // NOTE: Symmetrical bias case, symmetrical distribution of current to source and drain nodes.
+    begin
+        nigc        = igo * nq;
+        nigs        = nigc * 0.5;
+        nigd        = nigs;
+    end
+    else // NOTE: Asymmetrical bias case, asymmetrical partition scheme to source and drain nodes.
+    begin
+        dq_dksi     = (irp - if_) / (2.0 * qs + 1.0);
+        a_gc        = dq_dksi * (1.0 / qs + dpsi_dq / psi_ox);
+        if (psi_x < 1.0)
+        begin
+            if (psi_ox > 0.0)
+            begin
+                b_gc        =  dq_dksi * dpsi_dq * (ub / xb) * (3.0 + psi_x) / (4.0 + 2.0 * sqrt(1.0 - psi_x) * (2.0 + psi_x));
+            end
+            else
+            begin
+                b_gc        = -dq_dksi * dpsi_dq * (ub / xb) * (3.0 + psi_x) / (4.0 + 2.0 * sqrt(1.0 - psi_x) * (2.0 + psi_x));
+            end
+        end
+        else
+        begin
+            b_gc        =  dpsi_dq * dq_dksi * ub / (psi_x * psi_ox);
+        end
+        nigc        =       nq * igo * (2.0 + a_gc) / (2.0 - b_gc);
+        nigs        = 0.5 * nq * igo * (3.0 + a_gc) / (3.0 - b_gc);
+        nigd        = nigc - nigs;
+    end
+    // CALCULATION OF DENORMALIZED GATE CURRENTS
+    if (vg > vfb) // NOTE: Depletion and inversion region. Gate current flows between the gate and the channel and is distributed to source and drain nodes.
+    begin
+        IGB         = 0.0;
+        tmp         = 2.0 * KG * WeffNF * Leff * UT2 / TOX2;
+        IG      = tmp * nigc; // NOTE: Also used in gate shot noise and gate flicker noise (ekv3_noise.va)
+        IGD         = tmp * nigd;
+        IGS         = IG - IGD;
+    end
+    else // NOTE: Accumulation region. Gate current flows between the gate and the bulk.
+    begin
+        IGB         = KG * WeffNF * Leff * psi_ox * abs(psi_ox) * UT2 * p_tun / TOX2;
+        IG      = 0.0;
+        IGD         = 0.0;
+        IGS         = 0.0;
+    end
+    // CALCULATION OF OVERLAP GATE CURRENTS, BETWEEN GATE AND SOURCE, ON ONE SIDE, AND GATE AND DRAIN, ON THE OTHER
+    // SOURCE SIDE CALCULATIONS
+    if (LOVIG !=0 ) begin
+        if (vg - vs > vfb_ov)
+        begin
+            tmp         = sqrt( vg - vs - vfb_ov + gamma_g2  * 0.25) - gamma_g * 0.5;
+            psi_ox_sovgc    = vg - vs - tmp * tmp;
+        end
+        else
+        begin
+            tmp         = sqrt(-vg + vs + vfb_ov + gamma_ov2 * 0.25) - gamma_ov * 0.5;
+            psi_ox_sovgc    = vg - vs + tmp * tmp;
+        end
+        psi_x_sovgc         = abs(psi_ox_sovgc) / xb;
+        if (psi_x_sovgc < 1.0)
+        begin
+            tmp     = sqrt(1.0 - psi_x_sovgc);
+            p_tun_sovgc     = exp( - ub * (1.0 / (1.0 + tmp) + tmp));
+        end
+        else
+        begin
+            p_tun_sovgc     = exp( - ub / psi_x_sovgc);
+        end
+        // DRAIN SIDE CALCULATIONS
+        if (vg - vd > vfb_ov)
+        begin
+            tmp         = sqrt(vg - vd - vfb_ov + gamma_g2  * 0.25) - gamma_g * 0.5;
+            psi_ox_dovgc    = vg - vd - tmp * tmp;
+        end
+        else
+        begin
+            tmp         = sqrt(-vg + vd + vfb_ov + gamma_ov2 * 0.25) - gamma_ov * 0.5;
+            psi_ox_dovgc    = vg - vd + tmp * tmp;
+        end
+        psi_x_dovgc         = abs(psi_ox_dovgc) / xb;
+        if (psi_x_dovgc < 1.0)
+        begin
+            tmp         = sqrt(1.0 - psi_x_dovgc);
+            p_tun_dovgc     = exp( - ub * (1.0 / (1.0 + tmp) + tmp));
+        end
+        else
+        begin
+            p_tun_dovgc     = exp( - ub / psi_x_dovgc);
+        end
+        // CALCULATION OF DENORMALIZED OVERLAP GATE CURERNTS
+        tmp             = KG * WeffNF * LOVIG * UT2 / TOX2;
+        IGSOV           = tmp * psi_ox_sovgc * abs(psi_ox_sovgc) * p_tun_sovgc;
+        IGDOV           = tmp * psi_ox_dovgc * abs(psi_ox_dovgc) * p_tun_dovgc;
+    end
+    else begin
+        IGSOV           = 0;
+        IGDOV           = 0;
+    end
+end
+// ASSIGNMENT OF GATE CURRENTS AND OVERLAP GATE CURRENTS.
+
+`ifdef DC_S
+// GATE CURRENTS
+    I(b ,g ) <+ -SIGN_M * IGB;
+    I(s ,g ) <+ -SIGN_M * (d_gt_s * IGS + s_gt_d * IGD);
+    I(d ,g ) <+ -SIGN_M * (d_gt_s * IGD + s_gt_d * IGS);
+    // OVERLAP GATE CURRENTS
+    I(s ,g ) <+ -SIGN_M * (d_gt_s * IGSOV + s_gt_d * IGDOV);
+    I(d ,g ) <+ -SIGN_M * (d_gt_s * IGDOV + s_gt_d * IGSOV);
+`endif
+`ifdef DC
+    // GATE CURRENTS
+    I(b ,g ) <+ -SIGN_M * IGB;
+    I(si,g ) <+ -SIGN_M * (d_gt_s * IGS + s_gt_d * IGD);
+    I(di,g ) <+ -SIGN_M * (d_gt_s * IGD + s_gt_d * IGS);
+    // OVERLAP GATE CURRENTS
+    I(si,g ) <+ -SIGN_M * (d_gt_s * IGSOV + s_gt_d * IGDOV);
+    I(di,g ) <+ -SIGN_M * (d_gt_s * IGDOV + s_gt_d * IGSOV);
+`endif
+`ifdef RF_S
+    // GATE CURRENTS
+    I(b ,gi) <+ -SIGN_M * IGB;
+    I(si,gi) <+ -SIGN_M * (d_gt_s * IGS + s_gt_d * IGD);
+    I(di,gi) <+ -SIGN_M * (d_gt_s * IGD + s_gt_d * IGS);
+    // OVERLAP GATE CURRENTS
+    I(si,gi) <+ -SIGN_M * (d_gt_s * IGSOV + s_gt_d * IGDOV);
+    I(di,gi) <+ -SIGN_M * (d_gt_s * IGDOV + s_gt_d * IGSOV);
+`endif
+`ifdef RF
+    // GATE CURRENTS
+    I(b ,gi) <+ -SIGN_M * IGB;
+    I(si,gi) <+ -SIGN_M * (d_gt_s * IGS + s_gt_d * IGD);
+    I(di,gi) <+ -SIGN_M * (d_gt_s * IGD + s_gt_d * IGS);
+    // OVERLAP GATE CURRENTS
+    I(si,gi) <+ -SIGN_M * (d_gt_s * IGSOV + s_gt_d * IGDOV);
+    I(di,gi) <+ -SIGN_M * (d_gt_s * IGDOV + s_gt_d * IGSOV);
+`endif
+`ifdef NQS
+    // GATE CURRENTS
+    I(b ,gi) <+ -SIGN_M * IGB;
+    I(si,gi) <+ -SIGN_M * (d_gt_s * IGS + s_gt_d * IGD);
+    I(di,gi) <+ -SIGN_M * (d_gt_s * IGD + s_gt_d * IGS);
+    // OVERLAP GATE CURRENTS
+    I(si,gi) <+ -SIGN_M * (d_gt_s * IGSOV + s_gt_d * IGDOV);
+    I(di,gi) <+ -SIGN_M * (d_gt_s * IGDOV + s_gt_d * IGSOV);
+`endif

@@ -1,0 +1,73 @@
+`ifdef NATURES_INCLUDE
+`else
+
+// `define CURRENT_ABSTOL 1E-15
+// `define CHARGE_ABSTOL 1E-17
+// `define VOLTAGE_ABSTOL 1E-09
+
+// The following lines are part of the discipline.(h/vams) file.
+// Here they are written directly for portability purposes.
+//
+// `include "discipline.h"
+
+nature Current
+    units = "A";
+    access = I;
+    idt_nature = Charge;
+`ifdef CURRENT_ABSTOL
+    abstol = `CURRENT_ABSTOL;
+`else
+    abstol = 1E-12;
+`endif
+endnature
+
+nature Charge
+    units = "coul";
+    access = Q;
+    ddt_nature = Current;
+`ifdef CHARGE_ABSTOL
+    abstol = `CHARGE_ABSTOL;
+`else
+    abstol = 1E-14;
+`endif
+endnature
+
+nature Voltage
+    units = "V";
+    access = V;
+    idt_nature = Flux;
+`ifdef VOLTAGE_ABSTOL
+    abstol = `VOLTAGE_ABSTOL;
+`else
+    abstol = 1E-6;
+`endif
+endnature
+
+nature Flux
+    units = "Wb";
+    access = Phi;
+    ddt_nature = Voltage;
+`ifdef FLUX_ABSTOL
+    abstol = `FLUX_ABSTOL;
+`else
+    abstol = 1E-9;
+`endif
+endnature
+
+discipline electrical
+    potential Voltage;
+    flow     Current;
+enddiscipline
+
+discipline voltage
+    potential Voltage;
+enddiscipline
+
+discipline current
+    potential Current;
+enddiscipline
+// END: discipline.h
+`define NATURES_INCLUDE
+
+`endif
+
