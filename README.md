@@ -164,6 +164,19 @@ The results are written into ASCII file and can plotted with gnuplot in persist 
 gnuplot -p mosamp2.plt
 ```
 
+## General Usage Instructions Qucs-S
+
+For several models Qucs-S example schematics are provided. Because qucs-s doesn't support loading osdi shared libs
+with relative pathes in schematics "Nutmeg script" the user have to edit the local .spiceinit file for ngspice
+and add the load command for the wanted osdi model, e.g. for linux (perhaps under $HOME):
+
+osdi ~/Projects/spice/Verilog-A/VA-Models/osdilibs/ekv3.osdi
+
+Windows (perhaps under C:\Users\<User name>):
+
+osdi C:\Projects\spice\Verilog-A\VA-Models\osdilibs\ekv3.osdi
+
+
 ## Acknowledgement
 
 The team of openVAF developer from Semimod GmbH https://semimod.de/ .
