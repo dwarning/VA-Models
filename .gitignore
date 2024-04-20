@@ -16,6 +16,8 @@ code/*/*/.libs
 *.mt*
 *.res
 *.raw
+*.ngspice
+*.xyce
 *.ma*
 *.log
 *.so
