@@ -1,6 +1,6 @@
 <Qucs Schematic 24.2.1>
 <Properties>
-  <View=-151,-30,1109,714,0.944892,0,0>
+  <View=-214,-30,1046,765,0.944892,0,0>
   <Grid=10,10,1>
   <DataSet=inv_sub_TRAN.dat>
   <DataDisplay=inv_sub_TRAN.dpl>
@@ -28,6 +28,7 @@
   <.DC DC1 1 410 40 0 41 0 0 "26.85" 0 "0.001" 0 "1 pA" 0 "1 uV" 0 "no" 0 "150" 0 "no" 0 "none" 0 "CroutLU" 0>
   <SpiceInclude SpiceInclude1 1 610 190 -34 16 0 0 "../Modelcards/90nm_ngspice.lib" 1 "" 0 "" 0 "" 0 "" 0>
   <SpiceInclude SpiceInclude2 0 610 270 -34 16 0 0 "../Modelcards/90nm_xyce.lib" 1 "" 0 "" 0 "" 0 "" 0>
+  <.CUSTOMSIM CUSTOM1 1 640 40 0 51 0 0 "pre_osdi ekv3.osdi\n" 1 "" 0 "" 0>
 </Components>
 <Wires>
   <220 240 220 260 "" 0 0 0 "">

@@ -1,6 +1,6 @@
 <Qucs Schematic 24.2.1>
 <Properties>
-  <View=-230,0,1166,875,0.853155,0,0>
+  <View=-230,0,1166,824,0.853155,0,0>
   <Grid=10,10,1>
   <DataSet=ring_Osc.dat>
   <DataDisplay=ring_Osc.dpl>
@@ -31,6 +31,7 @@
   <SpiceIC SpiceIC1 1 40 350 -8 16 0 0 "v(out1)=1.5" 1>
   <.DC DC1 1 30 280 0 41 0 0 "26.85" 0 "0.001" 0 "1 pA" 0 "1 uV" 0 "no" 0 "150" 0 "no" 0 "none" 0 "CroutLU" 0>
   <.TR TR2 1 200 280 0 66 0 0 "lin" 1 "0" 1 "10ns" 1 "1001" 1 "Trapezoidal" 0 "2" 0 "1 ns" 0 "1e-16" 0 "150" 0 "0.001" 0 "1 pA" 0 "1 uV" 0 "26.85" 0 "1e-3" 0 "1e-6" 0 "1" 0 "CroutLU" 0 "no" 0 "yes" 1 "0" 0>
+  <.CUSTOMSIM CUSTOM1 1 700 320 0 51 0 0 "pre_osdi ekv3.osdi\n" 1 "" 0 "" 0>
 </Components>
 <Wires>
   <620 200 620 220 "" 0 0 0 "">

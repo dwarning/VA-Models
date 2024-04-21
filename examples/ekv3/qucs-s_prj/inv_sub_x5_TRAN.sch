@@ -1,6 +1,6 @@
 <Qucs Schematic 24.2.1>
 <Properties>
-  <View=-396,-30,1728,1224,0.560606,0,0>
+  <View=-508,-30,1616,1224,0.560606,0,0>
   <Grid=10,10,1>
   <DataSet=inv_sub_x5_TRAN.dat>
   <DataDisplay=inv_sub_x5_TRAN.dpl>
@@ -35,6 +35,7 @@
   <SpiceInclude SpiceInclude2 0 870 410 -34 16 0 0 "../Modelcards/90nm_xyce.lib" 1 "" 0 "" 0 "" 0 "" 0>
   <.TR TR1 1 590 310 0 66 0 0 "lin" 1 "0" 1 "2 us" 1 "4001" 1 "Trapezoidal" 0 "2" 0 "1 ns" 0 "1e-16" 0 "150" 0 "0.001" 0 "1 pA" 0 "1 uV" 0 "26.85" 0 "1e-3" 0 "1e-6" 0 "1" 0 "CroutLU" 0 "no" 0 "yes" 0 "0" 0>
   <R R1 1 1040 250 15 -26 0 1 "10k" 1 "26.85" 0 "0.0" 0 "0.0" 0 "26.85" 0 "US" 0>
+  <.CUSTOMSIM CUSTOM1 1 60 390 0 51 0 0 "pre_osdi ekv3.osdi\n" 1 "" 0 "" 0>
 </Components>
 <Wires>
   <1040 280 1040 300 "" 0 0 0 "">

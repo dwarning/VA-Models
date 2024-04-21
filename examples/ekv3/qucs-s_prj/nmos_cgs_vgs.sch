@@ -27,7 +27,7 @@
   <Vdc V1 1 60 240 -54 -14 0 1 "1" 1>
   <.CUSTOMSIM CUSTOM2 1 400 10 0 51 0 0 "\nlet vgspoints = 160\nset vgsp = ''$&vgspoints''\nlet vecCgs = vector($vgsp)\nlet vecVgs = vector($vgsp)\nlet vind = 0\nwhile vind < $vgsp\n  let v1_act = -0.1+vind*0.01\n  alter V1 = $&v1_act\n  ac lin 1 1meg 1meg \n  let Cj = -imag(V1#branch)/(2*pi*1e6)\n  let vecCgs[vind] = Cj\n  let vecVgs[vind] = $&v1_act\n  let vind = vind + 1\n  destroy ac1\nend\n\n" 1 "vecCgs;vecVgs;" 0 "" 0>
   <SpiceInclude SpiceInclude1 1 180 290 -34 16 0 0 "../Modelcards/90nm_ngspice.lib" 1 "" 0 "" 0 "" 0 "" 0>
-  <.CUSTOMSIM CUSTOM3 1 20 350 0 51 0 0 "pre_osdi ../../../osdilibs/ekv3.osdi\n" 1 "" 0 "" 0>
+  <.CUSTOMSIM CUSTOM3 1 20 350 0 51 0 0 "pre_osdi ekv3.osdi\n" 1 "" 0 "" 0>
   <MOS_SPICE X1 1 160 150 -26 34 0 0 "X" 0 "4" 0 "nmos" 0 "nch90 w=10u l=0.1u nf=4" 1 "+ad=10e-12 as=10e-12" 1 "+pd=14u ps=14u" 1 "" 0 "" 0>
 </Components>
 <Wires>

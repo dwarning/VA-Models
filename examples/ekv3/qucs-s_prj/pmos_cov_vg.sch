@@ -1,6 +1,6 @@
 <Qucs Schematic 24.2.1>
 <Properties>
-  <View=3,9,1111,664,1.07492,0,0>
+  <View=3,9,1111,715,1.07492,0,0>
   <Grid=10,10,1>
   <DataSet=pmos_cov_vg.dat>
   <DataDisplay=pmos_cov_vg.dpl>
@@ -23,7 +23,7 @@
   <GND * 1 490 200 0 0 0 0>
   <GND * 1 550 200 0 0 0 0>
   <GND * 1 740 200 0 0 0 0>
-  <.CUSTOMSIM CUSTOM1 1 60 240 0 51 0 0 "\npre_osdi ../../../osdilibs/ekv3.osdi\nlet points = 300\nset vgsp = ''$&points''\nlet Cgdsb = vector($vgsp)\nlet Cgb = vector($vgsp)\nlet Cgds = vector($vgsp)\nlet Vg = vector($vgsp)\nlet ind = 0\nwhile ind < $vgsp\n  let v1_act = -1.5+ind*0.01\n  alter Vg = $&v1_act\n  ac lin 1 1meg 1meg \n  let Cgdsb[ind] = imag(Vg_dsb#branch)/(2*pi*1e6)\n  let Cgb[ind] = imag(Vg_b#branch)/(2*pi*1e6)\n  let Cgds[ind] = imag(Vg_ds#branch)/(2*pi*1e6)\n  let Vg[ind] = $&v1_act\n  let ind = ind + 1\n  destroy ac1\nend\n\n" 1 "Cgdsb;Cgb;Cgds;Vg" 0 "" 0>
+  <.CUSTOMSIM CUSTOM1 1 60 240 0 51 0 0 "\npre_osdi ekv3.osdi\nlet points = 300\nset vgsp = ''$&points''\nlet Cgdsb = vector($vgsp)\nlet Cgb = vector($vgsp)\nlet Cgds = vector($vgsp)\nlet Vg = vector($vgsp)\nlet ind = 0\nwhile ind < $vgsp\n  let v1_act = -1.5+ind*0.01\n  alter Vg = $&v1_act\n  ac lin 1 1meg 1meg \n  let Cgdsb[ind] = imag(Vg_dsb#branch)/(2*pi*1e6)\n  let Cgb[ind] = imag(Vg_b#branch)/(2*pi*1e6)\n  let Cgds[ind] = imag(Vg_ds#branch)/(2*pi*1e6)\n  let Vg[ind] = $&v1_act\n  let ind = ind + 1\n  destroy ac1\nend\n\n" 1 "Cgdsb;Cgb;Cgds;Vg" 0 "" 0>
   <GND * 1 100 200 0 0 0 0>
   <SpiceInclude SpiceInclude1 1 330 250 -34 16 0 0 "../Modelcards/90nm_ngspice.lib" 1 "" 0 "" 0 "" 0 "" 0>
   <MOS_SPICE X1 1 280 100 -211 -26 0 3 "X" 0 "4" 0 "pmos" 0 "pch90 w=10u l=0.1u nf=4" 1 "+ ad=10p as=10p" 1 "+ pd=14u ps=14u" 1 "" 0 "" 0>
@@ -58,7 +58,7 @@
   <310 100 310 120 "" 0 0 0 "">
 </Wires>
 <Diagrams>
-  <Rect 640 623 425 313 3 #c0c0c0 1 00 1 -1.5 0.5 1.5 1 0 5e-13 3e-12 1 -1 0.5 1 315 0 225 1 0 0 "Vg" "" "">
+  <Rect 570 623 425 313 3 #c0c0c0 1 00 1 -1.5 0.5 1.5 1 0 5e-13 3e-12 1 -1 0.5 1 315 0 225 1 0 0 "Vg" "" "">
 	<"ngspice/cgb@vg" #0000ff 0 3 0 0 0>
 	<"ngspice/cgds@vg" #ff0000 0 3 0 0 0>
 	<"ngspice/cgdsb@vg" #ff00ff 0 3 0 0 0>

@@ -23,7 +23,7 @@
   <GND * 1 490 200 0 0 0 0>
   <GND * 1 550 200 0 0 0 0>
   <GND * 1 740 200 0 0 0 0>
-  <.CUSTOMSIM CUSTOM1 1 60 240 0 51 0 0 "\npre_osdi ../../../osdilibs/ekv3.osdi\nlet points = 300\nset vgsp = ''$&points''\nlet Cgdsb = vector($vgsp)\nlet Cgb = vector($vgsp)\nlet Cgds = vector($vgsp)\nlet Vg = vector($vgsp)\nlet ind = 0\nwhile ind < $vgsp\n  let v1_act = -1.5+ind*0.01\n  alter Vg = $&v1_act\n  ac lin 1 1meg 1meg \n  let Cgdsb[ind] = imag(Vg_dsb#branch)/(2*pi*1e6)\n  let Cgb[ind] = imag(Vg_b#branch)/(2*pi*1e6)\n  let Cgds[ind] = imag(Vg_ds#branch)/(2*pi*1e6)\n  let Vg[ind] = $&v1_act\n  let ind = ind + 1\n  destroy ac1\nend\n\n" 1 "Cgdsb;Cgb;Cgds;Vg" 0 "" 0>
+  <.CUSTOMSIM CUSTOM1 1 60 240 0 51 0 0 "\npre_osdi ekv3.osdi\nlet points = 300\nset vgsp = ''$&points''\nlet Cgdsb = vector($vgsp)\nlet Cgb = vector($vgsp)\nlet Cgds = vector($vgsp)\nlet Vg = vector($vgsp)\nlet ind = 0\nwhile ind < $vgsp\n  let v1_act = -1.5+ind*0.01\n  alter Vg = $&v1_act\n  ac lin 1 1meg 1meg \n  let Cgdsb[ind] = imag(Vg_dsb#branch)/(2*pi*1e6)\n  let Cgb[ind] = imag(Vg_b#branch)/(2*pi*1e6)\n  let Cgds[ind] = imag(Vg_ds#branch)/(2*pi*1e6)\n  let Vg[ind] = $&v1_act\n  let ind = ind + 1\n  destroy ac1\nend\n\n" 1 "Cgdsb;Cgb;Cgds;Vg" 0 "" 0>
   <GND * 1 100 200 0 0 0 0>
   <MOS_SPICE X1 1 280 100 -248 -26 0 3 "X" 0 "4" 0 "nmos" 0 "nch90 w=10u l=0.1u nf=4" 1 "+ad=10e-12 as=10e-12" 1 "+pd=14u ps=14u" 1 "" 0 "" 0>
   <MOS_SPICE X2 1 520 100 -248 -26 0 3 "X" 0 "4" 0 "nmos" 0 "nch90 w=10u l=0.1u nf=4" 1 "+ad=10e-12 as=10e-12" 1 "+pd=14u ps=14u" 1 "" 0 "" 0>

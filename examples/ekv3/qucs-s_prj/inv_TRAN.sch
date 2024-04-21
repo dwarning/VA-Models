@@ -1,6 +1,6 @@
 <Qucs Schematic 24.2.1>
 <Properties>
-  <View=-213,-47,1229,804,0.826087,0,0>
+  <View=-213,-47,1229,855,0.826087,0,0>
   <Grid=10,10,1>
   <DataSet=inv_TRAN.dat>
   <DataDisplay=inv_TRAN.dpl>
@@ -33,6 +33,7 @@
   <MOS_SPICE X2 1 510 270 -26 34 0 0 "X" 0 "4" 0 "nmos" 0 "nch90 w=1u l=0.1u nf=1" 1 "+ad=1e-12 as=1e-12" 1 "+pd=4u ps=4u" 1 "" 0 "" 0>
   <SpiceInclude SpiceInclude1 1 50 330 -34 16 0 0 "../Modelcards/90nm_ngspice.lib" 1 "" 0 "" 0 "" 0 "" 0>
   <SpiceInclude SpiceInclude2 0 50 410 -34 16 0 0 "../Modelcards/90nm_xyce.lib" 1 "" 0 "" 0 "" 0 "" 0>
+  <.CUSTOMSIM CUSTOM1 1 20 480 0 51 0 0 "pre_osdi ekv3.osdi\n" 1 "" 0 "" 0>
 </Components>
 <Wires>
   <510 300 510 330 "" 0 0 0 "">

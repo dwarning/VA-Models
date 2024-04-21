@@ -28,6 +28,7 @@
   <MOS_SPICE X1 1 160 140 -26 34 0 0 "X" 0 "4" 0 "pmos" 0 "pch90 w=3u l=0.1u nf=1" 1 "+ ad=3p as=3p" 1 "+ pd=8u ps=8u" 1 "" 0 "" 0>
   <SpiceInclude SpiceInclude2 0 60 460 -34 16 0 0 "../Modelcards/90nm_xyce.lib" 1 "" 0 "" 0 "" 0 "" 0>
   <SpiceInclude SpiceInclude1 1 60 380 -34 16 0 0 "../Modelcards/90nm_ngspice.lib" 1 "" 0 "" 0 "" 0 "" 0>
+  <.CUSTOMSIM CUSTOM1 1 370 180 0 51 0 0 "pre_osdi ekv3.osdi\n" 1 "" 0 "" 0>
 </Components>
 <Wires>
   <160 170 160 190 "" 0 0 0 "">

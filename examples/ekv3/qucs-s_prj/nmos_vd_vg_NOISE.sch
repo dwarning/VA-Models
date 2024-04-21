@@ -31,8 +31,9 @@
   <.DC DC1 0 30 270 0 42 0 0 "26.85" 0 "0.001" 0 "1 pA" 0 "1 uV" 0 "no" 0 "150" 0 "no" 0 "none" 0 "CroutLU" 0>
   <.NOISE NOISE1 1 210 270 0 65 0 0 "log" 1 "1 MegHz" 1 "10 GHz" 1 "101" 1 "v(sid)" 1 "V1" 1>
   <MOS_SPICE X1 1 220 120 -214 -85 0 0 "X" 0 "4" 0 "nmos" 0 "nch90 w=10u l=0.1u nf=4" 1 "+ad=10e-12 as=10e-12" 1 "+pd=14u ps=14u" 1 "" 0 "" 0>
-  <SpiceInclude SpiceInclude2 0 570 110 -34 16 0 0 "../Modelcards/90nm_xyce.lib" 1 "" 0 "" 0 "" 0 "" 0>
-  <SpiceInclude SpiceInclude1 1 570 30 -34 16 0 0 "../Modelcards/90nm_ngspice.lib" 1 "" 0 "" 0 "" 0 "" 0>
+  <SpiceInclude SpiceInclude1 1 570 20 -34 16 0 0 "../Modelcards/90nm_ngspice.lib" 1 "" 0 "" 0 "" 0 "" 0>
+  <SpiceInclude SpiceInclude2 0 570 90 -34 16 0 0 "../Modelcards/90nm_xyce.lib" 1 "" 0 "" 0 "" 0 "" 0>
+  <.CUSTOMSIM CUSTOM1 1 540 160 0 51 0 0 "pre_osdi ekv3.osdi\n" 1 "" 0 "" 0>
 </Components>
 <Wires>
   <220 170 260 170 "" 0 0 0 "">
