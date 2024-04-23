@@ -5,7 +5,7 @@ VBIC Gummel Test Ic=f(Vc,Vb)
 VB B 0 0.5
 VC C 0 1.0
 VS S 0 0.0
-XQ1 C B 0 S T qnva le=20.02 m=2 par1=1
+XQ1 C B 0 S qnva le=20.02 m=2 par1=1
 
 .control
 pre_osdi ../../../osdilibs/vbic_1p3.osdi
