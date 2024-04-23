@@ -51,6 +51,7 @@ openvaf -D__NGSPICE__ -o r2_et_cmc.osdi ../code/r2_cmc/vacode/r2_et_cmc.va
 openvaf -D__NGSPICE__ -o r3_cmc.osdi ../code/r3_cmc/vacode/r3_cmc.va
 openvaf -D__NGSPICE__ -o vbic_4T_et_cf.osdi ../code/vbic/vacode/vbic_4T_et_cf.va
 openvaf -D__NGSPICE__ -o vbic_1p3.osdi ../code/vbic/vacode/vbic_1p3.va
+openvaf -D__NGSPICE__ -DfiveTerminal -o vbic_1p3_5t.osdi ../code/vbic/vacode/vbic_1p3.va
 
 echo done
 

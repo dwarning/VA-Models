@@ -192,27 +192,40 @@
 //
 
 `ifdef threeTerminal
-`ifdef __XYCE__
-    module vbic13_va(c,b,e);
-`else
-    module vbic13(c,b,e);
-`endif
+    `ifdef __XYCE__
+        module vbic13_va(c,b,e);
+    `else
+        module vbic13(c,b,e);
+    `endif
     inout       c,b,e;                           // external nodes
     electrical  c,b,e;
     thermal     dt;                              // self-heating local temperature rise node
     electrical  cx,ci,bx,bi,ei,bp,xf1,xf2;       // internal nodes
     `undef fourTerminal
 `else
-`ifdef __XYCE__
-    module vbic13_4t_va(c,b,e,s);
-`else
-    module vbic13_4t(c,b,e,s);
-`endif
-    inout       c,b,e,s;                         // external nodes
-    electrical  c,b,e,s;
-    thermal     dt;                              // self-heating local temperature rise node
-    electrical  cx,ci,bx,bi,ei,bp,si,xf1,xf2;    // internal nodes
-    `define fourTerminal
+    `ifdef fiveTerminal
+        `ifdef __XYCE__
+            module vbic13_5t_va(c,b,e,s,dt);
+        `else
+            module vbic13_5t(c,b,e,s,dt);
+        `endif
+        inout       c,b,e,s,dt;                      // external nodes
+        electrical  c,b,e,s;
+        thermal     dt;                              // self-heating temperature rise node
+        electrical  cx,ci,bx,bi,ei,bp,si,xf1,xf2;    // internal nodes
+        `define fourTerminal
+    `else
+        `ifdef __XYCE__
+            module vbic13_4t_va(c,b,e,s);
+        `else
+            module vbic13_4t(c,b,e,s);
+        `endif
+        inout       c,b,e,s;                         // external nodes
+        electrical  c,b,e,s;
+        thermal     dt;                              // self-heating local temperature rise node
+        electrical  cx,ci,bx,bi,ei,bp,si,xf1,xf2;    // internal nodes
+        `define fourTerminal
+    `endif
 `endif
 
 `ifdef __XYCE__
@@ -687,11 +700,11 @@ analog begin : analogBlock
 `ifdef __NGSPICE__
         dt_et    = $limit(Temp(b_rth),"limitlog",100);
 `else
-`ifdef __XYCE__
+    `ifdef __XYCE__
         dt_et    = $limit(Temp(b_rth),"limRTH");
-`else
+    `else
         dt_et    =  Temp(b_rth);
-`endif
+    `endif
 `endif
         tdevC    = $temperature+trise+dt_et-`TABS_NIST2004;
         `CLIPB1p0(tdevC,tdevC,tminclip,tmaxclip)

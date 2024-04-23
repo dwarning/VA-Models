@@ -1,6 +1,6 @@
 <Qucs Schematic 24.2.1>
 <Properties>
-  <View=-30,-60,997,546,1.15969,0,0>
+  <View=-30,-60,1044,546,1.15969,0,0>
   <Grid=10,10,1>
   <DataSet=npn_ic_vc_ib_qs_sfh.dat>
   <DataDisplay=npn_ic_vc_ib_qs_sfh.dpl>
@@ -24,11 +24,11 @@
   <.SW SW1 1 190 290 0 71 0 0 "DC1" 1 "lin" 1 "V1" 1 "0" 1 "2" 1 "201" 1 "false" 0>
   <GND * 1 380 230 0 0 0 0>
   <Vdc V1 1 380 140 18 -26 0 1 "2.0" 1>
-  <.CUSTOMSIM CUSTOM1 1 790 350 0 51 0 0 "\npre_osdi vbic_1p3.osdi\n" 1 "" 0 "" 0>
+  <.CUSTOMSIM CUSTOM1 1 790 350 0 51 0 0 "\npre_osdi vbic_1p3_5t.osdi\n" 1 "" 0 "" 0>
   <SpiceInclude SpiceInclude1 1 480 370 -33 16 0 0 "../Modelcards/Infineon_VBIC.lib" 1 "" 0 "" 0 "" 0 "" 0>
   <.SW SW2 1 330 290 0 71 0 0 "SW1" 1 "lin" 1 "I1" 1 "100u" 1 "1000u" 1 "10" 1 "false" 0>
   <Idc I1 1 130 180 -65 -26 1 1 "100u" 1>
-  <BJT_SPICE Q1 1 230 130 -26 34 0 0 "4" 0 "npn" 1 "X" 1 "BFP780\n" 1 "" 0 "" 0 "" 0 "" 0>
+  <BJT_SPICE Q1 1 230 130 -26 34 0 0 "5" 0 "npn" 1 "X" 1 "BFP780\n" 1 "" 0 "" 0 "" 0 "" 0>
 </Components>
 <Wires>
   <230 40 230 100 "" 0 0 0 "">
@@ -42,11 +42,14 @@
   <380 40 380 110 "" 0 0 0 "">
   <260 130 280 130 "" 0 0 0 "">
   <280 130 280 230 "" 0 0 0 "">
+  <180 150 200 150 "" 0 0 0 "">
   <230 40 230 40 "C" 240 10 0 "">
+  <180 150 180 150 "Tj" 180 160 0 "">
 </Wires>
 <Diagrams>
-  <Rect 570 282 386 242 3 #c0c0c0 1 00 1 -1 0.2 1 1 -1 0.5 1 1 -1 0.5 1 315 0 225 0 0 0 "" "" "">
+  <Rect 570 282 386 242 3 #c0c0c0 1 00 1 0 0.2 2 1 -0.0138829 0.05 0.168001 1 -1 0.5 1 315 0 225 0 0 0 "" "" "">
 	<"ngspice/sw1.i(pr1)" #0000ff 0 3 0 0 0>
+	<"ngspice/sw1.v(tj)" #ff0000 0 3 0 0 1>
   </Rect>
 </Diagrams>
 <Paintings>

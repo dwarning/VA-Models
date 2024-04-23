@@ -14,8 +14,8 @@
 *   Version 1.1 October 2015
 ***************************************************************
 *.OPTION TNOM=25, GMIN= 1.00e-12
-*BFP780 C B E1 E2
-.SUBCKT BFP780 1 2 3 4
+*BFP780 C B E1 E2 T
+.SUBCKT BFP780 1 2 3 4 5
 *
 CCEPAR 11 33  800E-015
 *
@@ -57,10 +57,10 @@ D2 44 22 Diode_fbd
 + RS=1
 + Tnom=25)
 *
-NQ1 11 22 33 44 M_BFP780
+NQ1 11 22 33 44 5 M_BFP780
 *
 .ENDS BFP780
-.MODEL  M_BFP780 vbic13_4t (
+.MODEL  M_BFP780 vbic13_5t (
 + Type=1
 + Tnom=25
 + Cbeo=2.47E-012
