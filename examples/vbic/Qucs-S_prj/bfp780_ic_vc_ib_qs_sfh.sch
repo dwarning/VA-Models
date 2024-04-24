@@ -1,9 +1,9 @@
 <Qucs Schematic 24.2.1>
 <Properties>
-  <View=-30,-60,1044,546,1.15969,0,0>
+  <View=-30,-63,1007,549,1.14851,0,0>
   <Grid=10,10,1>
-  <DataSet=npn_ic_vc_ib_qs_sfh.dat>
-  <DataDisplay=npn_ic_vc_ib_qs_sfh.dpl>
+  <DataSet=bfp780_ic_vc_ib_qs_sfh.dat>
+  <DataDisplay=bfp780_ic_vc_ib_qs_sfh.dpl>
   <OpenDisplay=0>
   <Script=hic2_out.m>
   <RunScript=0>
