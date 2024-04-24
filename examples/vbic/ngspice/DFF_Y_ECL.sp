@@ -27,7 +27,7 @@ NQVLGNPN5 NET10 NET11 NET9 VEE NPN_VBIC_VLG sw_et=0
 NQVLGNPN4 NET11 NET6 NET5 VEE NPN_VBIC_VLG sw_et=0
 NQVLGNPN3 NET6 D NET8 VEE NPN_VBIC_VLG sw_et=0
 
-.include ../Modelcards/vbic.mod
+.include ../Modelcards/vbic_va.mod
 
 .SAVE V(D) V(CLK) V(Q)
 .control
