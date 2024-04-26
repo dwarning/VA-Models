@@ -1,6 +1,6 @@
 <Qucs Schematic 24.2.1>
 <Properties>
-  <View=-30,-53,987,547,1.17109,0,0>
+  <View=-30,-62,1017,556,1.13754,0,0>
   <Grid=10,10,1>
   <DataSet=npn_ic_vc_ib_sfh.dat>
   <DataDisplay=npn_ic_vc_ib_sfh.dpl>
@@ -22,14 +22,14 @@
   <GND * 1 340 250 0 0 0 0>
   <GND * 1 440 250 0 0 0 0>
   <Vdc VC 1 440 160 18 -26 0 1 "2.0" 1>
+  <BJT_SPICE Q1 1 290 150 -26 34 0 0 "5" 1 "npn" 1 "N" 1 "hicumL2va" 1 "" 0 "" 0 "" 0 "" 0>
   <GND * 1 150 250 0 0 0 0>
   <Idc IB 1 150 200 18 -26 0 1 "1 mA" 1>
+  <.SW SW1 1 200 290 0 51 0 0 "DC1" 1 "lin" 1 "VC" 1 "0" 1 "2" 1 "201" 1 "false" 0>
+  <.CUSTOMSIM CUSTOM1 1 20 20 0 51 0 0 "\npre_osdi hicumL2.osdi" 1 "" 0 "custom#ac1#.plot;custom#ac1#.print" 0>
+  <.SW SW2 1 330 290 0 51 0 0 "SW1" 1 "lin" 1 "IB" 1 "10u" 1 "100u" 1 "10" 1 "false" 0>
   <.SW SW3 1 570 330 0 51 0 0 "SW2" 1 "list" 1 "@hicumL2va[flsh]" 1 "5 Ohm" 0 "50 Ohm" 0 "[1 0]" 1 "true" 1>
-  <BJT_SPICE Q1 1 290 150 -26 34 0 0 "5" 1 "npn" 1 "N" 1 "vbic99_dc" 1 "" 0 "" 0 "" 0 "" 0>
-  <SpiceInclude SpiceInclude1 1 50 430 -33 16 0 0 "../Modelcards/vbic_va.mod" 1 "" 0 "" 0 "" 0 "" 0>
-  <.CUSTOMSIM CUSTOM1 1 20 20 0 51 0 0 "\npre_osdi vbic_1p3_5t.osdi\n" 1 "" 0 "" 0>
-  <.SW SW2 1 330 290 0 51 0 0 "SW1" 1 "lin" 1 "IB" 1 "100u" 1 "1000u" 1 "10" 1 "false" 0>
-  <.SW SW1 1 200 290 0 51 0 0 "DC1" 1 "lin" 1 "VC" 1 "0" 1 "5" 1 "501" 1 "false" 0>
+  <SpiceInclude SpiceInclude1 1 50 430 -33 16 0 0 "../Modelcards/examples.lib" 1 "" 0 "" 0 "" 0 "" 0>
 </Components>
 <Wires>
   <290 60 290 120 "" 0 0 0 "">
