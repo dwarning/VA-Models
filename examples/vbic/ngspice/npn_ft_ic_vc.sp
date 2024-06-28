@@ -1,4 +1,4 @@
-npn13G2 ft = f(Ic) Vce: 0.8 ... 1.6V
+npn13G2 ft = f(Ic) Vce: 0.8 ... 1.2V
 
 .include ../Modelcards/SG13G2_hbt_woStatistics.hsp.lib
 .param nx=8
@@ -26,7 +26,7 @@ set scratch=$curplot     $ store its name to 'scratch'
 setplot $scratch         $ make 'scratch' the active plot
 let ic=unitvec(ft_runs)  $ create a vector in plot 'scratch' to store ic data
 let nvc = 0
-foreach myvc 0.8 1.2 1.6
+foreach myvc 0.8 1.0 1.2
   set nvcs = "$&nvc"
   alter @vce[dc] = $myvc
   let ft{$nvcs}=vector(ft_runs)  $ create a vector in plot 'scratch' to store ft data
