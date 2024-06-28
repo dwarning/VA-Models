@@ -65,7 +65,7 @@
 +El=le*1e6
 +selft=1
 
-NQnpn13G2 c b e s1 npn13G2_NX_vbic dtemp=dtemp m=1
+NQnpn13G2 c b e s1 npn13G2_NX_vbic dtemp=dtemp m=1 sw_et=selft
 
 .model npn13G2_NX_vbic vbic13_4t type=1
 + level = 9
