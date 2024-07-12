@@ -11,7 +11,7 @@ l 2 b 1
 c 2 0 1
 ib 0 b dc 0.0 ac 1.0
 ic 0 c dc 0.001
-XQ1 C B 0 0 npn13G2 nx=nx selft=0
+XQ1 C B 0 0 npn13G2 nx=nx selft=1
 
 .control
 pre_osdi ../../../osdilibs/vbic_1p3.osdi
