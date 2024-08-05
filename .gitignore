@@ -4,10 +4,10 @@
 #
 # (compile "git ls-files -i --exclude-standard")
 
-code/admslibs
-code/admslibs/*.*
-code/osdilibs
-code/osdilibs/*.*
+admslibs
+admslibs/*.*
+osdilibs
+osdilibs/*.*
 *.vlog
 *.osdi
 code/*/*/.libs
@@ -23,6 +23,10 @@ code/*/*/.libs
 *.so
 *.la
 *.o
+*.o1
+*.o2
+*.o3
+*.o4
 *.lo
 *.C
 *.h
@@ -30,3 +34,6 @@ code/*/*/.libs
 *.adms
 .headerstring*
 .registerstring*
+*.out
+ngspiceCkt
+qa-test/*/*/results
