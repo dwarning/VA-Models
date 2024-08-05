@@ -23,6 +23,10 @@ code/*/*/.libs
 *.so
 *.la
 *.o
+*.o1
+*.o2
+*.o3
+*.o4
 *.lo
 *.C
 *.h
@@ -30,3 +34,6 @@ code/*/*/.libs
 *.adms
 .headerstring*
 .registerstring*
+*.out
+ngspiceCkt
+qa-test/*/*/results
