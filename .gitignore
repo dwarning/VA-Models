@@ -4,10 +4,10 @@
 #
 # (compile "git ls-files -i --exclude-standard")
 
-code/admslibs
-code/admslibs/*.*
-code/osdilibs
-code/osdilibs/*.*
+admslibs
+admslibs/*.*
+osdilibs
+osdilibs/*.*
 *.vlog
 *.osdi
 code/*/*/.libs
