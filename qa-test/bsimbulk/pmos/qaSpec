@@ -390,7 +390,7 @@ modelParameters             igbmod=0 igcmod=0 gidlmod=0
 test                        acvd_diode_lt
 biases                      V(s)=0 V(b)=0
 biasList                    V(g)=-0.25,-0.5,-0.75,-1.0
-biasSweep                   V(d)=-1.1999,0.2,0.2001
+biasSweep                   V(d)=-1.2,0.2,0.2
 outputs                     G(d,b) G(s,b) C(d,b) C(s,b) C(b,b) G(b,b)
 instanceParameters          w=0.5e-6 l=1e-6  as=5e-12 ad=5e-12 ps=21e-6 pd=21e-6
 modelParameters             parameters/pmosParameters
