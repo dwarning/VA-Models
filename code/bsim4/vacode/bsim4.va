@@ -1360,7 +1360,7 @@ module bsim4va(d, g, s, b);
     `MPRcc( ptvoff  ,0.0              ,""            ,0.0           ,1.0     ,"")
 
     `MPIcc( wpemod ,0              ,""            ,0             ,1          ,"")
-    `IPRcc( sca  ,0.0              ,""            ,0.0           ,1.0        ,"")
+    `IPRcc( sca  ,0.0              ,""            ,0.0           ,5.0        ,"")
     `IPRcc( scb  ,0.0              ,""            ,0.0           ,1.0        ,"")
     `IPRcc( scc  ,0.0              ,""            ,0.0           ,1.0        ,"")
     `MPRcc( web  ,0.0              ,""            ,0.0           ,1.0        ,"")
