@@ -83,10 +83,8 @@ module ekv26_va(d,g,s,b);
     real deltaL, Leq;    // channel length reduction
     real beta;           // transconductance factor
     real nslope;         // slope factor
-    real Ispec;          // specific current
     real Vt, Vtn;        // k*T/q, Vt*n
 //    real gm, gms, gmbs, gds;
-    real gms;
     real isub, Isub;
     real inv_Vt, Vt_01, Vt_2, Vt_4, Vt_Vt, Vt_Vt_2, Vt_Vt_16;
     real eps_COX, eps_COX_W, eps_COX_L;
@@ -203,7 +201,7 @@ module ekv26_va(d,g,s,b);
     `MPRco( THETA  ,  0.0    , "1/V"   , 0.0 , inf ,   "Mobility reduction coefficient")
     `MPRco( E0     ,  1.0E8  , "V/m"   , 25e3, inf ,   "Mobility reduction coefficient")
     //*** Velocity sat./channel length mod. parameters (short-channel)
-    `MPRco( UCRIT  ,  2.0E6  , "V/m"   , 1e6 , 25e6 ,  "Longitudinal critical field")
+    `MPRco( UCRIT  ,  2.0E6  , "V/m"   , 1e6 , inf ,   "Longitudinal critical field")
     `MPRnb( UCEX   ,  0.8    , ""      ,               "Longitudinal critical field temperature exponent")
     `MPRco( LAMBDA ,  0.8    , ""      , 0.0 , 3.0 ,   "Depletion length coefficient (channel length modulation)")
     //*** Process related parameters
@@ -217,7 +215,7 @@ module ekv26_va(d,g,s,b);
     `MPRoo( LK     ,  0.4E-6  , "m"    , 0.0 , inf ,   "Reverse short channel effect characteristic length")
     //*** Substrate current parameters
     `MPRco( IBA    ,  5.0E8   , "1/m"  , 0.0 , inf ,   "First impact ionization coefficient")
-    `MPRco( IBB    ,  4.0E8   , "V/m"  , 0.0 , inf ,   "Second impact ionization coefficient")
+    `MPRoo( IBB    ,  4.0E8   , "V/m"  , 0.0 , inf ,   "Second impact ionization coefficient")
     `MPRnb( IBBT   ,  9.0e-4  , "1/K"  ,               "Temperature coefficient for IBB")
     `MPRco( IBN    ,  1.0     , ""     , 0.0 , inf ,   "Saturation voltage factor for impact ionization")
     //*** Series resistance parameters
@@ -249,9 +247,9 @@ module ekv26_va(d,g,s,b);
     `MPRco( cjswg      ,  1.0E-12  , "" ,      0.0 , inf  , "")
     `MPRco( xjbv       ,  0.0      , "" ,      0.0 , inf  , "")
     `MPRco( bv         ,  10.0     , "" ,      0.0 , inf  , "")
-    `MPRco( njts       ,  1.0      , "" ,      0.0 , inf  , "")
-    `MPRco( njtssw     ,  1.0      , "" ,      0.0 , inf  , "")
-    `MPRco( njtsswg    ,  1.0      , "" ,      0.0 , inf  , "")
+    `MPRoo( njts       ,  1.0      , "" ,      0.0 , inf  , "")
+    `MPRoo( njtssw     ,  1.0      , "" ,      0.0 , inf  , "")
+    `MPRoo( njtsswg    ,  1.0      , "" ,      0.0 , inf  , "")
     `MPRco( vts        ,  0.0      , "" ,      0.0 , inf  , "")
     `MPRco( vtssw      ,  0.0      , "" ,      0.0 , inf  , "")
     `MPRco( vtsswg     ,  0.0      , "" ,      0.0 , inf  , "")
@@ -266,11 +264,19 @@ module ekv26_va(d,g,s,b);
     `MPRco( tnjtssw    ,  0.0      , "" ,      0.0 , inf  , "")
     `MPRco( tnjtsswg   ,  0.0      , "" ,      0.0 , inf  , "")
 
-    `OPM(gm, "A/V", "Transconductance")
+    `OPM(Id, "A", "Drain current")
+    `OPM(Ispec, "A", "Specific current")
+    `OPM(IC, "-", "Inversion coefficient")
+    `OPM(n0, "-", "Slope factor")
+    `OPM(gm, "A/V", "Gate transconductance")
+    `OPM(gms, "A/V", "Source transconductance")
     `OPM(gds, "A/V", "Output conductance")
     `OPM(gmbs, "A/V", "Substrate conductance")
+    `OPM(Rn, "Ohm", "Input-referred thermal noise resistance")
+    `OPM(Vnth, "V/sqrt(Hz)", "Input-referred thermal noise voltage")
+    `OPM(gamman, "-", "Thermal noise excess factor")
+    `OPM(Vnfl, "V/sqrt(Hz)", "Input-referred flicker noise voltage at 1 Hz")
     `OPP(Vdsat, "V", "Saturation voltage")
-    `OPM(Id, "A", "Drain current")
 
     analog begin
         `INITIAL_MODEL
@@ -413,6 +419,7 @@ module ekv26_va(d,g,s,b);
         `y_fv(tmp1,yk)
 
         if_     = yk*(1.0 + yk);
+        IC = if_;
         sqrt_if = sqrt(if_);
         dif_dv  = yk;
         //  Saturation voltage:
@@ -501,6 +508,7 @@ module ekv26_va(d,g,s,b);
          * of nslope for VP->-PHI  */
         sqrt_PHI_VP = sqrt(PHI_T+VP+Vt_4);   //    mb  95/12/19  introduced Vt_4
         nslope = 1.0 + GAMMA_S/(2.0*sqrt_PHI_VP);
+        n0 = 1.0 + GAMMA_S/(2.0*sqrt_PHI);
         //  Drain current:
         if_ir = if_-irprime;
         Ispec = Vt_Vt_2 * nslope * beta;
@@ -626,6 +634,10 @@ module ekv26_va(d,g,s,b);
         gms = -Ispec*((dn_dVS + dbeta_dVS)*if_ir + dif_dVS - dirprime_dVS);
         gm =   Ispec*((dn_dVG + dbeta_dVG)*if_ir + dif_dVG - dirprime_dVG);
         gmbs = gms - gm - gds;
+        Rn = Gn/(gm*gm);
+        gamman = gm*Rn;
+        Vnth = sqrt(4 * `P_K * T * Rn);
+        Vnfl = sqrt(KF / (Weff * NS * Leff * COX));
         // S/D resistance corrections including W and DW
         if ($param_given(HDIF)==1) begin
             RSeff = (RSH*HDIF)/(Weff-DW);
