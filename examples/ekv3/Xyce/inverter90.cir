@@ -1,0 +1,28 @@
+* EKV 3.02
+* simple inverter
+
+.param Vcc = 1.2
+
+.include ../Modelcards/90nm_xyce.lib
+
+* the voltage sources: 
+Vdd vdd 0 DC 'Vcc'
+V1 in 0 pulse(0 'Vcc' 0p 200p 100p 1n 2n)
+Vmeas vss 0 0
+
+Xnot1 in vdd vss out inv1
+*Rout out 0 10k
+
+.subckt inv1 a vdd vss z
+Yekv3_rf mp1 z a vdd vdd pmos90 W=0.2u L=0.09u as=0.2p ad=0.2p ps=2u pd=2u
+Yekv3_rf mn1 z a vss vss nmos90 W=0.1u L=0.09u as=0.1p ad=0.1p ps=1u pd=1u
+c3  a     vss   0.384f
+c2  z     vss   0.576f
+.ends
+
+* simulation command: 
+.tran 10ps 10ns
+
+.print tran v(in) v(out)
+
+.end

@@ -1,8 +1,5 @@
-.SUBCKT nch90 d g s b w=1u l=0.1u nf=1 ad=1e-12 as=1e-12 pd=4e-6 ps=4e-6
-M1 d g s b nmos90 w='w' l='l' nf='nf' ad='ad' as='as' pd='pd' ps='ps'
-.ENDS
-.MODEL NMOS90 NMOS
-+ LEVEL=301
+.MODEL NMOS90 ekv3_rf
+*+ LEVEL=301
 *--------------------------------
 *-- FLAGS AND SETUP PARAMETERS --
 *--------------------------------
@@ -293,11 +290,8 @@ M1 d g s b nmos90 w='w' l='l' nf='nf' ad='ad' as='as' pd='pd' ps='ps'
 +RSBWSH= 50.00
 +RDBWSH= 50.00
 
-.SUBCKT pch90 d g s b w=3u l=0.1u nf=1 ad=3e-12 as=3e-12 pd=8e-6 ps=8e-6
-M1 d g s b pmos90 w='w' l='l' nf='nf' ad='ad' as='as' pd='pd' ps='ps'
-.ENDS
-.MODEL PMOS90 PMOS
-+ LEVEL=301
+.MODEL PMOS90 ekv3_rf
+*+ LEVEL=301
 *--------------------------------
 *-- FLAGS AND SETUP PARAMETERS --
 *--------------------------------

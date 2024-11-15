@@ -1,0 +1,32 @@
+** One-Bit Comparator (Tran): by Weidong Liu 5/16/2000.
+
+Yekv3_rf m1 Anot A Vdd Vdd pmos90 W=0.36u L=0.12u
+Yekv3_rf m2 Anot A 0 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf m3 Bnot B Vdd Vdd  pmos90 W=0.36u L=0.12u
+Yekv3_rf m4 Bnot B 0 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf m5 AorBnot 0 Vdd Vdd pmos90 W=0.18u L=0.36u
+Yekv3_rf m6 AorBnot B 1 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf m7 1 Anot 0 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf m8 Lnot 0 Vdd Vdd pmos90 W=0.18u L=0.36u
+Yekv3_rf m9 Lnot Bnot 2 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf m10 2 A 0 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf m11 Qnot 0 Vdd Vdd pmos90 W=0.36u L=0.36u
+Yekv3_rf m12 Qnot AorBnot 3 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf m13 3 Lnot 0 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf mQLO 8 Qnot Vdd Vdd  pmos90 W=0.36u L=0.12u
+Yekv3_rf mQL1 8 Qnot 0 0 nmos90 W=0.18u L=0.12u
+Yekv3_rf mLTO 9 Lnot Vdd Vdd pmos90 W=0.36u L=0.12u
+Yekv3_rf mLT1 9 Lnot 0 0 nmos90 W=0.18u L=0.12u
+CQ Qnot 0 30f
+CL Lnot 0 10f
+
+Vdd Vdd 0 1.2
+Va A 0  pulse 0 1.2 10ns .1ns .1ns 15ns 30ns
+Vb B 0 0
+
+.tran .1ns 50ns
+.include ../Modelcards/90nm_xyce.lib
+
+.print tran v(A) v(B) v(9) v(8)
+
+.end

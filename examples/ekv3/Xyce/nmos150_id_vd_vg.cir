@@ -1,0 +1,20 @@
+Test of EKV3
+* This one sweeps Vd and creates curves of select Vg, allowing us to plot
+* drain current as function of drain voltage. 
+*
+
+.include "../Modelcards/ekv3_150nm.mod"
+Yekv3_rf M1 D G S B NMOS150 W=150e-9 L=150e-9 NF=1
+
+Vg G Ga DC 0v
+Vgprobe 0 Ga 0
+Vd D Da DC 0v
+Vdprobe 0 Da 0
+Vs S Sa DC 0v
+Vsprobe 0 Sa 0
+Vb B Ba DC 0v
+Vbprobe 0 Ba 0
+
+.dc Vd 0 5 0.01  Vg LIST 0.05 1.0 2.0 3.0 3.3
+.print DC V(d,da) V(g,ga)  I(Vdprobe) I(Vgprobe) I(Vsprobe) I(Vbprobe)
+.end

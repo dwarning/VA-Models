@@ -1,0 +1,27 @@
+THIS CIRCUIT TESTS THE EKV3 MODEL in an inverter
+
+.subckt INVERTER IN OUT VDD GND
+Yekv3_rf MN1 OUT IN GND GND NMOS150 W=10.0e-6 L=0.1e-6 AS=5e-12 AD=5e-12 PS=21e-6 PD=21e-6
+Yekv3_rf MP1 OUT IN VDD VDD PMOS150 W=10.0e-6 L=0.1e-6 AS=5e-12 AD=5e-12 PS=21e-6 PD=21e-6
+.ends
+
+* A small load (R1, C1) is applied to the output node, VOUT. The input signal
+* is at 3.3V for 1.5us and then at 0V for 1.5us. The voltage at VOUT is high (3.2V)
+* when VIN1 is low and vice versa.
+** Analysis setup **
+*
+.tran 20ns 30us
+.print tran PRECISION=10 WIDTH=19 {v(vout)+1.0} {v(in)+1.0} v(1)
+.options timeint reltol=5e-3 abstol=1e-3
+VDDdev 	VDD	0	3.3V
+RIN	IN	1	1K
+VIN1  1	0  3.3V PULSE (3.3V 0V 1.5us 5ns 5ns 1.5us 3.01us)
+R1    VOUT  0  10K  
+C2    VOUT  0  0.1p
+XINV1 IN VOUT VDD 0 INVERTER
+
+.include ../Modelcards/ekv3_150nm.mod
+.end
+
+
+

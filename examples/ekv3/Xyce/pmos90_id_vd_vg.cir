@@ -1,0 +1,20 @@
+EKV 3.02 PMOS Test
+
+* one voltage source per MOS terminal:
+VD d 0 -0.05
+VG g 0 0.0
+VS s 0 0.0
+VB b 0 0.0
+
+* model definitions:
+.include ../Modelcards/90nm_xyce.lib
+
+Yekv3_rf m1 d g s b pmos90 W=2e-6 L=0.1e-6
+
+.step VB 0 2.0 0.5
+.dc VG -1.2 0 0.01
+.print dc format=gnuplot v(g) i(VD)
+*.dc Vd 0 -3.3 -0.01 VG 0 -3.3 -0.3
+*.print dc -i(VD)
+
+.end

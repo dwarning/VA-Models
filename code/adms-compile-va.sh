@@ -50,6 +50,11 @@ buildxyceplugin ekv26.va ../../../admslibs
 rm -rfd .libs/
 rm *.la *.log
 cd ../..
+cd ./ekv3/vacode
+buildxyceplugin ekv3.va ../../../admslibs
+rm -rfd .libs/
+rm *.la *.log
+cd ../..
 #buildxyceplugin ../EPFL-HEMT/vacode/epfl_hemt.va .
 #buildxyceplugin ../fbh_hbt/vacode/fbh_hbt-2_1.va .
 #buildxyceplugin ../fbh_hbt/vacode/fbh_hbt-2_3.va .

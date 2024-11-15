@@ -1,0 +1,130 @@
+Test of EKV3
+* This one sweeps Vd and creates curves of select Vg, allowing us to plot
+* drain current as function of drain voltage. 
+*
+
+Yekv3_rf M1 D G S B PMOS150 W=150e-9 L=150e-9  NF=1
+
+Vg G Ga DC 0v
+Vgprobe 0 Ga 0
+Vd D Da DC 0v
+Vdprobe 0 Da 0
+Vs S Sa DC 0v
+Vsprobe 0 Sa 0
+Vb B Ba DC 0v
+Vbprobe 0 Ba 0
+
+.dc Vd 0 -5 -0.01  Vg LIST -0.05 -1.0 -2.0 -3.0 -3.3
+.print DC V(d,da) V(g,ga)  I(Vdprobe) I(Vgprobe) I(Vsprobe) I(Vbprobe)
+
+.print SENS V(d,da) V(g,ga)
+.sens param=PMOS150:VTO,PMOS150:RLX
++ objfunc={I(Vsprobe)}
+.options SENSITIVITY direct=1 adjoint=0 forcefd=1
+*.options SENSITIVITY direct=1 adjoint=0 forcedevicefd=1
+
+
+***  EKV v301.01 indicative parameters for 150nm CMOS (C) EK, AB, MB 2006
+*******************************************************************************
+*** data files for model evaluation are also <a href="http://legwww.epfl.ch/ekv/ekv30s3/">available</a>
+*******************************************************************************
+* Intrinsic parameters for a n-mosfet are based on [2] and *NOT* intended 
+* for use in real design. The set includes all intrinsic model parameters.
+* Use of extrinsic model parameters and models (series resistance, 
+
+* junction currents and capacitances) is in general simulator-dependent.
+* Parameters do *NOT* correspond to a particular technology but
+* have reasonable values for standard 150nm CMOS.
+*******************************************************************************
+*  [2] Scaling Issues in an 0.15&micro;m CMOS Technology with EKV3.0
+
+*      E. Kitonaki, A. Bazigos, M. Bucher, H. Puchner, S. Bhardwaj, Y. Papananos
+*      International Conference MIXDES 2006 Gdynia, pp. 151-158, Poland 22-24 June 2006
+*******************************************************************************
+* EKV3.0 model card for NMOS devices indicative of an 0.15um CMOS technology
+
+*******************************************************************************
+*
+.MODEL NMOS150 ekv3_rf 
+* Flags
+*+ LEVEL=302
++ SIGN = 1 TG = -1 
+* Scale parameters
++ SCALE = 1.0 XL = 0.0 XW = 0.0
+* Cgate parameters
++ COX = 8.58E-3 GAMMAG = 18.4 AQMA = 0.0 AQMI = 0.0 ETAQM = 0.75
+* Nch. parameters
++ VTO = 400.0E-3 PHIF = 450.0E-3 GAMMA = 300.0E-3 XJ = 30.0E-9 N0 = 1.025
+* Mobility
++ KP = 390.0E-6 E0 = 438.0E+6 E1 = 159.0E+6 ETA = 0.57 ZC = 1.0E-6 THC = 0.0
+* Long-ch. gds degr.
++ PDITS = 2.58E-6 PDITSD = 0.91 PDITSL = 0.0 FPROUT = 1.85E+6 DDITS = 0.1
+* Matching par.
++ AVTO = 0.0 AKP = 0.0 AGAMMA = 0.0
+* Vsat & CLM par.
++ UCRIT = 5.0E+6 DELTA = 1.5 LAMBDA = 0.5 ACLM = 0.85
+* Geometrical par.
++ DL = -16.7E-9 DLC = -23.0E-9 WDL = 0.0 LL = 0.0 LLN = 1.0 DW = -45.3E-9 DWC = 0.0 LDW = 0.0
+* Charge sharing
++ LETA0 = 1.0E+6 LETA = 1.3 LETA2 = 0.0 WETA = 1.0 NCS = 0.5
+* DIBL
++ ETAD = 0.75 SIGMAD = 1.0
+* RSCE
++ LR = 100E-9 QLR = 580E-6 NLR = 100.0E-3 FLR = 2
+* INWE
++ WR = 80.0E-9 QWR = 500.0E-6 NWR = 12.0E-3
+* Series resistance
++ RLX = 170.0E-6
+* Overlap & fringing
++ LOV = 25.0E-9 GAMMAOV = 5.0 VFBOV = 0.0 KJF = 150.0E-12 CJF = 300.0E-3 
+* Gate current 
++ KG = 50.0E-6 XB = 5.5 EB = 21.0E+9 LOVIG = 40.0E-12
+* Temperature par.
++ TNOM = 30.0 TCV = 600.0E-6 BEX = -1.6 TE0EX = -4.15 TE1EX = 0.0 TETA = 2.0E-3 
++ UCEX = 1.2 TLAMBDA = 0.15 TCVL = 0.0 TCVW = 0.0 TCVWL = 0.0
+*
+*****************************************************************************************
+
+* EKV3.0 model card for PMOS devices indicative of an 0.15um CMOS technology
+****************************************************************************************
+*
+.MODEL PMOS150 ekv3_rf 
+*+ LEVEL=302
+* Flags
++ SIGN = -1 TG = 1
+* Scale parameters
++ SCALE = 1.0 XL = 0.0 XW = 0.0
+* Cgate parameters
++ COX = 8.80E-3 GAMMAG = 300 AQMA = 400.0E-3 AQMI = 1.0 ETAQM = 0.75
+* Nch. parameters 
++ VTO = -940.0E-3 PHIF = 452.0E-3 GAMMA = 610.0E-3 XJ = 50.0E-9 N0 = 1.050
+* Mobility
++ KP = 82.0E-6 E0 = 2.10E+6 E1 = 760.0E+6 ETA = 0.0 ZC = 1.0E-6 THC = 0.0
+* Long-ch. gds degr.
++ PDITS = 0.0 PDITSD = 0.9 PDITSL = 0.0 FPROUT = 1.4E+6 DDITS = 0.16
+* Matching par.
++ AVTO = 0.0 AKP = 0.0 AGAMMA = 0.0
+* Vsat & CLM par. 
++ UCRIT = 5.5E+6 DELTA = 2.0 LAMBDA = 0.54 ACLM = 0.83 
+* Geometrical par.
++ DL = -24.2E-9 DLC = -0.0E-9 WDL = 7.0E-15 LL = 0.0 LLN = 1.0 DW = -7.2E-9 DWC = 0.0 LDW = 500.0E-18
+* Charge sharing
++ LETA0 = 0.0 LETA = 1.0 LETA2 = 0.0 WETA = 1.0 NCS = 1.0
+* DIBL
++ ETAD = 1.1 SIGMAD = 0.3
+* RSCE
++ LR = 55.0E-9 QLR = -2.9E-3 NLR = 11.0E-3 FLR = 1.34
+* INWE
++ WR = 80.0E-9 QWR = 4.5E-3 NWR = 14.5E-3
+* Series resistance
++ RLX = 700.0E-6
+* Overlap & fringing
++ LOV = 16.0E-9 GAMMAOV = 4.2 VFBOV = 0.0 KJF = 210.0E-12 CJF = 300.0E-3
+* Gate current
++ KG = 10.0E-6 XB = 5.5 EB = 21.0E+9 LOVIG = 3.0E-12
+* Temperature par.
++ TNOM = 30.0 TCV = -1.250E-3 BEX = -850.0E-3 TE0EX = 0.0 TE1EX = -4.0 TETA = 0.0 
++ UCEX = 1.7 TLAMBDA = 0.0 TCVL = 0.0 TCVW = 0.0 TCVWL = 0.0
+
+.end
+
