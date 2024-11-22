@@ -119,6 +119,10 @@ adms-compile-va.bat for MS Windows
 ## Binary packages
 
 Released are pre-compiled models for linux (Ubuntu 22.04 checked) and Windows 10 (64bit) ready for usage with osdi configured ngspice version > 39.
+For Windows (only 64 bit versions 10 and 11 are verified) [Microsoft Visual C++ 2015 - 2022 Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=52685) package has to be installed.
+
+32-Bit-Version: https://aka.ms/vs/17/release/vc_redist.x86.exe
+64-Bit-Version: https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 ## Project structure
 
@@ -138,6 +142,8 @@ Copy the *.osdi* files from directory osdilibs to the place where the NGSPICE co
 
 Other way (as shown in the example files) is the load command *pre_osdi ../../osdilibs/bsimcmg.osdi* in the NGSPICE control section. 
 You can also extend the ngspice environment variable SPICE_LIB_DIR to your_path/code/osdilibs
+
+Third and preferable option is to use NGSPICE_OSDI_DIR environment variable in your $HOME/.profile (linux) or Windows environment variables with the path to the *.osdi file.
 
 It is important that the *.model* card use the name of the Verilog-A module, e.g. in case of bsimcmg: *.model BSIMCMG_N bsimcmg_va*.
 
@@ -165,6 +171,8 @@ gnuplot -p mosamp2.plt
 ```
 
 ## General Usage Instructions Qucs-S
+
+General the usage instructions from ngspice are applicable and preferred.
 
 For several models Qucs-S example schematics are provided. Because qucs-s doesn't support loading osdi shared libs
 with relative pathes in schematics "Nutmeg script" the user have to edit the local .spiceinit file for ngspice
