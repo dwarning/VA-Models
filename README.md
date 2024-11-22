@@ -119,10 +119,11 @@ adms-compile-va.bat for MS Windows
 ## Binary packages
 
 Released are pre-compiled models for linux (Ubuntu 22.04 checked) and Windows 10 (64bit) ready for usage with osdi configured ngspice version > 39.
+
 For Windows (only 64 bit versions 10 and 11 are verified) [Microsoft Visual C++ 2015 - 2022 Redistributable](https://www.microsoft.com/en-us/download/details.aspx?id=52685) package has to be installed.
 
-32-Bit-Version: https://aka.ms/vs/17/release/vc_redist.x86.exe
-64-Bit-Version: https://aka.ms/vs/17/release/vc_redist.x64.exe
+    * 32-Bit-Version: https://aka.ms/vs/17/release/vc_redist.x86.exe
+    * 64-Bit-Version: https://aka.ms/vs/17/release/vc_redist.x64.exe
 
 ## Project structure
 
