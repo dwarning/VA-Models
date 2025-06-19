@@ -1,5 +1,9 @@
+Update to version 107.2.1
+Limit parameter XJ and NDEPEDGE > 0 against problems with sqrt()
+
 Xyce: 
 Use specific attributes to activate certain parameter as model and instance parameter.
+Setting op output GDS = 0 for vds < 0 because adms can't mapply-unary
 
 Prevent division by 0 for parameters: MJS, MJD, MJSWS, MJSWD, MJSWGS, MJSWGD and NDR
 

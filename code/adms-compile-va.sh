@@ -24,8 +24,9 @@ rm *.la *.log
 rm -rfd .libs/
 cd ../..
 cd ./bsimbulk/vacode
+buildxyceplugin bsimbulk.va ../../../admslibs
+#buildxyceplugin bsimbulk107.va ../../../admslibs
 #buildxyceplugin bsimbulk106.va ../../../admslibs
-buildxyceplugin bsimbulk107.va ../../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..
