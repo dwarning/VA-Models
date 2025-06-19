@@ -1,3 +1,6 @@
+Update to version 1.1.2
+Introduce IPIoz macro to prevent division by 0
+
 Xyce:
 An explicit "mult" (multiplicity) parameter has been added. Xyce does not support an implicit $mfactor.
 

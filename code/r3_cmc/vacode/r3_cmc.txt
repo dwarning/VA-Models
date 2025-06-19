@@ -1,0 +1,198 @@
+
+/*******************************************************************************
+********************************************************************************
+
+r3_cmc - The CMC 3-terminal resistor model.
+===========================================
+
+This is a single section, geometry and bias dependent resistor model.
+The bias dependence includes self-heating, velocity saturation,
+and depletion conductance modulation.
+
+
+ n1   Re1   i1        i2  Re2   n2           dt
+  o--/\/\/-----(-<-)-----/\/\/--o       -----o-----
+            |         |                 |    |    |
+       -----|         |-----            |    |    |
+       |    |         |    |            |    /    |
+       |   ---       ---   |            |    \   ---
+   Ip1(v)  Cp1       Cp2  (v)Ip2    Pwr(^)   /   Cth
+           ---       ---   |            | Rth\   ---
+       |    |         |    |            |    /    |
+       |    |         |    |            |    |    |
+       ---------------------            -----------
+                 |                           |
+                 |                           |
+                 o                          ---
+                 nc                           -
+
+
+The model includes a non-linear current, plus parasitic current and
+capacitance (with both bias-dependent and bias-independent components,
+for diffused and polysilicon resistors, respectively). Separate end
+resistance parameters are included, to allow separate (negative TCR)
+self-heating to be applied to these elements.
+
+Instance parameters are:
+           w design width  of resistor body
+           l design length of resistor body
+          wd dogbone width (total; not per side)
+          a1 area       of node n1 partition
+          p1 perimeter  of node n1 partition
+          c1 # contacts at node n1 terminal
+          a2 area       of node n2 partition
+          p2 perimeter  of node n2 partition
+          c2 # contacts at node n2 terminal
+       trise local temperature delta to ambient (before self-heating)
+    sw_noise switch for including noise:   0=no 1=yes
+       sw_et switch for self-heating:      0=no 1=yes
+     sw_mman switch for mismatch analysis: 0=no 1=yes
+    nsmm_rsh number of standard deviations of mismatch in rsh
+      nsmm_w number of standard deviations of mismatch in w
+      nsmm_l number of standard deviations of mismatch in l
+
+Contact and end resistance are included via explicit contact
+resistances, which scale reciprocally (and in a stepwise, staircase
+manner) with c1 and c2, and implicit end resistances that scale
+reciprocally (and continuously) with width, through the length offset
+xl. Crudely, as the low field resistance is
+Ro=(Rc/c1)+rsh*(l+xl)/(w+xw)+(Rc/c2)
+and c1 and c2 are roughly proportional to w, the effect of Rc and xl
+is similar. As they appear in series in the total resistance,
+separation of these terms by using test structures of different lengths
+is not possible. Therefore, unless separate characterization of Rc is
+available, for devices where contact self-heating is observable (as an
+increase in effective conductance with Vds bias, for short resistors)
+the electrothermal Rc model should be used. If no contact
+electrothermal effects are observable, either the Rc or xl models
+could be used, with the difference being discrete or continuous
+increase of contact and end region conductance with width. If c1 and
+c2 are not available as netlist parameters, they can be calculated as:
+c[12]=int((max(w,wc+2*wc2e)-2*wc2e+wc2c)/(wc+wc2c))
+
+  |---------  ===
+  |            ^
+  |            |  wc2e=contact to contact region edge spacing
+  |            v
+  |  ----     ===
+  |  |  |      ^
+  |  |  |      |  wc=contact width
+  |  |  |      v
+  |  ----     ===
+  |            ^
+  |            |  wc2c=contact to contact spacing
+  |            v
+  |  ----     ===
+  |  |  |      ^
+  |  |  |      |  wc=contact width
+  |  |  |      v
+  |  ----     ===
+  |            ^
+  |            |  wc2e=contact to contact region edge spacing
+  |            v
+  |---------  ===
+
+This follows as the contact region width is
+wcr=2*wc2e+nc*wc+(nc-1)*wc2c
+and for any resistor, dogbone or not, the minimum wcr is wc+2*wc2e as
+there must be at least one contact. This assumes discrete, fixed size
+contacts. In older technologies where contacts may scale in the width
+direction, c[12] becomes continuous:
+c[12]=(max(w,wc+2*wc2e)-2*wc2e)/(wc)
+where wc is the minimum contact width and Rc is then the resistance of
+a minimum width contact. This contact resistance model is continuous
+and is almost the same as the xl model.
+
+Note that c1 and c2 are the number of contacts in the direction
+parallel to the width dimension. If extra contacts are place in a
+direction parallel to the length dimension, as for reliability for
+narrow resistors where only one contact can fit in the width of the
+end region, it is assumed that if the contact closest to the
+resistor body is not bad, then the majority of the current will flow
+through it and not through the back contact, so the contact resistance
+will be essentially unchanged from if there is only a single contact,
+or row of contacts in the width dimension.
+
+If c1 or c2 is set to zero, it is assumed that there is no contact or
+end resistance at that end. This should be used where sections of
+r3_cmc are being ganged together and end effects should be removed at
+internal nodes. If c1 or c2 is zero, the xl contribution from that end
+is removed. Because the difference between TC's for body and end
+resistances can be modeled via a 1/length dependence of the TC's, the
+effect of c1 and c2 is taken into account in calculating the TC's, to
+enable proper ganging together of multiple sections.
+
+In this release of the model, the switch sw_lin is provided to enable
+converting the resistor to a simple linear resistor, turning off
+depletion pinching, velocity saturation, and self-heating. Depletion
+pinching and velocity saturation cannot be turned off by setting their
+respective parameters to small values, because the formulations and
+solutions are such that they are not numerically well behaved as these
+effects reduce to zero. Lower clip limits are therefore enforced for
+these parameters.
+
+Compared with version 1.0.0, this version (1.1.0) adds a few items:
+- additional parameters for scaling the depletion potential
+- options for more accurate pinch-off modeling
+- options for improved temperature modeling of velocity saturation
+
+The flicker noise model is set up so that it allows the variation with
+current to be controlled by afn, as in normal SPICE models. However the
+geometry dependence of 1/f noise is generally not modeled properly
+in most circuit simulators. The common kfn*Ids^afn/f^bfn model can be
+used for a single geometry. However, considering a single device
+as being equivalent to two half length devices in series or two
+half width devices in parallel, dictates that the noise current
+varies as (Ids/W)^afn*(W/L) and as 1/f noise should vary reciprocally
+with area, afn should theoretically only be allowed to be 2.
+This fundamental physical geometry scaling is enforced, and it is
+recommended that afn=2 be used, experimental data support this.
+afn is still provided as a parameter for compatibility with existing
+models, and to allow some flexibility in fitting the bias dependence
+of 1/f noise. A switch is provided to select between using drawn
+or effective dimensions for the geometry dependence.
+While pedantically using effective geometries may be
+more physical, noise characterization is often done independently of
+DC electrical characterization, so weff and leff may not be known when
+noise characterization is done. Also, if there is some change in
+weff or leff, it may be undesirable to have this significantly change
+noise for a device that is already characterized. For these reasons,
+the default is that 1/f noise varies with drawn, not effective, geometry.
+
+References:
+[1] R. V. H. Booth and C. C. McAndrew
+    A 3-Terminal Model for Diffused and Ion-Implanted Resistors
+    IEEE Trans. Electron Dev., vol. 44, no. 5, pp. 809-814, May 1997.
+[2] C. C. McAndrew
+    R3, An Accurate JFET and 3-Terminal Diffused Resistor Model
+    Proc. Nanotech/WCM, pp. 86-89, 2004.
+[3] C. C. McAndrew, S. Sekine, A. Cassagnes, and Z. Wu,
+    Physically Based Effective Width Modeling of MOSFETs and Diffused Resistors,
+    Proc. IEEE ICMTS, pp. 169-174, 2000.
+[4] C. C. McAndrew,
+    Useful Numerical Techniques for Compact Modeling,
+    Proc. IEEE ICMTS, 2002.
+[5] K. Banerjee, A. Ameraskera, G. Dixit, and C. Hu,
+    Temperature and Current Effects on Small-Geometry-Contact Resistance,
+    Proc. IEEE IEDM, pp. 115-118, 1997.
+[6] C. C. McAndrew, G. Coram, A. Blaum, and O. Pilloud,
+    Correlated Noise Modeling and Simulation,
+    Proc. Nanotech/WCM, pp. 40-45, 2005.
+[7] C. McAndrew. R3 (Version 2.0.0). nanoHUB. doi:10.4231/D3QB9V64G
+    https://nanohub.org/publications/26/1 (2014).
+[8] G. J. Coram, C. C. McAndrew, K. Gullapalli, and K. S. Kundert,
+    Flicker Noise Formulations in Compact Models
+    Accepted for publication in IEEE Trans. Computer-Aided Design
+    Circuits and Systems, 2020.
+
+The basic formulation of the model comes from [1], with enhancements
+noted in [2] additional features taken from [7]. The effective width
+model is from [3]. The symmetric limiting function used to retain
+source-drain symmetry is from [4]. The anomalous increase in
+conductance with Vds for some p-body resistors is due to contact
+resistance self-heating and negative TC's, this was pointed out in [5].
+The restriction on the geometry dependence of the 1/f noise model is
+from [6]. The flicker noise formulation adheres to [8].
+
+********************************************************************************
+*******************************************************************************/
