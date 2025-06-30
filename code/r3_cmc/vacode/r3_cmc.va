@@ -725,6 +725,10 @@ analog begin : analog_block
         I(b_pc2)   <+  Ip2;
         Pwr(b_rth) <+  Irth;
         Pwr(b_rth) <+  Ith;
+`ifdef __XYCE__
+        I(b_re1) <+  V(b_re1)/(rc1_tnom*tcrc);
+        I(b_re2) <+  V(b_re2)/(rc2_tnom*tcrc);
+`else
         if ((rc1_tnom/mMod)<=rthresh) begin    // V=R*I formulation
             V(b_re1) <+  I(b_re1)*rc1_tnom*tcrc;
         end else begin                         // I=G*V formulation
@@ -735,6 +739,7 @@ analog begin : analog_block
         end else begin                         // I=G*V formulation
             I(b_re2) <+  V(b_re2)/(rc2_tnom*tcrc);
         end
+`endif
     end // loadStatic
 
     begin : loadDynamic
