@@ -1,6 +1,6 @@
 // Copyright (c) 2000-2007, NXP Semiconductor
 // Copyright (c) 2007-2014, Delft University of Technology
-// Copyright (c) 2015-2023, Auburn University
+// Copyright (c) 2015-2024, Auburn University
 // All rights reserved, see IP_NOTICE_DISCLAIMER_LICENSE for further information.
 
 // Evaluate the operating point (output) variables

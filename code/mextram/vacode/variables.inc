@@ -1,6 +1,6 @@
 // Copyright (c) 2000-2007, NXP Semiconductor
 // Copyright (c) 2007-2014, Delft University of Technology
-// Copyright (c) 2015-2023, Auburn University
+// Copyright (c) 2015-2024, Auburn University
 // All rights reserved, see IP_NOTICE_DISCLAIMER_LICENSE for further information.
 
 // Declaration of variables
@@ -150,7 +150,7 @@ real EmEav_Em, Vb2e1Vfe, termE, termC;
 real Vex_bias;
 real eps_vdc, a_vde, a_vdcctc;
 
-real expl, tmpExp, tmpV, tmpExp1, tmpExp2;
+real expl, tmpExp, tmpV, tmpExp1, tmpExp2, tmpExp3;
 
 
 `ifdef  SUBSTRATE
@@ -196,3 +196,5 @@ real Vb1c1, Vcbeff, f_stop;
     real one_minus_ath;
 `endif
 
+//BTBT and TAT variables
+real istat_t,Itat,Ibtbt;

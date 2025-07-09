@@ -1,6 +1,6 @@
 // Copyright (c) 2000-2007, NXP Semiconductor
 // Copyright (c) 2007-2014, Delft University of Technology
-// Copyright (c) 2015-2023, Auburn University
+// Copyright (c) 2015-2024, Auburn University
 // All rights reserved, see IP_NOTICE_DISCLAIMER_LICENSE for further information.
 
 //Instance parameters
@@ -10,7 +10,7 @@ aliasparam dtemp = dta;
 `IPRoo( mult           ,1.0            ,""            ,0.0         ,inf          ,"Multiplication factor" )
 
 // Mextram parameters
-`MPRco( version        ,505.30         ,""            ,505.30      ,505.31       ,"Model version" )
+`MPRco( version        ,505.50         ,""            ,505.50      ,505.51       ,"Model version" )
 `MPIty( type           ,1              ,""                                       ,"Flag for NPN (1) or PNP (-1) transistor type" )
 `MPRco( tref           ,25.0           ,"degC"        ,-273.0      ,inf          ,"Reference temperature" )
 `MPIcc( exmod          ,1              ,""            ,0           ,3            ,"Flag for extended modeling of the reverse current gain" )
@@ -28,7 +28,7 @@ aliasparam dtemp = dta;
 `MPRco( ik             ,0.1            ,"A"           ,1.0p        ,inf          ,"CE high injection knee current" )
 `MPRco( ver            ,2.5            ,"V"           ,0.01        ,inf          ,"Reverse Early voltage" )
 `MPRco( vef            ,44.0           ,"V"           ,0.01        ,inf          ,"Forward Early voltage" )
-`MPRoo( issr           ,1.0            ,""            ,0.0         ,inf          ,"Fraction of saturation current for reverse main current " )
+`MPRoo( issr           ,1.0            ,""            ,0.0         ,inf          ,"Fraction of saturation current for reverse main current" )
 // forward base current parameters
 `MPRcz( ibi            ,0.1a           ,"A"                                      ,"Saturation current of ideal base current" )
 `MPRco( nbi            ,1.0            ,""            ,0.1         ,inf          ,"Non-ideality factor of ideal base current" )
@@ -45,7 +45,7 @@ aliasparam dtemp = dta;
 `MPRco( vknbr          ,0.68           ,"V"           ,0.05        ,inf          ,"High injection knee voltage for NBR Ib1 and Ib1s when swib1=1" )
 `MPRcz( ibinbrqs       ,0.0            ,"A"                                      ,"Saturation current of quasi-saturation component of NBR Ib1 when swib1=1" )
 // reverse base current parameters
-`MPRcz( ibx            ,3.14a          ,"A"                                      ,"Saturation current of extrinsic reverse base current" )
+`MPRoz( ibx            ,3.14a          ,"A"                                      ,"Saturation current of extrinsic reverse base current" )
 `MPRco( ikbx           ,14.29m         ,"A"           ,1.0p        ,inf          ,"Extrinsic CB high injection knee current" )
 `MPRcz( ibr            ,1.0f           ,"A"                                      ,"Saturation current of non-ideal reverse base current" )
 `MPRco( mlr            ,2.0            ,""            ,0.1         ,inf          ,"Non-ideality factor of non-ideal reverse base current" )
@@ -203,3 +203,10 @@ aliasparam dtemp = dta;
 
 `MPRcz( minr           ,$simparam("minr", 1.0e-3)         ,"Ohm"                ,"Minimum resistance" )
 
+//trap-assisted tunneling
+`MPRcz( istat             ,0.0          ,"A"                                      ,"Saturation current of TAT current" )
+`MPRoz( vtat             ,1.0          ,"A"                                      ,"Coefficient of TAT current" )
+`MPRnb( ktat             ,0.0          ,""                                      ,"Temperature coefficient of TAT current" )
+//tunneling current
+`MPRcz( vbtbt             ,0.16          ,"V"                                      ,"Coefficient of base tunneling current" )
+`MPRnb( kbtbt             ,0.0          ,""                                      ,"Coefficient of base tunneling current" )

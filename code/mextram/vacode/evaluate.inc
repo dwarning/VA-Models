@@ -1,6 +1,6 @@
 // Copyright (c) 2000-2007, NXP Semiconductor
 // Copyright (c) 2007-2014, Delft University of Technology
-// Copyright (c) 2015-2023, Auburn University
+// Copyright (c) 2015-2024, Auburn University
 // All rights reserved, see IP_NOTICE_DISCLAIMER_LICENSE for further information.
 
 // Evaluate model equations
@@ -191,6 +191,16 @@ qBI = q1I * (1.0 + 0.5 * (n0 + nB));
 Ir = issr * is_t * eVb2c2star_nfr;
 If = is_t * eVb2e1;
 In = (If - Ir) / qBI;
+
+//BTBT and TAR base current
+`max_logexp(tmpExp, Vb2e1, 0.0,0.0001)
+tmpExp1 = tmpExp / vtat;
+`expLin(tmpExp2, tmpExp1, vexlim)
+//trap-assisted tunneling current
+Itat = istat_t * (tmpExp2 - 1.0);
+//tunneling current
+`min_logexp(tmpExp3, Vb2e1, vbtbt, 0.001)
+Ibtbt = kbtbt * tmpExp3 * pow(vbtbt - tmpExp3, 2.0);
 
 // Base and substrate current(s)
 `expLin(tmpExp, Vb2e1 * VtINV / nbi, vexlim)
@@ -399,7 +409,7 @@ qBQ = q1Q * (1.0 + 0.5 * (n0 + nB));
 // Variable base resistance clipping
 Rbvtemp = rbv_t / qBQ;
 if (Rbvtemp < MINR_m) begin
-    Rbvtemp = MINR / mult;
+    Rbvtemp = MINR_m;
 end
 Rb2 = 3.0 * Rbvtemp;
 Ib1b2 =  (2.0 * Vt * (eVb1b2 - 1.0) + Vb1b2) / Rb2;
@@ -501,7 +511,7 @@ end
              Ib1b2 * Vb1b2 +
              // 504.8: Nov. 2008, RvdT, TU_Delft: Zener current contribution added:
              // Izteb > 0 for Vb2e1 < 0, hence the minus sign:
-             (Ib1 + Ib2 + GMIN * Vb2e1 - Izteb) * Vb2e1 - Iztcb * Vztcb +
+             (Ib1 + Ib2 + GMIN * Vb2e1 - Izteb + Ibtbt + Itat) * Vb2e1 - Iztcb * Vztcb +
              (Ib1_s + Ib2_s + Ibrel) * Vb1e1 +
     `ifdef SUBSTRATE
         (Iex + Ib3 + GMIN * Vb1c4) * Vb1c4 + XIex  * Vbc3 +
@@ -617,7 +627,6 @@ end else begin
     Qe = Qe_qs;
 end
 
-
 // Add branch current contributions
 
 // Static currents
@@ -626,7 +635,7 @@ I(c2, e1) <+ type * In * mult;
 I(b1, e1) <+ type * (Ib1_s + Ib2_s + Ibrel) * mult;
 // begin  RvdT, 28-10-2008, MXT504.8_alpha
 // contribution tunnel current added
-I(b2, e1) <+ type * (Ib1 + Ib2 + GMIN * Vb2e1 - Izteb) * mult;
+I(b2, e1) <+ type * (Ib1 + Ib2 + GMIN * Vb2e1 - Izteb  + Ibtbt + Itat) * mult;
 
 // CB tunneling current
 if (swib1 == 1) begin

@@ -1,6 +1,6 @@
 // Copyright (c) 2000-2007, NXP Semiconductor
 // Copyright (c) 2007-2014, Delft University of Technology
-// Copyright (c) 2015-2023, Auburn University
+// Copyright (c) 2015-2024, Auburn University
 // All rights reserved, see IP_NOTICE_DISCLAIMER_LICENSE for further information.
 
 // Temperature scaling of parameters
@@ -94,14 +94,14 @@ xp_t = xp * cjc_scale_inv;
 // the following computationally cheaper implementation:
 re_t  = re  * exp(lntN * ae);
 if (re_t < MINR_m) begin
-    re_t = MINR / mult;
+    re_t = MINR_m;
 end
 // This is based on the observation that exp() is faster than pow().
 // Acknowledgement due to Geoffrey Coram.
 rbv_t = rbv * exp(lntN * (ab - aqbo));
 rbc_t = rbc * exp(lntN * aex);
 if (rbc_t < MINR_m) begin
-    rbc_t = MINR / mult;
+    rbc_t = MINR_m;
 end
 
 // RvdT, 30-11-2007: new collector resistances rcc_xx_t, rcc_ex_t, rcc_in_t
@@ -149,6 +149,8 @@ end
 ibx_t = ibx * exp(lntN * (4.0 - acx + dais)) * exp(-vgcx * VdtINV);
 ibfs_t = ibfs * exp(lntN * (6.0 - 2.0 * mlfs)) * exp(-vgj * VdtINV / mlfs);
 isibrel_t = isibrel * exp(lntN * (4.0 / nfibrel)) * exp(-vgj * VdtINV / nfibrel);
+//trap-assisted tunneling
+istat_t = istat * sqrt(tN) * exp(ktat * dT);
 // begin  RvdT, November 2008, MXT504.8_alpha
 // T-scaling BE tunneling:
 //

@@ -1,6 +1,6 @@
 // Copyright (c) 2000-2007, NXP Semiconductor
 // Copyright (c) 2007-2014, Delft University of Technology
-// Copyright (c) 2015-2023, Auburn University
+// Copyright (c) 2015-2024, Auburn University
 // All rights reserved, see IP_NOTICE_DISCLAIMER_LICENSE for further information.
 
 // Noise sources
@@ -46,7 +46,7 @@ end else begin
 end
 
 // Forward base current shot noise
-powerFBCS = 2.0 * `QQ * abs(Ib1 + Ib2 - Izteb);
+powerFBCS = 2.0 * `QQ * abs(Ib1 + Ib2 - Izteb  + Ibtbt + Itat);
 
 // Ideal forward base current 1/f noise
 Ib_fwd_ideal_tot = Ib1 + Ib1_s;

@@ -1,7 +1,16 @@
 // Copyright (c) 2000-2007, NXP Semiconductor
 // Copyright (c) 2007-2014, Delft University of Technology
-// Copyright (c) 2015-2023, Auburn University
+// Copyright (c) 2015-2024, Auburn University
 // All rights reserved, see IP_disclaimer_license.txt for further information.
+
+Mextram 505.5 Source Code
+
+Additions and changes compared to 505.4 include:
+
+- MINR and MULT handling issue of rbv_t, rbc_t and re_t are fixed.
+
+- New BTBT and TAT base current model is introduced.
+
 
 Mextram 505.4 Source Code
 
