@@ -20,16 +20,16 @@ Actual version status:
 | ------------- | ------------- | ------------- | ------------- |
 | **Resistor**  |               | **MG MOSFET** |               |
 | r2_cmc        | 1.0.1         | bsim-img      | 102.9.6       |
-| r3_cmc        | 1.1.1         | bsim-cmg      | 111.2.1       |
+| r3_cmc        | 1.1.2         | bsim-cmg      | 111.2.1       |
 | **Diode**     |               | **HV-MOS**    |               |
 | diode_cmc     | 2.0.0         | hisim_hv      | 2.5.1         |
 | juncap        | 200.6.1       | psphv         | 1.0.6         |
 | **Varactor**  |               | **BJT**       |               |
 | mosvar        | 1.3.0         | hicum0        | 2.1.0         |
 | **MOSFET**    |               | hicum2        | 3.0.0         |
-| bsim4         | 4.8.0         | mextram       | 505.4.0       |
+| bsim4         | 4.8.0         | mextram       | 505.5.0       |
 | bsim6         | 6.1.1         | vbic          | 1.3           |
-| bsimbulk      | 107.1.0       | fbh_hbt       | 2.3           |
+| bsimbulk      | 107.2.1       | fbh_hbt       | 2.3           |
 | ekv26         | 2.6           | **HEMT**      |               |
 | ekv3          | 302.00        | angelov       | 2.0           |
 | hisim2        | 3.2.0         | angelov_gan   | 2.0           |
