@@ -1,6 +1,7 @@
 Update version 3.1.0
+Use Gmin macro instead gmin from init section
 Xyce:
-Skip OP variables IC, IB, IS, IAVL, BETADC
+Skip only OP variables IC, IB, IS, IAVL, BETADC
 
 Improve convergence by adding Gmin to branches bpsi and sici.
 Add version 3.0.0

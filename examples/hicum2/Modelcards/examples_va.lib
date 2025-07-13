@@ -158,14 +158,14 @@
 + zetavgbe = 0.7
 *
 *Self-Heating
-+ flsh = 1
++ flsh = 0
 + rth = 1113.4
 + cth = 6.841e-012
 + zetarth = 0
 + alrth = 0.002
 *
 *Compatibility with V2.1
-+ flcomp = 2.3
+*+ flcomp = 2.3
 *
 *Circuit simulator specific parameters
 + tnom = 26.85

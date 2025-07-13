@@ -19,7 +19,7 @@
 `define Cexp_lim        80.0
 `define Dexp_lim        80.0
 `define DFa_fj          1.921812
-`define Gmin            $simparam("gmin",0)
+`define Gmin            $simparam("gmin",1e-12)
 `define l_itmax         100
 `define LN_EXP_LIMIT    11.0
 `define RTOLC           1.0e-5
@@ -34,6 +34,7 @@
 //`define P_K         P_KB
 `define P_QEL       1.6021918e-19  //"old" SPICE
 //`define P_Q         P_QEL
+`define M_SQRT2            1.41421356237309504880
 
 
 //  OPP   operating point parameter, includes units and description for printing
@@ -615,7 +616,7 @@ branch  (n2 )  b_n2;
 `MPRoc( mcf      ,1.0         ,""        ,0    ,10   ,"Non-ideality transfer current factor for III-V HBTs")
 
 //Base-Emitter diode currents
-`MPRcc( ibeis    ,1.0E-18     ,"A"       ,0    ,1    ,"Internal BE saturation current")
+`MPRoc( ibeis    ,1.0E-18     ,"A"       ,0    ,1    ,"Internal BE saturation current")
 `MPRoc( mbei     ,1.0         ,""        ,0    ,10   ,"Internal BE current ideality factor")
 `MPRcc( ireis    ,0.0         ,"A"       ,0    ,1    ,"Internal BE recombination saturation current")
 `MPRoc( mrei     ,2.0         ,""        ,0    ,10   ,"Internal BE recombination current ideality factor")
@@ -628,7 +629,7 @@ branch  (n2 )  b_n2;
 `MPRcz( tbhrec   ,0.0         ,"s"       ,            "Base current recombination time constant at BC barrier for high forward injection")
 
 //Base-collector diode currents
-`MPRcc( ibcis    ,1.0E-16     ,"A"       ,0    ,1.0  ,"Internal BC saturation current")
+`MPRoc( ibcis    ,1.0E-16     ,"A"       ,0    ,1.0  ,"Internal BC saturation current")
 `MPRoc( mbci     ,1.0         ,""        ,0    ,10   ,"Internal BC current ideality factor")
 `MPRcc( ibcxs    ,0.0         ,"A"       ,0    ,1.0  ,"External BC saturation current")
 `MPRoc( mbcx     ,1.0         ,""        ,0    ,10   ,"External BC current ideality factor")
@@ -838,7 +839,7 @@ real itf,itr,Tf;
 real Cdei,Cdci,Crbi,  V_btbmax;
 integer l_it;
 real inv_latb,inv_latl,latb_6,latl_6,latmin,latmax,ln_lat,lat_delta; // HICFCI
-real gmin;
+//real gmin;
 
 //vertical NQS effect
 integer use_nqs;
@@ -847,6 +848,9 @@ real Ixf, Qxf, Ixf1, Ixf2, Qxf1, Qxf2, Itxf, Qdeix;
 // Avalanche current
 integer use_aval;
 real iavl;
+`ifdef __XYCE__
+    real Vcrit1, Vcrit2;
+`endif
 
 `ifdef CALC_OP
     `OPP( VBE    , "V"   , "External BE voltage"                               )
@@ -896,8 +900,26 @@ real iavl;
 analog begin
 
     // Branch Voltages of the Model
+    VT = `P_KB/`P_QEL*$temperature; // Need start value for limiting - will be corrected later by TMPUPDATE
+`ifdef __NGSPICE__
+    if (type == 1) begin
+        Vbiei = $limit(V(bi,ei), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis)));
+        Vbici = $limit(V(bi,ci), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis)));
+    end else begin
+        Vbiei = $limit(V(ei,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibeis)));
+        Vbici = $limit(V(ci,bi), "pnjlim", VT, VT*ln(VT/(`M_SQRT2*ibcis)));
+    end
+`else
+`ifdef __XYCE__
+    Vcrit1 = VT*ln(VT/(`M_SQRT2*ibeis));
+    Vbiei = $limit(V(br_biei),"typedpnjlim_new",VT,Vcrit1,type);
+    Vcrit2 = VT*ln(VT/(`M_SQRT2*ibcis));
+    Vbici = $limit(V(br_bici),"typedpnjlim_new",VT,Vcrit2,type);
+`else
     Vbiei = type*V(br_biei);
     Vbici = type*V(br_bici);
+`endif
+`endif
     Vciei = Vbiei-Vbici;
     Vbpei = type*V(br_bpei);
     Vbpci = type*V(br_bpci);
@@ -909,7 +931,7 @@ analog begin
         // local variables
         real k10,k20,C_1;
 
-        gmin = `Gmin;
+//        gmin = `Gmin;
 
         Tnom      = tnom+`P_CELSIUS0;
         Tamb      = $temperature;
@@ -1395,9 +1417,9 @@ analog begin
     begin : Load_sources
         //real I_crbi, I_cth, I_csu;  ==> leftover from earlier formulation
         // internal transistor
-        I(br_biei) <+ type*(ibei+irei+ibetat+ibh_rec) + gmin*V(br_biei);
+        I(br_biei) <+ type*(ibei+irei+ibetat+ibh_rec) + `Gmin*V(br_biei);
         I(br_biei) <+ ddt(type*(Qdeix+Qjei));
-        I(br_bici) <+ type*(ibci-iavl) + gmin*V(br_bici);
+        I(br_bici) <+ type*(ibci-iavl) + `Gmin*V(br_bici);
         I(br_bici) <+ ddt(type*(Qdci+Qjci));
         I(br_ciei) <+ type*Itxf;
         I(br_eici) <+ type*itr;
@@ -1447,7 +1469,7 @@ analog begin
         I(br_bpsi) <+ type*iT_sub;
         I(br_sici) <+ type*ijsc;
         if (flcomp >= 310) begin
-            I(br_sici) <+ gmin*V(br_sici);
+            I(br_sici) <+ `Gmin*V(br_sici);
         end
         I(br_sici) <+ ddt(type*Qjs);
         I(br_sc)   <+ ddt(type*Qscp);
@@ -1470,7 +1492,12 @@ analog begin
                 I(br_sht) <+ ddt(cth*V(br_sht));
             end
         end else begin
+`ifdef __XYCE__
+        // Following code is an intermediate solution (if branch contribution is not supported):
+            I(br_sht) <+ V(br_sht)/minr;
+`else
             V(br_sht) <+ 0.0;
+`endif
         end
 
         // vertical NQS effect adjunct network

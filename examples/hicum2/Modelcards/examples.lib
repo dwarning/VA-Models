@@ -165,7 +165,7 @@
 + alrth = 0.002
 *
 *Compatibility with V2.1
-+ flcomp = 2.3
+*+ flcomp = 2.3
 *
 *Circuit simulator specific parameters
 + tnom = 26.85
