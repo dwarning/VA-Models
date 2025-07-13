@@ -158,7 +158,7 @@
 + zetavgbe = 0.7
 *
 *Self-Heating
-+ flsh = 0
++ flsh = 1
 + rth = 1113.4
 + cth = 6.841e-012
 + zetarth = 0

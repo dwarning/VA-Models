@@ -65,7 +65,7 @@ rm *.la *.log
 rm -rfd .libs/
 cd ../..
 cd ./hicum2/vacode
-buildxyceplugin hicumL2V3p0p0.va ../../../admslibs
+buildxyceplugin hicumL2_v310.va ../../../admslibs
 rm *.la *.log
 rm -rfd .libs/
 cd ../..

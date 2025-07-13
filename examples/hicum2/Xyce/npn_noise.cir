@@ -15,6 +15,6 @@ Rth tj 0 100
 .include ../Modelcards/examples_va.lib
 
 .noise v(c) Vin dec 10 100 10G 
-.print format=gnuplot noise inoise onoise
+.print noise format=gnuplot inoise onoise
 
 .end

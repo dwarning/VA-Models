@@ -10,6 +10,6 @@ set format y "%.1s%c"
 set xlabel "Vbe [V]"
 set ylabel "Ic [A]"
 set logscale y
-plot 'npn_ic_ib_vb.prn' using 2:(-$3) t "Ic" w lp,\
-     'npn_ic_ib_vb.prn' using 2:(-$4) t "Ib" w lp,\
-     'npn_ic_ib_vb.prn' using 2:($5) t "Is" w lp
+plot 'npn_ic_ib_vb.cir.prn' using 2:(-$3) t "Ic" w lp,\
+     'npn_ic_ib_vb.cir.prn' using 2:(-$4) t "Ib" w lp,\
+     'npn_ic_ib_vb.cir.prn' using 2:($5) t "Is" w lp

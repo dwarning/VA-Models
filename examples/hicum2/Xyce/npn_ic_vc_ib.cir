@@ -5,7 +5,7 @@ VC C 0 1.8
 VS S 0 0.0
 
 YhicumL2_va q1 C B 0 S tj hicumL2va
-rth tj 0 300
+rth tj 0 1g
 
 .step ib 10u 100u 10u
 .dc vc 0.0 1.8 0.01

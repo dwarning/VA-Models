@@ -16,31 +16,31 @@ The models covering a wide range of devices :
 
 Actual version status:
 
-| Model         | Version       | Model         | Version       |
-| ------------- | ------------- | ------------- | ------------- |
-| **Resistor**  |               | **MG MOSFET** |               |
-| r2_cmc        | 1.0.1         | bsim-img      | 102.9.6       |
-| r3_cmc        | 1.1.2         | bsim-cmg      | 111.2.1       |
-| **Diode**     |               | **HV-MOS**    |               |
-| diode_cmc     | 2.0.0         | hisim_hv      | 2.5.1         |
-| juncap        | 200.6.1       | psphv         | 1.0.6         |
-| **Varactor**  |               | **BJT**       |               |
-| mosvar        | 1.3.0         | hicum0        | 2.1.0         |
-| **MOSFET**    |               | hicum2        | 3.0.0         |
-| bsim4         | 4.8.0         | mextram       | 505.5.0       |
-| bsim6         | 6.1.1         | vbic          | 1.3           |
-| bsimbulk      | 107.2.1       | fbh_hbt       | 2.3           |
-| ekv26         | 2.6           | **HEMT**      |               |
-| ekv3          | 302.00        | angelov       | 2.0           |
-| hisim2        | 3.2.0         | angelov_gan   | 2.0           |
-| psp102        | 102.5.0       | asmhemt       | 101.4.0       |
-| psp103        | 103.8.2       | epfl-hemt     | 3.0.0         |
-| psp104        | 104.0.0       | mvsg_cmc      | 3.2.0         |
-| **SOI MOSFET**|               | **IGBT**      |               |
-| l-lutsoi      | 102.7.0       | igbt3         | 1.0.0         |
-| bsim-soi      | 4.6.1         |               |               |
-| hisim-soi     | 1.5.0         |               |               |
-| hisim-sotb    | 1.3.0         |               |               |
+| Model         | Version      |ngspice| Xyce   | Model         | Version       |ngspice| Xyce  |
+| ------------- | -------------|-------|------- | ------------- | ------------- |-------|-------|
+| **Resistor**  |              |       |        | **MG MOSFET** |               |       |       |
+| r2_cmc        | 1.0.1        |  [x]  |        | bsim-img      | 102.9.6       |  [x]  |       |
+| r3_cmc        | 1.1.2        |  [x]  |  [x]   | bsim-cmg      | 111.2.1       |  [x]  |  [x]  |
+| **Diode**     |              |       |        | **HV-MOS**    |               |       |       |
+| diode_cmc     | 2.0.0        |  [x]  |  [x]   | hisim_hv      | 2.5.1         |  [x]  |       |
+| juncap        | 200.6.1      |  [x]  |  [x]   | psphv         | 1.0.6         |  [x]  |       |
+| **Varactor**  |              |       |        | **BJT**       |               |       |       |
+| mosvar        | 1.3.0        |  [x]  |  [x]   | hicum0        | 2.1.0         |  [x]  |  [x]  |
+| **MOSFET**    |              |       |        | hicum2        | 3.1.0         |  [x]  |  [x]  |
+| bsim4         | 4.8.0        |  [x]  |  [x]   | mextram       | 505.5.0       |  [x]  |  [x]  |
+| bsim6         | 6.1.1        |  [x]  |  [x]   | vbic          | 1.3           |  [x]  |  [x]  |
+| bsimbulk      | 107.2.1      |  [x]  |  [x]   | fbh_hbt       | 2.3           |  [x]  |       |
+| ekv26         | 2.6          |  [x]  |  [x]   | **HEMT**      |               |       |       |
+| ekv3          | 302.00       |  [x]  |  [x]   | angelov       | 2.0           |  [x]  |  [x]  |
+| hisim2        | 3.2.0        |  [x]  |        | angelov_gan   | 2.0           |  [x]  |  [x]  |
+| psp102        | 102.5.0      |  [x]  |        | asmhemt       | 101.4.0       |  [x]  |       |
+| psp103        | 103.8.2      |  [x]  |  [x]   | epfl-hemt     | 3.0.0         |  [x]  |       |
+| psp104        | 104.0.0      |  [x]  |        | mvsg_cmc      | 3.2.0         |  [x]  |       |
+| **SOI MOSFET**|              |       |        | **IGBT**      |               |       |       |
+| l-lutsoi      | 102.7.0      |  [x]  |  [x]   | igbt3         | 1.0.0         |  [x]  |  [x]  |
+| bsim-soi      | 4.6.1        |  [x]  |  [x]   |               |               |       |       |
+| hisim-soi     | 1.5.0        |  [x]  |        |               |               |       |       |
+| hisim-sotb    | 1.3.0        |  [x]  |        |               |               |       |       |
 
 All models are checked for syntax belong Verilog-AMS Language Reference Manual Version 2.4.0. https://accellera.org/downloads/standards/v-ams
 The models are modified mostly for convergence improvements. Equations are untouched.

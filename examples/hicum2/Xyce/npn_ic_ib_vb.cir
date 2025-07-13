@@ -5,7 +5,7 @@ VC C 0 1.0
 VS S 0 0.0
 
 YhicumL2_va q1 C B 0 S dt hicumL2va
-Rth dt 0 1.0
+Rth dt 0 1g
 
 .options device gmin=1e-14
 .dc vb 0.2 1.2 0.01

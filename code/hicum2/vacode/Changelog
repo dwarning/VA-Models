@@ -1,5 +1,10 @@
+Update version 3.1.0
+Xyce:
+Skip OP variables IC, IB, IS, IAVL, BETADC
+
 Improve convergence by adding Gmin to branches bpsi and sici.
 Add version 3.0.0
+Use discipline.h
 
 Xyce:
 Skip DC OP analysis.

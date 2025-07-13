@@ -27,7 +27,7 @@ openvaf -D__NGSPICE__ -o fbh_hbt-2_1.osdi ../code/fbh_hbt/vacode/fbh_hbt-2_1.va
 openvaf -D__NGSPICE__ -o fbh_hbt-2_3.osdi ../code/fbh_hbt/vacode/fbh_hbt-2_3.va
 openvaf -D__NGSPICE__ -o hicumL0_v2p1p0.osdi ../code/hicum0/vacode/hicumL0_v2p1p0.va
 openvaf -D__NGSPICE__ -o hicumL2V2p4p0.osdi ../code/hicum2/vacode/hicumL2.va
-openvaf -D__NGSPICE__ -o hicumL2.osdi ../code/hicum2/vacode/hicumL2V3p0p0.va
+openvaf -D__NGSPICE__ -o hicumL2.osdi ../code/hicum2/vacode/hicumL2_v310.va
 openvaf -D__NGSPICE__ -o hisim2.osdi ../code/hisim2/vacode/hisim2.va
 openvaf -D__NGSPICE__ -o hisimhv.osdi ../code/hisimhv/vacode/hisimhv.va
 openvaf -D__NGSPICE__ -o hisimsoi.osdi ../code/hisimsoi/vacode/hisimsoi.va
