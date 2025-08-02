@@ -26,13 +26,13 @@ Yvbic13_4t_va vbic1 c b e s1 npn13G2_NX_vbic; dtemp=dtemp m=1
 .model npn13G2_NX_vbic vbic13_4t_va
 *.model npn13G2_NX_vbic npn level = 12
 *+ type=1
-+ bvbe = 1.6
-+ bvbc = 5.1
-+ bvce = 1.6
-+ bvsub = 20
-+ vbefwd=0.2
-+ vbcfwd=0.2
-+ vsubfwd=0.2
+*+ bvbe = 1.6
+*+ bvbc = 5.1
+*+ bvce = 1.6
+*+ bvsub = 20
+*+ vbefwd=0.2
+*+ vbcfwd=0.2
+*+ vsubfwd=0.2
 + tnom = 27
 + cbeo = '8.00E-16*(Nx*0.25)**0.975'
 + cje = '8.418E-15*(Nx*0.25)**0.975'
@@ -96,7 +96,7 @@ Yvbic13_4t_va vbic1 c b e s1 npn13G2_NX_vbic; dtemp=dtemp m=1
 + itf = '0.585*(Nx*0.25)'
 + tr = 3.50E-13
 + td = '2.80E-13*(Nx*0.25)**0'
-+ selft = 1
+*+ selft = 1
 + cth = '1.60E-12*(Nx*0.25)**0.95'
 + rth = '3.26E+03*(4/Nx)**0.9'
 + ea = 1.040
