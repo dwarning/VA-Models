@@ -145,7 +145,7 @@ parameter real VJUNREF    = 2.5    `from(`VJUNREF_cliplow  ,inf         ) `P(inf
 parameter real FJUNQ      = 0.03   `from(`FJUNQ_cliplow    ,inf         ) `P(info="Fraction below which junction capacitance components are considered negligible" units="");
 
 //Diode_cmc recovery and high-injection equations code
-parameter real CORECOVERY = 0.0     from(0.0 : 1.0]                       `P(info="Flag for recovery equations; 0=original, 1=Hiroshima" units="");
+parameter real CORECOVERY = 0.0     from[0.0 : 1.0]                       `P(info="Flag for recovery equations; 0=original, 1=Hiroshima" units="");
 //    parameter real EG0        = 1.1785 `from(0.5    , 5 )                     `P(info="Bandgap for temperature dependence" units="eV");
 //    parameter real BGTMP1     = 90.25e-6 `from(5E-5 , 1E-3 )                  `P(info="For temperature dependence" units="eV/K");
 //    parameter real BGTMP2     = 1.0e-7 `from(-1E-6  , 1E-6 )                  `P(info="For temperature dependence" units="eV/K^2");

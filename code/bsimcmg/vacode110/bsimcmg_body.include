@@ -629,7 +629,7 @@ endfunction
 `MPRnb( JTSSWD         ,JTSSWS         ,"A/m"         ,"Unit length trap-assisted saturation current for sidewall drain junction" )
 `MPRnb( JTSSWGS        ,0.0            ,"A/m"         ,"Unit length trap-assisted saturation current for gate-edge sidewall source junction" )
 `MPRnb( JTSSWGD        ,JTSSWGS        ,"A/m"         ,"Unit length trap-assisted saturation current for gate-edge sidewall drain junction" )
-`MPRoo( JTWEFF         ,0.0            ,"m" ,0.0 ,inf ,"Trap-assisted tunneling current width dependence" )
+`MPRco( JTWEFF         ,0.0            ,"m" ,0.0 ,inf ,"Trap-assisted tunneling current width dependence" )
 `MPRnb( NJTS           ,2.0e1          ,""            ,"Non-ideality factor for JTSS" )
 `MPRnb( NJTSD          ,NJTS           ,""            ,"Non-ideality factor for JTSD" )
 `MPRnb( NJTSSW         ,2.0e1          ,""            ,"Non-ideality factor for JTSSWS" )

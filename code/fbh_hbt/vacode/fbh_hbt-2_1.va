@@ -141,7 +141,7 @@ module FBH_HBT(c,b,e,t);
     parameter real Ffeb = 0.0    from [0.0:inf);        // Flicker-noise frequency exponent
     parameter real Kb = 0.0    from [0.0:inf);          // Burst noise coefficient
     parameter real Ab = 0.0    from [0.0:inf);          // Burst noise exponent
-    parameter real Fb = 0.0    from (0.0:inf);          // Burst noise corner frequency, Hz
+    parameter real Fb = 0.0    from [0.0:inf);          // Burst noise corner frequency, Hz
     parameter real Kfe = 0.0    from [0.0:inf);         // Flicker-noise coefficient
     parameter real Afe = 0.0    from [0.0:inf);         // Flicker-noise exponent
     parameter real Ffee = 0.0    from [0.0:inf);        // Flicker-noise frequency exponent
