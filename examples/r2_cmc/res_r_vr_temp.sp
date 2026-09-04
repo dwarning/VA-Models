@@ -4,7 +4,7 @@ v1 1 0 10
 NRr2_cmc 1 0 rmodel w=1u l=20u isnoisy=1
 
 * Poly resistor, r2_cmc model
-.model rmodel r2_cmc(level=2 rsh=200 xl=0.2u xw=-0.05u p3=0.12 q3=1.6 p2=0.015 q2=3.8 tc1=1.5e-4 tc2=7e-7)
+.model rmodel r2_cmc(level=1002 rsh=200 xl=0.2u xw=-0.05u p3=0.12 q3=1.6 p2=0.015 q2=3.8 tc1=1.5e-4 tc2=7e-7)
 
 .control
 pre_osdi ../../osdilibs/r2_cmc.osdi
