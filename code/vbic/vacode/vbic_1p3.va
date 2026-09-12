@@ -1252,21 +1252,21 @@ analog begin : analogBlock
 
     begin : noise
         if (sw_noise) begin
-            I(b_bei) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Ibe),"Ibei shot noise");
+            I(b_bei) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Ibe/`MFACTOR_USE),"Ibei shot noise");
             I(b_bei) <+ flicker_noise(`MFACTOR_USE*kfn*pow(abs(Ibe/`MFACTOR_USE),afn),bfn,"Ibei flicker noise");
-            I(b_bex) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Ibex),"Ibex shot noise");
+            I(b_bex) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Ibex/`MFACTOR_USE),"Ibex shot noise");
             I(b_bex) <+ flicker_noise(`MFACTOR_USE*kfn*pow(abs(Ibex/`MFACTOR_USE),afn),bfn,"Ibex flicker noise");
-            I(b_cei) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Itzf),"transport current shot noise");
-            I(b_bep) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Ibep),"Ibep shot noise");
-            I(b_bep) <+ flicker_noise(`MFACTOR_USE*`MFACTOR_USE*kfn*pow(abs(Ibep/`MFACTOR_USE),afn),bfn,"Ibep flicker noise");
+            I(b_cei) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Itzf/`MFACTOR_USE),"transport current shot noise");
+            I(b_bep) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Ibep/`MFACTOR_USE),"Ibep shot noise");
+            I(b_bep) <+ flicker_noise(`MFACTOR_USE*kfn*pow(abs(Ibep/`MFACTOR_USE),afn),bfn,"Ibep flicker noise");
             I(b_rcx) <+ white_noise  (`MFACTOR_USE*4*`KB_VBIC*tdevK*Gcx,"rcx thermal noise");
-            I(b_rci) <+ white_noise  (`MFACTOR_USE*4*`KB_VBIC*tdevK*((abs(Irci)+1.0e-10*Gci)/(abs(Vrci)+1.0e-10)),"rci thermal noise");
+            I(b_rci) <+ white_noise  (`MFACTOR_USE*4*`KB_VBIC*tdevK*((abs(Irci/`MFACTOR_USE)+1.0e-10*Gci)/(abs(Vrci)+1.0e-10)),"rci thermal noise");
             I(b_rbx) <+ white_noise  (`MFACTOR_USE*4*`KB_VBIC*tdevK*Gbx,"rbx thermal noise");
             I(b_rbi) <+ white_noise  (`MFACTOR_USE*4*`KB_VBIC*tdevK*qb*Gbi,"rbi thermal noise");
             I(b_re)  <+ white_noise  (`MFACTOR_USE*4*`KB_VBIC*tdevK*Ge,"re thermal noise");
             I(b_rbp) <+ white_noise  (`MFACTOR_USE*4*`KB_VBIC*tdevK*qbp*Gbp,"rbp thermal noise");
 `ifdef fourTerminal
-                I(b_cep) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Iccp),"parasitic transport current shot noise");
+                I(b_cep) <+ white_noise  (`MFACTOR_USE*2*`QQ_VBIC*abs(Iccp/`MFACTOR_USE),"parasitic transport current shot noise");
                 I(b_rs)  <+ white_noise  (`MFACTOR_USE*4*`KB_VBIC*tdevK*Gs,"rs thermal noise");
 `endif
         end
