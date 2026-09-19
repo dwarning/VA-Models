@@ -1,3 +1,5 @@
+Use hidden constant parameter VBICtype for conditional branch limiting of npn / pnp type devices.
+
 Correct Multiplier application: All currents are always scaled by M, so the shot noise sources have not
 multiplyed by M again, used /M in white_noise() functions to remain format; white_noise() for resistors
 have to multiply still with M because conductances are not.
