@@ -157,9 +157,8 @@ endfunction
 // ************************
 // *  Model Parameters    *
 // ************************
-//`MPIcc( DEVTYPE        ,`ntype         ,""            ,`ptype      ,`ntype      ,"0: PMOS; 1: NMOS" )
-`MPIcc( TYPE           ,`ntype        ,""            ,`ptype      ,`ntype      ,"0: PMOS; 1: NMOS" )
-aliasparam DEVTYPE = TYPE;
+`MPIcc( DEVTYPE        ,`ntype         ,""            ,`ptype      ,`ntype      ,"0: PMOS; 1: NMOS" )
+`MPIcc( TYPE           ,DEVTYPE        ,""            ,`ptype      ,`ntype      ,"0: PMOS; 1: NMOS" )
 `MPIcc( BULKMOD        ,0              ,""            ,0           ,2           ,"0: SOI multi-gate; 1: Bulk multi-gate; 2: for decoupled bulk multi-gate" )
 `MPIcc( GEOMOD         ,0              ,""            ,0           ,4           ,"0: Double gate; 1: Triple gate; 2: Quadruple gate; 3: Cylindrical gate; 4: Unified fin Shape" )
 `MPIcc( CGEO1SW        ,0              ,""            ,0           ,1           ,"For CGEOMOD=1 only, this switch enables the parameters COVS, COVD, CGSP, and CGDP to be in F per fin, per gate-finger, per unit channel width" )

@@ -1,5 +1,3 @@
-Use -1 for ptype macro instead 0, DEVTYPE alias for TYPE
-
 Use disciplines.vams
 Use constants.vams
 

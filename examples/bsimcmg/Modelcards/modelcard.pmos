@@ -8,7 +8,7 @@
 .model pmos bsimcmg_va
 + BULKMOD = 1
 + CGEOMOD = 0
-+ TYPE = -1
++ TYPE = 0
 + GEOMOD = 0
 + GIDLMOD = 1
 + IGBMOD = 0
