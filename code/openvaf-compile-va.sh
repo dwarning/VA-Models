@@ -12,7 +12,7 @@ openvaf -D__NGSPICE__ -o angelov.osdi ../code/angelov/vacode/angelov.va
 openvaf -D__NGSPICE__ -o angelov_gan.osdi ../code/angelov/vacode/angelov_gan.va
 openvaf -D__NGSPICE__ -o asmhemt.osdi ../code/ASMHEMT/vacode/asmhemt.va
 openvaf -D__NGSPICE__ -o bsim4.osdi ../code/bsim4/vacode/bsim4.va
-openvaf -D__NGSPICE__ -o BSIM6.1.1.osdi ../code/bsim6/vacode/BSIM6.1.1.va
+openvaf -D__NGSPICE__ -o bsim6.osdi ../code/bsim6/vacode/BSIM6.1.1.va
 openvaf -D__NGSPICE__ -o bsimbulk106.osdi ../code/bsimbulk/vacode/bsimbulk106.va
 openvaf -D__NGSPICE__ -o bsimbulk.osdi ../code/bsimbulk/vacode/bsimbulk.va
 openvaf -D__NGSPICE__ -o bsimcmg110.osdi ../code/bsimcmg/vacode110/bsimcmg.va
